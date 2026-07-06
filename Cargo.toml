@@ -8,6 +8,7 @@ members = [
     "src/gpu-setupd",
     "src/system-daemon",
     "src/ai-daemon",
+    "src/installer-detect",
     # FIXME: solus-rust-tools has incompatible dep versions (zbus 4 vs 5, sysinfo 0.31 vs 0.33)
     # Build them separately from src/solus-rust-tools/ until deps are unified
 ]

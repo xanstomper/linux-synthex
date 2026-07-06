@@ -161,6 +161,7 @@
       <packagereq type="default">solus-pkg</packagereq>
       <packagereq type="mandatory">solus-system-daemon</packagereq>
       <packagereq type="default">solus-ai-daemon</packagereq>
+      <packagereq type="default">solus-installer-detect</packagereq>
     </packagelist>
   </group>
 

@@ -77,6 +77,7 @@ System management tools written in Rust for Solus:
 | **Tool** | **Type** | **Spec** |
 |----------|----------|----------|
 | solus-ai-daemon | AI assistant (Rust) | `solus-ai-daemon.spec` |
+| solus-installer-detect | HW auto-detector (Rust) | `solus-installer-detect.spec` |
 
 ### Layer 5: CI/CD
 

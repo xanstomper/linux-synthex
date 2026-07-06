@@ -30,7 +30,7 @@ rust-clean:
 
 # ─── Building (requires Fedora with Qt6/KF6 deps) ─────────────────────
 
-build: rust build-desktopd build-stored build-hwdaemon build-gpu-setupd build-system-daemon build-ai-daemon build-control-center build-studio
+build: rust build-desktopd build-stored build-hwdaemon build-gpu-setupd build-system-daemon build-installer-detect build-ai-daemon build-control-center build-studio
 	@echo "✅ All native components built"
 
 build-desktopd:
@@ -48,6 +48,17 @@ build-hwdaemon:
 build-gpu-setupd:
 	@echo "🔨 Building solus-gpu-setupd (C)..."
 	@$(MAKE) -C src/solus-gpu-setupd 2>&1 | tail -1 || echo "  ⚠ C build unavailable"
+
+build-system-daemon:
+	cargo build -p solus-system-daemon $(CARGOFLAGS)
+
+build-installer-detect:
+	cargo build -p solus-installer-detect $(CARGOFLAGS)
+	@mkdir -p build/installer-detect
+	cp target/debug/solus-installer-detect build/installer-detect/
+
+build-ai-daemon:
+	cargo build -p solus-ai-daemon $(CARGOFLAGS)
 
 build-control-center:
 	@echo "🔨 Building solus-control-center (C++/QML)..."

@@ -1,0 +1,13 @@
+[package]
+name = "solus-installer-detect"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+authors.workspace = true
+description = "Solus Installer Hardware Detector — auto-detects GPU, form factor, disks, and generates Calamares configuration recommendations"
+
+[dependencies]
+serde.workspace = true
+serde_json.workspace = true
+anyhow.workspace = true
+sysinfo.workspace = true
