@@ -1,0 +1,12 @@
+[Unit]
+Description=Solus Hardware Compatibility Database Scanner
+After=solus-hwdaemon.service
+Wants=solus-hwdaemon.service
+
+[Service]
+Type=oneshot
+ExecStart=/usr/bin/solus-compat scan
+StandardOutput=journal
+
+[Install]
+WantedBy=multi-user.target

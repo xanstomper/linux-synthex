@@ -9,8 +9,15 @@ members = [
     "src/system-daemon",
     "src/ai-daemon",
     "src/installer-detect",
-    # FIXME: solus-rust-tools has incompatible dep versions (zbus 4 vs 5, sysinfo 0.31 vs 0.33)
-    # Build them separately from src/solus-rust-tools/ until deps are unified
+    "src/integration-engine",
+    "src/snapshot-manager",
+    "src/solus-rust-tools/solus-pkg",
+    "src/solus-rust-tools/solus-update-manager",
+    "src/solus-rust-tools/solus-driver-manager",
+    "src/solus-recovery-rs",
+    "src/solus-service-manager-rs",
+    "src/solus-kernel-manager-rs",
+    "src/solus-compat-db",
 ]
 
 [workspace.package]
@@ -25,7 +32,15 @@ serde_json = "1"
 tokio = { version = "1", features = ["full"] }
 tracing = "0.1"
 tracing-subscriber = { version = "0.3", features = ["env-filter"] }
-zbus = "5"
+zbus = { version = "5", features = ["tokio"] }
 anyhow = "1"
 clap = { version = "4", features = ["derive"] }
 sysinfo = "0.33"
+dirs = "5"
+chrono = { version = "0.4", features = ["serde"] }
+reqwest = { version = "0.12", default-features = false, features = ["json", "rustls-tls"] }
+toml = "0.8"
+futures-util = "0.3"
+glob = "0.3"
+walkdir = "2"
+indicatif = "0.17"

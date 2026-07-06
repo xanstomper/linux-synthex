@@ -16,10 +16,9 @@
 //   │  State Reader  │────► reads /run/solus/system-daemon/state.json
 //   └────────────────┘
 
-use anyhow::{Context, Result};
+use anyhow::Result;
 use clap::{Parser, Subcommand};
 use serde::{Deserialize, Serialize};
-use std::path::PathBuf;
 use std::process::Stdio;
 use std::sync::Arc;
 use tokio::process::{Child, Command};
@@ -117,32 +116,31 @@ struct AiDaemon {
 #[interface(name = "org.solus.AI")]
 impl AiDaemon {
     /// Chat with a local LLM
-    #[zbus(property)]
-    async fn chat(&self, prompt: String, model: String) -> zbus::Result<String> {
+    async fn chat(&self, prompt: String, model: String) -> zbus::fdo::Result<String> {
         info!("D-Bus Chat called: model={model}, prompt_len={}", prompt.len());
         match self.chat_internal(&prompt, &model).await {
             Ok(resp) => Ok(resp.response),
             Err(e) => {
                 error!("Chat failed: {e}");
-                Err(zbus::Error::Failure(format!("AI service error: {e}")))
+                Err(zbus::fdo::Error::Failed(format!("AI service error: {e}")))
             }
         }
     }
 
     /// Get hardware-aware system advice
-    async fn advise(&self) -> zbus::Result<String> {
+    async fn advise(&self) -> zbus::fdo::Result<String> {
         info!("D-Bus Advise called");
         match self.generate_advisory().await {
             Ok(advice) => Ok(serde_json::to_string(&advice).unwrap_or_default()),
             Err(e) => {
                 error!("Advisory failed: {e}");
-                Err(zbus::Error::Failure(format!("Advisory error: {e}")))
+                Err(zbus::fdo::Error::Failed(format!("Advisory error: {e}")))
             }
         }
     }
 
     /// Check if Ollama is running and responsive
-    async fn health(&self) -> zbus::Result<String> {
+    async fn health(&self) -> zbus::fdo::Result<String> {
         match self.ollama_health().await {
             Ok(status) => Ok(status),
             Err(e) => Ok(format!("unhealthy: {e}")),
@@ -150,7 +148,7 @@ impl AiDaemon {
     }
 
     /// Start Ollama service
-    async fn start_ollama(&self) -> zbus::Result<bool> {
+    async fn start_ollama(&self) -> zbus::fdo::Result<bool> {
         info!("D-Bus StartOllama called");
         match self.start_ollama_inner().await {
             Ok(true) => {
@@ -166,7 +164,7 @@ impl AiDaemon {
     }
 
     /// Stop Ollama service
-    async fn stop_ollama(&self) -> zbus::Result<bool> {
+    async fn stop_ollama(&self) -> zbus::fdo::Result<bool> {
         info!("D-Bus StopOllama called");
         match self.stop_ollama_inner().await {
             Ok(_) => Ok(true),
@@ -178,27 +176,27 @@ impl AiDaemon {
     }
 
     /// List installed models
-    async fn list_models(&self) -> zbus::Result<String> {
+    async fn list_models(&self) -> zbus::fdo::Result<String> {
         match self.list_models_inner().await {
             Ok(models) => Ok(serde_json::to_string(&models).unwrap_or_default()),
-            Err(e) => Err(zbus::Error::Failure(format!("List models error: {e}"))),
+            Err(e) => Err(zbus::fdo::Error::Failed(format!("List models error: {e}"))),
         }
     }
 
     /// Transcribe audio via Whisper (returns text)
-    async fn transcribe(&self, audio_path: String) -> zbus::Result<String> {
+    async fn transcribe(&self, audio_path: String) -> zbus::fdo::Result<String> {
         info!("D-Bus Transcribe called: {audio_path}");
         match self.transcribe_inner(&audio_path).await {
             Ok(text) => Ok(text),
-            Err(e) => Err(zbus::Error::Failure(format!("Transcription error: {e}"))),
+            Err(e) => Err(zbus::fdo::Error::Failed(format!("Transcription error: {e}"))),
         }
     }
 
     /// Process a voice command: transcribe + route
-    async fn voice_command(&self, audio_path: String) -> zbus::Result<String> {
+    async fn voice_command(&self, audio_path: String) -> zbus::fdo::Result<String> {
         info!("D-Bus VoiceCommand called");
         let text = self.transcribe_inner(&audio_path).await
-            .map_err(|e| zbus::Error::Failure(format!("Voice command error: {e}")))?;
+            .map_err(|e| zbus::fdo::Error::Failed(format!("Voice command error: {e}")))?;
 
         // Route the command based on detected intent
         let lower = text.to_lowercase();
@@ -474,7 +472,7 @@ impl AiDaemon {
                     ai_model_recommendation: extract_section(&resp.response, "AI"),
                 })
             }
-            Err(e) => {
+            Err(_e) => {
                 // Fallback: rule-based advice when LLM unavailable
                 let ram_gb = total_mem / 1024;
                 Ok(SystemAdvisory {
@@ -591,7 +589,7 @@ async fn run_daemon() -> Result<()> {
     print_header("org.solus.AI");
 
     // Export D-Bus interface
-    let connection = zbus::ConnectionBuilder::system()?
+    let _connection = zbus::connection::Builder::system()?
         .name("org.solus.AI")?
         .serve_at("/org/solus/AI", daemon)?
         .build()
@@ -617,13 +615,13 @@ async fn run_chat(prompt: &[String], model: &str) -> Result<()> {
     }
 
     println!("🧠 {model}");
-    println!("─".repeat(50));
+    println!("{}", "─".repeat(50));
     println!();
 
     let resp = daemon.chat_internal(&text, model).await?;
     println!("{}", resp.response);
     println!();
-    println!("─".repeat(50));
+    println!("{}", "─".repeat(50));
     println!("⚡ {:.0} tok/s | ⏱ {:?}", resp.tokens_per_second,
         std::time::Duration::from_nanos(resp.total_duration_ns));
 

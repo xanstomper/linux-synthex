@@ -3,6 +3,7 @@
 use anyhow::Result;
 use std::sync::Mutex;
 use tracing::info;
+use zbus::connection::Builder;
 use zbus::interface;
 
 use crate::{DesktopDaemon, ThemeMode};
@@ -69,9 +70,9 @@ impl DesktopInterface {
 
 pub async fn run_service(daemon: DesktopDaemon) -> Result<()> {
     let interface = DesktopInterface::new(daemon);
-    let _connection = zbus::ConnectionBuilder::session()?
+    let _connection = Builder::session()?
         .name("org.solus.Desktop")?
-        .interface("org.solus.Desktop", interface)?
+        .serve_at("/org/solus/Desktop", interface)?
         .build()
         .await?;
 

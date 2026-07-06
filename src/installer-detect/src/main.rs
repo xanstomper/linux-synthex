@@ -40,7 +40,7 @@
 //   }
 // }
 
-use anyhow::{Context, Result};
+use anyhow::Result;
 use serde::Serialize;
 use std::fs;
 use std::path::Path;
@@ -141,7 +141,7 @@ impl DetectionReport {
         let gpus = Self::detect_gpus()?;
         let disks = Self::detect_disks()?;
         let ram_mb = system.ram_mb;
-        let total_ram_gb = ram_mb / 1024;
+        let _total_ram_gb = ram_mb / 1024;
 
         // Generate recommendations based on detected hardware
         let edition_recommendation = Self::recommend_edition(&gpus);
@@ -288,7 +288,7 @@ impl DetectionReport {
                 let dev_path = entry.path();
 
                 // Read PCI device for this GPU
-                let device_str = name_str.trim_start_matches("card");
+                let _device_str = name_str.trim_start_matches("card");
                 if let Ok(pci_path) = fs::canonicalize(dev_path.join("device")) {
                     let vendor = Self::read_pci_attr(&pci_path, "vendor");
                     let device = Self::read_pci_attr(&pci_path, "device");
@@ -725,7 +725,6 @@ impl DetectionReport {
 
     fn recommend_kernel(gpus: &[GpuInfo], form_factor: &str) -> KernelRec {
         let mut params = Vec::new();
-        let mut kernel = String::new();
         let mut reasons = Vec::new();
 
         for gpu in gpus {
@@ -759,20 +758,20 @@ impl DetectionReport {
             }
         }
 
-        // Kernel selection
-        if reasons.is_empty() {
-            kernel = "kernel-core".to_string();
+        // Kernel selection — chosen based on hardware and form factor
+        let kernel = if reasons.is_empty() {
             reasons.push("Standard hardware — kernel-core recommended".to_string());
+            "kernel-core"
         } else if form_factor == "laptop" {
-            kernel = "kernel-zen".to_string();
             reasons.push("Laptop detected — kernel-zen for better power management + BORE scheduler".to_string());
+            "kernel-zen"
         } else if gpus.iter().any(|g| g.vendor == "nvidia" || g.vendor == "amd") {
-            kernel = "kernel-zen".to_string();
             reasons.push("Gaming hardware detected — kernel-zen for BORE scheduler + performance optimizations".to_string());
+            "kernel-zen"
         } else {
-            kernel = "kernel-core".to_string();
             reasons.push("Desktop hardware — kernel-core for stability".to_string());
-        }
+            "kernel-core"
+        };
 
         // Virtualization
         if gpus.iter().any(|g| g.vendor == "nvidia") {
@@ -788,7 +787,7 @@ impl DetectionReport {
         params.dedup();
 
         KernelRec {
-            kernel,
+            kernel: kernel.to_string(),
             extra_params: params.join(" "),
             reason: reasons.join("; "),
         }
@@ -799,13 +798,13 @@ impl DetectionReport {
 
 fn main() -> Result<()> {
     eprintln!("🔍 Solus Hardware Detector v0.1.0");
-    eprintln!("═".repeat(50));
+    eprintln!("{}", "═".repeat(50));
 
     let report = DetectionReport::detect()?;
 
     println!("{}", serde_json::to_string_pretty(&report)?);
 
-    eprintln!("═".repeat(50));
+    eprintln!("{}", "═".repeat(50));
     eprintln!("✅ Detection complete — JSON output above");
 
     Ok(())

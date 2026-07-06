@@ -3,6 +3,7 @@
 
 use anyhow::Result;
 use tracing::info;
+use zbus::connection::Builder;
 use zbus::interface;
 
 struct HardwareInterface;
@@ -62,9 +63,9 @@ fn proc_info() -> crate::MemoryInfo {
 }
 
 pub async fn run_service() -> Result<()> {
-    let connection = zbus::ConnectionBuilder::session()?
+    let _connection = Builder::session()?
         .name("org.solus.Hardware")?
-        .interface("org.solus.Hardware", HardwareInterface)?
+        .serve_at("/org/solus/Hardware", HardwareInterface)?
         .build()
         .await?;
 

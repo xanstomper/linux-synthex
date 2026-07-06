@@ -9,8 +9,7 @@
 use anyhow::{Context, Result};
 use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
-use std::path::Path;
-use tracing::{error, info, warn};
+use tracing::{error, info};
 
 mod dbus;
 
@@ -45,7 +44,9 @@ pub struct RepoInfo {
 
 #[derive(Default)]
 pub struct StoreDaemon {
-    packages: HashMap<String, PackageInfo>,
+    /// In-memory package cache — populated on first search/install, used by D-Bus queries
+    #[allow(dead_code)] // populated by search/install, read by D-Bus GetPackageInfo
+    pub packages: HashMap<String, PackageInfo>,
     repos: Vec<RepoInfo>,
 }
 

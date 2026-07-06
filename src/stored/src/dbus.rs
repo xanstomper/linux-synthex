@@ -3,6 +3,7 @@
 use anyhow::Result;
 use std::sync::Mutex;
 use tracing::info;
+use zbus::connection::Builder;
 use zbus::interface;
 
 use crate::StoreDaemon;
@@ -91,9 +92,9 @@ impl StoreInterface {
 
 pub async fn run_service(daemon: StoreDaemon) -> Result<()> {
     let interface = StoreInterface::new(daemon);
-    let _connection = zbus::ConnectionBuilder::session()?
+    let _connection = Builder::session()?
         .name("org.solus.SoftwareCenter")?
-        .interface("org.solus.SoftwareCenter", interface)?
+        .serve_at("/org/solus/SoftwareCenter", interface)?
         .build()
         .await?;
 

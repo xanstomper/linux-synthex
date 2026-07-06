@@ -1,21 +1,12 @@
 [Unit]
-Description=Solus Recovery — Boot Failure Detection
-Documentation=https://docs.solus-project.org/recovery
-Before=display-manager.service
-DefaultDependencies=no
+Description=Solus Recovery Framework
+After=multi-user.target
 
 [Service]
 Type=oneshot
-ExecStart=/usr/bin/solus-recovery --check-boot
+ExecStart=/usr/bin/solus-recovery diagnose
 RemainAfterExit=yes
 StandardOutput=journal
-StandardError=journal
-
-
-# Security hardening
-ProtectSystem=full
-PrivateTmp=yes
-NoNewPrivileges=yes
 
 [Install]
-WantedBy=sysinit.target
+WantedBy=multi-user.target

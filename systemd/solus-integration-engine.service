@@ -1,0 +1,15 @@
+[Unit]
+Description=Solus Integration Engine — Upstream monitoring and integration
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+ExecStart=/usr/bin/solus-integration-engine daemon
+Restart=on-failure
+RestartSec=3600
+StandardOutput=journal
+StandardError=journal
+
+[Install]
+WantedBy=multi-user.target

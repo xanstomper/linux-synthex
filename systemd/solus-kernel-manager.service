@@ -1,0 +1,12 @@
+[Unit]
+Description=Solus Kernel Manager
+After=multi-user.target
+
+[Service]
+Type=oneshot
+ExecStart=/usr/bin/solus-kernel list
+RemainAfterExit=yes
+StandardOutput=journal
+
+[Install]
+WantedBy=multi-user.target

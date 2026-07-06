@@ -1,0 +1,15 @@
+[package]
+name = "solus-recovery"
+version = "0.1.0"
+edition = "2021"
+description = "Solus Linux — Recovery framework (boot, driver, package, network repair, snapshot restore)"
+authors = ["Solus Linux Team <dev@solus.org>"]
+
+[dependencies]
+anyhow = { workspace = true }
+clap = { workspace = true }
+serde = { workspace = true }
+serde_json = { workspace = true }
+tracing = { workspace = true }
+tracing-subscriber = { workspace = true }
+chrono = { workspace = true }

@@ -16,7 +16,7 @@ pub fn detect_gpus() -> Result<Vec<GpuInfo>> {
                 continue;
             }
 
-            let devices = std::fs::read_dir(entry.path()).ok();
+            let _devices = std::fs::read_dir(entry.path()).ok();
             let card_path = format!("/sys/class/drm/{name}/device");
             let vendor = std::fs::read_to_string(format!("{card_path}/vendor"))
                 .unwrap_or_default()
@@ -36,7 +36,7 @@ pub fn detect_gpus() -> Result<Vec<GpuInfo>> {
                 "0x8086" => ("Intel", "i915"),
                 "0x10de" => ("NVIDIA", "nvidia"),
                 "0x1ae0" => ("Google", "virtio-gpu"),
-                _ => (&vendor, "unknown"),
+                _ => (vendor.as_str(), "unknown"),
             };
 
             gpus.push(GpuInfo {
@@ -76,7 +76,7 @@ pub fn detect_gpus() -> Result<Vec<GpuInfo>> {
                             device: parts.iter().skip(2).cloned().collect::<Vec<_>>().join(" "),
                             driver: "unknown".to_string(),
                             memory_mb: 0,
-                            pci_slot: parts[0].trim_end(':').to_string(),
+                            pci_slot: parts[0].trim_end_matches(':').to_string(),
                         });
                     }
                 }

@@ -9,7 +9,7 @@
 
 use anyhow::{Context, Result};
 use serde::Serialize;
-use std::collections::HashMap;
+use std::process::Command;
 use sysinfo::System;
 use tracing::{error, info, warn};
 
@@ -139,7 +139,7 @@ impl HardwareProfile {
         }
     }
 
-    fn detect_disks(sys: &System) -> Vec<DiskInfo> {
+    fn detect_disks(_sys: &System) -> Vec<DiskInfo> {
         use sysinfo::Disks;
         let disks = Disks::new_with_refreshed_list();
         disks
@@ -150,7 +150,7 @@ impl HardwareProfile {
                 mount: d.mount_point().to_string_lossy().to_string(),
                 total_bytes: d.total_space(),
                 used_bytes: d.total_space() - d.available_space(),
-                filesystem: String::from_utf8_lossy(d.file_system()).to_string(),
+                filesystem: d.file_system().to_string_lossy().to_string(),
                 disk_type: format!("{:?}", d.kind()),
             })
             .collect()
@@ -174,17 +174,71 @@ impl HardwareProfile {
                 .trim()
                 .to_string();
 
-                infos.push(NetworkInfo {
-                    interface: iface,
+                // Detect speed
+                let speed = std::fs::read_to_string(
+                    format!("/sys/class/net/{iface}/speed"),
+                )
+                .ok()
+                .and_then(|s| s.trim().parse::<u64>().ok())
+                .filter(|&s| s > 0);
+
+                // Detect IPs via ip command
+                let ipv4 = Self::get_ips(&iface, "inet");
+                let ipv6 = Self::get_ips(&iface, "inet6");
+
+                let is_wireless = std::path::Path::new(
+                    &format!("/sys/class/net/{iface}/wireless")
+                ).exists();
+
+                let ni = NetworkInfo {
+                    interface: iface.clone(),
                     mac,
-                    ipv4: Vec::new(),
-                    ipv6: Vec::new(),
-                    speed_mbps: None,
-                });
+                    ipv4,
+                    ipv6,
+                    speed_mbps: speed,
+                };
+
+                // Detect carrier state
+                let carrier = std::fs::read_to_string(
+                    format!("/sys/class/net/{iface}/carrier"),
+                )
+                .map(|s| s.trim() == "1")
+                .unwrap_or(false);
+
+                if !carrier {
+                    // Interface exists but no link — still include it
+                }
+
+                infos.push(ni);
+                let _ = is_wireless; // reserved for future use
             }
         }
 
         Ok(infos)
+    }
+
+    /// Get IP addresses for an interface using the `ip` command.
+    fn get_ips(iface: &str, family: &str) -> Vec<String> {
+        Command::new("ip")
+            .args(["-o", "addr", "show", "dev", iface])
+            .output()
+            .ok()
+            .map(|o| String::from_utf8_lossy(&o.stdout).to_string())
+            .unwrap_or_default()
+            .lines()
+            .filter(|l| l.contains(family))
+            .filter_map(|l| {
+                // Parse: "2: eth0    inet 192.168.1.100/24 ..."
+                l.split_whitespace()
+                    .find(|w| w.contains('/') && w.chars().next().map(|c| c.is_ascii_digit() || c == ':').unwrap_or(false))
+                    .or_else(|| l.split_whitespace().nth(3))
+                    .map(|addr| {
+                        // Remove CIDR prefix if present
+                        addr.split('/').next().unwrap_or(addr).to_string()
+                    })
+            })
+            .filter(|addr| !addr.is_empty())
+            .collect()
     }
 
     pub fn to_json(&self) -> Result<String> {

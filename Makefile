@@ -30,7 +30,7 @@ rust-clean:
 
 # ─── Building (requires Fedora with Qt6/KF6 deps) ─────────────────────
 
-build: rust build-desktopd build-stored build-hwdaemon build-gpu-setupd build-system-daemon build-installer-detect build-ai-daemon build-control-center build-studio
+build: rust build-desktopd build-stored build-hwdaemon build-gpu-setupd build-system-daemon build-installer-detect build-ai-daemon build-integration-engine build-snapshot-manager build-control-center build-studio
 	@echo "✅ All native components built"
 
 build-desktopd:
@@ -59,6 +59,14 @@ build-installer-detect:
 
 build-ai-daemon:
 	cargo build -p solus-ai-daemon $(CARGOFLAGS)
+
+build-integration-engine:
+	@echo "🔍 Building solus-integration-engine..."
+	cargo build -p solus-integration-engine $(CARGOFLAGS)
+
+build-snapshot-manager:
+	@echo "📸 Building solus-snapshot-manager..."
+	cargo build -p solus-snapshot-manager $(CARGOFLAGS)
 
 build-control-center:
 	@echo "🔨 Building solus-control-center (C++/QML)..."

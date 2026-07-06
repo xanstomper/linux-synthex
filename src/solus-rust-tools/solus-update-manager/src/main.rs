@@ -131,6 +131,7 @@ fn dnf_command() -> Command {
     Command::new("dnf5")
 }
 
+#[allow(dead_code)] // General-purpose command runner — used by future subcommands
 fn run_command(cmd: &mut Command, description: &str) -> Result<String> {
     tracing::info!("Running: {} ({description})", format!("{cmd:?}"));
     let output = cmd.output().context(format!("Failed to execute {description}"))?;
@@ -274,14 +275,16 @@ fn show_stats() -> Result<()> {
     println!("Security:        {}", status.security_updates);
 
     // Show system info
-    let sys = sysinfo::System::new_all();
+    let _sys = sysinfo::System::new_all();
     println!("\n=== System ===");
     println!(
         "OS:              {} {}",
-        sys.long_os_version().unwrap_or_default(),
-        sys.kernel_version().unwrap_or_default()
+        sysinfo::System::os_version().unwrap_or_default(),
+        sysinfo::System::kernel_version().unwrap_or_default()
     );
-    println!("Uptime:          {:?}", chrono::Duration::seconds(sys.uptime() as i64));
+    let uptime_secs = sysinfo::System::uptime();
+    let dur = chrono::Duration::seconds(uptime_secs as i64);
+    println!("Uptime:          {dur}");
 
     Ok(())
 }

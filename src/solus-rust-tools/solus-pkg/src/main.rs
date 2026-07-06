@@ -1,7 +1,6 @@
 use anyhow::{Context, Result};
 use clap::Parser;
 use serde::{Deserialize, Serialize};
-use std::path::PathBuf;
 use std::process::Command;
 use tracing_subscriber::EnvFilter;
 
@@ -63,6 +62,7 @@ enum Cli {
 }
 
 #[derive(Debug, Serialize, Deserialize)]
+#[allow(dead_code)] // Used when constructing PackageInfo from dnf info output
 struct PackageInfo {
     name: String,
     version: String,
@@ -79,6 +79,7 @@ struct PackageInfo {
 }
 
 #[derive(Debug, Serialize, Deserialize)]
+#[allow(dead_code)] // Used for repository configuration serialization
 struct SolusRepo {
     name: String,
     baseurl: String,
@@ -201,7 +202,7 @@ fn verify(package: Option<&str>) -> Result<()> {
 
 fn list_categories(category: Option<&str>) -> Result<()> {
     let solus_repo = "/etc/yum.repos.d/solus.repo";
-    let repo_content = std::fs::read_to_string(solus_repo).unwrap_or_default();
+    let _repo_content = std::fs::read_to_string(solus_repo).unwrap_or_default();
 
     println!("=== Solus Package Categories ===");
     println!();

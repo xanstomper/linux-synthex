@@ -10,12 +10,12 @@
 //   - ACPI power source monitoring → auto-switch modes
 //   - GPU power management → amdgpu/nvidia/i915 power levels
 
-use anyhow::{Context, Result};
+use anyhow::Result;
 use serde::{Deserialize, Serialize};
 use std::path::Path;
 use std::time::Duration;
 use tokio::time;
-use tracing::{error, info, warn};
+use tracing::{info, warn};
 
 // ─── Modes ─────────────────────────────────────────────────────────────
 
@@ -166,7 +166,7 @@ pub fn detect_form_factor() -> FormFactor {
 
 // ─── Power Source ──────────────────────────────────────────────────────
 
-#[derive(Debug, Clone, Copy, PartialEq)]
+#[derive(Debug, Clone, Copy, PartialEq, Serialize, Deserialize)]
 pub enum PowerSource {
     Ac,
     Battery,
@@ -267,7 +267,7 @@ pub fn detect_displays() -> DisplayCapabilities {
             let (width, height) = get_resolution(&entry.path());
 
             // Check VRR capability via EDID
-            let edid_path = entry.path().join("edid");
+            let _edid_path = entry.path().join("edid");
             let vrr = check_vrr_capable(&entry.path());
             let hdr = check_hdr_capable(&entry.path());
 
@@ -428,7 +428,7 @@ pub fn set_cpu_governor(governor: &str) -> Result<()> {
         .map(|d| d.filter_map(|e| {
             let name = e.ok()?.file_name();
             let s = name.to_string_lossy();
-            s.starts_with("cpu") && s[3..].parse::<u32>().is_ok()
+            if s.starts_with("cpu") && s[3..].parse::<u32>().is_ok() { Some(()) } else { None }
         }).count())
         .unwrap_or(0);
 
@@ -454,7 +454,7 @@ pub fn set_energy_preference(pref: &str) -> Result<()> {
         .map(|d| d.filter_map(|e| {
             let name = e.ok()?.file_name();
             let s = name.to_string_lossy();
-            s.starts_with("cpu") && s[3..].parse::<u32>().is_ok()
+            if s.starts_with("cpu") && s[3..].parse::<u32>().is_ok() { Some(()) } else { None }
         }).count())
         .unwrap_or(0);
 
@@ -642,6 +642,7 @@ pub struct SystemState {
 }
 
 impl SystemState {
+    #[allow(dead_code)] // Used by D-Bus interface to restore previous state on restart
     fn load() -> Result<Self> {
         let path = state_path();
         if path.exists() {
@@ -688,8 +689,8 @@ fn dirs_config() -> std::path::PathBuf {
 // ─── ACPI Monitor ──────────────────────────────────────────────────────
 
 async fn monitor_power_source(current_state: &mut SystemState) {
-    let ac_path = "/sys/class/power_supply/AC0/online";
-    let ac_path2 = "/sys/class/power_supply/ADP1/online";
+    let _ac_path = "/sys/class/power_supply/AC0/online";
+    let _ac_path2 = "/sys/class/power_supply/ADP1/online";
 
     loop {
         time::sleep(Duration::from_secs(5)).await;

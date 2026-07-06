@@ -20,8 +20,9 @@ sudo bash scripts/build-solus.sh build-iso
 
 ### Run integration tests
 ```bash
-make test     # 64+ tests — verifies code, configs, services, desktop files
+python3 tests/integration-tests.py   # 70 tests — validates code, configs, services, builds
 make check    # validation targets for systemd, JSON, Python, desktop files
+make rust-check  # cargo check — verify Rust workspace compiles cleanly
 ```
 
 ## Features
@@ -111,9 +112,19 @@ make check    # validation targets for systemd, JSON, Python, desktop files
 ### Solus Native Rust Tools
 | Command | Description |
 |---------|-------------|
+| `solus-integration-engine` | Upstream monitoring — tracks Arch, Nobara, Bazzite, CachyOS, KDE, Mesa, Kernel, Proton-GE |
+| `solus-snapshot` | Btrfs snapshot manager — create, list, rollback, verify, clean |
 | `solus-update-manager` | System update manager with BTRFS snapshots |
 | `solus-driver-manager` | GPU detection and driver auto-install |
 | `solus-pkg` (alias `spkg`) | Package manager with Solus repo awareness |
+| `solus-ai-daemon` | AI assistant — Ollama integration, hardware advice |
+| `solus-system-daemon` | Performance auto-tuner — CPU governor, TDP, GPU power |
+| `solus-hwdaemon` | Hardware detection daemon — D-Bus service |
+| `solus-desktopd` | Desktop layout/theme engine |
+| `solus-gpu-setupd` | GPU driver auto-installer — AMD, Intel, NVIDIA |
+| `solus-stored` | Software center backend — DNF5, Flatpak |
+| `solus-installer-detect` | Hardware detection for Calamares installer |
+| `solus-cli` | Unified system tool — info, doctor, mode, update, health |
 
 ### Solus Tools
 | Command | Description |
@@ -182,15 +193,34 @@ make check    # validation targets for systemd, JSON, Python, desktop files
 `solus-ai-hub`
 | `solus-webapp` | Turn websites into native apps |
 
-### System Services
-| Service | Description |
-|---------|-------------|
-| `solus-desktopd` | Desktop layout/theme/mode engine |
-| `solus-hwdaemon` | Hardware detection daemon |
-| `solus-gpu-setupd` | GPU driver auto-installer |
-| `solus-stored` | Software center backend |
-| `solus-workspace` | System mode switcher |
-|| `solus-ai` | solus-ai-daemon CLI — chat, start, stop, models, pull, advise |
+### System Services (all Rust)
+| Service | Language | Description |
+|---------|----------|-------------|
+| `solus-system-daemon` | Rust | Performance auto-tuner — CPU, TDP, GPU, gaming, VRR, HDR |
+| `solus-integration-engine` | Rust | Upstream monitoring — tracks Arch, Nobara, Bazzite, CachyOS, KDE, Mesa |
+| `solus-snapshot-manager` | Rust | Btrfs snapshot creation, rollback, verification, cleanup |
+| `solus-hwdaemon` | Rust | Hardware detection daemon — CPU, GPU, RAM, disks, network |
+| `solus-gpu-setupd` | Rust | GPU driver auto-installer — AMD, Intel, NVIDIA, Secure Boot |
+| `solus-desktopd` | Rust | Desktop layout/theme/mode engine — Mint, Windows, Gaming, macOS |
+| `solus-stored` | Rust | Software center backend — DNF, Flatpak, AppImage, AUR |
+| `solus-ai-daemon` | Rust | Local AI assistant — Ollama integration, whisper, diagnostics |
+| `solus-installer-detect` | Rust | Hardware detection for Calamares installer |
+| `solus-cli` | Rust | Unified CLI — info, doctor, mode, update, snapshot, health |
+| `solus-recovery` | Rust | Recovery framework — boot, driver, package, network repair |
+| `solus-service-manager` | Rust | Systemd service management — list, start, stop, enable, disable |
+| `solus-kernel-manager` | Rust | Kernel management — list, install, remove, switch, cleanup |
+| `solus-compat-db` | Rust | Hardware compatibility database — scan, check, report |
+
+### GUI Applications
+| Application | Framework | Description |
+|-------------|-----------|-------------|
+| `solus-control-center` | QML/C++ | Unified control center — 13 pages (Dashboard, System, Performance, Gaming, Developer, Themes, Security, Updates, Drivers, RGB, Snapshots, Kernel, Controllers) |
+| `solus-software-center` | QML | Mint-inspired software manager with category browsing |
+| `solus-oobe` | QML | First-run wizard — profile selection, theme, bundles |
+| `solus-gaming-center` | QML | Gaming hub — Steam, Proton, MangoHUD, Gamescope |
+| `solus-studio` | QML/C++ | Theme studio with preset designer |
+| `solus-welcome` | Python | Welcome application with links and tutorials |
+| `solus-agent` | Python | AI-powered desktop agent |
 
 ## Project Structure
 

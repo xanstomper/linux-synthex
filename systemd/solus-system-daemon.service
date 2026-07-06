@@ -17,6 +17,13 @@ User=root
 Nice=0
 CPUAccounting=true
 MemoryAccounting=true
+MemoryMax=128M
+NoNewPrivileges=yes
+PrivateTmp=yes
+ProtectSystem=full
+SystemCallArchitectures=native
+ProtectKernelTunables=yes
+ProtectControlGroups=yes
 
 [Install]
 WantedBy=multi-user.target
