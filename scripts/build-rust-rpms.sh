@@ -56,6 +56,9 @@ build_daemons() {
         "solus-gpu-setupd"
         "solus-system-daemon"
         "solus-cli"
+        "solus-ai-daemon"
+        "solus-installer-detect"
+        "solus-control-center"
     )
 
     for spec_name in "${daemon_specs[@]}"; do

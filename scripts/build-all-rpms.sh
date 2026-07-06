@@ -107,6 +107,19 @@ cp "$ROOT/branding/theme/solus-sddm-theme/theme.conf"         "$BUILDROOT/SOURCE
 cp "$ROOT/desktop/hyprland/waybar-style.css"                  "$BUILDROOT/SOURCES/" 2>/dev/null || true
 cp "$ROOT/desktop/hyprland/wlogout-layout"                    "$BUILDROOT/SOURCES/" 2>/dev/null || true
 cp "$ROOT/desktop/hyprland/wlogout-style.css"                 "$BUILDROOT/SOURCES/" 2>/dev/null || true
+# Rust daemon binaries (from workspace)
+for binary in solus-hwdaemon solus-desktopd solus-stored solus-gpu-setupd solus-cli \
+              solus-system-daemon solus-ai-daemon solus-installer-detect solus-control-center; do
+    src_bin="target/release/$binary"
+    [ -f "$ROOT/$src_bin" ] && cp "$ROOT/$src_bin" "$BUILDROOT/SOURCES/"
+done
+
+# AI daemon systemd unit
+cp "$ROOT/systemd/solus-ai-daemon.service" "$BUILDROOT/SOURCES/" 2>/dev/null || true
+
+# Installer hook script
+cp "$ROOT/installer/scripts/solus-installer-hook" "$BUILDROOT/SOURCES/" 2>/dev/null || true
+
 echo "  Source files copied."
 echo ""
 

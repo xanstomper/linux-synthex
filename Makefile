@@ -77,7 +77,7 @@ iso:
 
 # Development setup
 
-check: check-code check-systemd check-desktop check-json
+check: check-code check-systemd check-desktop check-json check-specs
 
 check-code:
 	@echo "🔍 Validating Python source code..."
@@ -102,6 +102,24 @@ check-desktop:
 check-json:
 	@echo "🔍 Validating JSON files..."
 	@python3 tests/check-json.py 2>&1 | tail -1
+
+check-specs:
+	@echo "🔍 Validating RPM spec files..."
+	@count=0; total=0; \
+	for spec in packages/spec-files/*.spec; do \
+		total=$$((total + 1)); \
+		name=$$(basename "$$spec" .spec); \
+		reqs=$$(grep -c '^Requires:' "$$spec" 2>/dev/null || true); \
+		buildreqs=$$(grep -c '^BuildRequires:' "$$spec" 2>/dev/null || true); \
+		summary=$$(grep '^Summary:' "$$spec" 2>/dev/null | head -1 | cut -d: -f2- | xargs || echo '(missing)'); \
+		if grep -q '^Name:' "$$spec" && grep -q '^Version:' "$$spec" && grep -q '^%files' "$$spec"; then \
+			count=$$((count + 1)); \
+			printf "  ✓ %-35s %s\n" "$$name" "$$summary"; \
+		else \
+			printf "  ✗ %-35s MISSING required fields\n" "$$name"; \
+		fi; \
+	done; \
+	echo "  ✅ $$count/$$total spec files valid"
 
 # ─── Testing ─────────────────────────────────────────────────────────
 
