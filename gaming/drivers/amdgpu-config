@@ -1,0 +1,156 @@
+# Solus Linux — AMD GPU Driver Configuration
+# /etc/default/amdgpu (sourced by gpu-driver-manager)
+
+# ============================================================
+# KERNEL PARAMETERS
+# ============================================================
+
+# AMD GPU kernel driver options
+# Format: amdgpu.<option>=value
+AMDGPU_KERNEL_OPTIONS="amdgpu.ppfeaturemask=0xffffffff amdgpu.dc=1 amdgpu.dcdebugmask=0x0"
+
+# amdgpu.ppfeaturemask = 0xffffffff — Enables all power management features
+#   (undervolting, overclocking, power profiles via sysfs)
+# amdgpu.dc = 1 — Enable Display Core (necessary for modern display features)
+# amdgpu.dcdebugmask = 0x0 — No debug flags in display core
+
+# ============================================================
+# MODPROBE CONFIGURATION
+# ============================================================
+
+# /etc/modprobe.d/amdgpu.conf (auto-generated from this config)
+MODPROBE_OPTIONS="options amdgpu si_support=1 cik_support=1"
+# si_support=1 — Enable Southern Islands (HD 7000 series) support
+# cik_support=1 — Enable Sea Islands (HD 8000/R7/R9 series) support
+
+# ============================================================
+# POWER MANAGEMENT PROFILES
+# ============================================================
+
+# Default power profile
+# Options: low, auto, high, manual, compute_*, vr, 3d_fullscreen
+# These map to amdgpu sysfs pp_power_profile_mode
+DEFAULT_POWER_PROFILE="auto"
+
+# Performance profile override for gaming
+PERFORMANCE_POWER_PROFILE="3d_fullscreen"
+
+# ============================================================
+# GPU CLOCK LIMITS
+# ============================================================
+
+# Clock limits in MHz (applied via /sys/class/drm/card*/device/pp_od_clk_voltage)
+# Set to 0 for automatic/default
+GPU_CLOCK_MIN=0
+GPU_CLOCK_MAX=0
+VRAM_CLOCK_MIN=0
+VRAM_CLOCK_MAX=0
+
+# Voltage offset in mV (negative = undervolt, positive = overvolt)
+# 0 = default/automatic
+GPU_VOLTAGE_OFFSET=0
+
+# ============================================================
+# FAN CONTROL
+# ============================================================
+
+# Fan control method
+# Options: auto, manual, curve
+FAN_MODE="auto"
+
+# PWM values for manual fan control (0-255)
+FAN_SPEED_PERCENT=50
+
+# Temperature targets for fan curve (°C)
+# Format: temp=%d:pwm=%d,...
+FAN_CURVE="0:0,40:30,60:50,75:75,85:100,100:255"
+
+# ============================================================
+# MESA DRIVER CONFIGURATION
+# ============================================================
+
+# Vulkan driver selection (radv vs amdvlk)
+# Options: radv, amdvlk, auto
+VULKAN_DRIVER="radv"
+
+# RADV-specific options
+# RADV_PERFTEST values: sam, nir, etc (comma-separated)
+RADV_PERFTEST="sam"
+
+# Mesa shader cache settings
+MESA_SHADER_CACHE_SIZE=4096          # MB per game
+MESA_SHADER_CACHE_DIR="$HOME/.cache/mesa_shader_cache_db"
+
+# Enable ACO (AMD Compiler) — default on modern Mesa
+# ACO is the community shader compiler, faster than LLVM
+export ACO_COMPILER=1
+
+# ============================================================
+# VIDEO DECODE / ENCODE
+# ============================================================
+
+# Enable VA-API hardware video decoding
+# Requires: mesa-va-drivers, libva
+ENABLE_VAAPI=1
+
+# Enable VDPAU hardware video decoding
+# Requires: mesa-vdpau-drivers, libvdpau
+ENABLE_VDPAU=1
+
+# ============================================================
+# FSYNC / FUTEX2
+# ============================================================
+
+# Enable fsync (requires CONFIG_FUTEX in kernel)
+ENABLE_FSYNC=1
+
+# Enable futex2 (requires CONFIG_FUTEX2 in kernel)
+ENABLE_FUTEX2=1
+
+# ============================================================
+# HDR SUPPORT
+# ============================================================
+
+# Enable HDR output support via displays connected to AMD GPU
+ENABLE_HDR=1
+
+# HDR metadata signaling method
+# Options: auto, ws, drm, both
+HDR_METHOD="auto"
+
+# ============================================================
+# VRR / ADAPTIVE SYNC
+# ============================================================
+
+# Enable Variable Refresh Rate (Freesync)
+ENABLE_VRR=1
+
+# VRR minimum refresh rate (Hz)
+VRR_MIN_REFRESH=40
+
+# VRR maximum refresh rate (Hz)
+VRR_MAX_REFRESH=0  # 0 = display native max
+
+# ============================================================
+# LATENCY TUNING
+# ============================================================
+
+# Enable GPU latency reduction
+ENABLE_LOW_LATENCY=1
+
+# Radeon Anti-Lag equivalent settings
+# 0 = default, 1 = reduce latency, 2 = aggressive
+ANTI_LAG_LEVEL=1
+
+# ============================================================
+# DEBUG / LOGGING
+# ============================================================
+
+# RADV debug flags (empty = production mode)
+RADV_DEBUG=""
+
+# Enable detailed logging (for troubleshooting)
+RADV_LOG_LEVEL=0  # 0=off, 1=warn, 2=info, 3=debug
+
+# Force shader compiler to dump SPIR-V (debugging)
+RADV_DUMP_SHADERS=0

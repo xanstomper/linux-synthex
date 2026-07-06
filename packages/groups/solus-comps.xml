@@ -1,0 +1,201 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE comps PUBLIC "-//Red Hat, Inc.//DTD Comps info//EN" "comps.dtd">
+<comps>
+  <!-- Base System -->
+  <group>
+    <id>solus-base</id>
+    <name>Solus Base System</name>
+    <description>Core Solus system packages</description>
+    <uservisible>false</uservisible>
+    <packagelist>
+      <packagereq type="mandatory">btrfs-progs</packagereq>
+      <packagereq type="mandatory">snapper</packagereq>
+      <packagereq type="mandatory">firewalld</packagereq>
+      <packagereq type="mandatory">flatpak</packagereq>
+      <packagereq type="mandatory">pipewire</packagereq>
+      <packagereq type="mandatory">pipewire-pulseaudio</packagereq>
+      <packagereq type="mandatory">wireplumber</packagereq>
+      <packagereq type="mandatory">NetworkManager</packagereq>
+      <packagereq type="mandatory">selinux-policy-targeted</packagereq>
+    </packagelist>
+  </group>
+
+  <!-- Solus System Tools -->
+  <group>
+    <id>solus-system</id>
+    <name>Solus System Tools</name>
+    <description>Solus system management daemons and tools</description>
+    <uservisible>false</uservisible>
+    <packagelist>
+      <packagereq type="mandatory">solus-desktopd</packagereq>
+      <packagereq type="mandatory">solus-hwdaemon</packagereq>
+      <packagereq type="mandatory">solus-gpu-setupd</packagereq>
+      <packagereq type="mandatory">solus-stored</packagereq>
+      <packagereq type="mandatory">solus-workspace</packagereq>
+      <packagereq type="mandatory">solus-control-center</packagereq>
+      <packagereq type="mandatory">solus-software-center</packagereq>
+      <packagereq type="mandatory">solus-recovery</packagereq>
+      <packagereq type="mandatory">solus-oobe</packagereq>
+    </packagelist>
+  </group>
+
+  <!-- Gaming -->
+  <group>
+    <id>solus-gaming</id>
+    <name>Solus Gaming Stack</name>
+    <description>Complete gaming platform with Steam, Proton, and optimization tools</description>
+    <uservisible>true</uservisible>
+    <packagelist>
+      <packagereq type="mandatory">steam</packagereq>
+      <packagereq type="mandatory">lutris</packagereq>
+      <packagereq type="mandatory">mangohud</packagereq>
+      <packagereq type="mandatory">gamescope</packagereq>
+      <packagereq type="mandatory">gamemode</packagereq>
+      <packagereq type="default">heroic-games-launcher</packagereq>
+      <packagereq type="default">proton-ge-custom</packagereq>
+      <packagereq type="default">vkbasalt</packagereq>
+      <packagereq type="default">wine-core</packagereq>
+      <packagereq type="default">winetricks</packagereq>
+      <packagereq type="default">solus-gaming-center</packagereq>
+      <packagereq type="mandatory">solus-gaming-platform</packagereq>
+    </packagelist>
+  </group>
+
+  <!-- Safety & Hardware Rules -->
+  <group>
+    <id>solus-safety</id>
+    <name>Solus Safety &amp; Hardware Rules</name>
+    <description>DNF5 package protection, udev rules (controllers/RGB/handheld/firmware), performance sysctl, ZRAM, rescue USB, boot health check</description>
+    <uservisible>false</uservisible>
+    <packagelist>
+      <packagereq type="mandatory">solus-safety</packagereq>
+    </packagelist>
+  </group>
+
+  <!-- Essentials (Flatpak/VPN/scanner/disk-health) -->
+  <group>
+    <id>solus-essentials</id>
+    <name>Solus Essentials</name>
+    <description>Flatpak + Flathub preconfigured, Flatseal, Warehouse, WireGuard/OpenVPN, SANE scanning, SMART/NVMe disk health, fwupd</description>
+    <uservisible>true</uservisible>
+    <packagelist>
+      <packagereq type="mandatory">solus-essentials</packagereq>
+    </packagelist>
+  </group>
+
+  <!-- Creator Platform -->
+  <group>
+    <id>solus-creator</id>
+    <name>Solus Creator Platform</name>
+    <description>OBS plugins, color management (colord/DisplayCAL), Wacom tablet, audio production suite</description>
+    <uservisible>true</uservisible>
+    <packagelist>
+      <packagereq type="mandatory">solus-creator-platform</packagereq>
+    </packagelist>
+  </group>
+
+  <!-- Development -->
+  <group>
+    <id>solus-developer</id>
+    <name>Solus Development Stack</name>
+    <description>Complete development environment with compilers, containers, and IDEs</description>
+    <uservisible>true</uservisible>
+    <packagelist>
+      <packagereq type="mandatory">git</packagereq>
+      <packagereq type="mandatory">gcc</packagereq>
+      <packagereq type="mandatory">gcc-c++</packagereq>
+      <packagereq type="mandatory">make</packagereq>
+      <packagereq type="mandatory">cmake</packagereq>
+      <packagereq type="mandatory">python3</packagereq>
+      <packagereq type="mandatory">python3-devel</packagereq>
+      <packagereq type="default">rust</packagereq>
+      <packagereq type="default">cargo</packagereq>
+      <packagereq type="default">golang</packagereq>
+      <packagereq type="default">nodejs</packagereq>
+      <packagereq type="default">java-21-openjdk</packagereq>
+      <packagereq type="default">podman</packagereq>
+      <packagereq type="default">toolbox</packagereq>
+      <packagereq type="default">distrobox</packagereq>
+      <packagereq type="default">@development-tools</packagereq>
+    </packagelist>
+  </group>
+
+  <!-- Creative -->
+  <group>
+    <id>solus-creator</id>
+    <name>Solus Creator Stack</name>
+    <description>Creative tools for content creation</description>
+    <uservisible>true</uservisible>
+    <packagelist>
+      <packagereq type="default">blender</packagereq>
+      <packagereq type="default">krita</packagereq>
+      <packagereq type="default">gimp</packagereq>
+      <packagereq type="default">obs-studio</packagereq>
+      <packagereq type="default">inkscape</packagereq>
+      <packagereq type="default">audacity</packagereq>
+    </packagelist>
+  </group>
+
+  <!-- AI -->
+  <group>
+    <id>solus-ai</id>
+    <name>Solus AI Stack</name>
+    <description>Local AI tools including Ollama and Solus AI Hub</description>
+    <uservisible>true</uservisible>
+    <packagelist>
+      <packagereq type="mandatory">ollama</packagereq>
+      <packagereq type="mandatory">solus-ai-hub</packagereq>
+      <packagereq type="default">open-webui</packagereq>
+    </packagelist>
+  </group>
+
+  <!-- Full Desktop -->
+  <group>
+    <id>solus-desktop</id>
+    <name>Solus Plasma Desktop</name>
+    <description>Solus-tuned KDE Plasma desktop environment</description>
+    <uservisible>false</uservisible>
+    <packagelist>
+      <packagereq type="mandatory">plasma-desktop</packagereq>
+      <packagereq type="mandatory">sddm</packagereq>
+      <packagereq type="mandatory">wayland</packagereq>
+      <packagereq type="mandatory">dolphin</packagereq>
+      <packagereq type="mandatory">konsole</packagereq>
+      <packagereq type="mandatory">kate</packagereq>
+      <packagereq type="default">gwenview</packagereq>
+      <packagereq type="default">spectacle</packagereq>
+      <packagereq type="default">plasma-nm</packagereq>
+      <packagereq type="default">plasma-pa</packagereq>
+      <packagereq type="default">kscreen</packagereq>
+      <packagereq type="default">powerdevil</packagereq>
+    </packagelist>
+  </group>
+
+  <!-- GPU Drivers -->
+  <group>
+    <id>solus-gpu-amd</id>
+    <name>Solus AMD GPU Support</name>
+    <description>AMD GPU drivers and compute support</description>
+    <uservisible>false</uservisible>
+    <packagelist>
+      <packagereq type="mandatory">mesa-dri-drivers</packagereq>
+      <packagereq type="mandatory">mesa-vulkan-drivers</packagereq>
+      <packagereq type="mandatory">mesa-libGL</packagereq>
+      <packagereq type="mandatory">amd-gpu-firmware</packagereq>
+      <packagereq type="default">rocm-opencl</packagereq>
+      <packagereq type="default">rocm-hip</packagereq>
+    </packagelist>
+  </group>
+
+  <group>
+    <id>solus-gpu-nvidia</id>
+    <name>Solus NVIDIA GPU Support</name>
+    <description>NVIDIA proprietary GPU drivers</description>
+    <uservisible>false</uservisible>
+    <packagelist>
+      <packagereq type="mandatory">akmod-nvidia</packagereq>
+      <packagereq type="mandatory">xorg-x11-drv-nvidia-cuda</packagereq>
+      <packagereq type="default">nvidia-vaapi-driver</packagereq>
+    </packagelist>
+  </group>
+</comps>

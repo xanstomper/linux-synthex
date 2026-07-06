@@ -1,0 +1,192 @@
+# Solus Linux Kernel Configuration
+# Based on Fedora defconfig with CachyOS-style gaming optimizations
+#
+# Key differences from stock:
+#   - CONFIG_PREEMPT=y (low-latency desktop — consistent with PREEMPT_FULL on x86_64)
+#   - CONFIG_HZ=1000 (1000Hz tick for interactive desktop responsiveness)
+#   - CONFIG_HZ_1000=y
+#   - CONFIG_NO_HZ_FULL=y (tickless for gaming cores — enabled via boot param)
+#   - CONFIG_CPU_FREQ_DEFAULT_GOV_SCHEDUTIL=y (efficient CPU scaling)
+#   - CONFIG_TRANSPARENT_HUGEPAGE_MADVISE=y (madvise-only, not always)
+#   - CONFIG_ZRAM=y (memory compression)
+#   - CONFIG_BTRFS_FS=y (snapshot/rollback filesystem)
+#   - CONFIG_ZSTD_COMPRESSION=y (fast compression everywhere)
+
+# ─── Scheduler & Preemption ───────────────────────────────────────────
+CONFIG_PREEMPT=y
+# CONFIG_PREEMPT_VOLUNTARY is not set
+CONFIG_SCHED_BORE=y
+CONFIG_SCHED_DEBUG=n
+
+# ─── Tickless (NO_HZ) ─────────────────────────────────────────────────
+CONFIG_NO_HZ_IDLE=y
+CONFIG_NO_HZ_FULL=y
+# CONFIG_NO_HZ_FULL_ALL is not set
+CONFIG_HZ_1000=y
+CONFIG_HZ=1000
+
+# ─── CPU Frequency ────────────────────────────────────────────────────
+CONFIG_CPU_FREQ=y
+CONFIG_CPU_FREQ_DEFAULT_GOV_SCHEDUTIL=y
+CONFIG_CPU_FREQ_GOV_SCHEDUTIL=y
+CONFIG_CPU_FREQ_GOV_PERFORMANCE=y
+CONFIG_CPU_FREQ_GOV_POWERSAVE=y
+CONFIG_CPU_FREQ_GOV_ONDEMAND=y
+
+# ─── Memory & Compression ─────────────────────────────────────────────
+CONFIG_ZRAM=y
+CONFIG_ZRAM_WRITEBACK=y
+CONFIG_ZRAM_MEMORY_TRACKING=y
+CONFIG_ZSMALLOC=y
+CONFIG_ZSTD_COMPRESS=y
+CONFIG_ZSTD_DECOMPRESS=y
+CONFIG_LZ4_COMPRESS=y
+CONFIG_LZ4_DECOMPRESS=y
+
+# ─── Transparent Hugepages — madvise-only ─────────────────────────────
+CONFIG_TRANSPARENT_HUGEPAGE=y
+# CONFIG_TRANSPARENT_HUGEPAGE_ALWAYS is not set
+CONFIG_TRANSPARENT_HUGEPAGE_MADVISE=y
+
+# ─── Filesystems ──────────────────────────────────────────────────────
+CONFIG_BTRFS_FS=y
+CONFIG_BTRFS_FS_POSIX_ACL=y
+# CONFIG_BTRFS_FS_REF_VERIFY is not set
+CONFIG_EXT4_FS=y
+CONFIG_EXT4_FS_POSIX_ACL=y
+CONFIG_XFS_FS=y
+CONFIG_XFS_POSIX_ACL=y
+CONFIG_F2FS_FS=y
+CONFIG_F2FS_FS_POSIX_ACL=y
+CONFIG_NTFS3_FS=y
+CONFIG_EXFAT_FS=y
+CONFIG_FAT_FS=y
+CONFIG_VFAT_FS=y
+
+# ─── GPU Drivers ──────────────────────────────────────────────────────
+CONFIG_DRM=y
+CONFIG_DRM_AMDGPU=y
+CONFIG_DRM_AMDGPU_SI=y
+CONFIG_DRM_AMDGPU_CIK=y
+CONFIG_DRM_RADEON=n
+CONFIG_DRM_NOUVEAU=y
+CONFIG_DRM_I915=y
+CONFIG_DRM_I915_FORCE_PROBE="*"
+CONFIG_DRM_VKMS=y
+
+# ─── Graphics Support ─────────────────────────────────────────────────
+CONFIG_FB=y
+CONFIG_FRAMEBUFFER_CONSOLE=y
+CONFIG_DRM_FBDEV_EMULATION=y
+CONFIG_DRM_LOAD_EDID_FIRMWARE=y
+
+# ─── Audio ────────────────────────────────────────────────────────────
+CONFIG_SOUND=y
+CONFIG_SND=y
+CONFIG_SND_HDA_INTEL=y
+CONFIG_SND_HDA_HWDEP=y
+CONFIG_SND_HDA_RECONFIG=y
+CONFIG_SND_HDA_PATCH_LOADER=y
+CONFIG_SND_HDA_CODEC_REALTEK=y
+CONFIG_SND_HDA_CODEC_HDMI=y
+CONFIG_SND_SOC=y
+CONFIG_SND_SOC_SOF=y
+
+# ─── Input / Controllers ──────────────────────────────────────────────
+CONFIG_INPUT_JOYSTICK=y
+CONFIG_INPUT_TABLET=y
+CONFIG_INPUT_TOUCHSCREEN=y
+CONFIG_JOYSTICK_XPAD=y
+CONFIG_JOYSTICK_PSXPAD_SPI=y
+CONFIG_INPUT_UINPUT=y
+CONFIG_HID_STEAM=y
+CONFIG_HID_SONY=y
+CONFIG_HID_NINTENDO=y
+CONFIG_HID_GENERIC=y
+
+# ─── Networking ───────────────────────────────────────────────────────
+CONFIG_NET=y
+CONFIG_INET=y
+CONFIG_IPV6=y
+CONFIG_TCP_CONG_BBR=y
+CONFIG_DEFAULT_BBR=y
+CONFIG_NET_SCHED=y
+CONFIG_NET_SCH_FQ=y
+CONFIG_NET_SCH_FQ_CODEL=y
+
+# ─── Security ─────────────────────────────────────────────────────────
+CONFIG_SECURITY=y
+CONFIG_SECURITY_SELINUX=y
+CONFIG_DEFAULT_SECURITY_SELINUX=y
+CONFIG_SECURITY_APPARMOR=y
+CONFIG_SECURITY_YAMA=y
+CONFIG_LSM="landlock,lockdown,yama,integrity,selinux,bpf"
+CONFIG_DM_CRYPT=y
+CONFIG_DM_VERITY=y
+CONFIG_CRYPTO_USER_API=y
+
+# ─── Hardware Support ─────────────────────────────────────────────────
+CONFIG_ACPI=y
+CONFIG_HWMON=y
+CONFIG_THERMAL=y
+CONFIG_CPU_FREQ_THERMAL=y
+CONFIG_SENSORS_CORETEMP=y
+CONFIG_SENSORS_NCT6775=y
+CONFIG_SENSORS_IT87=y
+CONFIG_SENSORS_K10TEMP=y
+CONFIG_WATCHDOG=y
+
+# ─── USB ──────────────────────────────────────────────────────────────
+CONFIG_USB=y
+CONFIG_USB_XHCI_HCD=y
+CONFIG_USB_EHCI_HCD=y
+CONFIG_USB_OHCI_HCD=y
+CONFIG_USB_STORAGE=y
+CONFIG_USB_SERIAL=y
+
+# ─── Thunderbolt ──────────────────────────────────────────────────────
+CONFIG_THUNDERBOLT=y
+CONFIG_USB4=y
+
+# ─── LED / RGB ────────────────────────────────────────────────────────
+CONFIG_LEDS_CLASS=y
+CONFIG_LEDS_TRIGGER_TIMER=y
+CONFIG_LEDS_TRIGGER_HEARTBEAT=y
+
+# ─── Power Management ─────────────────────────────────────────────────
+CONFIG_PM=y
+CONFIG_PM_SLEEP=y
+CONFIG_HIBERNATION=y
+CONFIG_ACPI_AC=y
+CONFIG_ACPI_BATTERY=y
+CONFIG_ACPI_BUTTON=y
+CONFIG_ACPI_FAN=y
+CONFIG_ACPI_THERMAL=y
+CONFIG_POWER_SUPPLY=y
+CONFIG_CHARGER=y
+
+# ─── Containers ───────────────────────────────────────────────────────
+CONFIG_CGROUPS=y
+CONFIG_CGROUP_BPF=y
+CONFIG_NAMESPACES=y
+CONFIG_USER_NS=y
+CONFIG_PID_NS=y
+CONFIG_NET_NS=y
+CONFIG_OVERLAY_FS=y
+
+# ─── Virtualization ───────────────────────────────────────────────────
+CONFIG_KVM=y
+CONFIG_KVM_INTEL=y
+CONFIG_KVM_AMD=y
+CONFIG_VHOST_NET=y
+
+# ─── Firmware ─────────────────────────────────────────────────────────
+CONFIG_FW_LOADER=y
+CONFIG_FW_LOADER_USER_HELPER=y
+
+# ─── Compiler Optimizations ───────────────────────────────────────────
+CONFIG_LTO=y
+CONFIG_LTO_GCC=y
+CONFIG_CC_OPTIMIZE_FOR_PERFORMANCE_O3=y
+CONFIG_X86_X2APIC=y
+CONFIG_X86_POSTED_MSI=y

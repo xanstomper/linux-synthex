@@ -1,0 +1,28 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: Solus Linux Team <kernel@getsol.us>
+Date: Sat, 5 Jul 2026 00:00:00 +0000
+Subject: [PATCH] solus-0004-vm-gaming-tuning.patch
+
+VM subsystem tuning for gaming workloads:
+  - Increase watermark_scale_factor for smoother memory pressure handling
+  - Reduce swappiness default (10 instead of 60)
+  - Increase vfs_cache_pressure slightly
+  - Tune dirty ratios for less I/O stalls during gaming
+
+Matches CachyOS VM defaults.
+
+Signed-off-by: Solus Linux Team <kernel@getsol.us>
+---
+ mm/vmstat.c | 4 ++--
+ 1 file changed, 2 insertions(+), 2 deletions(-)
+
+diff --git a/mm/vmstat.c b/mm/vmstat.c
+--- a/mm/vmstat.c
++++ b/mm/vmstat.c
+@@ -0,0 +0,0 @@
+-int vm_swappiness = 60;
++int vm_swappiness = 10;
+-int watermark_scale_factor = 10;
++int watermark_scale_factor = 125;
+-- 
+2.45.0

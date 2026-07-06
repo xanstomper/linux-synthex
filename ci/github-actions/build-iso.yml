@@ -1,0 +1,227 @@
+# ============================================================================
+# Solus Linux — ISO Build Workflow
+# ============================================================================
+# Builds all ISO variants (minimal, standard, full, netinstall) in
+# containerized environments. Runs after packages are built and signed.
+# ============================================================================
+
+name: Build ISO
+
+on:
+  workflow_call:
+    inputs:
+      release_version:
+        description: "Release version (e.g., 2026.1)"
+        required: true
+        type: string
+      variant_matrix:
+        description: "JSON list of variants to build"
+        required: false
+        type: string
+        default: '["minimal", "standard", "full", "netinstall"]'
+      arch_matrix:
+        description: "JSON list of architectures to build for"
+        required: false
+        type: string
+        default: '["x86_64-v3", "x86_64-v4"]'
+  workflow_dispatch:
+    inputs:
+      release_version:
+        description: "Release version (e.g., 2026.1)"
+        required: true
+        type: string
+      variant_matrix:
+        description: "JSON list of variants to build"
+        required: false
+        type: string
+        default: '["minimal", "standard", "full", "netinstall"]'
+      arch_matrix:
+        description: "JSON list of architectures to build for"
+        required: false
+        type: string
+        default: '["x86_64-v3", "x86_64-v4"]'
+  push:
+    tags:
+      - 'v*.*.*'
+
+env:
+  REGISTRY: ghcr.io
+  IMAGE_NAME: solus-linux/iso-builder
+  KICKSTART_DIR: kickstart
+  OUTPUT_DIR: output
+  REPO_BASE: https://repo.solus.org
+
+jobs:
+  ############################################################################
+  # PREPARE: Resolve build matrix
+  ############################################################################
+  prepare:
+    runs-on: ubuntu-latest
+    outputs:
+      variants: ${{ steps.set-matrix.outputs.variants }}
+      arches: ${{ steps.set-matrix.outputs.arches }}
+      version: ${{ steps.set-version.outputs.version }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Resolve version from tag
+        id: set-version
+        run: |
+          if [[ "${{ github.ref_type }}" == "tag" ]]; then
+            TAG="${{ github.ref_name }}"
+            VERSION="${TAG#v}"
+            echo "version=${VERSION}" >> "$GITHUB_OUTPUT"
+          elif [[ -n "${{ inputs.release_version }}" ]]; then
+            echo "version=${{ inputs.release_version }}" >> "$GITHUB_OUTPUT"
+          else
+            echo "version=nightly-$(date +%Y%m%d)" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Set build matrix
+        id: set-matrix
+        run: |
+          VARIANTS='${{ inputs.variant_matrix }}'
+          ARCHES='${{ inputs.arch_matrix }}'
+          echo "variants=${VARIANTS}" >> "$GITHUB_OUTPUT"
+          echo "arches=${ARCHES}" >> "$GITHUB_OUTPUT"
+
+  ############################################################################
+  # BUILD: ISO generation for each variant × architecture
+  ############################################################################
+  build:
+    needs: prepare
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        variant: ${{ fromJSON(needs.prepare.outputs.variants) }}
+        arch: ${{ fromJSON(needs.prepare.outputs.arches) }}
+
+    container:
+      image: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ github.sha }}
+      options: --privileged  # Required for livecd-creator (mount, loop)
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Generate kickstart configuration
+        run: |
+          KICKSTART="${KICKSTART_DIR}/solus-${variant}.ks"
+          if [[ ! -f "${KICKSTART}" ]]; then
+            echo "Kickstart not found: ${KICKSTART}"
+            exit 1
+          fi
+
+          # Inject repository URL and version
+          sed -i \
+            -e "s|@REPO_BASE@|${REPO_BASE}|g" \
+            -e "s|@VERSION@|${VERSION}|g" \
+            -e "s|@ARCH@|${ARCH}|g" \
+            "${KICKSTART}"
+        env:
+          variant: ${{ matrix.variant }}
+          arch: ${{ matrix.arch }}
+          VERSION: ${{ needs.prepare.outputs.version }}
+
+      - name: Build ISO
+        run: |
+          mkdir -p "${OUTPUT_DIR}"
+
+          livecd-creator \
+            --config="${KICKSTART_DIR}/solus-${variant}.ks" \
+            --cache=/var/cache/livecd \
+            --title="Solus Linux ${{ matrix.variant }}" \
+            --releasever="${{ needs.prepare.outputs.version }}" \
+            --compression=xz \
+            --keepcache
+
+          # Rename and move output
+          mv *.iso "${OUTPUT_DIR}/solus-linux-${{ needs.prepare.outputs.version }}-${{ matrix.variant }}-${{ matrix.arch }}.iso"
+        env:
+          variant: ${{ matrix.variant }}
+          arch: ${{ matrix.arch }}
+
+      - name: Generate checksums
+        run: |
+          cd "${OUTPUT_DIR}"
+          ISO="solus-linux-${{ needs.prepare.outputs.version }}-${{ matrix.variant }}-${{ matrix.arch }}.iso"
+          sha256sum "${ISO}" > "${ISO}.sha256"
+          sha512sum "${ISO}" > "${ISO}.sha512"
+          b2sum "${ISO}" > "${ISO}.b2"
+
+      - name: Upload ISO artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: iso-${{ matrix.variant }}-${{ matrix.arch }}
+          path: ${{ env.OUTPUT_DIR }}/
+          retention-days: 90
+
+      - name: Upload build logs
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: logs-${{ matrix.variant }}-${{ matrix.arch }}
+          path: /var/log/livecd-creator/
+          retention-days: 30
+
+  ############################################################################
+  # SIGN: GPG-sign all generated ISOs
+  ############################################################################
+  sign:
+    needs: build
+    runs-on: ubuntu-latest
+    if: github.ref_type == 'tag'
+
+    steps:
+      - name: Download all ISO artifacts
+        uses: actions/download-artifact@v4
+        with:
+          pattern: iso-*
+          merge-multiple: true
+          path: iso-artifacts
+
+      - name: Import signing key
+        run: |
+          # Key is stored as a GitHub Actions secret (base64-encoded)
+          echo "${{ secrets.SOLUS_ISO_SIGNING_KEY }}" | base64 -d | gpg --import
+          echo "${{ secrets.SOLUS_ISO_SIGNING_KEY_PASSPHRASE }}" | gpg --passphrase-fd 0 \
+            --batch --yes \
+            --default-key "Solus ISO <iso@solus.org>" \
+            --detach-sign --armor \
+            iso-artifacts/*.iso
+
+      - name: Upload signed artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: signed-iso
+          path: iso-artifacts/
+          retention-days: 90
+
+  ############################################################################
+  # NOTIFY: Post build results
+  ############################################################################
+  notify:
+    needs: [build, sign]
+    runs-on: ubuntu-latest
+    if: always()
+
+    steps:
+      - name: Notify build status
+        uses: slackapi/slack-github-action@v1.24.0
+        with:
+          payload: |
+            {
+              "text": "ISO Build Complete: ${{ needs.prepare.outputs.version }} (${{ github.workflow }} #${{ github.run_number }})",
+              "blocks": [
+                {
+                  "type": "section",
+                  "text": {
+                    "type": "mrkdwn",
+                    "text": "*ISO Build Complete*\n• Version: `${{ needs.prepare.outputs.version }}`\n• Status: `${{ needs.build.result }}`\n• Run: <${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}|#${{ github.run_number }}>"
+                  }
+                }
+              ]
+            }
+        env:
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+          SLACK_WEBHOOK_TYPE: INCOMING_WEBHOOK

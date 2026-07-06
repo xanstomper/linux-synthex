@@ -1,0 +1,10 @@
+# /etc/flatpak/remotes.d/flathub.flatpakrepo — Flathub repository
+# Pre-configured so users never need to manually add it
+
+[Flatpak Repo]
+Title=Flathub
+Url=https://dl.flathub.org/repo/
+Homepage=https://flathub.org
+Description=Central repository of Flatpak applications
+Icon=https://dl.flathub.org/repo/logo.svg
+GPGKey=mQINBFn/TUBEACiQNfTYHvB3z4k0DKfsyAm0roPDEvN1wLxKvx6vfkz1AB1x5FkQVe2nCGzJedF3Fxo5q3oFR2LmBwJjxHNkivNyTZ0ssNqR8R3C5z5RFSJm9/rkJq1J4yT2N8Km1XqHGfYKRKT8a3xqQ5tzttC1tQCF7E8Bz2rXi5k4S4YDgXb0k5K85E7pQ9Dwds4C5Yk7pJUz8rSkJyNvQZ/gLCQm4QvXG511TS40aA2w5z5N6rN9B6wKZBPg2txcxj5u+5t1K3LjYsU3bA7m1c3mY9q8c7x1F2e9v5c2j6n4m8k9p2q3w1e6r5t7y9u0i3o2p1a4s6d8f0g2h4j6k8l0

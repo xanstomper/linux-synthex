@@ -1,0 +1,7 @@
+# /etc/flatpak/system-flatpakrepo — Solus flatpak system defaults
+
+[Flatpak Repo]
+Title=Solus Flatpak
+Url=https://repo.getsol.us/flatpak/
+Homepage=https://getsol.us
+Description=Solus Linux Flatpak repository

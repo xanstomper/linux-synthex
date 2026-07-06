@@ -1,0 +1,14 @@
+[Desktop Entry]
+Type=Service
+Name=Solus Updates
+Comment=Check for system updates, schedule maintenance
+Icon=system-software-update
+Exec=/usr/bin/solus-control-center --page updates
+X-KDE-ServiceTypes=KCModule
+X-KDE-ParentApp=kcm_shell
+X-KDE-ParentComponents=SolusUpdates
+X-KDE-Library=kcm_shell
+X-KDE-FactoryName=solus-updates
+X-KDE-ParentWidget=true
+Categories=Qt;KDE;System;Settings;
+OnlyShowIn=KDE;

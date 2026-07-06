@@ -1,0 +1,24 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="3840" height="2160" viewBox="0 0 3840 2160">
+  <defs>
+    <linearGradient id="bg" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" style="stop-color:#3D5A3D"/>
+      <stop offset="40%" style="stop-color:#4A6B4A"/>
+      <stop offset="100%" style="stop-color:#2D4A2D"/>
+    </linearGradient>
+    <radialGradient id="glow" cx="50%" cy="30%" r="60%">
+      <stop offset="0%" style="stop-color:#9BBD5C;stop-opacity:0.06"/>
+      <stop offset="100%" style="stop-color:#9BBD5C;stop-opacity:0"/>
+    </radialGradient>
+  </defs>
+  <rect width="3840" height="2160" fill="url(#bg)"/>
+  <rect width="3840" height="2160" fill="url(#glow)"/>
+  <!-- Subtle leaf-like pattern -->
+  <g fill="none" stroke="#9BBD5C" stroke-width="1" opacity="0.03">
+    <ellipse cx="600" cy="400" rx="200" ry="100" transform="rotate(-30,600,400)"/>
+    <ellipse cx="3240" cy="400" rx="200" ry="100" transform="rotate(30,3240,400)"/>
+    <ellipse cx="1200" cy="600" rx="150" ry="75" transform="rotate(-20,1200,600)"/>
+    <ellipse cx="2640" cy="600" rx="150" ry="75" transform="rotate(20,2640,600)"/>
+  </g>
+  <!-- Light beam from top -->
+  <polygon points="1520,0 2320,0 2100,1080 1740,1080" fill="#FFFFFF" opacity="0.015"/>
+</svg>

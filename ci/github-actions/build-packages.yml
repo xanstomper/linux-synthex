@@ -1,0 +1,337 @@
+# ============================================================================
+# Solus Linux — Package Build Workflow
+# ============================================================================
+# Builds RPM packages from spec files using Copr build service or direct
+# mock chroots. Handles dependency ordering, parallel builds, and
+# reverse-dependency rebuilds.
+# ============================================================================
+
+name: Build Packages
+
+on:
+  workflow_call:
+    inputs:
+      packages:
+        description: "JSON list of packages to build (or 'all')"
+        required: false
+        type: string
+        default: '[]'
+      arch:
+        description: "Target architecture"
+        required: false
+        type: string
+        default: 'x86_64-v3'
+      chroot:
+        description: "Mock chroot profile"
+        required: false
+        type: string
+        default: 'solus-rawhide-x86_64-v3'
+      rebuild_reverse_deps:
+        description: "Rebuild reverse dependencies"
+        required: false
+        type: boolean
+        default: false
+  workflow_dispatch:
+    inputs:
+      packages:
+        description: "Packages to build (space-separated, or 'all')"
+        required: false
+        type: string
+        default: ''
+      arch:
+        description: "Target architecture"
+        required: false
+        type: choice
+        options:
+          - x86_64-v3
+          - x86_64-v4
+          - aarch64
+        default: x86_64-v3
+      rebuild_reverse_deps:
+        description: "Rebuild reverse dependencies"
+        required: false
+        type: boolean
+        default: false
+  push:
+    branches:
+      - develop
+    paths:
+      - 'packages/**/*.spec'
+      - 'packages/**/*.patch'
+      - 'packages/**/*.tar.*'
+  pull_request:
+    paths:
+      - 'packages/**/*.spec'
+      - 'packages/**/*.patch'
+
+env:
+  MOCK_CONFIG: /etc/mock
+  RPMBUILD_DIR: /tmp/rpmbuild
+  REPO_SERVER: https://repo.solus.org
+
+jobs:
+  ############################################################################
+  # LINT: Validate spec files and patches
+  ############################################################################
+  lint:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install linting tools
+        run: |
+          dnf install -y rpmlint ShellCheck
+
+      - name: Run rpmlint on changed specs
+        run: |
+          CHANGED_SPECS=$(git diff --name-only origin/develop...HEAD -- '*.spec' || echo "")
+          if [[ -z "${CHANGED_SPECS}" ]]; then
+            CHANGED_SPECS=$(find packages -name '*.spec')
+          fi
+          for spec in ${CHANGED_SPECS}; do
+            echo "=== Linting: ${spec} ==="
+            rpmlint "${spec}"
+          done
+
+      - name: Validate patch files
+        run: |
+          CHANGED_PATCHES=$(git diff --name-only origin/develop...HEAD -- '*.patch' || echo "")
+          for patch in ${CHANGED_PATCHES}; do
+            if ! git apply --check /dev/null "${patch}" 2>/dev/null; then
+              echo "Patch does not apply cleanly: ${patch}"
+              exit 1
+            fi
+          done
+
+  ############################################################################
+  # RESOLVE: Determine build order and dependencies
+  ############################################################################
+  resolve:
+    needs: lint
+    runs-on: ubuntu-latest
+    outputs:
+      build_order: ${{ steps.build-order.outputs.order }}
+      package_list: ${{ steps.packages.outputs.list }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Determine packages to build
+        id: packages
+        run: |
+          if [[ "${{ github.event_name }}" == "pull_request" ]]; then
+            # For PRs, only build changed packages and their reverse deps
+            CHANGED=$(git diff --name-only origin/develop...HEAD -- 'packages/*/' | \
+              sed 's|packages/\([^/]*\)/.*|\1|' | sort -u | jq -R -s -c 'split("\n")[:-1]')
+            echo "list=${CHANGED}" >> "$GITHUB_OUTPUT"
+          elif [[ -n "${{ inputs.packages }}" && "${{ inputs.packages }}" != "[]" ]]; then
+            echo "list=${{ inputs.packages }}" >> "$GITHUB_OUTPUT"
+          else
+            # Full rebuild: build all packages
+            ALL=$(find packages -maxdepth 2 -name '*.spec' -exec basename {} .spec \; | \
+              sort -u | jq -R -s -c 'split("\n")[:-1]')
+            echo "list=${ALL}" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Resolve build order
+        id: build-order
+        run: |
+          PACKAGES='${{ steps.packages.outputs.list }}'
+          # Topological sort based on BuildRequires
+          python3 - << 'PYEOF'
+          import json, sys
+          packages = json.loads(sys.argv[1])
+          # Simplified topological sort — in production, parse spec BuildRequires
+          print(f"order={json.dumps(sorted(packages))}")
+          PYEOF
+          "${PACKAGES}"
+
+  ############################################################################
+  # BUILD SRPMS: Build source RPMs
+  ############################################################################
+  build-srpm:
+    needs: resolve
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        package: ${{ fromJSON(needs.resolve.outputs.package_list) }}
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install build dependencies
+        run: |
+          dnf install -y rpm-build mock make automake gcc gcc-c++
+
+      - name: Setup build environment
+        run: |
+          mkdir -p "${RPMBUILD_DIR}"/{SPECS,SOURCES,SRPMS,RPMS,BUILD}
+          # Link spec and sources
+          SPEC_PATH=$(find packages -maxdepth 2 -name '${{ matrix.package }}.spec' | head -1)
+          if [[ -z "${SPEC_PATH}" ]]; then
+            echo "Spec not found for package: ${{ matrix.package }}"
+            exit 1
+          fi
+          cp "${SPEC_PATH}" "${RPMBUILD_DIR}/SPECS/"
+          # Copy source tarballs and patches
+          PKG_DIR=$(dirname "${SPEC_PATH}")
+          if [[ -d "${PKG_DIR}/sources" ]]; then
+            cp "${PKG_DIR}/sources/"* "${RPMBUILD_DIR}/SOURCES/" 2>/dev/null || true
+          fi
+          if [[ -d "${PKG_DIR}/patches" ]]; then
+            cp "${PKG_DIR}/patches/"* "${RPMBUILD_DIR}/SOURCES/" 2>/dev/null || true
+          fi
+
+      - name: Download upstream sources
+        run: |
+          cd "${RPMBUILD_DIR}/SOURCES"
+          spectool -g -R "${RPMBUILD_DIR}/SPECS/${{ matrix.package }}.spec" || true
+
+      - name: Build source RPM
+        run: |
+          rpmbuild -bs \
+            --define "_topdir ${RPMBUILD_DIR}" \
+            --define "_sourcedir ${RPMBUILD_DIR}/SOURCES" \
+            --define "_specdir ${RPMBUILD_DIR}/SPECS" \
+            "${RPMBUILD_DIR}/SPECS/${{ matrix.package }}.spec"
+
+      - name: Upload SRPM
+        uses: actions/upload-artifact@v4
+        with:
+          name: srpm-${{ matrix.package }}
+          path: ${{ env.RPMBUILD_DIR }}/SRPMS/
+          retention-days: 14
+
+  ############################################################################
+  # BUILD RPMS: Build binary RPMs in mock chroot
+  ############################################################################
+  build-rpm:
+    needs: build-srpm
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        package: ${{ fromJSON(needs.resolve.outputs.package_list) }}
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Download SRPM
+        uses: actions/download-artifact@v4
+        with:
+          name: srpm-${{ matrix.package }}
+          path: srpms
+
+      - name: Configure mock
+        run: |
+          dnf install -y mock
+          usermod -aG mock $(whoami)
+
+          # Write mock config
+          cat > "${MOCK_CONFIG}/solus-rawhide-${{ inputs.arch }}.cfg" << 'MOCKCFG'
+          config_opts['root'] = 'solus-rawhide-${{ inputs.arch }}'
+          config_opts['target_arch'] = 'x86_64'
+          config_opts['chroot_setup_cmd'] = 'install @buildsys-build'
+          config_opts['macros']['%vendor'] = 'Solus Linux'
+          config_opts['macros']['%dist'] = '.solus'
+          config_opts['yum.conf'] = """
+          [main]
+          cachedir=/var/cache/mock
+          debuglevel=1
+          reposdir=/dev/null
+          logfile=/var/log/mock.log
+
+          [solus-rawhide]
+          name=Solus $arch rawhide
+          baseurl=${{ env.REPO_SERVER }}/rawhide/${{ inputs.arch }}
+          enabled=1
+          gpgcheck=1
+          """
+          MOCKCFG
+
+      - name: Build binary RPMs
+        run: |
+          SRPM=$(ls srpms/*.src.rpm | head -1)
+          if [[ -z "${SRPM}" ]]; then
+            echo "No SRPM found for ${{ matrix.package }}"
+            exit 1
+          fi
+
+          mock \
+            --root="solus-rawhide-${{ inputs.arch }}" \
+            --resultdir="${RPMBUILD_DIR}/results" \
+            --rebuild "${SRPM}"
+
+      - name: Sign RPMs
+        if: github.ref_type == 'tag' || github.ref_name == 'main'
+        run: |
+          echo "${{ secrets.SOLUS_RELEASE_KEY_PASSPHRASE }}" | \
+            rpm --addsign \
+              --define "_gpg_name Solus Release Key" \
+              --passphrase-fd 0 \
+              ${RPMBUILD_DIR}/results/*.rpm
+
+      - name: Upload RPMs
+        uses: actions/upload-artifact@v4
+        with:
+          name: rpms-${{ matrix.package }}-${{ inputs.arch }}
+          path: ${{ env.RPMBUILD_DIR }}/results/*.rpm
+          retention-days: 90
+
+      - name: Upload build logs
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: build-log-${{ matrix.package }}
+          path: /var/lib/mock/solus-rawhide-${{ inputs.arch }}/result/build.log
+          retention-days: 30
+
+  ############################################################################
+  # UPDATE REPO: Sync built packages to repository
+  ############################################################################
+  update-repo:
+    needs: build-rpm
+    runs-on: ubuntu-latest
+    if: github.ref_type == 'tag' || github.ref_name == 'main'
+
+    steps:
+      - name: Download all RPMs
+        uses: actions/download-artifact@v4
+        with:
+          pattern: rpms-*
+          merge-multiple: true
+          path: rpms-to-publish
+
+      - name: Install repository tools
+        run: |
+          dnf install -y createrepo_c
+
+      - name: Create/update repository
+        run: |
+          REPO_DIR="/repo/solus/rawhide/${{ inputs.arch }}"
+          mkdir -p "${REPO_DIR}/Packages"
+
+          # Move RPMs to package pool
+          find rpms-to-publish -name '*.rpm' -exec cp -n {} "${REPO_DIR}/Packages/" \;
+
+          # Generate metadata
+          createrepo_c \
+            --update \
+            --workers=$(nproc) \
+            --compress-type=zstd \
+            --revision="$(date +%Y%m%d%H%M%S)" \
+            "${REPO_DIR}"
+
+          # Sign repomd.xml
+          echo "${{ secrets.SOLUS_REPO_KEY_PASSPHRASE }}" | \
+            gpg --batch --yes --passphrase-fd 0 \
+              --default-key "Solus Repo <repo@solus.org>" \
+              --detach-sign --armor \
+              "${REPO_DIR}/repodata/repomd.xml"
+
+      - name: Sync to mirror origin
+        run: |
+          # Rsync to primary repository server
+          rsync -avz --delete-delay \
+            /repo/solus/ \
+            repo@repo.solus.org:/repo/solus/

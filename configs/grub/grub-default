@@ -1,0 +1,40 @@
+# /etc/default/grub — Solus GRUB defaults
+
+GRUB_TIMEOUT=5
+GRUB_DISTRIBUTOR="Solus Linux"
+GRUB_DEFAULT=saved
+GRUB_DISABLE_SUBMENU=true
+GRUB_TERMINAL_OUTPUT="gfxterm"
+
+# Kernel command line
+GRUB_CMDLINE_LINUX="quiet splash rd.driver.blacklist=nouveau modprobe.blacklist=nouveau rhgb"
+
+# Enable cryptodisk support
+GRUB_ENABLE_CRYPTODISK=y
+
+# Recovery entry
+GRUB_DISABLE_RECOVERY=false
+
+# Save default
+GRUB_SAVEDEFAULT=true
+
+# Graphics
+GRUB_GFXMODE=auto
+GRUB_GFXPAYLOAD_LINUX=keep
+GRUB_VIDEO_BACKEND=modetest
+
+# Font
+GRUB_FONT=/usr/share/grub/fonts/inter-regular-16.pf2
+
+# Theme
+GRUB_THEME="/usr/share/grub/themes/solus/theme.txt"
+
+# Background
+GRUB_BACKGROUND="/usr/share/grub/themes/solus/background.png"
+
+# Hidden menu (show for 3 seconds on boot)
+GRUB_HIDDEN_TIMEOUT=0
+GRUB_HIDDEN_TIMEOUT_QUIET=true
+
+# Record fail
+GRUB_RECORDFAIL_TIMEOUT=10

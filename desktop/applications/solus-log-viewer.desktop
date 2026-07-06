@@ -1,0 +1,12 @@
+[Desktop Entry]
+Type=Application
+Name=Log Viewer
+Name[de]=Protokollbetrachter
+Comment=View and search system logs
+Comment[de]=Systemprotokolle ansehen und durchsuchen
+Exec=konsole -e solus-log-viewer errors
+Icon=preferences-system-log
+Terminal=true
+Categories=System;Settings;
+StartupNotify=true
+Keywords=log;journal;systemd;debug;error;

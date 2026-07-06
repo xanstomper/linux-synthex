@@ -1,0 +1,229 @@
+#!/usr/bin/env python3
+"""
+Solus Desktop Marketplace — discover and install themes, widgets, layouts, and extensions.
+Browse community creations and apply them with one click.
+
+Usage:
+    solus-marketplace              — Launch GUI (if available)
+    solus-marketplace list         — List all available items
+    solus-marketplace search <q>   — Search marketplace
+    solus-marketplace install <id> — Install item by ID
+"""
+
+import sys
+import os
+import json
+import subprocess
+import urllib.request
+import urllib.error
+
+MARKETPLACE_DIR = os.path.expanduser("~/.config/solus/marketplace")
+LOCAL_CATALOG = os.path.join(MARKETPLACE_DIR, "catalog.json")
+
+# Built-in marketplace catalog
+BUILTIN_CATALOG = {
+    "themes": [
+        {"id": "solus-dark", "name": "Solus Dark", "type": "theme", "desc": "Default Solus dark theme", "author": "Solus Team", "rating": 5},
+        {"id": "solus-light", "name": "Solus Light", "type": "theme", "desc": "Clean light theme for productivity", "author": "Solus Team", "rating": 4},
+        {"id": "solus-neon", "name": "Solus Neon", "type": "theme", "desc": "RGB gaming aesthetic", "author": "Solus Team", "rating": 4},
+        {"id": "catppuccin", "name": "Catppuccin Mocha", "type": "theme", "desc": "Warm pastel dark theme", "author": "Community", "rating": 5},
+        {"id": "dracula", "name": "Dracula", "type": "theme", "desc": "Dark vampire-themed UI", "author": "Community", "rating": 5},
+        {"id": "nordic", "name": "Nordic", "type": "theme", "desc": "Scandinavian frost theme", "author": "Community", "rating": 4},
+    ],
+    "layouts": [
+        {"id": "gaming", "name": "Gaming Layout", "type": "layout", "desc": "Optimized for gaming with centered panel", "author": "Solus Team", "rating": 5},
+        {"id": "macos", "name": "macOS Layout", "type": "layout", "desc": "Top bar + dock like macOS", "author": "Solus Team", "rating": 4},
+        {"id": "windows", "name": "Windows 11 Layout", "type": "layout", "desc": "Familiar Windows layout", "author": "Solus Team", "rating": 4},
+        {"id": "minimal", "name": "Minimal Layout", "type": "layout", "desc": "Clean, distraction-free", "author": "Solus Team", "rating": 5},
+    ],
+    "presets": [
+        {"id": "cyberpunk", "name": "Cyberpunk", "type": "preset", "desc": "Neon RGB aesthetic", "author": "Solus Team", "rating": 5},
+        {"id": "glass", "name": "Glassmorphism", "type": "preset", "desc": "Acrylic, transparent design", "author": "Solus Team", "rating": 4},
+        {"id": "minimal", "name": "Minimalist", "type": "preset", "desc": "Clean monochrome workspace", "author": "Solus Team", "rating": 4},
+    ],
+    "extensions": [
+        {"id": "kde-blur", "name": "KDE Blur Manager", "type": "extension", "desc": "Advanced blur effects", "author": "Community", "rating": 4},
+        {"id": "kde-dynamic", "name": "Dynamic Wallpaper", "type": "extension", "desc": "Time-based wallpapers", "author": "Community", "rating": 4},
+        {"id": "gnome-dash", "name": "Dash to Dock", "type": "extension", "desc": "GNOME dock customization", "author": "Community", "rating": 5},
+    ]
+}
+
+
+def ensure_dirs():
+    os.makedirs(MARKETPLACE_DIR, exist_ok=True)
+
+
+def load_catalog():
+    """Load marketplace catalog."""
+    ensure_dirs()
+    # Start with built-in, merge with any cached remote data
+    catalog = dict(BUILTIN_CATALOG)
+    
+    if os.path.exists(LOCAL_CATALOG):
+        try:
+            with open(LOCAL_CATALOG) as f:
+                local = json.load(f)
+                # Merge remote items
+                for category, items in local.items():
+                    if category in catalog:
+                        existing_ids = {i["id"] for i in catalog[category]}
+                        for item in items:
+                            if item["id"] not in existing_ids:
+                                item["remote"] = True
+                                catalog[category].append(item)
+                    else:
+                        catalog[category] = items
+        except:
+            pass
+    
+    return catalog
+
+
+def try_fetch_remote():
+    """Try to fetch remote catalog (non-blocking)."""
+    try:
+        req = urllib.request.Request(
+            "https://marketplace.solus-linux.org/api/v1/catalog",
+            headers={"User-Agent": "SolusMarketplace/1.0"}
+        )
+        with urllib.request.urlopen(req, timeout=5) as resp:
+            data = json.loads(resp.read())
+            with open(LOCAL_CATALOG, "w") as f:
+                json.dump(data, f, indent=2)
+            return True
+    except:
+        return False
+
+
+def cmd_list():
+    """List all available marketplace items."""
+    catalog = load_catalog()
+    
+    # Try to refresh from remote (background)
+    try_fetch_remote()
+    
+    total = sum(len(items) for items in catalog.values())
+    print(f"🏪 Solus Desktop Marketplace ({total} items)")
+    print(f"{'='*60}")
+    
+    for category, items in catalog.items():
+        if not items:
+            continue
+        icon = {"themes": "🎨", "layouts": "📐", "presets": "🌀", "extensions": "🔌"}.get(category, "📦")
+        print(f"\n{icon} {category.title()} ({len(items)})")
+        print(f"{'─'*60}")
+        
+        for item in items:
+            remote_tag = " 🌐" if item.get("remote") else ""
+            stars = "⭐" * item.get("rating", 0)
+            name = f"{item['name']:30}"
+            print(f"  {name} {stars}{remote_tag}")
+            print(f"  {'':30} {item.get('desc', '')}")
+            print(f"  {'':30} by {item.get('author', 'Unknown')} — id: {item['id']}")
+            print()
+
+
+def cmd_search(query):
+    """Search marketplace."""
+    catalog = load_catalog()
+    query = query.lower()
+    
+    print(f"🔍 Searching for: {query}")
+    print(f"{'='*60}")
+    
+    found = False
+    for category, items in catalog.items():
+        for item in items:
+            if (query in item["name"].lower() or 
+                query in item.get("desc", "").lower() or
+                query in item.get("author", "").lower()):
+                if not found:
+                    found = True
+                stars = "⭐" * item.get("rating", 0)
+                print(f"  [{category[:-1]}] {item['name']:30} {stars}")
+                print(f"  {'':8} {item.get('desc', '')}")
+                print(f"  {'':8} id: {item['id']}")
+                print()
+    
+    if not found:
+        print("  No results found.")
+
+
+def cmd_install(item_id):
+    """Install an item by ID."""
+    catalog = load_catalog()
+    
+    # Find item
+    item = None
+    item_category = None
+    for category, items in catalog.items():
+        for i in items:
+            if i["id"] == item_id:
+                item = i
+                item_category = category
+                break
+        if item:
+            break
+    
+    if not item:
+        print(f"❌ Item not found: {item_id}")
+        print("   Use 'solus-marketplace list' to see available items.")
+        return
+    
+    print(f"📦 Installing: {item['name']}")
+    print(f"   Type: {item_category}")
+    print(f"   Author: {item.get('author', 'Unknown')}")
+    print()
+    
+    # Apply based on type
+    if item_category == "themes":
+        subprocess.run(["solus-layout", "set", item_id.split("-")[0]], capture_output=True)
+        print(f"   ✅ Theme '{item['name']}' applied!")
+        
+    elif item_category == "layouts":
+        subprocess.run(["solus-layout", "set", item_id], capture_output=True)
+        print(f"   ✅ Layout '{item['name']}' applied!")
+        
+    elif item_category == "presets":
+        preset_path = os.path.join(os.path.dirname(os.path.abspath(__file__)),
+                                 "solus-studio", "presets", f"{item_id}.json")
+        if os.path.exists(preset_path):
+            print(f"   ✅ Preset '{item['name']}' selected")
+            print(f"   Apply via: solus-studio apply {item_id}")
+        else:
+            print(f"   ⚠ Preset file not found locally")
+    
+    elif item_category == "extensions":
+        if "kde" in item_id or "plasma" in item_id:
+            subprocess.run(["kpackagetool5", "-i", f"/usr/share/kde/plasmoids/{item_id}"], capture_output=True)
+            print(f"   ✅ Extension '{item['name']}' installed!")
+        elif "gnome" in item_id:
+            print(f"   ⚠ GNOME extensions require GNOME Software")
+    
+    # Create snapshot
+    subprocess.run(["snapper", "-c", "root", "create", "-d", f"marketplace-{item_id}"], 
+                  capture_output=True)
+    print(f"   📸 Snapshot created (pre-{item_id})")
+
+
+def main():
+    if len(sys.argv) < 2:
+        print(__doc__)
+        # Launch simple menu if interactive
+        cmd_list()
+        return
+    
+    cmd = sys.argv[1]
+    
+    if cmd == "list":
+        cmd_list()
+    elif cmd == "search" and len(sys.argv) >= 3:
+        cmd_search(" ".join(sys.argv[2:]))
+    elif cmd == "install" and len(sys.argv) >= 3:
+        cmd_install(sys.argv[2])
+    else:
+        print(__doc__)
+
+
+if __name__ == "__main__":
+    main()

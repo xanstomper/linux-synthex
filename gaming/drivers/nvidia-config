@@ -1,0 +1,205 @@
+# Solus Linux — NVIDIA GPU Driver Configuration
+# /etc/default/nvidia (sourced by gpu-driver-manager)
+
+# ============================================================
+# DRIVER SELECTION
+# ============================================================
+
+# NVIDIA driver type to use
+# Options:
+#   proprietary — NVIDIA closed-source driver (nvidia.ko)
+#   nouveau     — Open-source Nouveau driver (nouveau.ko)
+#   auto        — Auto-detect: proprietary on GeForce/Quadro, nouveau on older HW
+DRIVER_TYPE="auto"
+
+# When DRIVER_TYPE=auto, prefer this driver for GPUs that support both
+# Options: proprietary, nouveau
+AUTO_PREFER="proprietary"
+
+# Force specific driver version (proprietary)
+# Examples: 550, 545, 535, latest
+# Set to "latest" for the newest packaged version
+PROPRIETARY_VERSION="latest"
+
+# ============================================================
+# KERNEL PARAMETERS (Proprietary Driver)
+# ============================================================
+
+# Kernel module parameters for nvidia.ko
+NVIDIA_KERNEL_OPTIONS="nvidia-drm.modeset=1 nvidia-drm.fbdev=1 nvidia.NVreg_EnableGpuFirmware=0 nvidia.NVreg_RegistryDwords=RMIntrLock=0x01"
+
+# nvidia-drm.modeset=1 — Enable DRM modesetting (required for Wayland, VRR)
+# nvidia-drm.fbdev=1   — Enable fbdev emulation (required for console/TTY)
+# NVreg_EnableGpuFirmware=0 — Use kernel-mode driver instead of GSP firmware
+#   (Set to 1 to use GSP firmware on Turing+; 0 is more compatible/performant for gaming)
+# RMIntrLock=0x01 — Reduce interrupt lock contention
+
+# Additional NVIDIA kernel parameters
+# nvidia.NVreg_EnablePCIeGen3=1 — Force PCIe Gen 3 (fixes Gen4 stability)
+# nvidia.NVreg_UsePageAttributeTable=1 — PAT support for better memory management
+# nvidia.NVreg_InitializeSystemMemoryWithZeroes=0 — Skip zero-initialization (faster)
+NVIDIA_KERNEL_OPTIONS_EXTRA="nvidia.NVreg_UsePageAttributeTable=1 nvidia.NVreg_InitializeSystemMemoryWithZeroes=0"
+
+# ============================================================
+# KERNEL PARAMETERS (Nouveau Driver)
+# ============================================================
+
+# Kernel module parameters for nouveau.ko
+NOUVEAU_KERNEL_OPTIONS="nouveau.runpm=0"
+
+# nouveau.runpm=0 — Disable runtime power management (prevents GPU hangs on some GPUs)
+
+# Enable NVK Vulkan driver (Nouveau Vulkan)
+NOUVEAU_ENABLE_NVK=1
+
+# ============================================================
+# DISPLAY CONFIGURATION
+# ============================================================
+
+# Display stack selection
+# Options:
+#   wayland  — Wayland session (requires nvidia-drm.modeset=1)
+#   x11      — X11 session
+#   auto     — Auto-detect based on compositor/de
+DISPLAY_STACK="auto"
+
+# Wayland-specific configuration
+# Enable experimental Wayland support in NVIDIA driver
+ENABLE_WAYLAND=1
+
+# Enable GBM (Generic Buffer Manager) backend for Wayland
+# Required for GNOME/KDE Wayland
+ENABLE_GBM=1
+
+# Force EGLDevice backend (alternative to GBM for some WMs)
+# Set to "egldevice" to force, "gbm" for GBM, "auto" to autodetect
+WAYLAND_BACKEND="auto"
+
+# ============================================================
+# POWER MANAGEMENT
+# ============================================================
+
+# PowerMizer mode (proprietary driver)
+# Options:
+#   0 — Adaptive (auto clock based on load)
+#   1 — Prefer maximum performance (gaming)
+#   2 — Prefer maximum battery life (laptops)
+POWERMIZER_MODE=1
+
+# Dynamic power management (Turing+)
+# 0 = disabled, 1 = enabled (dynamic clock/power adjustment)
+NVIDIA_DYNAMIC_POWER=1
+
+# ============================================================
+# NVIDIA SPECIFIC FEATURES
+# ============================================================
+
+# Enable NVIDIA Reflex (Low Latency Mode)
+# Passed via __GL_SHIM_WRAPPER or nvidia-settings
+ENABLE_REFLEX=1
+
+# NVIDIA DLSS support
+# Requires: DXVK-NVAPI, Proton GE with NVAPI patches
+ENABLE_DLSS=1
+
+# Enable CUDA for compute workloads
+ENABLE_CUDA=1
+
+# NVIDIA GSP Firmware loading
+# 0 = skip GSP (use kernel driver directly), 1 = load GSP firmware
+# GSP offloads some GPU management but can cause issues on desktop
+ENABLE_GSP_FIRMWARE=0
+
+# ============================================================
+# SHADER CACHE
+# ============================================================
+
+# NVIDIA shader disk cache location
+__GL_SHADER_DISK_CACHE_PATH="$HOME/.cache/nvidia-shader-cache"
+
+# NVIDIA shader disk cache size (MB) — 0 = unlimited
+__GL_SHADER_DISK_CACHE_SIZE=4294967296  # 4GB
+
+# Skip shader cache cleanup on exit (preserves cache between sessions)
+__GL_SHADER_DISK_CACHE_SKIP_CLEANUP=1
+
+# Enable shader cache
+__GL_SHADER_DISK_CACHE=1
+
+# ============================================================
+# VRR / G-SYNC
+# ============================================================
+
+# Enable G-Sync / G-Sync Compatible
+ENABLE_GSYNC=1
+
+# Allow G-Sync on windowed monitors
+# 0 = fullscreen only, 1 = windowed + fullscreen
+GSYNC_WINDOWED=0
+
+# ============================================================
+# HDR SUPPORT
+# ============================================================
+
+# Enable HDR output via HDMI/DisplayPort
+ENABLE_HDR=1
+
+# HDR mode
+# Options: auto, hdr10, dolby_vision
+HDR_MODE="auto"
+
+# ============================================================
+# FSYNC / FUTEX2
+# ============================================================
+
+# Enable fsync
+ENABLE_FSYNC=1
+
+# Enable futex2 (requires CONFIG_FUTEX2 in kernel)
+ENABLE_FUTEX2=1
+
+# ============================================================
+# LATENCY TUNING
+# ============================================================
+
+# Enable low-latency mode (NVIDIA-specific)
+ENABLE_LOW_LATENCY=1
+
+# OpenGL threaded optimizations
+# 0 = sequential, 1 = threaded (reduces draw call latency)
+__GL_THREADED_OPTIMIZATIONS=1
+
+# Maximum pre-rendered frames (1 = lowest latency, 3 = default)
+__GL_MaxFramesAllowed=1
+
+# Sync-to-VBlank (0 = off for tearing, 1 = on for V-Sync)
+__GL_SYNC_TO_VBLANK=0
+
+# ============================================================
+# MULTI-GPU SUPPORT
+# ============================================================
+
+# Primary GPU selection for multi-GPU systems
+# Options: auto, nvidia, amd, intel, <PCI bus ID>
+PRIMARY_GPU="auto"
+
+# PRIME render offload configuration
+# Enable Prime Render Offload for Optimus laptops
+ENABLE_PRIME=1
+
+# PRIME sync mode
+# 0 = off, 1 = auto, 2 = always sync
+PRIME_SYNC_MODE=1
+
+# ============================================================
+# DEBUG / LOGGING
+# ============================================================
+
+# NVIDIA debug flags (empty = production)
+NVIDIA_DEBUG=""
+
+# Log level (0 = off, 1 = error, 2 = warning, 3 = info)
+NVIDIA_LOG_LEVEL=0
+
+# Enable verbose logging for troubleshooting (0/1)
+NVIDIA_VERBOSE=0

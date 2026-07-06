@@ -1,0 +1,14 @@
+[Desktop Entry]
+Type=Application
+Name=Welcome to Solus
+Name[de]=Willkommen bei Solus
+Comment=First-run setup wizard
+Comment[de]=Einrichtungsassistent für den ersten Start
+Exec=solus-welcome
+Icon=start-here-solus
+Terminal=false
+Categories=System;Settings;
+StartupNotify=true
+X-GNOME-Autostart-enabled=true
+X-GNOME-Autostart-Delay=5
+Keywords=welcome;setup;first;run;

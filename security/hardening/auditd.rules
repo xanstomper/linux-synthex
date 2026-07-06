@@ -1,0 +1,367 @@
+###############################################################################
+# /etc/audit/rules.d/99-solus-hardening.rules
+# Audit daemon rules for Linux Solus Security Architecture
+#
+# This file is applied by auditd at startup.
+# Rules are read from /etc/audit/rules.d/ in lexicographic order.
+# Name: 99-solus-hardening.rules (applied last, overrides defaults)
+#
+# Auditd configuration (in /etc/audit/auditd.conf):
+#   log_file = /var/log/audit/audit.log
+#   log_format = RAW
+#   max_log_file = 128 MB
+#   num_logs = 5
+#   max_log_file_action = ROTATE
+#   space_left = 256 MB
+#   space_left_action = SYSLOG
+#   admin_space_left = 64 MB
+#   admin_space_left_action = SINGLE
+#   disk_full_action = SUSPEND
+#   disk_error_action = SUSPEND
+#   flush = INCREMENTAL_ASYNC
+#   freq = 50
+#   backlog_limit = 8192
+#   priority_boost = 4
+#
+# Verify rules with: sudo auditctl -l
+# Test with: sudo aureport --summary
+# Search logs: sudo ausearch -m <event_type> -ts today
+#
+# Reference:
+#   - CIS Linux Benchmark v3.0 (Sections 4.x)
+#   - NIST SP 800-53 (AU-2, AU-3, AU-12)
+#   - PCI DSS v4.0 (Requirement 10: Log and Monitor All Access)
+#   - ISO 27001 (A.12.4: Logging and Monitoring)
+#   - audit.rules(7), auditctl(8)
+###############################################################################
+
+#==============================================================================
+# 0. RULE SYNTAX REMINDER
+#==============================================================================
+#
+# -w path     : watch file/directory
+# -p          : permission filter (r=read, w=write, x=execute, a=attribute)
+# -k keyname  : free-form key for log filtering ("solus_*" keys for Solus)
+# -a action   : append to list (always, never, task, exit, user)
+# -S syscall  : system call to audit
+# -F field    : field match filter
+#
+# Rule types:
+#   - File system watches: -w /path -p rwxa -k key
+#   - System calls: -a always,exit -S syscall -F field=value -k key
+#   - Executable watches: -a always,exit -S execve -F path=/bin/program -k key
+#
+
+#==============================================================================
+# 1. DELETE ALL EXISTING RULES AND SET BUFFER
+#==============================================================================
+
+# Delete all existing rules to start with a clean slate
+-D
+
+# Set buffer size (8192 entries) - increase for heavy auditing
+-b 8192
+
+# Failure mode: 0=silent, 1=printk (log), 2=panic (kernel panic on failure)
+-f 1
+
+# Rate limit (messages per second)
+-r 1000
+
+#==============================================================================
+# 2. KERNEL AND SYSTEM STATE CHANGES
+#==============================================================================
+
+# Monitor kernel module loading/unloading (critical for rootkits)
+-w /sbin/insmod -p x -k solus_kernel_module
+-w /sbin/modprobe -p x -k solus_kernel_module
+-w /sbin/rmmod -p x -k solus_kernel_module
+-w /usr/sbin/insmod -p x -k solus_kernel_module
+-w /usr/sbin/modprobe -p x -k solus_kernel_module
+-w /usr/sbin/rmmod -p x -k solus_kernel_module
+
+# Monitor kernel module loading via system calls (catches unlinked binaries)
+-a always,exit -S init_module -S finit_module -S delete_module -k solus_kernel_module
+
+# Monitor kernel parameters via sysctl
+-a always,exit -S sysctl -k solus_sysctl
+
+# Monitor kernel log access
+-a always,exit -S syslog -S klogctl -k solus_kernel_log
+
+#==============================================================================
+# 3. SECURITY AND AUTHENTICATION EVENTS
+#==============================================================================
+
+# All authentication events (PAM, login, su, sudo)
+-w /etc/pam.d/ -p wa -k solus_pam_config
+-w /etc/nsswitch.conf -p wa -k solus_nsswitch
+-w /etc/shadow -p rw -k solus_shadow
+-w /etc/gshadow -p rw -k solus_gshadow
+-w /etc/passwd -p wa -k solus_passwd
+-w /etc/group -p wa -k solus_group
+-w /etc/security/ -p wa -k solus_security_config
+-w /etc/sudoers -p wa -k solus_sudoers
+-w /etc/sudoers.d/ -p wa -k solus_sudoers
+-w /etc/sudo.conf -p wa -k solus_sudoers
+
+# Monitor su and sudo usage
+-a always,exit -S execve -F path=/usr/bin/su -k solus_su
+-a always,exit -S execve -F path=/usr/bin/sudo -k solus_sudo
+-a always,exit -S execve -F path=/usr/sbin/sudo -k solus_sudo
+
+# Monitor PAM authentication
+-a always,exit -S pam_open_session -S pam_close_session -k solus_pam_session
+
+# Monitor SSH configuration changes
+-w /etc/ssh/sshd_config -p wa -k solus_ssh_config
+-w /etc/ssh/ssh_config -p wa -k solus_ssh_config
+-w /etc/ssh/ -p wa -k solus_ssh_config
+
+# Monitor login/logout events
+-w /var/log/lastlog -p wa -k solus_login
+-w /var/run/faillock/ -p wa -k solus_login
+
+#==============================================================================
+# 4. SYSTEM ADMINISTRATION ACTIONS
+#==============================================================================
+
+# Monitor cron and at jobs
+-w /etc/cron.allow -p wa -k solus_cron
+-w /etc/cron.deny -p wa -k solus_cron
+-w /etc/cron.d/ -p wa -k solus_cron
+-w /etc/cron.daily/ -p wa -k solus_cron
+-w /etc/cron.hourly/ -p wa -k solus_cron
+-w /etc/cron.monthly/ -p wa -k solus_cron
+-w /etc/cron.weekly/ -p wa -k solus_cron
+-w /etc/crontab -p wa -k solus_cron
+-w /etc/at.allow -p wa -k solus_cron
+-w /etc/at.deny -p wa -k solus_cron
+
+# Monitor systemd unit changes
+-w /etc/systemd/ -p wa -k solus_systemd
+-w /usr/lib/systemd/ -p wa -k solus_systemd
+
+# Monitor systemd journal
+-w /var/log/journal/ -p wa -k solus_journal
+
+# Monitor systemd temporary files
+-w /etc/tmpfiles.d/ -p wa -k solus_tmpfiles
+
+#==============================================================================
+# 5. NETWORK CONFIGURATION CHANGES
+#==============================================================================
+
+# Monitor firewall rules changes (nftables/firewalld)
+-w /etc/nftables/ -p wa -k solus_nftables
+-w /etc/firewalld/ -p wa -k solus_firewalld
+-w /usr/lib/firewalld/ -p wa -k solus_firewalld
+
+# Monitor network configuration
+-w /etc/hosts -p wa -k solus_network_config
+-w /etc/hosts.allow -p wa -k solus_network_config
+-w /etc/hosts.deny -p wa -k solus_network_config
+-w /etc/resolv.conf -p wa -k solus_network_config
+-w /etc/NetworkManager/ -p wa -k solus_network_config
+-w /etc/sysconfig/network -p wa -k solus_network_config
+
+# Monitor network interfaces and routing
+-a always,exit -S sethostname -S setdomainname -k solus_network_config
+-a always,exit -S sethostname -S setdomainname -k solus_network_config
+
+# Monitor network namespace changes
+-a always,exit -S unshare -F a0=0x20000000 -k solus_net_ns
+
+#==============================================================================
+# 6. FILE PERMISSION AND OWNERSHIP CHANGES
+#==============================================================================
+
+# Monitor all chmod and chown calls
+-a always,exit -S chmod -S fchmod -S fchmodat -S chown -S fchown \
+    -S fchownat -S lchown -S setxattr -S lsetxattr -S fsetxattr \
+    -S removexattr -S lremovexattr -S fremovexattr -k solus_file_perm
+
+# Monitor chattr/lsattr (file immutable bits)
+-a always,exit -S ioctl -F cmd=0x40086600 -k solus_chattr
+
+# Monitor system binary modifications
+-w /usr/bin/ -p wa -k solus_binaries
+-w /usr/sbin/ -p wa -k solus_binaries
+-w /usr/local/bin/ -p wa -k solus_binaries
+-w /usr/local/sbin/ -p wa -k solus_binaries
+-w /opt/ -p wa -k solus_opt
+
+# Monitor library modifications
+-w /usr/lib/ -p wa -k solus_libraries
+-w /usr/lib64/ -p wa -k solus_libraries
+-w /usr/libexec/ -p wa -k solus_libraries
+
+# Monitor kernel image and initramfs
+-w /boot/ -p wa -k solus_boot
+
+# Monitor SELinux policy files
+-w /etc/selinux/ -p wa -k solus_selinux
+-w /sys/fs/selinux/ -p wa -k solus_selinux
+
+#==============================================================================
+# 7. TIME AND DATE CHANGES
+#==============================================================================
+
+# Monitor system clock modifications
+-a always,exit -S adjtimex -S clock_settime -k solus_time_change
+-a always,exit -S settimeofday -S clock_adjtime -k solus_time_change
+
+# Monitor timezone changes
+-w /etc/localtime -p wa -k solus_time_change
+
+#==============================================================================
+# 8. USER AND GROUP MANAGEMENT
+#==============================================================================
+
+# Monitor user/group creation, deletion, and modification
+-w /etc/passwd -p wa -k solus_user_mgmt
+-w /etc/group -p wa -k solus_user_mgmt
+-w /etc/shadow -p wa -k solus_user_mgmt
+-w /etc/gshadow -p wa -k solus_user_mgmt
+
+# Monitor user and group ID assignment
+-a always,exit -S setuid -S setgid -S setreuid -S setregid \
+    -S setresuid -S setresgid -k solus_identity
+
+#==============================================================================
+# 9. MOUNT AND UNMOUNT EVENTS
+#==============================================================================
+
+# Monitor all mount and unmount operations
+-a always,exit -S mount -S umount -S umount2 -k solus_mount
+
+# Monitor /etc/fstab modifications
+-w /etc/fstab -p wa -k solus_mount
+
+#==============================================================================
+# 10. PROCESS AND EXECUTION MONITORING
+#==============================================================================
+
+# Monitor all process execution (high volume - adjust with exclusions)
+# Enable only for critical systems or investigation periods
+# -a always,exit -S execve -k solus_process
+
+# Monitor specific process executions (privilege escalation)
+-a always,exit -S execve -F uid=0 -k solus_privileged_exec
+
+# Monitor process ID changes (namespaces)
+-a always,exit -S clone -S fork -S vfork -k solus_process_create
+-a always,exit -S unshare -k solus_namespace
+
+#==============================================================================
+# 11. SOLUS-SPECIFIC APPLICATION MONITORING
+#==============================================================================
+
+# Monitor Solus package manager (eopkg)
+-w /usr/bin/eopkg -p x -k solus_package_mgmt
+-w /etc/eopkg/ -p wa -k solus_package_mgmt
+
+# Monitor Solus Repository configuration
+-w /etc/solus/ -p wa -k solus_repo
+-w /var/lib/solus/ -p wa -k solus_repo
+
+# Monitor Solus update system
+-w /usr/libexec/solus/ -p wa -k solus_updates
+
+# Monitor Flatpak operations (sandboxed application management)
+-w /usr/bin/flatpak -p x -k solus_flatpak
+-w /var/lib/flatpak/ -p wa -k solus_flatpak
+
+# Monitor Software Center
+-w /usr/bin/solus-software-center -p x -k solus_software
+
+# Monitor Security Dashboard
+-w /usr/bin/solus-security-dashboard -p x -k solus_security_dashboard
+
+# Monitor backup tool
+-w /usr/bin/solus-backup -p x -k solus_backup
+
+#==============================================================================
+# 12. TPM2 AND HSM OPERATIONS
+#==============================================================================
+
+# Monitor TPM device access
+-w /dev/tpm0 -p rw -k solus_tpm
+-w /dev/tpmrm0 -p rw -k solus_tpm
+
+# Monitor TPM2 tools execution
+-w /usr/bin/tpm2_* -p x -k solus_tpm_tools
+
+#==============================================================================
+# 13. DISK ENCRYPTION EVENTS
+#==============================================================================
+
+# Monitor cryptsetup operations
+-w /usr/sbin/cryptsetup -p x -k solus_cryptsetup
+-w /usr/bin/cryptsetup -p x -k solus_cryptsetup
+
+# Monitor LUKS metadata
+-w /etc/crypttab -p wa -k solus_cryptsetup
+-w /etc/cryptsetup-keys.d/ -p wa -k solus_cryptsetup
+
+#==============================================================================
+# 14. IMMUTABLE RULES FILE
+#==============================================================================
+
+# Make the rules immutable (prevents tampering until reboot)
+# This must be the LAST rule in the file
+# Uncomment after testing:
+# -e 2
+
+###############################################################################
+# ADDITIONAL NOTES
+###############################################################################
+#
+# To reload audit rules without restarting auditd:
+#   sudo augenrules --check
+#   sudo auditctl -R /etc/audit/rules.d/99-solus-hardening.rules
+#
+# To see all loaded rules:
+#   sudo auditctl -l
+#
+# To search for specific events:
+#   sudo ausearch -k solus_kernel_module -ts today
+#   sudo ausearch -m USER_LOGIN -ts yesterday
+#
+# To generate reports:
+#   sudo aureport -au    # Authentication report
+#   sudo aureport -m     # Account management report
+#   sudo aureport -l     # Login report
+#   sudo aureport -x     # Process execution report
+#
+# To watch the audit log in real-time:
+#   sudo tail -f /var/log/audit/audit.log | audit2why
+#
+# Remote logging configuration (rsyslog):
+#   # /etc/rsyslog.conf or /etc/rsyslog.d/audit.conf
+#   $ModLoad imudp
+#   $UDPServerRun 514
+#   local6.* @central-log-server:514
+#
+# Performance considerations:
+#   - Each rule adds overhead; only enable what you need
+#   - Use -F uid=0 for high-sensitivity rules to reduce noise
+#   - Use -k keys to categorize and filter events efficiently
+#   - Monitor backlog with: sudo auditctl -s | grep backlog
+#   - Consider rotating logs every 128 MB with 5 rotations
+#
+# CIS Benchmark References:
+#   4.1.x - Configure System Accounting (auditd)
+#   4.2.x - Configure Logging (rsyslog)
+#   4.3.x - Configure logrotate
+#
+# NIST SP 800-53 Controls:
+#   AU-2: Audit Events
+#   AU-3: Content of Audit Records
+#   AU-6: Audit Review, Analysis, and Reporting
+#   AU-12: Audit Generation
+#   AC-2: Account Management
+#   CM-3: Configuration Change Control
+#
+###############################################################################
+# End of file

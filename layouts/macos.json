@@ -1,0 +1,42 @@
+{
+  "name": "macos",
+  "description": "macOS-inspired layout — top menu bar, dock, global menu",
+  "panel": {
+    "position": "top",
+    "height": 28,
+    "dock": true,
+    "dock_position": "bottom",
+    "dock_size": 48,
+    "widgets": ["app-menu", "window-title", "clock", "system-tray"]
+  },
+  "compositor": {
+    "enabled": true,
+    "blur": true,
+    "blur_strength": 8,
+    "vsync": "auto",
+    "latency_mode": "normal",
+    "animation_speed": 1,
+    "animations": "genie"
+  },
+  "wallpaper": "/usr/share/wallpapers/solus/macos-style.png",
+  "services": {
+    "gamemode": false,
+    "tracker_services": true,
+    "background_services_stopped": []
+  },
+  "shortcuts": {
+    "super+space": "spotlight",
+    "super+tab": "app-switcher",
+    "super+w": "close-window",
+    "super+q": "quit-app",
+    "super+m": "minimize",
+    "ctrl+space": "krunner"
+  },
+  "performance": {
+    "cpu_governor": "ondemand",
+    "gpu_profile": "auto",
+    "io_scheduler": "mq-deadline",
+    "zram_enabled": true,
+    "swappiness": 20
+  }
+}

@@ -1,0 +1,14 @@
+[Desktop Entry]
+Type=Service
+Name=Solus Drivers
+Comment=Manage GPU drivers, hardware detection, and firmware
+Icon=preferences-system-hardware
+Exec=/usr/bin/solus-control-center --page drivers
+X-KDE-ServiceTypes=KCModule
+X-KDE-ParentApp=kcm_shell
+X-KDE-ParentComponents=SolusDrivers
+X-KDE-Library=kcm_shell
+X-KDE-FactoryName=solus-drivers
+X-KDE-ParentWidget=true
+Categories=Qt;KDE;System;Settings;
+OnlyShowIn=KDE;

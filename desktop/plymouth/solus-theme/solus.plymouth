@@ -1,0 +1,8 @@
+[Plymouth Theme]
+Name=Solus
+Description=Solus Linux boot splash
+ModuleName=script
+
+[script]
+ImageDir=/usr/share/plymouth/themes/solus
+ScriptFile=/usr/share/plymouth/themes/solus/solus.script

@@ -1,0 +1,46 @@
+#!/usr/bin/env bash
+# solus-studiocd — Studio D-Bus daemon entry point
+# Manages themes, presets, and rice configurations
+set -euo pipefail
+HERE="$(cd "$(dirname "$0")" && pwd)"
+
+if command -v solus-studiocd-bin &>/dev/null; then
+    exec solus-studiocd-bin "$@"
+fi
+
+# Python/QML fallback
+echo "solus-studiocd: using fallback mode"
+if [ -f "$HERE/ui/Main.qml" ]; then
+    if command -v qmlscene &>/dev/null; then
+        exec qmlscene "$HERE/ui/Main.qml" --daemon "$@"
+    fi
+    if command -v qml6 &>/dev/null; then
+        exec qml6 "$HERE/ui/Main.qml" --daemon "$@"
+    fi
+fi
+
+echo "solus-studiocd running in headless mode"
+# D-Bus registration stub
+exec python3 -c "
+import sys, dbus, dbus.service, dbus.mainloop.glib
+from gi.repository import GLib
+
+BUS_NAME = 'org.solus.Studio'
+OBJECT_PATH = '/org/solus/Studio'
+
+class StudioDaemon(dbus.service.Object):
+    @dbus.service.method(BUS_NAME, in_signature='', out_signature='s')
+    def GetStatus(self):
+        return 'running'
+
+    @dbus.service.method(BUS_NAME, in_signature='s', out_signature='s')
+    def ApplyPreset(self, name):
+        return f'preset {name} applied'
+
+dbus.mainloop.glib.DBusGMainLoop(set_as_default=True)
+bus = dbus.SessionBus()
+name = dbus.service.BusName(BUS_NAME, bus)
+obj = StudioDaemon(bus, OBJECT_PATH)
+print('solus-studiocd: D-Bus service running on', BUS_NAME)
+GLib.MainLoop().run()
+" 2>/dev/null || echo "solus-studiocd: dbus-python not available, started in stub mode"

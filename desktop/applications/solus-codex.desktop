@@ -1,0 +1,10 @@
+[Desktop Entry]
+Type=Application
+Name=Solus Codex
+Comment=Built-in AI Agent IDE — Code editor with Solus Agent integration
+Exec=solus-agent --codex
+Icon=solus-agent
+Terminal=false
+Categories=Development;AI;IDE;
+StartupNotify=true
+X-KDE-StartupNotify=true

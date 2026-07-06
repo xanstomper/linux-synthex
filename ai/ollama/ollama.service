@@ -1,0 +1,62 @@
+[Unit]
+Description=Ollama Service — Solus AI Optimized
+Documentation=https://github.com/ollama/ollama
+Documentation=https://docs.solus-project.org/ai/
+Wants=network-online.target
+After=network-online.target
+
+[Service]
+Type=simple
+User=ollama
+Group=ollama
+ExecStart=/usr/bin/ollama serve
+ExecReload=/bin/kill -HUP $MAINPID
+Restart=on-failure
+RestartSec=3
+TimeoutStartSec=30
+TimeoutStopSec=30
+
+# Environment configuration
+Environment=OLLAMA_HOST=127.0.0.1:11434
+Environment=OLLAMA_MODELS=/var/lib/ollama/models
+Environment=OLLAMA_KEEP_ALIVE=5m
+Environment=OLLAMA_NUM_PARALLEL=1
+Environment=OLLAMA_MAX_LOADED_MODELS=1
+Environment=OLLAMA_FLASH_ATTENTION=1
+Environment=OLLAMA_GPU_OVERHEAD=512
+Environment=OLLAMA_SCHED_SPREAD=1
+
+# Security hardening
+ProtectSystem=full
+ProtectHome=true
+PrivateTmp=true
+NoNewPrivileges=true
+CapabilityBoundingSet=CAP_SYS_NICE CAP_IPC_LOCK
+ProtectControlGroups=true
+ProtectKernelModules=true
+ProtectKernelTunables=true
+RestrictAddressFamilies=AF_UNIX AF_INET AF_INET6
+RestrictNamespaces=true
+RestrictRealtime=true
+SystemCallArchitectures=native
+SystemCallFilter=@system-service
+
+# GPU access (for acceleration)
+DeviceAllow=/dev/dri/renderD128 rw
+DeviceAllow=/dev/kfd rw
+DeviceAllow=/dev/nvidia0 rw
+DeviceAllow=/dev/nvidiactl rw
+DeviceAllow=/dev/nvidia-modeset rw
+DeviceAllow=/dev/nvidia-uvm rw
+DeviceAllow=/dev/nvidia-uvm-tools rw
+
+# Suppress memory lock warnings
+LimitMEMLOCK=infinity
+
+# Resource limits
+LimitNOFILE=1048576
+LimitNPROC=2048
+LimitCORE=0
+
+[Install]
+WantedBy=multi-user.target

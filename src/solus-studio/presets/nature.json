@@ -1,0 +1,15 @@
+{
+  "name": "nature",
+  "description": "Earthy, warm tones with nature-inspired palette",
+  "colorscheme": "FairyGlade",
+  "icons": "Papirus-Dark-Maia",
+  "cursor": "ComixCursors",
+  "font": {"family": "Noto Sans", "size": 11},
+  "layout": "balanced",
+  "compositor": {
+    "enabled": true,
+    "blur": true,
+    "vsync": "auto"
+  },
+  "wallpaper": "forest-canopy"
+}

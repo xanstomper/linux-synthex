@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="128" height="128" viewBox="0 0 128 128">
+  <!-- Studio Icon — Paint palette and brush -->
+  <rect width="128" height="128" rx="24" fill="#1A1A2E"/>
+  <ellipse cx="58" cy="58" rx="32" ry="26" fill="none" stroke="#FFB300" stroke-width="3"/>
+  <circle cx="44" cy="48" r="5" fill="#FF3366"/>
+  <circle cx="64" cy="42" r="5" fill="#00D2FF"/>
+  <circle cx="82" cy="48" r="5" fill="#00FF88"/>
+  <circle cx="44" cy="66" r="5" fill="#FFB300"/>
+  <circle cx="80" cy="66" r="5" fill="#9933FF"/>
+  <path d="M84 82 L104 104 Q108 108 104 112 L100 116 Q96 120 92 116 L72 96" fill="none" stroke="#FFB300" stroke-width="3" stroke-linecap="round"/>
+</svg>

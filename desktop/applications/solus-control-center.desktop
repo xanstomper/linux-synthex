@@ -1,0 +1,10 @@
+[Desktop Entry]
+Type=Application
+Name=Solus Control Center
+Comment=Manage your Solus system — settings, drivers, updates, gaming
+Exec=solus-control-center
+Icon=solus-control-center
+Categories=Settings;System;
+Terminal=false
+StartupNotify=true
+X-KDE-StartupNotify=true

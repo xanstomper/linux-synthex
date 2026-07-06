@@ -1,0 +1,23 @@
+[Unit]
+Description=Solus Web App Engine Daemon
+Documentation=https://docs.solus-project.org/webapp-engine
+After=network.target
+
+[Service]
+Type=simple
+ExecStart=/usr/bin/solus-webappd --daemon
+Restart=on-failure
+RestartSec=5
+StandardOutput=journal
+StandardError=journal
+
+# Security hardening — needs network + write for web app .desktop creation
+ProtectSystem=full
+ProtectHome=read-only
+PrivateTmp=yes
+NoNewPrivileges=yes
+SystemCallArchitectures=native
+ProtectKernelTunables=yes
+ProtectControlGroups=yes
+MemoryMax=128M
+CPUQuota=30%

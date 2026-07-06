@@ -1,0 +1,112 @@
+#!/usr/bin/env python3
+"""Solus AppImage Integration — find, integrate, and manage AppImages.
+Usage:
+    solus-appimage integrate <file>   Integrate AppImage (add to menu)
+    solus-appimage list               List integrated AppImages
+    solus-appimage run <name>         Run AppImage by name
+    solus-appimage remove <name>      Remove AppImage integration
+"""
+import os, sys, subprocess, json, glob, stat, shutil
+
+APPIMAGE_DIRS = [
+    os.path.expanduser("~/Applications"),
+    os.path.expanduser("~/AppImages"),
+    os.path.expanduser("~/.local/bin"),
+    "/opt",
+]
+INTEGRATION_DIR = os.path.expanduser("~/.local/share/applications")
+ICON_DIR = os.path.expanduser("~/.local/share/icons/hicolor/128x128/apps")
+
+def find_appimages():
+    results = []
+    for directory in APPIMAGE_DIRS:
+        if os.path.exists(directory):
+            for f in os.listdir(directory):
+                if f.endswith(".AppImage") or f.endswith(".appimage"):
+                    path = os.path.join(directory, f)
+                    name = os.path.splitext(f)[0].replace("-", " ").title()
+                    results.append({"name": name, "path": path, "file": f})
+    return results
+
+def integrate(path):
+    """Create a desktop entry for an AppImage."""
+    if not os.path.exists(path):
+        print(f"❌ File not found: {path}")
+        return
+    # Make executable
+    os.chmod(path, os.stat(path).st_mode | stat.S_IEXEC)
+    # Extract embedded icon if possible
+    fname = os.path.basename(path)
+    name = os.path.splitext(fname)[0].replace("-", " ").title()
+    app_id = f"appimage-{os.path.splitext(fname)[0].lower()}"
+    # Create desktop entry
+    os.makedirs(INTEGRATION_DIR, exist_ok=True)
+    desktop_path = os.path.join(INTEGRATION_DIR, f"{app_id}.desktop")
+    with open(desktop_path, "w") as f:
+        f.write(f"""[Desktop Entry]
+Type=Application
+Name={name}
+Exec={path} --no-sandbox %F
+Icon={app_id}
+Terminal=false
+Categories=Utility;
+X-AppImage-Integrate=true
+""")
+    print(f"✅ Integrated: {name}")
+    print(f"   Desktop entry: {desktop_path}")
+    print(f"   Launch from app menu or: solus-appimage run {name.lower()}")
+
+def cmd_list():
+    apps = find_appimages()
+    if not apps:
+        print("📦 No AppImages found")
+        print(f"   Place .AppImage files in: {', '.join(APPIMAGE_DIRS)}")
+        return
+    print("📦 AppImages:")
+    for app in apps:
+        size = os.path.getsize(app["path"]) / 1024 / 1024
+        desk = os.path.join(INTEGRATION_DIR, f"appimage-{os.path.splitext(app['file'])[0].lower()}.desktop")
+        integrated = os.path.exists(desk)
+        mark = "✅" if integrated else "○"
+        print(f"  {mark} {app['name']:30} {size:.0f} MB  ({app['path']})")
+        if not integrated:
+            print(f"      {'':30} Run: solus-appimage integrate '{app['path']}'")
+
+def cmd_run(name):
+    apps = find_appimages()
+    for app in apps:
+        if name.lower() in app["name"].lower():
+            print(f"🚀 Running {app['name']}...")
+            os.execv(app["path"], [app["path"]])
+    print(f"❌ No AppImage found matching '{name}'")
+
+def cmd_remove(name):
+    apps = find_appimages()
+    for app in apps:
+        if name.lower() in app["name"].lower():
+            desk = os.path.join(INTEGRATION_DIR, f"appimage-{os.path.splitext(app['file'])[0].lower()}.desktop")
+            if os.path.exists(desk):
+                os.remove(desk)
+                print(f"🗑️  Removed integration for {app['name']}")
+            return
+    print(f"❌ No AppImage found matching '{name}'")
+
+def main():
+    if len(sys.argv) < 2:
+        print(__doc__)
+        cmd_list()
+        return
+    cmd = sys.argv[1]
+    if cmd == "integrate" and len(sys.argv) >= 3:
+        integrate(sys.argv[2])
+    elif cmd == "list":
+        cmd_list()
+    elif cmd == "run" and len(sys.argv) >= 3:
+        cmd_run(" ".join(sys.argv[2:]))
+    elif cmd == "remove" and len(sys.argv) >= 3:
+        cmd_remove(" ".join(sys.argv[2:]))
+    else:
+        print(__doc__)
+
+if __name__ == "__main__":
+    main()

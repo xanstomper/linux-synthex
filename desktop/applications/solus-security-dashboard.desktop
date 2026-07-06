@@ -1,0 +1,9 @@
+[Desktop Entry]
+Type=Application
+Name=Solus Security Dashboard
+Comment=View system security status
+Exec=solus-security-dashboard
+Icon=solus-security-dashboard
+Categories=Applications;System;Security;
+Terminal=false
+StartupNotify=true

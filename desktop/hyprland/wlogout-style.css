@@ -1,0 +1,51 @@
+/* Solus wlogout CSS — power menu theme
+ * Full-screen overlay with large icon buttons
+ */
+
+window {
+    background-color: rgba(26, 26, 46, 0.9);
+}
+
+button {
+    background-color: rgba(22, 33, 62, 0.8);
+    color: #ffffff;
+    border: 2px solid transparent;
+    border-radius: 16px;
+    background-repeat: no-repeat;
+    background-position: center;
+    background-size: 25%;
+    margin: 16px;
+    transition: all 200ms ease;
+}
+
+button:focus,
+button:active,
+button:hover {
+    background-color: rgba(233, 69, 96, 0.3);
+    border-color: #e94560;
+    outline: none;
+}
+
+#lock {
+    background-image: image(url("/usr/share/wlogout/icons/lock.png"), rgba(233, 69, 96, 0.5));
+}
+
+#logout {
+    background-image: image(url("/usr/share/wlogout/icons/logout.png"), rgba(233, 69, 96, 0.5));
+}
+
+#suspend {
+    background-image: image(url("/usr/share/wlogout/icons/suspend.png"), rgba(233, 69, 96, 0.5));
+}
+
+#hibernate {
+    background-image: image(url("/usr/share/wlogout/icons/hibernate.png"), rgba(233, 69, 96, 0.5));
+}
+
+#reboot {
+    background-image: image(url("/usr/share/wlogout/icons/reboot.png"), rgba(233, 69, 96, 0.5));
+}
+
+#shutdown {
+    background-image: image(url("/usr/share/wlogout/icons/shutdown.png"), rgba(233, 69, 96, 0.5));
+}

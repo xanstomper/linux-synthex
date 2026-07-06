@@ -1,0 +1,29 @@
+[Unit]
+Description=Solus Ananicy — Auto-Nice Daemon (CachyOS-style)
+Documentation=https://docs.solus-project.org/ananicy
+After=multi-user.target
+
+[Service]
+Type=forking
+ExecStart=/usr/bin/solus-ananicy start
+ExecStop=/usr/bin/solus-ananicy stop
+ExecReload=/usr/bin/solus-ananicy restart
+PIDFile=/run/solus-ananicy.pid
+RemainAfterExit=yes
+
+# Resource limits
+MemoryMax=64M
+CPUQuota=20%
+
+# Security hardening
+ProtectSystem=full
+ProtectHome=read-only
+PrivateTmp=yes
+NoNewPrivileges=yes
+SystemCallArchitectures=native
+ProtectKernelTunables=yes
+ProtectControlGroups=yes
+CapabilityBoundingSet=CAP_SYS_NICE
+
+[Install]
+WantedBy=multi-user.target

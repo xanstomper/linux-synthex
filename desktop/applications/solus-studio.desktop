@@ -1,0 +1,9 @@
+[Desktop Entry]
+Type=Application
+Name=Solus Studio
+Comment=Customize themes, layouts, and desktop appearance
+Exec=solus-studio
+Icon=solus-studio
+Categories=Applications;Settings;Desktop;
+Terminal=false
+StartupNotify=true

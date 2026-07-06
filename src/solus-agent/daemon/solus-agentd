@@ -1,0 +1,598 @@
+#!/usr/bin/env python3
+"""Solus Agent Daemon — org.solus.Agent DBus service.
+Powers: taskbar assistant, codex IDE, knowledge base, agentic framework.
+No HTTP. No localhost. No browser.
+"""
+import os, sys, json, signal, subprocess, threading, time, re, platform, hashlib, pickle
+from pathlib import Path
+from collections import defaultdict
+from typing import Optional
+
+import dbus, dbus.service, dbus.mainloop.glib
+from gi.repository import GLib
+
+CONFIG_DIR = Path(os.path.expanduser("~/.config/solus/agent"))
+CONFIG_DIR.mkdir(parents=True, exist_ok=True)
+DATA_DIR = Path(os.path.expanduser("~/.local/share/solus/agent"))
+DATA_DIR.mkdir(parents=True, exist_ok=True)
+CONFIG_FILE = CONFIG_DIR / "config.json"
+MEMORY_FILE = DATA_DIR / "memory.json"
+KB_INDEX = DATA_DIR / "knowledge.index"
+
+BUS_NAME = "org.solus.Agent"
+OBJ_PATH = "/org/solus/Agent"
+IFACE = "org.solus.Agent"
+
+DEFAULT_CONFIG = {
+    "model": {"provider": "ollama", "model": "llama3.2:3b", "temperature": 0.7, "max_tokens": 4096},
+    "providers": {
+        "ollama": {"enabled": True, "base_url": "http://localhost:11434/v1"},
+        "opencode-zen": {"enabled": False, "api_key": "", "base_url": "https://opencode.ai/zen/v1"},
+        "opencode-go": {"enabled": False, "api_key": "", "base_url": "https://opencode.ai/go/v1"},
+        "openai": {"enabled": False, "api_key": "", "base_url": "https://api.openai.com/v1"},
+        "anthropic": {"enabled": False, "api_key": "", "base_url": "https://api.anthropic.com/v1"},
+        "openrouter": {"enabled": False, "api_key": "", "base_url": "https://openrouter.ai/api/v1"},
+    },
+    "permissions": {"level": "ask", "file_read": "ask", "file_write": "ask", "command": "ask", "code_exec": "ask"},
+    "ui": {"theme": "system", "font_size": 14},
+    "agent": {"mode": "balanced", "max_steps": 10},
+    "search": {"index_folders": [os.path.expanduser("~"), os.path.expanduser("~/Documents"), os.path.expanduser("~/Projects")]},
+}
+
+
+def load_config():
+    if CONFIG_FILE.exists():
+        try: d = json.loads(CONFIG_FILE.read_text()); return {**DEFAULT_CONFIG, **d}
+        except: pass
+    return dict(DEFAULT_CONFIG)
+
+def save_config(c):
+    CONFIG_FILE.write_text(json.dumps(c, indent=2))
+
+
+# ═══ AI Provider Layer ══════════════════════════════════════════════
+
+class AIProvider:
+    """Universal model provider — Ollama, OpenCode, OpenAI, Anthropic..."""
+    def __init__(self, config):
+        self.config = config
+    
+    def chat(self, messages, stream=False, timeout=120):
+        prov = self.config["model"]["provider"]
+        model = self.config["model"]["model"]
+        cfg = self.config["providers"].get(prov, {})
+        base = cfg.get("base_url", "")
+        key = cfg.get("api_key", "")
+        if not base or not cfg.get("enabled"):
+            return {"error": f"Provider '{prov}' not configured"}
+        
+        import urllib.request
+        url = f"{base.rstrip('/')}/chat/completions"
+        body = json.dumps({"model": model, "messages": messages, "stream": stream,
+                          "temperature": self.config["model"]["temperature"],
+                          "max_tokens": self.config["model"]["max_tokens"]}).encode()
+        headers = {"Content-Type": "application/json"}
+        if key: headers["Authorization"] = f"Bearer {key}"
+        try:
+            req = urllib.request.Request(url, data=body, headers=headers)
+            resp = urllib.request.urlopen(req, timeout=timeout)
+            data = json.loads(resp.read())
+            text = data.get("choices", [{}])[0].get("message", {}).get("content", "")
+            return {"response": text}
+        except Exception as e:
+            return {"error": str(e)}
+
+    def stream_chat(self, messages):
+        """Generator for streaming responses."""
+        prov = self.config["model"]["provider"]
+        model = self.config["model"]["model"]
+        cfg = self.config["providers"].get(prov, {})
+        base = cfg.get("base_url", ""); key = cfg.get("api_key", "")
+        import urllib.request
+        url = f"{base.rstrip('/')}/chat/completions"
+        body = json.dumps({"model": model, "messages": messages, "stream": True}).encode()
+        headers = {"Content-Type": "application/json"}
+        if key: headers["Authorization"] = f"Bearer {key}"
+        try:
+            req = urllib.request.Request(url, data=body, headers=headers)
+            resp = urllib.request.urlopen(req, timeout=120)
+            for line in resp:
+                if line.startswith(b"data: "):
+                    chunk = line[6:].strip()
+                    if chunk == b"[DONE]": break
+                    try:
+                        d = json.loads(chunk)
+                        delta = d.get("choices", [{}])[0].get("delta", {}).get("content", "")
+                        if delta: yield delta
+                    except: continue
+        except: yield "⚠️ Connection error"
+
+
+# ═══ Agent Framework ════════════════════════════════════════════════
+
+class ToolRegistry:
+    """Registry of tools that agents can call."""
+    
+    def __init__(self, config):
+        self.config = config
+        self.tools = {}
+        self._register_defaults()
+    
+    def _register_defaults(self):
+        self.register("execute_command", self.tool_execute_command, "Run a shell command", {"command": "str"})
+        self.register("read_file", self.tool_read_file, "Read file contents", {"path": "str"})
+        self.register("write_file", self.tool_write_file, "Write content to file", {"path": "str", "content": "str"})
+        self.register("search_files", self.tool_search_files, "Search files by name/pattern", {"pattern": "str"})
+        self.register("install_package", self.tool_install_package, "Install a system package", {"name": "str"})
+        self.register("search_package", self.tool_search_package, "Search available packages", {"query": "str"})
+        self.register("get_system_info", self.tool_system_info, "Get system information", {})
+        self.register("list_processes", self.tool_list_processes, "List running processes", {})
+        self.register("web_search", self.tool_web_search, "Search the web", {"query": "str"})
+    
+    def register(self, name, fn, description, params=None):
+        self.tools[name] = {"fn": fn, "desc": description, "params": params or {}}
+    
+    def call(self, name, **kwargs):
+        if name in self.tools:
+            perm = self.config["permissions"].get("command", "ask")
+            if perm == "deny":
+                return f"⚠️ '{name}' denied by permissions"
+            return self.tools[name]["fn"](**kwargs)
+        return f"⚠️ Unknown tool: {name}"
+    
+    def tool_execute_command(self, command):
+        try:
+            r = subprocess.run(command, shell=True, capture_output=True, text=True, timeout=60)
+            return {"stdout": r.stdout[:2000], "stderr": r.stderr[:500], "code": r.returncode}
+        except subprocess.TimeoutExpired: return {"error": "timeout"}
+        except Exception as e: return {"error": str(e)}
+    
+    def tool_read_file(self, path):
+        path = os.path.expanduser(path)
+        if os.path.exists(path):
+            try: return {"content": open(path).read()[:5000], "size": os.path.getsize(path)}
+            except Exception as e: return {"error": str(e)}
+        return {"error": "not found"}
+    
+    def tool_write_file(self, path, content):
+        path = os.path.expanduser(path)
+        try:
+            os.makedirs(os.path.dirname(path) or ".", exist_ok=True)
+            with open(path, "w") as f: f.write(content)
+            return {"status": "written", "path": path, "bytes": len(content)}
+        except Exception as e: return {"error": str(e)}
+    
+    def tool_search_files(self, pattern):
+        results = []
+        for folder in self.config["search"]["index_folders"]:
+            folder = os.path.expanduser(folder)
+            if not os.path.isdir(folder): continue
+            for root, dirs, files in os.walk(folder):
+                if ".git" in dirs: dirs.remove(".git")
+                for f in files:
+                    if pattern.lower() in f.lower():
+                        results.append(os.path.join(root, f))
+                    if len(results) >= 20: break
+                if len(results) >= 20: break
+        return {"results": results}
+    
+    def tool_install_package(self, name):
+        try:
+            r = subprocess.run(["sudo", "dnf", "install", "-y", name], capture_output=True, text=True, timeout=120)
+            return {"status": "ok" if r.returncode == 0 else "failed", "output": r.stdout[-500:]}
+        except Exception as e: return {"error": str(e)}
+    
+    def tool_search_package(self, query):
+        try:
+            r = subprocess.run(["dnf", "search", query], capture_output=True, text=True, timeout=30)
+            lines = [l for l in r.stdout.splitlines() if l.strip() and not l.startswith(("==", "Last", "Upgraded"))][:15]
+            return {"results": lines}
+        except Exception as e: return {"error": str(e)}
+    
+    def tool_system_info(self):
+        return {
+            "hostname": platform.node(), "kernel": platform.release(),
+            "cpu": platform.processor(), "cores": os.cpu_count(),
+            "distro": " ".join(platform.freedesktop_os_release().get("NAME", "Linux").split()),
+            "desktop": os.environ.get("XDG_CURRENT_DESKTOP", "?"),
+            "session": os.environ.get("XDG_SESSION_TYPE", "?"),
+        }
+    
+    def tool_list_processes(self):
+        try:
+            r = subprocess.run(["ps", "aux", "--sort=-%mem"], capture_output=True, text=True, timeout=10)
+            lines = r.stdout.splitlines()[:20]
+            return {"processes": lines}
+        except: return {"error": "failed"}
+    
+    def tool_web_search(self, query):
+        try:
+            import urllib.parse
+            url = f"https://api.duckduckgo.com/?q={urllib.parse.quote(query)}&format=json"
+            r = urllib.request.urlopen(url, timeout=10)
+            data = json.loads(r.read())
+            return {"result": data.get("AbstractText", "No results")[:2000]}
+        except: return {"result": "Web search unavailable"}
+
+
+class BaseAgent:
+    """Base class for all agents."""
+    def __init__(self, name, description, provider, tools):
+        self.name = name
+        self.description = description
+        self.provider = provider
+        self.tools = tools
+        self.system_prompt = ""
+    
+    def run(self, task, context=None):
+        raise NotImplementedError
+
+
+class CoordinatorAgent(BaseAgent):
+    """Coordinates specialist agents and executes tasks."""
+    def __init__(self, provider, tools):
+        super().__init__("Coordinator", "Plans and delegates tasks", provider, tools)
+        self.system_prompt = """You are the Solus Agent coordinator. You plan and execute tasks.
+You have access to specialist agents and tools. For each task:
+1. Understand the request
+2. Break it down into steps
+3. Use tools to execute each step
+4. Report results clearly
+
+Available tools: """ + ", ".join(f"{n}({', '.join(t['params'].keys())})" for n,t in tools.tools.items()) + """
+            
+Use tools by responding with: ```tool
+{"name": "tool_name", "args": {"param": "value"}}
+```"""
+    
+    def run(self, task, context=None):
+        messages = [{"role": "system", "content": self.system_prompt}]
+        if context:
+            for c in context.get("recent", []):
+                messages.append({"role": c["role"], "content": c["content"]})
+        messages.append({"role": "user", "content": task})
+        
+        result = self.provider.chat(messages)
+        if "error" in result:
+            return result["error"]
+        
+        response = result.get("response", "")
+        # Parse tool calls
+        import re
+        tool_calls = re.findall(r'```tool\n(.*?)```', response, re.DOTALL)
+        for tc in tool_calls:
+            try:
+                tc_data = json.loads(tc.strip())
+                tool_result = self.tools.call(tc_data["name"], **tc_data.get("args", {}))
+                response += f"\n\n**Result:** {json.dumps(tool_result, indent=2)[:500]}"
+            except Exception as e:
+                response += f"\n\n**Tool error:** {e}"
+        
+        return response
+
+
+class CodeAgent(BaseAgent):
+    """Specialist agent for code generation, review, and refactoring."""
+    def __init__(self, provider, tools):
+        super().__init__("Code Agent", "Writes, reviews, and refactors code", provider, tools)
+        self.system_prompt = """You are a world-class software engineer embedded in the OS.
+You can write, review, refactor, debug, and explain code in any language.
+You have full filesystem access through tools.
+
+When writing code: provide complete, working, production-quality code.
+When reviewing: point out bugs, security issues, and improvements.
+When refactoring: explain the changes and provide the complete updated file.
+"""
+    
+    def run(self, task, context=None):
+        messages = [{"role": "system", "content": self.system_prompt}]
+        if context:
+            messages.extend(context.get("recent", [])[-10:])
+        messages.append({"role": "user", "content": task})
+        result = self.provider.chat(messages, timeout=180)
+        if "error" in result: return result["error"]
+        response = result.get("response", "")
+        # Execute file writes
+        import re
+        blocks = re.findall(r'```(?:python|js|ts|rust|go|cpp|c|bash|yaml|json|toml|html|css|sql)\n(.*?)```', response, re.DOTALL)
+        file_writes = re.findall(r'(?:write|save|create)\s+(?:file\s+)?`([^`]+)`', response, re.I)
+        for fw in file_writes[:1]:  # only first file write to be safe
+            path = os.path.expanduser(fw)
+            with open(path, "w") as f: f.write(blocks[0] if blocks else "# content")
+            response += f"\n\n✅ Written to `{path}`"
+        return response
+
+
+class SystemAgent(BaseAgent):
+    """Specialist agent for system administration."""
+    def __init__(self, provider, tools):
+        super().__init__("System Agent", "Manages system, packages, services", provider, tools)
+    
+    def run(self, task, context=None):
+        messages = [
+            {"role": "system", "content": "You are a Linux system administration agent. Use tools to manage the system."},
+            {"role": "user", "content": task}
+        ]
+        result = self.provider.chat(messages)
+        if "error" in result: return result["error"]
+        response = result.get("response", "")
+        # Auto-execute commands in backticks
+        import re
+        cmds = re.findall(r'`([^`]+)`', response)
+        for cmd in cmds[:3]:
+            if cmd.startswith(("sudo", "dnf", "systemctl", "flatpak", "solus")):
+                r = self.tools.call("execute_command", command=cmd)
+                response += f"\n\n`$ {cmd}`\n```\n{json.dumps(r)[:500]}\n```"
+        return response
+
+
+class ResearchAgent(BaseAgent):
+    """Specialist agent for web research and documentation."""
+    def __init__(self, provider, tools):
+        super().__init__("Research Agent", "Searches and summarizes information", provider, tools)
+    
+    def run(self, task, context=None):
+        messages = [
+            {"role": "system", "content": "You are a research agent. Search and synthesize information clearly."},
+            {"role": "user", "content": task}
+        ]
+        result = self.provider.chat(messages)
+        return result.get("response", "No response") if "error" not in result else result["error"]
+
+
+class AgentOrchestrator:
+    """Manages all agents and routes tasks."""
+    
+    def __init__(self, provider, tools, config):
+        self.provider = provider
+        self.tools = tools
+        self.config = config
+        self.coordinator = CoordinatorAgent(provider, tools)
+        self.code = CodeAgent(provider, tools)
+        self.system = SystemAgent(provider, tools)
+        self.research = ResearchAgent(provider, tools)
+        self.agents = {
+            "coordinator": self.coordinator,
+            "code": self.code,
+            "system": self.system,
+            "research": self.research,
+        }
+    
+    def route(self, task, context=None):
+        """Route task to the best agent."""
+        task_lower = task.lower()
+        # Detect intent
+        if any(w in task_lower for w in ["write code", "create app", "fix bug", "refactor", "implement", "generate", "program"]):
+            agent = self.code
+        elif any(w in task_lower for w in ["install", "update", "upgrade", "service", "package", "dnf", "systemctl"]):
+            agent = self.system
+        elif any(w in task_lower for w in ["search", "find", "research", "what is", "how to", "documentation"]):
+            agent = self.research
+        else:
+            agent = self.coordinator
+        
+        return agent.run(task, context)
+
+
+# ═══ Knowledge Base ═════════════════════════════════════════════════
+
+class KnowledgeBase:
+    """Simple RAG knowledge base. Indexes documents for semantic search."""
+    
+    def __init__(self):
+        self.documents = []
+        self._load()
+    
+    def _load(self):
+        if KB_INDEX.exists():
+            try:
+                with open(KB_INDEX, "rb") as f: self.documents = pickle.load(f)
+            except: self.documents = []
+    
+    def _save(self):
+        with open(KB_INDEX, "wb") as f: pickle.dump(self.documents[-1000:], f)
+    
+    def add(self, title, content, source="", tags=None):
+        doc = {
+            "id": hashlib.md5(content.encode()[:1000]).hexdigest(),
+            "title": title, "content": content[:10000],
+            "source": source, "tags": tags or [],
+            "added": time.time(),
+        }
+        self.documents.append(doc)
+        self._save()
+        return doc["id"]
+    
+    def search(self, query, limit=10):
+        """Simple keyword search (no embeddings needed for offline)."""
+        q = query.lower()
+        scored = []
+        for doc in self.documents[-1000:]:
+            score = 0
+            words = q.split()
+            for w in words:
+                if w in doc["title"].lower(): score += 3
+                if w in doc["content"].lower(): score += 1
+                if any(w in t.lower() for t in doc.get("tags", [])): score += 2
+            if score > 0:
+                scored.append((score, doc))
+        scored.sort(key=lambda x: -x[0])
+        return [s[1] for s in scored[:limit]]
+    
+    def index_folder(self, folder):
+        folder = os.path.expanduser(folder)
+        if not os.path.isdir(folder): return 0
+        count = 0
+        supported = {".py", ".js", ".ts", ".rs", ".go", ".cpp", ".c", ".h", ".md", ".txt",
+                    ".yaml", ".yml", ".json", ".toml", ".qml", ".css", ".html", ".sh", ".conf"}
+        for root, dirs, files in os.walk(folder):
+            if ".git" in dirs: dirs.remove(".git")
+            if "__pycache__" in dirs: dirs.remove("__pycache__")
+            for f in files:
+                ext = os.path.splitext(f)[1].lower()
+                if ext in supported:
+                    path = os.path.join(root, f)
+                    try:
+                        content = open(path, "r", errors="ignore").read()
+                        if len(content) > 50:
+                            self.add(f, content, source=path, tags=[ext[1:]])
+                            count += 1
+                    except: pass
+        self._save()
+        return count
+
+
+# ═══ Memory System ══════════════════════════════════════════════════
+
+class MemorySystem:
+    def __init__(self):
+        self.data = self._load()
+    def _load(self):
+        if MEMORY_FILE.exists():
+            try: return json.loads(MEMORY_FILE.read_text())
+            except: pass
+        return {"conversations": [], "facts": [], "preferences": {}}
+    def _save(self):
+        MEMORY_FILE.write_text(json.dumps(self.data, indent=2))
+    def add_conversation(self, role, content):
+        self.data["conversations"].append({"role": role, "content": content, "ts": time.time()})
+        self.data["conversations"] = self.data["conversations"][-200:]
+        self._save()
+    def get_context(self):
+        return {"recent": self.data["conversations"][-20:], "facts": self.data["facts"][-20:]}
+
+
+# ═══ D-Bus Service ═════════════════════════════════════════════════
+
+class SolusAgentDaemon(dbus.service.Object):
+    """The core daemon that powers the entire Solus Agent platform."""
+    
+    def __init__(self, bus, path):
+        super().__init__(bus, path)
+        self.config = load_config()
+        self.provider = AIProvider(self.config)
+        self.tools = ToolRegistry(self.config)
+        self.orchestrator = AgentOrchestrator(self.provider, self.tools, self.config)
+        self.memory = MemorySystem()
+        self.kb = KnowledgeBase()
+        self._index_progress = 0
+        
+        print(f"🧠 Solus Agent daemon running on {BUS_NAME}")
+        print(f"   Model: {self.config['model']['provider']}/{self.config['model']['model']}")
+        print(f"   Knowledge: {len(self.kb.documents)} docs indexed")
+        
+        # Start background KB indexing
+        threading.Thread(target=self._bg_index, daemon=True).start()
+    
+    def _bg_index(self):
+        self.kb.index_folder("~/linux-solus")
+        self.kb.index_folder("~/Documents")
+    
+    @dbus.service.method(IFACE, in_signature="s", out_signature="s")
+    def Chat(self, query):
+        """Natural language chat with the orchestrator."""
+        context = self.memory.get_context()
+        response = self.orchestrator.route(query, context)
+        self.memory.add_conversation("user", query)
+        self.memory.add_conversation("assistant", response)
+        return json.dumps({"response": response})
+    
+    @dbus.service.method(IFACE, in_signature="s", out_signature="s")
+    def Search(self, query):
+        """Universal desktop search."""
+        results = []
+        for folder in self.config["search"]["index_folders"]:
+            f = os.path.expanduser(folder)
+            if not os.path.isdir(f): continue
+            for root, dirs, files in os.walk(f):
+                if ".git" in dirs: dirs.remove(".git")
+                for fn in files:
+                    if query.lower() in fn.lower():
+                        fp = os.path.join(root, fn)
+                        try: s = os.stat(fp); results.append({"name": fn, "path": fp, "size": s.st_size, "mtime": s.st_mtime})
+                        except: pass
+                    if len(results) >= 15: break
+                if len(results) >= 15: break
+        return json.dumps({"results": results})
+    
+    @dbus.service.method(IFACE, in_signature="s", out_signature="s")
+    def CodeAction(self, request):
+        """Code generation/refactoring via Code Agent."""
+        r = json.loads(request) if isinstance(request, str) else request
+        task = r.get("task", "")
+        code = r.get("code", "")
+        path = r.get("path", "")
+        full_task = f"File: {path}\n\nCurrent code:\n```\n{code[:3000]}\n```\n\nTask: {task}"
+        result = self.orchestrator.code.run(full_task)
+        self.memory.add_conversation("user", f"Code: {task}")
+        self.memory.add_conversation("assistant", result[:500])
+        return json.dumps({"response": result})
+    
+    @dbus.service.method(IFACE, in_signature="s", out_signature="s")
+    def KnowledgeSearch(self, query):
+        """Search the knowledge base."""
+        results = self.kb.search(query)
+        return json.dumps({"results": results})
+    
+    @dbus.service.method(IFACE, in_signature="s", out_signature="s")
+    def KnowledgeAdd(self, doc_json):
+        """Add a document to the knowledge base."""
+        doc = json.loads(doc_json)
+        doc_id = self.kb.add(doc.get("title", "Untitled"), doc.get("content", ""),
+                             doc.get("source", ""), doc.get("tags", []))
+        return json.dumps({"id": doc_id})
+    
+    @dbus.service.method(IFACE, in_signature="s", out_signature="s")
+    def KnowledgeIndex(self, folder):
+        """Index a folder into the knowledge base."""
+        count = self.kb.index_folder(folder)
+        return json.dumps({"indexed": count, "total": len(self.kb.documents)})
+    
+    @dbus.service.method(IFACE, in_signature="ss", out_signature="s")
+    def QuickCommand(self, category, query):
+        """Quick actions: pkg, file, app, setting."""
+        if category == "pkg":
+            r = subprocess.run(["dnf", "list", query], capture_output=True, text=True, timeout=30)
+            return json.dumps({"found": r.returncode == 0, "output": r.stdout[:500]})
+        elif category == "file":
+            results = self.kb.search(query)
+            return json.dumps({"results": results[:5]})
+        elif category == "app":
+            return json.dumps({"action": f"Launching {query}"})
+        return json.dumps({"error": "unknown"})
+    
+    @dbus.service.method(IFACE, in_signature="", out_signature="s")
+    def GetStatus(self):
+        return json.dumps({
+            "status": "running", "model": f"{self.config['model']['provider']}/{self.config['model']['model']}",
+            "agents": list(self.orchestrator.agents.keys()),
+            "knowledge": len(self.kb.documents),
+            "memory": len(self.memory.data["conversations"]),
+        })
+    
+    @dbus.service.method(IFACE, in_signature="s", out_signature="s")
+    def SetConfig(self, json_str):
+        try: c = json.loads(json_str); self.config.update(c); save_config(self.config); return json.dumps({"saved": True})
+        except Exception as e: return json.dumps({"error": str(e)})
+    
+    @dbus.service.method(IFACE, in_signature="", out_signature="s")
+    def GetConfig(self):
+        return json.dumps(self.config)
+    
+    @dbus.service.signal(IFACE, signature="s")
+    def Notification(self, message):
+        pass
+
+
+def main():
+    dbus.mainloop.glib.DBusGMainLoop(set_as_default=True)
+    bus = dbus.SessionBus()
+    name = dbus.service.BusName(BUS_NAME, bus)
+    daemon = SolusAgentDaemon(bus, OBJ_PATH)
+    try:
+        GLib.MainLoop().run()
+    except KeyboardInterrupt:
+        print("\n⏹  Solus Agent daemon stopped")
+
+if __name__ == "__main__":
+    main()

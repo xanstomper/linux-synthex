@@ -1,0 +1,15 @@
+{
+  "name": "minimal",
+  "description": "Clean, monochrome, distraction-free workspace",
+  "colorscheme": "BreezeLight",
+  "icons": "Papirus-Colorless",
+  "cursor": "Breeze",
+  "font": {"family": "Inter", "size": 10},
+  "layout": "minimal",
+  "compositor": {
+    "enabled": true,
+    "blur": false,
+    "vsync": "auto"
+  },
+  "wallpaper": "minimal-gray"
+}

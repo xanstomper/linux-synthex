@@ -1,0 +1,381 @@
+# ============================================================================
+# Solus Linux — Security Scanning Workflow
+# ============================================================================
+# Scans packages, ISOs, and infrastructure for vulnerabilities.
+# Runs on schedule, on release tags, and on demand.
+# ============================================================================
+
+name: Security Scan
+
+on:
+  schedule:
+    # Daily CVE scan
+    - cron: '0 6 * * *'
+  workflow_dispatch:
+    inputs:
+      scan_type:
+        description: "Type of scan to run"
+        required: false
+        type: choice
+        options:
+          - all
+          - cve
+          - openscap
+          - dependency
+          - container
+        default: all
+      severity_threshold:
+        description: "Minimum severity to report"
+        required: false
+        type: choice
+        options:
+          - critical
+          - high
+          - medium
+          - low
+        default: high
+  push:
+    branches:
+      - main
+      - develop
+    paths:
+      - 'packages/**'
+      - 'kickstart/**'
+      - 'Dockerfile*'
+      - 'Containerfile*'
+
+env:
+  CVE_DB_DIR: /tmp/cve-db
+  SCAN_REPORT_DIR: /tmp/scan-reports
+  OSV_QUERY_URL: https://api.osv.dev/v1/query
+  GHCR_REGISTRY: ghcr.io/solus-linux
+
+jobs:
+  ############################################################################
+  # CVE SCAN: Scan package versions against OSV database
+  ############################################################################
+  cve-scan:
+    runs-on: ubuntu-latest
+    outputs:
+      critical_count: ${{ steps.scan.outputs.critical }}
+      high_count: ${{ steps.scan.outputs.high }}
+      report_file: ${{ steps.scan.outputs.report }}
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install scan tools
+        run: |
+          # Install osv-scanner
+          curl -sL https://github.com/google/osv-scanner/releases/latest/download/osv-scanner_linux_amd64 \
+            -o /usr/local/bin/osv-scanner
+          chmod +x /usr/local/bin/osv-scanner
+
+          # Install grype
+          curl -sSfL https://raw.githubusercontent.com/anchore/grype/main/install.sh \
+            | sh -s -- -b /usr/local/bin
+
+      - name: Extract package versions from specs
+        run: |
+          mkdir -p "${SCAN_REPORT_DIR}"
+          python3 << 'PYEOF'
+          import os, json, re, subprocess
+
+          packages = []
+          spec_dir = "packages"
+          for root, dirs, files in os.walk(spec_dir):
+              for f in files:
+                  if f.endswith(".spec"):
+                      path = os.path.join(root, f)
+                      pkg_name = f.replace(".spec", "")
+                      with open(path) as fh:
+                          content = fh.read()
+                      # Extract version
+                      ver_match = re.search(r'^Version:\s*(\S+)', content, re.M)
+                      ver = ver_match.group(1) if ver_match else "unknown"
+                      # Extract epoch
+                      epoch_match = re.search(r'^Epoch:\s*(\S+)', content, re.M)
+                      epoch = epoch_match.group(1) if epoch_match else "0"
+                      packages.append({
+                          "name": pkg_name,
+                          "version": f"{epoch}:{ver}",
+                          "path": path
+                      })
+
+          with open(f"{os.environ['SCAN_REPORT_DIR']}/packages.json", "w") as fh:
+              json.dump(packages, fh, indent=2)
+          print(f"Found {len(packages)} packages")
+          PYEOF
+
+      - name: Run OSV scanner
+        id: scan
+        env:
+          OSV_SEVERITY_THRESHOLD: ${{ inputs.severity_threshold || 'high' }}
+        run: |
+          # Scan each package against OSV
+          osv-scanner \
+            --format=json \
+            --output="${SCAN_REPORT_DIR}/osv-results.json" \
+            --lockfile="${SCAN_REPORT_DIR}/packages.json" \
+            || true  # Scanner returns non-zero on findings
+
+          # Parse results
+          python3 << 'PYEOF'
+          import json, os
+
+          with open(f"{os.environ['SCAN_REPORT_DIR']}/osv-results.json") as f:
+              data = json.load(f)
+
+          critical = 0
+          high = 0
+          medium = 0
+          low = 0
+
+          results = data.get("results", [])
+          for result in results:
+              for vuln in result.get("vulnerabilities", []):
+                  severity = vuln.get("severity", "unknown").lower()
+                  if severity == "critical":
+                      critical += 1
+                  elif severity == "high":
+                      high += 1
+                  elif severity == "medium":
+                      medium += 1
+                  elif severity == "low":
+                      low += 1
+
+          report = {
+              "critical": critical,
+              "high": high,
+              "medium": medium,
+              "low": low,
+              "total": critical + high + medium + low,
+              "timestamp": os.popen("date -u +%Y-%m-%dT%H:%M:%SZ").read().strip(),
+              "vulnerabilities": [
+                  {
+                      "id": v.get("id"),
+                      "package": v.get("package", {}).get("name"),
+                      "severity": v.get("severity"),
+                      "summary": v.get("summary", "")[:200]
+                  }
+                  for result in results
+                  for v in result.get("vulnerabilities", [])
+              ]
+          }
+
+          with open(f"{os.environ['SCAN_REPORT_DIR']}/scan-summary.json", "w") as f:
+              json.dump(report, f, indent=2)
+
+          print(f"critical={critical}", file=os.popen(f"tee -a {os.environ.get('GITHUB_OUTPUT', '/dev/null')}", "w"))
+          print(f"high={high}", file=os.popen(f"tee -a {os.environ.get('GITHUB_OUTPUT', '/dev/null')}", "w"))
+          print(f"report={SCAN_REPORT_DIR}/scan-summary.json", file=os.popen(f"tee -a {os.environ.get('GITHUB_OUTPUT', '/dev/null')}", "w"))
+          PYEOF
+
+      - name: Upload scan results
+        uses: actions/upload-artifact@v4
+        with:
+          name: cve-scan-results
+          path: ${{ env.SCAN_REPORT_DIR }}/
+          retention-days: 90
+
+  ############################################################################
+  # OPENSCAP: Compliance and hardening scan
+  ############################################################################
+  openscap-scan:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install OpenSCAP
+        run: |
+          dnf install -y openscap-scanner scap-security-guide
+
+      - name: Generate SCAP profile
+        run: |
+          mkdir -p "${SCAN_REPORT_DIR}/openscap"
+
+          # Use CIS benchmark or custom Solus profile
+          OSCAP_PROFILE="${SCAN_REPORT_DIR}/openscap/solus-profile.xml"
+          cat > "${OSCAP_PROFILE}" << 'XML'
+          <?xml version="1.0" encoding="UTF-8"?>
+          <Profile id="solus-hardened">
+            <title>Solus Linux Hardened Profile</title>
+            <description>Baseline security policy for Solus Linux installations</description>
+            <select idrule="xccdf_org.solus.rule_ensure_gpgcheck_globally_activated" selected="true"/>
+            <select idrule="xccdf_org.solus.rule_ensure_selinux_enabled" selected="true"/>
+            <select idrule="xccdf_org.solus.rule_ensure_firewalld_enabled" selected="true"/>
+            <select idrule="xccdf_org.solus.rule_ensure_aide_installed" selected="true"/>
+            <select idrule="xccdf_org.solus.rule_ensure_sshd_configured" selected="true"/>
+            <select idrule="xccdf_org.solus.rule_ensure_password_hashing_sha512" selected="true"/>
+            <select idrule="xccdf_org.solus.rule_ensure_kernel_hardening" selected="true"/>
+            <select idrule="xccdf_org.solus.rule_ensure_filesystem_partitions" selected="true"/>
+          </Profile>
+          XML
+
+          # Evaluate with oscap
+          oscap xccdf eval \
+            --profile solus-hardened \
+            --results "${SCAN_REPORT_DIR}/openscap/results.xml" \
+            --report "${SCAN_REPORT_DIR}/openscap/report.html" \
+            /usr/share/xml/scap/ssg/content/ssg-rhel9-ds.xml \
+            || true
+
+      - name: Upload OpenSCAP results
+        uses: actions/upload-artifact@v4
+        with:
+          name: openscap-results
+          path: ${{ env.SCAN_REPORT_DIR }}/openscap/
+          retention-days: 90
+
+  ############################################################################
+  # DEPENDENCY CHECK: OWASP Dependency-Check on source repos
+  ############################################################################
+  dependency-check:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Run OWASP Dependency-Check
+        uses: dependency-check/Dependency-Check_Action@main
+        with:
+          project: 'solus-linux'
+          path: '.'
+          format: 'HTML'
+          args: >
+            --failOnCVSS 7
+            --enableRetired
+            --suppression suppression.xml
+
+      - name: Upload dependency check results
+        uses: actions/upload-artifact@v4
+        with:
+          name: dependency-check-results
+          path: reports/
+          retention-days: 90
+
+  ############################################################################
+  # CONTAINER SCAN: Scan container images for vulnerabilities
+  ############################################################################
+  container-scan:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Scan container images
+        run: |
+          mkdir -p "${SCAN_REPORT_DIR}/container"
+
+          # Scan ISO builder image
+          grype "${GHCR_REGISTRY}/iso-builder:latest" \
+            --output json \
+            --file "${SCAN_REPORT_DIR}/container/iso-builder.json" \
+            --fail-on high \
+            || true
+
+          # Scan any other container images in the registry
+          grype "${GHCR_REGISTRY}/build-base:latest" \
+            --output json \
+            --file "${SCAN_REPORT_DIR}/container/build-base.json" \
+            --fail-on high \
+            || true
+
+      - name: Upload container scan results
+        uses: actions/upload-artifact@v4
+        with:
+          name: container-scan-results
+          path: ${{ env.SCAN_REPORT_DIR }}/container/
+          retention-days: 90
+
+  ############################################################################
+  # REPORT: Aggregate all scan results and post notifications
+  ############################################################################
+  report:
+    needs: [cve-scan, openscap-scan, dependency-check, container-scan]
+    runs-on: ubuntu-latest
+    if: always()
+
+    steps:
+      - name: Download all scan results
+        uses: actions/download-artifact@v4
+        with:
+          pattern: '*-results'
+          merge-multiple: true
+          path: aggregated-reports
+
+      - name: Generate security report
+        run: |
+          python3 << 'PYEOF'
+          import json, os
+          reports_dir = "aggregated-reports"
+
+          report = {
+              "repository": "${{ github.repository }}",
+              "workflow": "${{ github.workflow }}",
+              "run_id": "${{ github.run_id }}",
+              "timestamp": os.popen("date -u +%Y-%m-%dT%H:%M:%SZ").read().strip(),
+              "scan_types": {}
+          }
+
+          # CVE scan summary
+          cve_file = os.path.join(reports_dir, "scan-summary.json")
+          if os.path.exists(cve_file):
+              with open(cve_file) as f:
+                  report["scan_types"]["cve"] = json.load(f)
+
+          # Count total vulnerabilities
+          total = sum(
+              s.get("critical", 0) + s.get("high", 0)
+              for s in report.get("scan_types", {}).values()
+              if isinstance(s, dict)
+          )
+
+          print(f"Total critical+high vulnerabilities: {total}")
+
+          with open("security-report.json", "w") as f:
+              json.dump(report, f, indent=2)
+          PYEOF
+
+      - name: Create issue for critical vulnerabilities
+        if: needs.cve-scan.outputs.critical_count > 0
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const critical = parseInt('${{ needs.cve-scan.outputs.critical_count }}');
+            const high = parseInt('${{ needs.cve-scan.outputs.high_count }}');
+            const body = `## Security Scan Results — ${new Date().toISOString()}
+            
+            ### Critical Vulnerabilities: ${critical}
+            ### High Vulnerabilities: ${high}
+            
+            See the [scan artifacts](${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}) for full details.
+            
+            Severity threshold: ${{ inputs.severity_threshold || 'high' }}
+            `;
+            
+            await github.rest.issues.create({
+              owner: context.repo.owner,
+              repo: context.repo,
+              title: `Security Scan: ${critical} critical, ${high} high vulnerabilities found`,
+              body: body,
+              labels: ['security', 'automated']
+            });
+
+      - name: Notify security team
+        if: needs.cve-scan.outputs.critical_count > 0
+        uses: slackapi/slack-github-action@v1.24.0
+        with:
+          payload: |
+            {
+              "text": "Security Alert: ${{ needs.cve-scan.outputs.critical_count }} critical, ${{ needs.cve-scan.outputs.high_count }} high vulnerabilities",
+              "blocks": [{
+                "type": "section",
+                "text": {
+                  "type": "mrkdwn",
+                  "text": "*Security Scan Complete*\n• Critical: `${{ needs.cve-scan.outputs.critical_count }}`\n• High: `${{ needs.cve-scan.outputs.high_count }}`\n• Run: <${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}|#${{ github.run_number }}>"
+                }
+              }]
+            }
+        env:
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+          SLACK_WEBHOOK_TYPE: INCOMING_WEBHOOK

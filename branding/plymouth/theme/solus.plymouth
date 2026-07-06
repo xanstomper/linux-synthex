@@ -1,0 +1,19 @@
+[Plymouth Theme]
+Name=Solus
+Description=Solus Linux Boot Splash
+ModuleName=solus-theme
+
+[solus-theme]
+ImageDir=/usr/share/plymouth/themes/solus
+HorizontalAlignment=0.5
+VerticalAlignment=0.5
+Transition=none
+TransitionDuration=0.0
+UseBackgroundCompositing=true
+BackgroundStartColor=0x0B0F1A
+BackgroundEndColor=0x1A1A2E
+Logo=/usr/share/plymouth/themes/solus/logo.png
+LogoOpacity=0.8
+Bullet=/usr/share/plymouth/themes/solus/bullet.png
+BulletHighlight=/usr/share/plymouth/themes/solus/bullet-highlight.png
+Watermark=/usr/share/plymouth/themes/solus/watermark.png

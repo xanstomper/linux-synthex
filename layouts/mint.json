@@ -1,0 +1,65 @@
+{
+  "name": "mint",
+  "description": "Linux Mint-style layout — bottom panel, classic menu, window list, clean desktop",
+  "panel": {
+    "position": "bottom",
+    "height": 38,
+    "dock": false,
+    "widgets": ["application-menu", "window-list", "system-tray", "clock"],
+    "menu_style": "classic",
+    "window_list_style": "text-plus-icon",
+    "panel_opacity": 95
+  },
+  "compositor": {
+    "enabled": true,
+    "blur": false,
+    "vsync": "auto",
+    "latency_mode": "normal",
+    "animation_speed": 2,
+    "shadows": true,
+    "translucency": 0.0
+  },
+  "wallpaper": "/usr/share/wallpapers/solus/mint-style.png",
+  "desktop": {
+    "show_icons": true,
+    "icon_size": 48,
+    "allow_right_click": true,
+    "folder_previews": true
+  },
+  "services": {
+    "gamemode": false,
+    "tracker_services": true,
+    "background_services_stopped": []
+  },
+  "shortcuts": {
+    "super": "application-menu",
+    "super+d": "show-desktop",
+    "super+e": "dolphin",
+    "super+l": "lock-screen",
+    "super+t": "konsole",
+    "alt+f2": "run-command",
+    "alt+tab": "window-switcher",
+    "ctrl+alt+delete": "task-manager",
+    "super+right": "tile-right",
+    "super+left": "tile-left",
+    "super+up": "maximize",
+    "super+down": "minimize"
+  },
+  "theme": {
+    "color_scheme": "SolusMint",
+    "plasma_theme": "solus-mint",
+    "icon_theme": "Mint-Y",
+    "cursor_theme": "Bibata-Modern-Classic",
+    "font": "Noto Sans,10",
+    "mono_font": "JetBrains Mono,10",
+    "titlebar_buttons": "right",
+    "window_decoration": "solus-mint"
+  },
+  "performance": {
+    "cpu_governor": "ondemand",
+    "gpu_profile": "auto",
+    "io_scheduler": "mq-deadline",
+    "zram_enabled": true,
+    "swappiness": 30
+  }
+}

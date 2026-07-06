@@ -1,0 +1,380 @@
+# ============================================================================
+# Solus Linux — Release Workflow
+# ============================================================================
+# Signs artifacts, generates checksums and torrents, syncs to mirrors,
+# publishes release notes, and announces the release.
+# ============================================================================
+
+name: Release ISO
+
+on:
+  workflow_call:
+    inputs:
+      release_version:
+        description: "Release version (e.g., 2026.1)"
+        required: true
+        type: string
+      signed_iso_artifact:
+        description: "Name of artifact containing signed ISOs"
+        required: true
+        type: string
+      prerelease:
+        description: "Mark as prerelease"
+        required: false
+        type: boolean
+        default: false
+  workflow_dispatch:
+    inputs:
+      release_version:
+        description: "Release version (e.g., 2026.1)"
+        required: true
+        type: string
+      signed_iso_artifact:
+        description: "Name of artifact containing signed ISOs"
+        required: false
+        type: string
+        default: signed-iso
+      prerelease:
+        description: "Mark as prerelease"
+        required: false
+        type: boolean
+        default: false
+
+env:
+  RELEASE_DIR: /tmp/release
+  RELEASE_NOTES_DIR: /tmp/release-notes
+  TORRENT_DIR: /tmp/torrents
+  MIRROR_ORIGIN: repo.solus.org
+  CDN_ENDPOINT: https://cdn.solus.org
+  MIRROR_RSYNC: rsync://repo.solus.org/solus
+
+jobs:
+  ############################################################################
+  # PREPARE: Gather signed artifacts and prepare release assets
+  ############################################################################
+  prepare:
+    runs-on: ubuntu-latest
+    outputs:
+      version: ${{ steps.version.outputs.version }}
+      iso_files: ${{ steps.list-isos.outputs.files }}
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set version
+        id: version
+        run: |
+          VERSION="${{ inputs.release_version }}"
+          echo "version=${VERSION}" >> "$GITHUB_OUTPUT"
+
+      - name: Download signed ISO artifacts
+        uses: actions/download-artifact@v4
+        with:
+          name: ${{ inputs.signed_iso_artifact }}
+          path: isos
+
+      - name: List ISO files
+        id: list-isos
+        run: |
+          mkdir -p "${RELEASE_DIR}" "${TORRENT_DIR}"
+          cp isos/*.iso "${RELEASE_DIR}/" 2>/dev/null || true
+          cp isos/*.asc "${RELEASE_DIR}/" 2>/dev/null || true
+          FILES=$(ls "${RELEASE_DIR}/")
+          echo "Release files: ${FILES}"
+          JSON=$(ls "${RELEASE_DIR}"/*.iso 2>/dev/null | jq -R -s -c 'split("\n")[:-1]')
+          echo "files=${JSON}" >> "$GITHUB_OUTPUT"
+
+  ############################################################################
+  # CHECKSUMS: Generate and sign all checksum files
+  ############################################################################
+  checksums:
+    needs: prepare
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/download-artifact@v4
+        with:
+          name: ${{ inputs.signed_iso_artifact }}
+          path: ${{ env.RELEASE_DIR }}
+
+      - name: Generate checksums
+        run: |
+          cd "${RELEASE_DIR}"
+
+          # SHA-256
+          sha256sum *.iso > SHA256SUMS
+          sha256sum *.asc >> SHA256SUMS
+
+          # SHA-512
+          sha512sum *.iso > SHA512SUMS
+          sha512sum *.asc >> SHA512SUMS
+
+          # BLAKE2b
+          b2sum *.iso > B2SUMS
+          b2sum *.asc >> B2SUMS
+
+          # Combined checksums file
+          {
+            echo "=========================================="
+            echo " Solus Linux ${{ needs.prepare.outputs.version }} Checksums"
+            echo " Generated: $(date -u)"
+            echo "=========================================="
+            echo ""
+            echo "--- SHA256 ---"
+            cat SHA256SUMS
+            echo ""
+            echo "--- SHA512 ---"
+            cat SHA512SUMS
+            echo ""
+            echo "--- BLAKE2b ---"
+            cat B2SUMS
+            echo ""
+            echo "=========================================="
+          } > CHECKSUMS
+
+      - name: Sign checksums
+        run: |
+          cd "${RELEASE_DIR}"
+          echo "${{ secrets.SOLUS_RELEASE_KEY_PASSPHRASE }}" | \
+            gpg --batch --yes --passphrase-fd 0 \
+              --default-key "Solus Release <release@solus.org>" \
+              --detach-sign --armor SHA256SUMS
+
+          echo "${{ secrets.SOLUS_RELEASE_KEY_PASSPHRASE }}" | \
+            gpg --batch --yes --passphrase-fd 0 \
+              --default-key "Solus Release <release@solus.org>" \
+              --detach-sign --armor SHA512SUMS
+
+          echo "${{ secrets.SOLUS_RELEASE_KEY_PASSPHRASE }}" | \
+            gpg --batch --yes --passphrase-fd 0 \
+              --default-key "Solus Release <release@solus.org>" \
+              --detach-sign --armor CHECKSUMS
+
+      - name: Upload checksum files
+        uses: actions/upload-artifact@v4
+        with:
+          name: checksums
+          path: ${{ env.RELEASE_DIR }}/SHA*SUMS*
+          retention-days: 365
+
+  ############################################################################
+  # TORRENTS: Generate BitTorrent metafiles
+  ############################################################################
+  torrents:
+    needs: prepare
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install torrent tools
+        run: |
+          dnf install -y transmission-cli
+
+      - name: Generate torrent files
+        run: |
+          mkdir -p "${TORRENT_DIR}"
+
+          for iso in "${RELEASE_DIR}"/*.iso; do
+            BASENAME=$(basename "${iso}" .iso)
+            transmission-create \
+              --tracker "udp://tracker.solus.org:6969/announce" \
+              --tracker "udp://tracker.opentrackr.org:1337/announce" \
+              --tracker "https://tracker.solus.org:443/announce" \
+              --comment "Solus Linux ${{ needs.prepare.outputs.version }} - ${BASENAME}" \
+              --outfile "${TORRENT_DIR}/${BASENAME}.torrent" \
+              "${iso}"
+
+            # Sign torrent
+            echo "${{ secrets.SOLUS_RELEASE_KEY_PASSPHRASE }}" | \
+              gpg --batch --yes --passphrase-fd 0 \
+                --default-key "Solus Release <release@solus.org>" \
+                --detach-sign --armor \
+                "${TORRENT_DIR}/${BASENAME}.torrent"
+          done
+
+      - name: Upload torrent files
+        uses: actions/upload-artifact@v4
+        with:
+          name: torrents
+          path: ${{ env.TORRENT_DIR }}/
+          retention-days: 365
+
+  ############################################################################
+  # MIRROR: Sync release artifacts to mirror network
+  ############################################################################
+  mirror:
+    needs: [prepare, checksums, torrents]
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+      - name: Download all release artifacts
+        uses: actions/download-artifact@v4
+        with:
+          path: release-assets
+
+      - name: Install sync tools
+        run: |
+          dnf install -y rsync openssh-clients
+
+      - name: Deploy to mirror origin
+        run: |
+          RELEASE_PATH="/repo/solus/releases/${{ needs.prepare.outputs.version }}"
+          mkdir -p "${RELEASE_PATH}"
+
+          # Copy all assets
+          find release-assets -type f -exec cp -n {} "${RELEASE_PATH}/" \;
+
+          # Create symlink for 'latest'
+          ln -sfn "${RELEASE_PATH}" "/repo/solus/releases/latest"
+
+          # Sync to origin server
+          rsync -avz --delete-delay \
+            -e "ssh -i /tmp/deploy-key -o StrictHostKeyChecking=no" \
+            /repo/solus/ \
+            "deploy@${MIRROR_ORIGIN}:/repo/solus/"
+
+      - name: Notify CDN to purge cache
+        run: |
+          # CDN cache purge (example for BunnyCDN)
+          curl -X POST \
+            -H "Content-Type: application/json" \
+            -H "Authorization: Bearer ${{ secrets.CDN_API_KEY }}" \
+            -d '{"urls": ["https://cdn.solus.org/releases/${{ needs.prepare.outputs.version }}/"]}' \
+            "https://api.bunny.net/pullzone/${{ secrets.CDN_ZONE_ID }}/purge" \
+            || echo "CDN purge failed (non-critical)"
+
+      - name: Trigger mirror sync
+        run: |
+          # Ping mirror list to trigger sync
+          curl -X POST \
+            -H "Authorization: Bearer ${{ secrets.MIRROR_API_KEY }}" \
+            "https://admin.solus.org/api/mirrors/sync" \
+            || echo "Mirror sync trigger failed (non-critical)"
+
+  ############################################################################
+  # GITHUB RELEASE: Create GitHub Release with all artifacts
+  ############################################################################
+  github-release:
+    needs: [prepare, checksums, torrents, mirror]
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+
+    steps:
+      - uses: actions/checkout@v4
+      - name: Download all artifacts
+        uses: actions/download-artifact@v4
+        with:
+          path: release-assets
+
+      - name: Generate release notes
+        run: |
+          mkdir -p "${RELEASE_NOTES_DIR}"
+
+          # Generate release notes from CHANGELOG or template
+          cat > "${RELEASE_NOTES_DIR}/release-notes.md" << 'RNOTES'
+          # Solus Linux ${{ needs.prepare.outputs.version }} Released
+
+          ## Downloads
+
+          | Variant | Architecture | Size | SHA256 |
+          |---------|-------------|------|--------|
+          RNOTES
+
+          for iso in release-assets/*/*.iso; do
+            BASENAME=$(basename "${iso}")
+            SIZE=$(stat --format=%s "${iso}" | numfmt --to=iec)
+            SHA=$(sha256sum "${iso}" | cut -d' ' -f1)
+            echo "| ${BASENAME} | | ${SIZE} | \`${SHA}\` |" >> "${RELEASE_NOTES_DIR}/release-notes.md"
+          done
+
+          cat >> "${RELEASE_NOTES_DIR}/release-notes.md" << 'RNOTES'
+
+          ## Verification
+
+          ```bash
+          # Import our GPG key
+          gpg --keyserver keyserver.ubuntu.com --recv-keys ${{ secrets.SOLUS_RELEASE_KEY_ID }}
+
+          # Verify checksums
+          gpg --verify SHA256SUMS.asc SHA256SUMS
+
+          # Verify ISO
+          sha256sum -c SHA256SUMS
+          ```
+
+          ## Changes since previous release
+
+          See the [changelog](CHANGELOG.md) for full details.
+
+          ## Support
+
+          - Documentation: https://docs.solus.org
+          - Forums: https://discuss.solus.org
+          - IRC: #solus on irc.libera.chat
+          RNOTES
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: v${{ needs.prepare.outputs.version }}
+          name: Solus Linux ${{ needs.prepare.outputs.version }}
+          body_path: ${{ env.RELEASE_NOTES_DIR }}/release-notes.md
+          prerelease: ${{ inputs.prerelease }}
+          files: |
+            release-assets/**/*
+          fail_on_unmatched_files: false
+          generate_release_notes: false
+
+      - name: Upload release metadata
+        uses: actions/upload-artifact@v4
+        with:
+          name: release-metadata
+          path: ${{ env.RELEASE_NOTES_DIR }}/
+          retention-days: 365
+
+  ############################################################################
+  # ANNOUNCE: Post release announcements
+  ############################################################################
+  announce:
+    needs: [github-release]
+    runs-on: ubuntu-latest
+    if: ! inputs.prerelease
+
+    steps:
+      - name: Announce on Slack
+        uses: slackapi/slack-github-action@v1.24.0
+        with:
+          payload: |
+            {
+              "text": "Solus Linux ${{ needs.prepare.outputs.version }} has been released! 🎉",
+              "blocks": [{
+                "type": "section",
+                "text": {
+                  "type": "mrkdwn",
+                  "text": "*Solus Linux ${{ needs.prepare.outputs.version }} Released*\n\nDownload: https://solus.org/download\nRelease Notes: https://github.com/${{ github.repository }}/releases/tag/v${{ needs.prepare.outputs.version }}"
+                }
+              }]
+            }
+        env:
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+          SLACK_WEBHOOK_TYPE: INCOMING_WEBHOOK
+
+      - name: Post to Mastodon
+        run: |
+          curl -X POST \
+            -H "Authorization: Bearer ${{ secrets.MASTODON_TOKEN }}" \
+            -d "status=Solus Linux ${{ needs.prepare.outputs.version }} has been released! 🎉\n\nDownload: https://solus.org/download\nRelease Notes: https://github.com/${{ github.repository }}/releases/tag/v${{ needs.prepare.outputs.version }}" \
+            "https://fosstodon.org/api/v1/statuses" \
+            || echo "Mastodon post failed (non-critical)"
+
+      - name: Send mailing list email
+        run: |
+          # Send announcement to solus-announce mailing list
+          mail -s "Solus Linux ${{ needs.prepare.outputs.version }} Released" \
+            -a "From: Solus Release Team <release@solus.org>" \
+            solus-announce@lists.solus.org \
+            < "${RELEASE_NOTES_DIR}/release-notes.md" \
+            || echo "Mail send failed (non-critical)"

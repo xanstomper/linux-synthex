@@ -1,0 +1,75 @@
+# ╔══════════════════════════════════════════════════════════════╗
+# ║  Solus Hyprland — Wofi Application Launcher Configuration   ║
+# ║  Design: "Solus Dynamic Tiling" — Clean, minimal            ║
+# ║  Version: 1.0.0                                             ║
+# ╚══════════════════════════════════════════════════════════════╝
+# Installed to: /etc/wofi/config
+# User override: ~/.config/wofi/config
+
+# ─── Display Mode ─────────────────────────────────────────────────────────
+mode=drun
+
+# ─── Dimensions ───────────────────────────────────────────────────────────
+width=600
+height=500
+x=center
+y=center
+location=center
+term=kitty
+
+# ─── Styling ──────────────────────────────────────────────────────────────
+# Wofi uses CSS for styling; this config sets runtime options.
+# CSS file: /usr/share/wofi/style.css (or ~/.config/wofi/style.css)
+# See: https://man.archlinux.org/man/wofi.7
+
+# Prompt text
+prompt=🔍
+
+# Filter placeholder
+filter_text=Search apps, commands, files…
+
+# Image size
+image_size=32
+
+# Number of visible rows (default 10)
+max_entries=10
+
+# Allow custom text input
+allow_markup=true
+allow_images=true
+
+# Key binds
+key_exit=Escape
+key_accept=Return
+key_cancel=Control+g
+key_clear=BackSpace
+
+# Show case sensitivity
+insensitive=true
+
+# Hide scrollbar
+hide_scroll=true
+
+# Sort mode (default: alphabetical)
+sort_order=alphabetical
+
+# Show action button
+show_actions=true
+
+# ─── DRUN Mode Options ──────────────────────────────────────────────────
+# Display generic (application name) instead of exec path
+drun_generic=true
+
+# Print matches as they are entered
+drun_match_all=true
+
+# Show categories
+drun_categories=true
+
+# ─── Power Menu Mode ─────────────────────────────────────────────────────
+# Custom powermenu script
+# Define actions in script at /usr/share/solus/hyprland/scripts/powermenu.sh
+# Or create a custom mode entry
+
+# ─── Performance ─────────────────────────────────────────────────────────
+cache_file=/tmp/wofi-cache

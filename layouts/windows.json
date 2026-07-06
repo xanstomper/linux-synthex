@@ -1,0 +1,43 @@
+{
+  "name": "windows",
+  "description": "Windows 11-inspired layout — familiar for migrants",
+  "panel": {
+    "position": "bottom",
+    "height": 44,
+    "dock": false,
+    "widgets": ["windows-launcher", "search", "task-manager", "system-tray", "clock"]
+  },
+  "compositor": {
+    "enabled": true,
+    "blur": true,
+    "vsync": "auto",
+    "latency_mode": "normal",
+    "animation_speed": 2
+  },
+  "wallpaper": "/usr/share/wallpapers/solus/windows-style.png",
+  "services": {
+    "gamemode": false,
+    "tracker_services": true,
+    "background_services_stopped": []
+  },
+  "shortcuts": {
+    "super": "start-menu",
+    "super+d": "show-desktop",
+    "super+e": "dolphin",
+    "super+l": "lock-screen",
+    "super+tab": "task-switcher",
+    "super+v": "clipboard-history",
+    "super+w": "close-window",
+    "alt+f4": "close-window",
+    "super+i": "settings",
+    "super+r": "run-command",
+    "ctrl+shift+esc": "task-manager"
+  },
+  "performance": {
+    "cpu_governor": "ondemand",
+    "gpu_profile": "auto",
+    "io_scheduler": "mq-deadline",
+    "zram_enabled": true,
+    "swappiness": 30
+  }
+}

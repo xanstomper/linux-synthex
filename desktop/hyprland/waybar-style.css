@@ -1,0 +1,187 @@
+/* Solus Waybar CSS — Hyprland status bar theme
+ * Matches the Solus visual identity: dark navy + amber accent
+ */
+
+* {
+    font-family: "Inter", "Symbols Nerd Font";
+    font-size: 14px;
+    border-radius: 8px;
+    transition: all 150ms ease;
+}
+
+/* ─── Main bar ──────────────────────────────────────────────────────── */
+window#waybar {
+    background-color: rgba(26, 26, 46, 0.95);
+    color: #ffffff;
+    border-bottom: 1px solid rgba(42, 42, 78, 0.8);
+}
+
+/* ─── Modules ───────────────────────────────────────────────────────── */
+#workspaces button {
+    padding: 0 12px;
+    background-color: transparent;
+    color: #a0a0b0;
+    border-radius: 8px;
+    margin: 4px 2px;
+}
+
+#workspaces button:hover {
+    background-color: rgba(233, 69, 96, 0.2);
+    color: #ffffff;
+}
+
+#workspaces button.active {
+    background-color: #e94560;
+    color: #ffffff;
+}
+
+#workspaces button.urgent {
+    background-color: #ef4444;
+    color: #ffffff;
+}
+
+/* ─── Clock ─────────────────────────────────────────────────────────── */
+#clock {
+    background-color: rgba(15, 52, 96, 0.6);
+    color: #ffffff;
+    padding: 4px 14px;
+    margin: 4px 4px;
+    border-radius: 8px;
+    font-weight: bold;
+    font-size: 15px;
+}
+
+/* ─── PulseAudio ────────────────────────────────────────────────────── */
+#pulseaudio {
+    background-color: rgba(15, 52, 96, 0.6);
+    color: #ffffff;
+    padding: 4px 12px;
+    margin: 4px 2px;
+    border-radius: 8px;
+}
+
+#pulseaudio.muted {
+    background-color: rgba(239, 68, 68, 0.3);
+    color: #ef4444;
+}
+
+/* ─── Network ───────────────────────────────────────────────────────── */
+#network {
+    background-color: rgba(15, 52, 96, 0.6);
+    color: #4ade80;
+    padding: 4px 12px;
+    margin: 4px 2px;
+    border-radius: 8px;
+}
+
+#network.disconnected {
+    background-color: rgba(239, 68, 68, 0.3);
+    color: #ef4444;
+}
+
+/* ─── Battery ───────────────────────────────────────────────────────── */
+#battery {
+    background-color: rgba(15, 52, 96, 0.6);
+    color: #4ade80;
+    padding: 4px 12px;
+    margin: 4px 2px;
+    border-radius: 8px;
+}
+
+#battery.charging {
+    color: #4ade80;
+}
+
+#battery.warning {
+    color: #fbbf24;
+}
+
+#battery.critical {
+    color: #ef4444;
+    animation: blink 1s infinite;
+}
+
+@keyframes blink {
+    to { background-color: rgba(239, 68, 68, 0.5); }
+}
+
+/* ─── CPU / Memory ──────────────────────────────────────────────────── */
+#cpu, #memory {
+    background-color: rgba(15, 52, 96, 0.6);
+    color: #ffffff;
+    padding: 4px 12px;
+    margin: 4px 2px;
+    border-radius: 8px;
+}
+
+#cpu.high-load {
+    color: #fbbf24;
+}
+
+#memory.high-usage {
+    color: #ef4444;
+}
+
+/* ─── Tray ──────────────────────────────────────────────────────────── */
+#tray {
+    background-color: rgba(15, 52, 96, 0.6);
+    padding: 4px 8px;
+    margin: 4px 2px;
+    border-radius: 8px;
+}
+
+#tray > .passive {
+    -gtk-icon-effect: dim;
+}
+
+#tray > .needs-attention {
+    -gtk-icon-effect: highlight;
+}
+
+/* ─── Backlight ─────────────────────────────────────────────────────── */
+#backlight {
+    background-color: rgba(15, 52, 96, 0.6);
+    color: #ffffff;
+    padding: 4px 12px;
+    margin: 4px 2px;
+    border-radius: 8px;
+}
+
+/* ─── Gamemode indicator ────────────────────────────────────────────── */
+#gamemode {
+    background-color: #e94560;
+    color: #ffffff;
+    padding: 4px 12px;
+    margin: 4px 2px;
+    border-radius: 8px;
+    font-weight: bold;
+}
+
+#gamemode.running {
+    background-color: #4ade80;
+    color: #1a1a2e;
+}
+
+/* ─── Custom modules ────────────────────────────────────────────────── */
+#custom-launcher {
+    background-color: #e94560;
+    color: #ffffff;
+    padding: 4px 14px;
+    margin: 4px 4px;
+    border-radius: 8px;
+    font-size: 18px;
+    font-weight: bold;
+}
+
+#custom-power {
+    background-color: rgba(15, 52, 96, 0.6);
+    color: #ef4444;
+    padding: 4px 12px;
+    margin: 4px 2px;
+    border-radius: 8px;
+}
+
+#custom-power:hover {
+    background-color: #ef4444;
+    color: #ffffff;
+}

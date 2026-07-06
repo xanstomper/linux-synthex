@@ -1,0 +1,15 @@
+[Desktop Entry]
+Version=1.0
+Type=Application
+Name={{NAME}}
+Comment={{URL}}
+Exec={{EXEC}}
+Icon={{ICON}}
+Categories={{CATEGORY}};
+Terminal=false
+StartupNotify=true
+MimeType=text/html;
+Keywords=webapp;{{NAME}};
+X-Solus-WebApp=true
+X-Solus-WebApp-URL={{URL}}
+X-Solus-WebApp-GPU={{GPU}}

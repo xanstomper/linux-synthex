@@ -1,0 +1,117 @@
+###############################################################################
+# solus-policy.if
+# SELinux policy interface definitions for Solus Linux
+#
+# Provides gen_tunable declarations and interface macros that other
+# policy modules can use to interact with Solus domains.
+###############################################################################
+
+## <summary>Allow Solus services to use NFS-mounted storage</summary>
+gen_tunable(solus_use_nfs, false)
+
+## <summary>Allow Solus services to use Samba/SMB-mounted storage</summary>
+gen_tunable(solus_use_samba, false)
+
+## <summary>Enable debug logging for Solus security dashboard</summary>
+gen_tunable(solus_dashboard_debug, false)
+
+## <summary>Allow Solus services to connect to remote backup targets</summary>
+gen_tunable(solus_backup_remote, false)
+
+########################################
+# Interface: solus_read_data
+# Allow a domain to read Solus data files
+########################################
+interface(`solus_read_data',`
+    gen_require(`
+        type solus_data_t;
+    ')
+    allow $1 solus_data_t:dir search;
+    read_files_pattern($1, solus_data_t, solus_data_t)
+    read_lnk_files_pattern($1, solus_data_t, solus_data_t)
+')
+
+########################################
+# Interface: solus_rw_data
+# Allow a domain to read/write Solus data files
+########################################
+interface(`solus_rw_data',`
+    gen_require(`
+        type solus_data_t;
+    ')
+    solus_read_data($1)
+    allow $1 solus_data_t:dir { write add_name remove_name };
+    write_files_pattern($1, solus_data_t, solus_data_t)
+    create_files_pattern($1, solus_data_t, solus_data_t)
+    delete_files_pattern($1, solus_data_t, solus_data_t)
+')
+
+########################################
+# Interface: solus_dbus_chat
+# Allow a domain to send D-Bus messages to solus-stored
+########################################
+interface(`solus_dbus_chat_stored',`
+    gen_require(`
+        type solus_stored_t;
+    ')
+    allow $1 solus_stored_t:dbus send_msg;
+')
+
+########################################
+# Interface: solus_dbus_chat_desktopd
+# Allow a domain to send D-Bus messages to solus-desktopd
+########################################
+interface(`solus_dbus_chat_desktopd',`
+    gen_require(`
+        type solus_desktopd_t;
+    ')
+    allow $1 solus_desktopd_t:dbus send_msg;
+')
+
+########################################
+# Interface: solus_dbus_chat_hwdaemon
+# Allow a domain to send D-Bus messages to solus-hwdaemon
+########################################
+interface(`solus_dbus_chat_hwdaemon',`
+    gen_require(`
+        type solus_hwdaemon_t;
+    ')
+    allow $1 solus_hwdaemon_t:dbus send_msg;
+')
+
+########################################
+# Interface: solus_manage_logs
+# Allow a domain to manage Solus log files
+########################################
+interface(`solus_manage_logs',`
+    gen_require(`
+        type solus_log_t;
+    ')
+    allow $1 solus_log_t:dir { search read write add_name remove_name };
+    manage_files_pattern($1, solus_log_t, solus_log_t)
+')
+
+########################################
+# Interface: solus_read_runtime
+# Allow a domain to read Solus runtime data
+########################################
+interface(`solus_read_runtime',`
+    gen_require(`
+        type solus_var_run_t;
+    ')
+    allow $1 solus_var_run_t:dir search;
+    read_files_pattern($1, solus_var_run_t, solus_var_run_t)
+')
+
+########################################
+# Interface: solus_rw_runtime
+# Allow a domain to read/write Solus runtime data
+########################################
+interface(`solus_rw_runtime',`
+    gen_require(`
+        type solus_var_run_t;
+    ')
+    solus_read_runtime($1)
+    allow $1 solus_var_run_t:dir { write add_name remove_name };
+    manage_files_pattern($1, solus_var_run_t, solus_var_run_t)
+')

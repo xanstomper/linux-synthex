@@ -1,0 +1,205 @@
+// ╔══════════════════════════════════════════════════════════════╗
+// ║  Solus Hyprland — Waybar Configuration                      ║
+// ║  Design: "Solus Dynamic Tiling" — Minimal, information-rich ║
+// ║  Version: 1.0.0                                             ║
+// ╚══════════════════════════════════════════════════════════════╝
+// Installed to: /etc/xdg/waybar/config.jsonc
+// User override: ~/.config/waybar/config.jsonc
+
+{
+    "layer": "top",
+    "position": "top",
+    "height": 36,
+    "margin-top": 0,
+    "margin-bottom": 0,
+    "margin-left": 0,
+    "margin-right": 0,
+    "mod": "JSONC",
+
+    // ─── Modules ──────────────────────────────────────────────────────────
+    "modules-left": [
+        "custom/hyprland-soluspulse",
+        "hyprland/workspaces"
+    ],
+    "modules-center": [
+        "hyprland/window"
+    ],
+    "modules-right": [
+        "custom/media",
+        "tray",
+        "pulseaudio",
+        "network",
+        "bluetooth",
+        "cpu",
+        "memory",
+        "battery",
+        "clock",
+        "custom/power"
+    ],
+
+    // ─── Workspaces ──────────────────────────────────────────────────────
+    "hyprland/workspaces": {
+        "disable-scroll": false,
+        "all-outputs": false,
+        "format": "{icon}",
+        "format-icons": {
+            "1": "1",
+            "2": "2",
+            "3": "3",
+            "4": "4",
+            "5": "5",
+            "6": "6",
+            "urgent": "",
+            "default": "{index}",
+            "sort-by-number": true
+        },
+        "on-click": "hyprctl workspace {name}",
+        "persistent_workspaces": {
+            "1": [],
+            "2": [],
+            "3": [],
+            "4": [],
+            "5": [],
+            "6": []
+        }
+    },
+
+    // ─── Window Title ────────────────────────────────────────────────────
+    "hyprland/window": {
+        "format": "{}",
+        "max-length": 50,
+        "separate-outputs": true,
+        "rewrite": {
+            "(.*) — Mozilla Firefox": "Firefox — $1",
+            "(.*) - Visual Studio Code": "Code — $1",
+            "(.*) — Discord": "Discord — $1",
+            "Mozilla Firefox": "Firefox"
+        }
+    },
+
+    // ─── System Tray ─────────────────────────────────────────────────────
+    "tray": {
+        "icon-size": 16,
+        "spacing": 8
+    },
+
+    // ─── PulseAudio ──────────────────────────────────────────────────────
+    "pulseaudio": {
+        "format": "{icon} {volume}%",
+        "format-bluetooth": "{icon} {volume}%",
+        "format-muted": " 0%",
+        "format-icons": {
+            "headphones": "",
+            "hands-free": "",
+            "headset": "",
+            "phone": "",
+            "portable": "",
+            "car": "",
+            "default": ["", "", ""]
+        },
+        "on-click": "pavucontrol",
+        "on-scroll-up": "wpctl set-volume @DEFAULT_AUDIO_SINK@ 5%+",
+        "on-scroll-down": "wpctl set-volume @DEFAULT_AUDIO_SINK@ 5%-",
+        "scroll-step": 5,
+        "ignored-sinks": ["Easy Effects Sink"]
+    },
+
+    // ─── Network ─────────────────────────────────────────────────────────
+    "network": {
+        "format-wifi": " {essid}",
+        "format-ethernet": " {ipaddr}",
+        "format-disconnected": "⚠ Disconnected",
+        "tooltip-format-wifi": "WiFi: {essid} ({signalStrength}%)\nIP: {ipaddr}",
+        "tooltip-format-ethernet": "Ethernet: {ifname}\nIP: {ipaddr}",
+        "tooltip-format-disconnected": "Disconnected",
+        "on-click": "nm-connection-editor",
+        "max-length": 30
+    },
+
+    // ─── Bluetooth ───────────────────────────────────────────────────────
+    "bluetooth": {
+        "format": "",
+        "format-disabled": "",
+        "format-connected": " {device_alias}",
+        "on-click": "blueman-manager",
+        "tooltip-format": "{controller_alias}\n{device_alias}",
+        "tooltip-format-connected": "{controller_alias}\n{device_alias}",
+        "tooltip-format-enumerate-connected": "{device_enumerate}"
+    },
+
+    // ─── CPU ─────────────────────────────────────────────────────────────
+    "cpu": {
+        "format": " {usage}%",
+        "interval": 5,
+        "on-click": "gnome-system-monitor || kitty htop",
+        "states": {
+            "warning": 80,
+            "critical": 95
+        }
+    },
+
+    // ─── Memory ──────────────────────────────────────────────────────────
+    "memory": {
+        "format": " {}%",
+        "interval": 10,
+        "states": {
+            "warning": 80,
+            "critical": 95
+        }
+    },
+
+    // ─── Battery ─────────────────────────────────────────────────────────
+    "battery": {
+        "bat": "BAT0",
+        "adapter": "ADP1",
+        "format": "{icon} {capacity}%",
+        "format-icons": ["", "", "", "", ""],
+        "format-charging": " {capacity}%",
+        "format-plugged": "🔌 {capacity}%",
+        "format-full": " Full",
+        "states": {
+            "warning": 30,
+            "critical": 15
+        },
+        "interval": 60
+    },
+
+    // ─── Clock ───────────────────────────────────────────────────────────
+    "clock": {
+        "format": " {:%H:%M}",
+        "format-alt": " {:%A, %d %B %Y}",
+        "tooltip-format": "{:%A, %d %B %Y}\n{:%H:%M:%S}",
+        "on-click": "gnome-calendar || thunderbird",
+        "interval": 30
+    },
+
+    // ─── Custom: Media Player ────────────────────────────────────────────
+    "custom/media": {
+        "format": "🎵 {}",
+        "return-type": "json",
+        "max-length": 50,
+        "interval": 5,
+        "exec": "playerctl metadata --format '{\"text\": \"{{artist}} — {{title}}\", \"class\": \"playing\"}' 2>/dev/null || echo '{\"text\": \"\", \"class\": \"stopped\"}'",
+        "on-click": "playerctl play-pause",
+        "on-scroll-up": "playerctl next",
+        "on-scroll-down": "playerctl previous",
+        "tooltip": true,
+        "tooltip-format": "{:50}"
+    },
+
+    // ─── Custom: Power Menu ──────────────────────────────────────────────
+    "custom/power": {
+        "format": "⏻",
+        "tooltip": false,
+        "on-click": "wofi --show powermenu",
+        "interval": "once"
+    },
+
+    // ─── Custom: Solus Pulse ─────────────────────────────────────────────
+    "custom/hyprland-soluspulse": {
+        "format": "⬟",
+        "tooltip": "Solus Hyprland",
+        "on-click": "hyprctl splash",
+        "interval": "once"
+    }
+}

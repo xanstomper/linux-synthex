@@ -1,0 +1,21 @@
+[Unit]
+Description=Solus Blueprint — Daily System Backup
+Documentation=https://docs.solus-project.org/blueprint
+
+[Service]
+Type=oneshot
+ExecStart=/usr/bin/solus-blueprint export /var/backups/solus/system.zbp --quiet
+StandardOutput=journal
+StandardError=journal
+
+# Security hardening
+ProtectSystem=full
+ProtectHome=read-only
+PrivateTmp=yes
+NoNewPrivileges=yes
+SystemCallArchitectures=native
+ProtectKernelTunables=yes
+ProtectKernelModules=yes
+ProtectControlGroups=yes
+MemoryMax=256M
+CPUQuota=30%

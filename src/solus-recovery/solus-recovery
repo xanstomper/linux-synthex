@@ -1,0 +1,11 @@
+#!/usr/bin/env bash
+# solus-recovery — Boot failure detection and recovery tool
+set -euo pipefail
+
+HERE="$(cd "$(dirname "$0")" && pwd)"
+
+if [ "${1:-}" = "--check-boot" ]; then
+    exec bash "$HERE/solus-recovery.sh" check
+fi
+
+exec bash "$HERE/solus-recovery.sh" "$@"

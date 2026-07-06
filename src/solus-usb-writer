@@ -1,0 +1,135 @@
+#!/usr/bin/env python3
+"""Solus USB Image Writer — Mint-style USB flashing tool.
+Write ISO images to USB drives safely.
+
+Usage:
+    solus-usb-writer                          Launch GUI (if available)
+    solus-usb-writer list                     List USB drives
+    solus-usb-writer write <iso> <device>     Write ISO to device
+    solus-usb-writer verify <iso> <device>    Verify written data
+"""
+import os, sys, subprocess, hashlib, json, glob
+
+def list_drives():
+    """List removable drives."""
+    drives = []
+    for dev in glob.glob("/dev/sd?"):
+        try:
+            result = subprocess.run(
+                ["lsblk", "-o", "NAME,SIZE,TYPE,MODEL,MOUNTPOINT", "-J", dev],
+                capture_output=True, text=True, timeout=5
+            )
+            data = json.loads(result.stdout)
+            for d in data.get("blockdevices", []):
+                if d.get("type") == "disk" and d.get("name", "").startswith("sd"):
+                    removable = os.path.exists(f"/sys/block/{d['name']}/removable")
+                    ro_content = open(f"/sys/block/{d['name']}/ro").read().strip() if os.path.exists(f"/sys/block/{d['name']}/ro") else "0"
+                    if removable and ro_content == "0":
+                        drives.append(d)
+        except: pass
+    return drives
+
+def cmd_list():
+    drives = list_drives()
+    if not drives:
+        print("No removable USB drives detected.")
+        print("Insert a USB drive and try again.")
+        return
+    print("💾 Available USB drives:")
+    for d in drives:
+        size_gb = int(d.get("size", "0").replace("G", "")) if "G" in d.get("size", "") else 0
+        model = d.get("model", "").strip()
+        mount = d.get("mountpoint", "") or "unmounted"
+        print(f"  /dev/{d['name']:8} {d.get('size', '?'):>6}  {model:30} [{mount}]")
+    print("\n⚠  Make sure you select the correct device!")
+
+def cmd_write(iso_path, device):
+    if not os.path.exists(iso_path):
+        print(f"❌ ISO not found: {iso_path}")
+        return
+    if not os.path.exists(device):
+        print(f"❌ Device not found: {device}")
+        return
+
+    # Safety checks
+    if not device.startswith("/dev/sd") or any(device.startswith(p) for p in ["/dev/sda", "/dev/nvme0"]):
+        print("❌ Refusing to write to system disk!")
+        return
+
+    with open(f"/sys/block/{device[5:]}/removable") as f:
+        if f.read().strip() != "1":
+            print("❌ Device is not removable!")
+            return
+
+    size = os.path.getsize(iso_path)
+    size_str = f"{size / 1024 / 1024:.0f} MB" if size < 1e9 else f"{size / 1e9:.2f} GB"
+    print(f"💿 Writing: {iso_path} ({size_str})")
+    print(f"💾 To device: {device}")
+    print("⚠  ALL DATA ON THIS DEVICE WILL BE DESTROYED!")
+    print()
+    confirm = input(f"Type 'YES' to write to {device}: ")
+    if confirm != "YES":
+        print("Aborted.")
+        return
+
+    print("📝 Unmounting partitions...")
+    subprocess.run(["sudo", "umount", f"{device}1"], capture_output=True)
+    subprocess.run(["sudo", "umount", f"{device}2"], capture_output=True)
+
+    print("💿 Writing ISO (this may take a while)...")
+    try:
+        subprocess.run(["sudo", "dd", f"if={iso_path}", f"of={device}",
+                       "bs=4M", "status=progress", "conv=fsync"], check=True)
+        print("✅ Write complete!")
+    except subprocess.CalledProcessError:
+        print("❌ Write failed!")
+        return
+
+def cmd_verify(iso_path, device):
+    if not os.path.exists(iso_path) or not os.path.exists(device):
+        print("❌ File or device not found")
+        return
+    print("🔍 Verifying...")
+    # Hash the ISO
+    h = hashlib.sha256()
+    with open(iso_path, "rb") as f:
+        for chunk in iter(lambda: f.read(65536), b""):
+            h.update(chunk)
+    iso_hash = h.hexdigest()
+    print(f"  ISO hash:  {iso_hash[:16]}...")
+
+    # Read device and hash
+    h = hashlib.sha256()
+    try:
+        with open(device, "rb") as f:
+            # Only read as much as the ISO
+            remaining = os.path.getsize(iso_path)
+            while remaining > 0:
+                chunk = f.read(min(65536, remaining))
+                if not chunk: break
+                h.update(chunk)
+                remaining -= len(chunk)
+    except PermissionError:
+        print("  ⚠ Need sudo for device read")
+        return
+    dev_hash = h.hexdigest()
+    print(f"  Device hash: {dev_hash[:16]}...")
+
+    if iso_hash == dev_hash:
+        print("✅ VERIFIED — data matches")
+    else:
+        print("❌ VERIFICATION FAILED — data mismatch")
+
+def main():
+    if len(sys.argv) < 2 or sys.argv[1] in ("-h", "--help", "help"):
+        print(__doc__)
+        cmd_list()
+        return
+    cmd = sys.argv[1]
+    if cmd == "list": cmd_list()
+    elif cmd == "write" and len(sys.argv) >= 4: cmd_write(sys.argv[2], sys.argv[3])
+    elif cmd == "verify" and len(sys.argv) >= 4: cmd_verify(sys.argv[2], sys.argv[3])
+    else: print(__doc__)
+
+if __name__ == "__main__":
+    main()

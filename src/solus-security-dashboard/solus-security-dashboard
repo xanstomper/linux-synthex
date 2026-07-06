@@ -1,0 +1,12 @@
+#!/usr/bin/env python3
+"""Solus Security Dashboard — entry point."""
+import os, sys
+
+HERE = os.path.dirname(os.path.abspath(__file__))
+DAEMON = os.path.join(HERE, "securityd.py")
+CHECK  = os.path.join(HERE, "security-check.py")
+
+if len(sys.argv) > 1 and sys.argv[1] == "--check":
+    os.execv(CHECK, [CHECK] + sys.argv[2:])
+
+os.execv(DAEMON, [DAEMON] + sys.argv[1:])

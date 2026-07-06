@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="128" height="128" viewBox="0 0 128 128">
+  <!-- AI Hub Icon — Brain with circuits -->
+  <rect width="128" height="128" rx="24" fill="#0B0F1A"/>
+  <circle cx="64" cy="58" r="26" fill="none" stroke="#00D2FF" stroke-width="3"/>
+  <circle cx="64" cy="58" r="10" fill="#00D2FF"/>
+  <path d="M48 58 Q48 78 64 82 Q80 78 80 58" fill="none" stroke="#00D2FF" stroke-width="2"/>
+  <path d="M54 58 L64 70 L74 58" fill="none" stroke="#00D2FF" stroke-width="2.5" stroke-linecap="round"/>
+  <circle cx="64" cy="98" r="4" fill="#00D2FF"/>
+  <line x1="64" y1="84" x2="64" y2="94" stroke="#00D2FF" stroke-width="2"/>
+  <circle cx="40" cy="48" r="3" fill="#00D2FF" opacity="0.5"/>
+  <circle cx="88" cy="48" r="3" fill="#00D2FF" opacity="0.5"/>
+</svg>

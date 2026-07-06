@@ -1,0 +1,11 @@
+[Unit]
+Description=Solus hardware-change trigger for auto-tuning
+
+[Path]
+PathChanged=/sys/class/dmi/id/chassis_type
+PathChanged=/sys/firmware/devicetree/base/model
+PathChanged=/proc/cpuinfo
+PathChanged=/proc/meminfo
+
+[Install]
+WantedBy=multi-user.target

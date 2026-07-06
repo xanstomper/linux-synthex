@@ -1,0 +1,100 @@
+#!/usr/bin/env python3
+"""Solus Gaming Mode — enables/disables gaming performance mode + Gamescope session.
+Usage:
+    solus-gaming-mode enable       Apply gaming optimizations
+    solus-gaming-mode disable      Revert to balanced mode
+    solus-gaming-mode status       Show gaming mode status
+    solus-gaming-mode session      Launch Gamescope + Steam Big Picture (Bazzite-style)
+"""
+import os, sys, subprocess, json, signal, time
+
+STATE_FILE = "/var/lib/solus/gaming-mode"
+MODE_DIR = "/usr/share/solus/modes"
+
+def is_active():
+    return os.path.exists(STATE_FILE)
+
+def cmd_enable():
+    print("🎮 Solus Gaming Mode: ENABLING")
+    os.makedirs(os.path.dirname(STATE_FILE), exist_ok=True)
+    open(STATE_FILE, "w").close()
+
+    # Apply gaming mode script if it exists
+    mode_script = os.path.join(MODE_DIR, "gaming.sh")
+    if os.path.exists(mode_script):
+        subprocess.run(["bash", mode_script])
+    else:
+        # Manual tuning
+        subprocess.run(["sudo", "sysctl", "-w", "vm.swappiness=10"])
+        subprocess.run(["sudo", "sysctl", "-w", "kernel.sched_latency_ns=3000000"])
+        subprocess.run(["sudo", "sysctl", "-w", "kernel.sched_min_granularity_ns=500000"])
+        subprocess.run(["sudo", "sysctl", "-w", "vm.max_map_count=2147483642"])
+        subprocess.run(["sudo", "sh", "-c",
+            "echo performance > /sys/devices/system/cpu/cpu0/cpufreq/scaling_governor 2>/dev/null || true"])
+
+    # Enable game mode (gamemode)
+    subprocess.run(["systemctl", "--user", "start", "gamemoded"], capture_output=True)
+    print("✅ Gaming mode active — optimizations applied")
+
+def cmd_disable():
+    if os.path.exists(STATE_FILE):
+        os.remove(STATE_FILE)
+    # Restore balanced mode
+    mode_script = os.path.join(MODE_DIR, "balanced.sh")
+    if os.path.exists(mode_script):
+        subprocess.run(["bash", mode_script])
+
+    subprocess.run(["sudo", "sysctl", "-w", "vm.swappiness=60"])
+    subprocess.run(["sudo", "sysctl", "-w", "kernel.sched_latency_ns=6000000"])
+    subprocess.run(["sudo", "sysctl", "-w", "kernel.sched_min_granularity_ns=750000"])
+    subprocess.run(["sudo", "sh", "-c",
+        "echo schedutil > /sys/devices/system/cpu/cpu0/cpufreq/scaling_governor 2>/dev/null || true"])
+    print("⏹  Gaming mode disabled — balanced settings restored")
+
+def cmd_status():
+    active = is_active()
+    print(f"{'🟢' if active else '⚪'} Gaming Mode: {'ACTIVE' if active else 'Inactive'}")
+    if active:
+        with open(STATE_FILE) as f:
+            content = f.read().strip()
+            if content:
+                print(f"  Mode: {content}")
+
+def cmd_session():
+    """Gamescope session — Bazzite-style gaming mode, replaces desktop."""
+    print("🎮 Solus Gaming Mode (Gamescope Session)")
+    print("Press Super+B to return to desktop, Super+Q to quit")
+
+    if not os.path.exists("/usr/bin/gamescope"):
+        print("❌ gamescope not found. Install: sudo dnf install gamescope")
+        sys.exit(1)
+
+    if not os.path.exists("/usr/bin/steam"):
+        print("📦 Installing Steam...")
+        subprocess.run(["sudo", "dnf", "install", "-y", "steam"])
+
+    os.execve("/usr/bin/gamescope", [
+        "gamescope", "-W", "1920", "-H", "1080", "-r", "144",
+        "--adaptive-sync", "--mangoapp", "--",
+        "steam", "-bigpicture", "-fulldesktopresize"
+    ], os.environ)
+
+def main():
+    if len(sys.argv) < 2:
+        print(__doc__)
+        return
+
+    cmd = sys.argv[1]
+    if cmd == "enable":
+        cmd_enable()
+    elif cmd == "disable":
+        cmd_disable()
+    elif cmd == "status":
+        cmd_status()
+    elif cmd == "session":
+        cmd_session()
+    else:
+        print(f"Unknown: {cmd}\n{__doc__}")
+
+if __name__ == "__main__":
+    main()

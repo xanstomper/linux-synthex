@@ -1,0 +1,322 @@
+# ============================================================================
+# Solus Linux — ISO Testing Workflow
+# ============================================================================
+# Tests ISO images in virtual machines: boot, package management,
+# desktop, service health, and network connectivity.
+# ============================================================================
+
+name: Test ISO
+
+on:
+  workflow_call:
+    inputs:
+      iso_artifact:
+        description: "Name of the artifact containing ISO images"
+        required: true
+        type: string
+      test_suite:
+        description: "Test suite to run (smoke, full, acceptance)"
+        required: false
+        type: string
+        default: 'smoke'
+      release_version:
+        description: "Release version being tested"
+        required: false
+        type: string
+        default: ''
+  workflow_dispatch:
+    inputs:
+      iso_artifact:
+        description: "Name of the artifact containing ISO images"
+        required: true
+        type: string
+      test_suite:
+        description: "Test suite to run"
+        required: false
+        type: choice
+        options:
+          - smoke
+          - full
+          - acceptance
+        default: smoke
+      release_version:
+        description: "Release version being tested"
+        required: false
+        type: string
+
+env:
+  VM_DIR: /tmp/vm-test
+  TEST_RESULTS_DIR: /tmp/test-results
+  LIBVIRT_IMAGES: /var/lib/libvirt/images
+  ARTIFACT_BASE: https://github.com/${{ github.repository }}/releases/download
+
+jobs:
+  ############################################################################
+  # PREPARE: Download ISO and set up test infrastructure
+  ############################################################################
+  prepare:
+    runs-on: ubuntu-latest
+    outputs:
+      iso_list: ${{ steps.list-isos.outputs.isos }}
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Download ISO artifacts
+        uses: actions/download-artifact@v4
+        with:
+          pattern: ${{ inputs.iso_artifact }}
+          merge-multiple: true
+          path: isos
+
+      - name: List available ISOs
+        id: list-isos
+        run: |
+          ISOS=$(ls isos/*.iso 2>/dev/null || echo "")
+          if [[ -z "${ISOS}" ]]; then
+            echo "No ISO files found in artifact"
+            exit 1
+          fi
+          echo "Found ISOs: ${ISOS}"
+          # Output as JSON array
+          JSON=$(echo "${ISOS}" | jq -R -s -c 'split("\n")[:-1]')
+          echo "isos=${JSON}" >> "$GITHUB_OUTPUT"
+
+      - name: Install virtualization tools
+        run: |
+          sudo dnf install -y \
+            qemu-kvm libvirt-daemon libvirt-daemon-kvm \
+            virt-install libvirt-client \
+            expect jq
+
+      - name: Start libvirt
+        run: |
+          sudo systemctl start libvirtd
+          sudo systemctl status libvirtd
+
+  ############################################################################
+  # TEST: Run tests against each ISO variant
+  ############################################################################
+  test:
+    needs: prepare
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        iso: ${{ fromJSON(needs.prepare.outputs.iso_list) }}
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install test tools
+        run: |
+          sudo dnf install -y \
+            qemu-kvm libvirt-daemon libvirt-daemon-kvm \
+            virt-install libvirt-client \
+            expect jq sysbench stress-ng iperf3 fio
+
+      - name: Start libvirt
+        run: |
+          sudo systemctl start libvirtd
+
+      - name: Extract ISO variant
+        run: |
+          ISO="${{ matrix.iso }}"
+          BASENAME=$(basename "${ISO}" .iso)
+          echo "ISO name: ${BASENAME}"
+          # Parse variant from filename: solus-linux-<version>-<variant>-<arch>.iso
+          VARIANT=$(echo "${BASENAME}" | awk -F'-' '{print $4}')
+          echo "variant=${VARIANT}" >> "$GITHUB_ENV"
+
+      - name: Create VM disk
+        run: |
+          mkdir -p "${VM_DIR}"
+          sudo mkdir -p "${LIBVIRT_IMAGES}"
+
+          # Create disk image
+          sudo qemu-img create -f qcow2 \
+            "${LIBVIRT_IMAGES}/solus-test.qcow2" \
+            20G
+
+      - name: Install Solus in VM
+        run: |
+          # Perform automated install using libvirt
+          sudo virt-install \
+            --name solus-test \
+            --ram 4096 \
+            --vcpus 4 \
+            --disk path="${LIBVIRT_IMAGES}/solus-test.qcow2",format=qcow2 \
+            --cdrom "${{ matrix.iso }}" \
+            --os-variant linux2022 \
+            --network default \
+            --graphics none \
+            --console pty,target_type=serial \
+            --wait -1 \
+            --extra-args "console=ttyS0,115200n8 serial"
+
+      - name: Verify VM boot
+        run: |
+          # Check VM is running
+          sudo virsh list --all | grep solus-test
+
+          # Wait for SSH to be available
+          for i in $(seq 1 30); do
+            if sudo virsh domifaddr solus-test --source agent 2>/dev/null; then
+              VM_IP=$(sudo virsh domifaddr solus-test --source agent | grep -oP '\d+\.\d+\.\d+\.\d+' | head -1)
+              if [[ -n "${VM_IP}" ]]; then
+                echo "VM IP: ${VM_IP}"
+                echo "vm_ip=${VM_IP}" >> "$GITHUB_ENV"
+                break
+              fi
+            fi
+            sleep 10
+          done
+
+      - name: Run smoke tests
+        if: inputs.test_suite == 'smoke' || inputs.test_suite == 'full'
+        run: |
+          VM_IP="${{ env.vm_ip }}"
+          mkdir -p "${TEST_RESULTS_DIR}"
+
+          # Test basic connectivity
+          echo "=== SSH Connectivity ==="
+          ssh -o StrictHostKeyChecking=no -o ConnectTimeout=10 \
+            root@${VM_IP} "uname -a" \
+            > "${TEST_RESULTS_DIR}/kernel-version.txt"
+
+          # Test package manager
+          echo "=== Package Manager ==="
+          ssh root@${VM_IP} "dnf check-update" \
+            > "${TEST_RESULTS_DIR}/dnf-check.txt" 2>&1 || true
+
+          # Test running services
+          echo "=== Services ==="
+          ssh root@${VM_IP} "systemctl list-units --state=running" \
+            > "${TEST_RESULTS_DIR}/running-services.txt"
+
+          # Test disk layout
+          echo "=== Disk Layout ==="
+          ssh root@${VM_IP} "lsblk && df -h" \
+            > "${TEST_RESULTS_DIR}/disk-layout.txt"
+
+          # Test network
+          echo "=== Network ==="
+          ssh root@${VM_IP} "ip addr && ping -c 3 8.8.8.8" \
+            > "${TEST_RESULTS_DIR}/network.txt"
+
+      - name: Run full test suite
+        if: inputs.test_suite == 'full' || inputs.test_suite == 'acceptance'
+        run: |
+          VM_IP="${{ env.vm_ip }}"
+          RESULTS="${TEST_RESULTS_DIR}"
+
+          # Package install/remove test
+          echo "=== Package Install/Remove ==="
+          ssh root@${VM_IP} "dnf install -y nano && dnf remove -y nano" \
+            > "${RESULTS}/package-test.txt" 2>&1
+
+          # Boot time
+          echo "=== Boot Time ==="
+          ssh root@${VM_IP} "systemd-analyze" \
+            > "${RESULTS}/boot-time.txt"
+
+          # Memory info
+          echo "=== Memory ==="
+          ssh root@${VM_IP} "free -h && cat /proc/meminfo" \
+            > "${RESULTS}/memory.txt"
+
+          # SELinux status
+          echo "=== SELinux ==="
+          ssh root@${VM_IP} "getenforce && sestatus" \
+            > "${RESULTS}/selinux.txt"
+
+          # Firewall status
+          echo "=== Firewall ==="
+          ssh root@${VM_IP} "firewall-cmd --state && firewall-cmd --list-all" \
+            > "${RESULTS}/firewall.txt"
+
+      - name: Run acceptance test suite
+        if: inputs.test_suite == 'acceptance'
+        run: |
+          VM_IP="${{ env.vm_ip }}"
+          RESULTS="${TEST_RESULTS_DIR}"
+
+          # CPU benchmark
+          echo "=== CPU Benchmark ==="
+          ssh root@${VM_IP} "sysbench cpu run --threads=4 --time=30" \
+            > "${RESULTS}/cpu-benchmark.txt" 2>&1
+
+          # Memory benchmark
+          echo "=== Memory Benchmark ==="
+          ssh root@${VM_IP} "sysbench memory run --threads=4 --time=30" \
+            > "${RESULTS}/memory-benchmark.txt" 2>&1
+
+          # Disk benchmark
+          echo "=== Disk Benchmark ==="
+          ssh root@${VM_IP} "fio --name=test --ioengine=libaio --rw=randread \
+            --bs=4k --size=1G --numjobs=4 --runtime=30 --group_reporting" \
+            > "${RESULTS}/disk-benchmark.txt" 2>&1
+
+      - name: Collect test results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: test-results-${{ matrix.iso }}
+          path: ${{ env.TEST_RESULTS_DIR }}/
+          retention-days: 60
+
+      - name: Cleanup VM
+        if: always()
+        run: |
+          sudo virsh destroy solus-test 2>/dev/null || true
+          sudo virsh undefine solus-test 2>/dev/null || true
+          sudo rm -f "${LIBVIRT_IMAGES}/solus-test.qcow2"
+
+  ############################################################################
+  # REPORT: Aggregate test results
+  ############################################################################
+  report:
+    needs: test
+    runs-on: ubuntu-latest
+    if: always()
+
+    steps:
+      - name: Download all test results
+        uses: actions/download-artifact@v4
+        with:
+          pattern: test-results-*
+          merge-multiple: true
+          path: aggregated-results
+
+      - name: Generate test report
+        run: |
+          python3 << 'PYEOF'
+          import json, os
+          results_dir = "aggregated-results"
+
+          report = {
+              "test_suite": "${{ inputs.test_suite }}",
+              "release_version": "${{ inputs.release_version }}",
+              "timestamp": os.popen("date -u +%Y-%m-%dT%H:%M:%SZ").read().strip(),
+              "files": os.listdir(results_dir) if os.path.exists(results_dir) else []
+          }
+
+          with open("test-report.json", "w") as f:
+              json.dump(report, f, indent=2)
+
+          print(f"Tests completed. Files: {len(report['files'])}")
+          PYEOF
+
+      - name: Upload test report
+        uses: actions/upload-artifact@v4
+        with:
+          name: test-report
+          path: test-report.json
+          retention-days: 90
+
+      - name: Publish test results
+        uses: EnricoMi/publish-unit-test-result-action@v2
+        if: always()
+        with:
+          files: aggregated-results/*.txt
+          comment_mode: always

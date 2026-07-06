@@ -1,0 +1,11 @@
+[Desktop Entry]
+Type=Application
+Name=Hermes Agent (Daemon)
+Comment=Hermes background AI service — required for Super+Space
+Exec=solus-hermes --daemon
+Icon=hermes
+Terminal=false
+Categories=Utility;System;
+OnlyShowIn=KDE;
+X-KDE-autostart-after=panel
+X-KDE-StartupNotify=false

@@ -1,0 +1,49 @@
+# Git ignore rules for Linux Solus build project
+
+# Build artifacts
+build/livecd/out/
+build/livecd/work/
+build/livecd/cache/
+build/out/
+build/rpmbuild/
+build/repo/
+*.iso
+*.iso.asc
+*.torrent
+
+# RPM build artifacts
+*.rpm
+*.srpm
+SRPMS/
+RPMS/
+~/rpmbuild/
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.pytest_cache/
+*.egg-info/
+dist/
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
+.DS_Store
+
+# Generated
+project-inventory.json
+project-tree.txt
+
+# Environment
+.env
+*.local
+
+# Large files
+*.img
+*.qcow2
+*.raw

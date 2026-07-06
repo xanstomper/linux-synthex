@@ -1,0 +1,23 @@
+#!/usr/bin/env bash
+# solus-oobe — Out-Of-Box Experience Wizard
+# Launches the OOBE first-boot setup with QML or fallback
+set -euo pipefail
+
+HERE="$(cd "$(dirname "$0")" && pwd)"
+QML_MAIN="$HERE/ui/Main.qml"
+
+if command -v solus-oobe-bin &>/dev/null; then
+    exec solus-oobe-bin "$@"
+fi
+
+if command -v qmlscene &>/dev/null; then
+    exec qmlscene "$QML_MAIN" "$@"
+fi
+
+if command -v qml6 &>/dev/null; then
+    exec qml6 "$QML_MAIN" "$@"
+fi
+
+echo "Solus OOBE Wizard"
+echo "QML runtime not found. Install qt6-qtdeclarative or compile the native binary."
+exit 1

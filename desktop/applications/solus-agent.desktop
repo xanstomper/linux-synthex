@@ -1,0 +1,11 @@
+[Desktop Entry]
+Type=Application
+Name=Solus Agent
+Comment=AI Desktop Assistant — Super+Space to open. Search, chat, code, knowledge, system control.
+Exec=solus-agent
+Icon=solus-agent
+Terminal=false
+Categories=Utility;System;AI;Development;
+StartupNotify=true
+X-GNOME-UsesNotifications=true
+X-KDE-StartupNotify=true

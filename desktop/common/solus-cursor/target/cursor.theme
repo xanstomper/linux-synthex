@@ -1,0 +1,127 @@
+[Icon Theme]
+# ╔══════════════════════════════════════════════════════════════╗
+# ║  Solus Cursor Theme                                        ║
+# ║  Based on: Breeze Cursor / Bibata Modern                    ║
+# ║  Design: Rounded, modern, with Solus accent color support   ║
+# ║  Version: 1.0.0                                             ║
+# ╚══════════════════════════════════════════════════════════════╝
+# Installed to: /usr/share/icons/Solus-Cursor/cursor.theme
+# Build from: /usr/src/solus-cursor/
+
+Name=Solus-Cursor
+Comment=Solus default cursor theme — rounded, modern, accessible
+Inherits=Breeze
+Example=left_ptr
+
+# ─── Display Name ─────────────────────────────────────────────────────────
+DisplayName=Solus Cursor
+
+# ─── Availability ───────────────────────────────────────────────────────
+# Sizes: 24px (default), 32px (large), 48px (extra large for accessibility)
+AvailableSizes=24,32,48
+
+# ─── Theme Details ───────────────────────────────────────────────────────
+# Style: Filled outline, 2px stroke, rounded caps/joins
+# Hotspot: Center of action (tip for pointers)
+# Color: #1F2937 (light) / #E4E4E7 (dark) with accent (#3B82F6) borders
+# Animation: Smooth spring for busy/wait cursors (800ms loop)
+
+# ─── Cursor Definitions ──────────────────────────────────────────────────
+
+# Standard pointers
+left_ptr                  = pointer (default)
+left_ptr_watch            = pointer + loading animation
+x_cursor                  = precision crosshair
+hand2                     = clickable link (pointing hand)
+hand1                     = clickable (flat hand)
+fleur                     = move (all directions)
+cross                     = crosshair
+cross_reverse             = crosshair (reversed)
+
+# Resize cursors
+top_side                  = north resize
+bottom_side               = south resize
+left_side                 = west resize
+right_side                = east resize
+top_left_corner           = northwest resize
+top_right_corner          = northeast resize
+bottom_left_corner        = southwest resize
+bottom_right_corner       = southeast resize
+sb_v_double_arrow         = vertical resize
+sb_h_double_arrow         = horizontal resize
+
+# Text editing
+xterm                     = text select (I-beam)
+text                      = text select (I-beam)
+vertical-text             = vertical text select
+
+# Drag and drop
+dnd-none                  = drop not allowed
+dnd-copy                  = copy on drop
+dnd-link                  = link on drop
+dnd-move                  = move on drop
+
+# Status
+watch                     = loading / busy (animated)
+clock                     = waiting
+wait                      = application busy (animated)
+progress                  = operation in progress (animated)
+
+# Special
+grabbing                  = grab active
+grab                      = grab available
+all-scroll                = scroll all directions
+zoom-in                   = zoom in
+zoom-out                  = zoom out
+context-menu              = context menu (right-click)
+help                      = help / what's this?
+alias                     = link / shortcut
+cell                      = cell selection
+copy                      = copy
+move                      = move
+no-drop                   = cannot drop here
+not-allowed               = action not permitted
+pencil                    = precision edit
+pointer                   = hand pointer
+row-resize                = row resize (horizontal)
+col-resize                = column resize (vertical)
+
+# ─── Directory Structure ──────────────────────────────────────────────────
+# cursor.theme      — Theme metadata (this file)
+# cursors/          — Compiled XCursor files (.cursor)
+#   solus-left_ptr.png (scalable SVG source -> XCursor)
+#   ...
+# svg/              — SVG source files for cursor design
+#   left_ptr.svg
+#   ...
+# Makefile          — Build script (xcursorgen from SVGs)
+# README.md         — Build instructions
+
+# ─── Build Instructions (for packagers) ───────────────────────────────────
+# 1. Install dependencies:
+#    sudo solus install xcursorgen librsvg
+# 2. Generate cursors:
+#    cd /usr/src/solus-cursor && make
+# 3. Install to system:
+#    sudo make install PREFIX=/usr
+# 4. Verify:
+#    gsettings set org.gnome.desktop.interface cursor-theme "Solus-Cursor"
+#    kwriteconfig5 --file ~/.config/kcminputrc \
+#      --group "Mouse" --key "cursorTheme" "Solus-Cursor"
+
+# ─── Sizing Note ─────────────────────────────────────────────────────────
+# The 24px variant is the default. 32px and 48px variants are provided for:
+# - High DPI displays (scale factor 2+)
+# - Accessibility (vision impairment)
+# - Large screen / projector use
+
+# ─── Colors ──────────────────────────────────────────────────────────────
+# Outline color: #1F2937 (light), #E4E4E7 (dark) — WCAG AA compliant
+# Accent color: #3B82F6 (default), follows system accent where possible
+# The cursor automatically adjusts color based on GSettings:
+#   org.gnome.desktop.interface.color-scheme = prefer-dark
+
+# ─── Accessibility Variants ──────────────────────────────────────────────
+# Solus-Cursor-Large — 48px base size, heavier outline (3px)
+# To switch:
+#   gsettings set org.gnome.desktop.interface cursor-theme "Solus-Cursor-Large"

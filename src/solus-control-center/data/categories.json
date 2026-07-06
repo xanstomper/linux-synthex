@@ -1,0 +1,74 @@
+{
+  "categories": [
+    {
+      "id": "gaming",
+      "name": "Gaming",
+      "icon": "🎮",
+      "apps": [
+        {"name": "Steam", "id": "com.valvesoftware.Steam", "source": "flatpak"},
+        {"name": "Lutris", "id": "net.lutris.Lutris", "source": "flatpak"},
+        {"name": "Heroic Launcher", "id": "heroic", "source": "flatpak"},
+        {"name": "MangoHUD", "id": "mangohud", "source": "rpm"},
+        {"name": "Gamescope", "id": "gamescope", "source": "rpm"}
+      ]
+    },
+    {
+      "id": "development",
+      "name": "Development",
+      "icon": "💻",
+      "apps": [
+        {"name": "VS Code", "id": "com.visualstudio.code", "source": "flatpak"},
+        {"name": "Git", "id": "git", "source": "rpm"},
+        {"name": "Rust", "id": "rust", "source": "rpm"},
+        {"name": "Node.js", "id": "nodejs", "source": "rpm"},
+        {"name": "Podman", "id": "podman", "source": "rpm"}
+      ]
+    },
+    {
+      "id": "internet",
+      "name": "Internet",
+      "icon": "🌐",
+      "apps": [
+        {"name": "Firefox", "id": "org.mozilla.firefox", "source": "flatpak"},
+        {"name": "Chromium", "id": "org.chromium.Chromium", "source": "flatpak"},
+        {"name": "Discord", "id": "com.discordapp.Discord", "source": "flatpak"},
+        {"name": "Thunderbird", "id": "org.mozilla.Thunderbird", "source": "flatpak"}
+      ]
+    },
+    {
+      "id": "media",
+      "name": "Media & Creativity",
+      "icon": "🎨",
+      "apps": [
+        {"name": "Blender", "id": "org.blender.Blender", "source": "flatpak"},
+        {"name": "Krita", "id": "org.kde.krita", "source": "flatpak"},
+        {"name": "GIMP", "id": "org.gimp.GIMP", "source": "flatpak"},
+        {"name": "OBS Studio", "id": "com.obsproject.Studio", "source": "flatpak"},
+        {"name": "Audacity", "id": "org.audacityteam.Audacity", "source": "flatpak"}
+      ]
+    },
+    {
+      "id": "system",
+      "name": "System Tools",
+      "icon": "⚙",
+      "apps": [
+        {"name": "Konsole", "id": "konsole", "source": "rpm"},
+        {"name": "Dolphin", "id": "dolphin", "source": "rpm"},
+        {"name": "KDE System Monitor", "id": "ksystemmonitor", "source": "rpm"},
+        {"name": "KWrite", "id": "kwrite", "source": "rpm"},
+        {"name": "Spectacle", "id": "spectacle", "source": "rpm"}
+      ]
+    },
+    {
+      "id": "office",
+      "name": "Office & Productivity",
+      "icon": "📊",
+      "apps": [
+        {"name": "OnlyOffice", "id": "org.onlyoffice.desktopeditors", "source": "flatpak"},
+        {"name": "LibreOffice", "id": "org.libreoffice.LibreOffice", "source": "flatpak"},
+        {"name": "Okular", "id": "okular", "source": "rpm"},
+        {"name": "Kalendar", "id": "org.kde.kalendar", "source": "flatpak"}
+      ]
+    }
+  ]
+}

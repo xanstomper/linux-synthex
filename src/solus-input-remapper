@@ -1,0 +1,30 @@
+#!/usr/bin/env bash
+# solus-input-remapper — Nobara-style input remapper GUI launcher
+# Configure game controllers, keyboards, and mice
+set -euo pipefail
+
+echo "🎮 Solus Input Remapper"
+echo "═══════════════════════"
+
+if command -v input-remapper-gtk &>/dev/null; then
+    exec input-remapper-gtk "$@"
+elif command -v input-remapper &>/dev/null; then
+    exec input-remapper "$@"
+elif command -v input-remapper-control &>/dev/null; then
+    exec input-remapper-control "$@"
+else
+    echo "📦 Input Remapper not found. Installing..."
+    sudo dnf install -y input-remapper 2>/dev/null || {
+        echo "Installing from inputs-remapper GitHub..."
+        git clone https://github.com/sez11/input-remapper.git /tmp/input-remapper 2>/dev/null
+        cd /tmp/input-remapper && sudo python3 setup.py install 2>/dev/null || true
+    }
+    if command -v input-remapper-gtk &>/dev/null; then
+        exec input-remapper-gtk
+    else
+        echo "Starting input-remapper service..."
+        sudo systemctl start input-remapper 2>/dev/null || true
+        echo "Input remapper service started"
+        echo "Configure via: input-remapper-gtk"
+    fi
+fi

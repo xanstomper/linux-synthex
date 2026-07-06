@@ -1,0 +1,38 @@
+# Ollama configuration for Solus Linux
+# Installed to /etc/ollama/ollama.json
+
+{
+  "host": "127.0.0.1:11434",
+  "models": "/var/lib/ollama/models",
+  "keep_alive": "5m",
+  "num_parallel": 1,
+  "max_loaded_models": 1,
+  "num_thread": 0,
+  "gpu_layers": 0,
+  "flash_attn": true,
+  "verbose": false,
+  "no_history": false,
+  "ctx_size": 4096,
+  "batch_size": 512,
+  "rope_frequency_base": 0.0,
+  "rope_frequency_scale": 0.0,
+  "low_vram": false,
+  "f16_kv": true,
+  "use_mlock": false,
+  "use_mmap": true,
+  "numa": false,
+  "main_gpu": 0,
+  "tensor_split": null,
+  "mirostat": 0,
+  "mirostat_tau": 5.0,
+  "mirostat_eta": 0.1,
+  "temperature": 0.8,
+  "seed": 0,
+  "stop": [],
+  "repeat_penalty": 1.1,
+  "repeat_last_n": 64,
+  "tfs_z": 1.0,
+  "top_k": 40,
+  "top_p": 0.9,
+  "min_p": 0.0
+}

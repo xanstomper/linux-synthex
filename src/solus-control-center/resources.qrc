@@ -1,0 +1,18 @@
+<RCC>
+    <qresource prefix="/qml">
+        <file alias="Main.qml">ui/Main.qml</file>
+        <file alias="pages/Dashboard.qml">ui/pages/Dashboard.qml</file>
+        <file alias="pages/System.qml">ui/pages/System.qml</file>
+        <file alias="pages/Performance.qml">ui/pages/Performance.qml</file>
+        <file alias="pages/Gaming.qml">ui/pages/Gaming.qml</file>
+        <file alias="pages/Developer.qml">ui/pages/Developer.qml</file>
+        <file alias="pages/Themes.qml">ui/pages/Themes.qml</file>
+        <file alias="pages/Security.qml">ui/pages/Security.qml</file>
+        <file alias="pages/Updates.qml">ui/pages/Updates.qml</file>
+        <file alias="pages/Drivers.qml">ui/pages/Drivers.qml</file>
+        <file alias="pages/RGB.qml">ui/pages/RGB.qml</file>
+        <file alias="pages/Snapshots.qml">ui/pages/Snapshots.qml</file>
+        <file alias="pages/Kernel.qml">ui/pages/Kernel.qml</file>
+        <file alias="pages/Controllers.qml">ui/pages/Controllers.qml</file>
+    </qresource>
+</RCC>

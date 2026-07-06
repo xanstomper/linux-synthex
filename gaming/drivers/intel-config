@@ -1,0 +1,168 @@
+# Solus Linux — Intel GPU Driver Configuration
+# /etc/default/intel-gpu (sourced by gpu-driver-manager)
+
+# ============================================================
+# KERNEL PARAMETERS
+# ============================================================
+
+# Intel i915 kernel driver options
+INTEL_KERNEL_OPTIONS="i915.enable_psr=0 i915.enable_fbc=1 i915.fastboot=1 i915.enable_guc=3"
+
+# i915.enable_psr=0       — Disable Panel Self Refresh (may cause flicker on some panels)
+# i915.enable_fbc=1       — Enable Frame Buffer Compression (saves power/bandwidth)
+# i915.fastboot=1         — Fast boot — skip unnecessary mode sets (reduces flicker)
+# i915.enable_guc=3       — Enable GuC/HuC firmware submission (for media encode/decode)
+#   Bitmask: 1=GuC submission, 2=HuC loading, 3=both
+
+# Additional i915 options
+INTEL_KERNEL_OPTIONS_EXTRA="i915.enable_dpcd_backlight=1 i915.enable_gvt=0"
+
+# i915.enable_dpcd_backlight=1 — Enable DPCD backlight control (for OLED/HDR panels)
+# i915.enable_gvt=0           — Disable GVT-g virtualization (not needed for gaming)
+
+# ============================================================
+# POWER MANAGEMENT
+# ============================================================
+
+# Default power profile
+# Options: low, auto, high
+DEFAULT_POWER_PROFILE="auto"
+
+# Gaming performance power profile
+PERFORMANCE_POWER_PROFILE="high"
+
+# Enable Intel RAPL (Running Average Power Limit) control
+# Allows adjusting TDP limits for sustained performance
+ENABLE_RAPL_CONTROL=1
+
+# TDP limit in watts (0 = default, requires RAPL control)
+# Increase for better sustained performance (monitor temperatures!)
+TDP_LIMIT_WATTS=0
+
+# ============================================================
+# MESA DRIVER CONFIGURATION
+# ============================================================
+
+# Vulkan driver selection
+# Options: anv, intel_hasvk, auto
+# anv = modern Intel Vulkan, intel_hasvk = Haswell legacy Vulkan
+VULKAN_DRIVER="anv"
+
+# Intel-specific Vulkan options
+INTEL_VK_OPTIONS=""
+
+# Enable ACO shader compiler (1=yes, 0=no)
+# ACO is now default on Intel too in Mesa 24+
+ENABLE_ACO=1
+
+# Mesa shader cache size (MB per game)
+MESA_SHADER_CACHE_SIZE=4096
+
+# Enable shader cache compression (zstd)
+MESA_SHADER_CACHE_COMPRESS=1
+
+# ============================================================
+# MEDIA / VIDEO ENCODE-DECODE
+# ============================================================
+
+# Intel media driver selection
+# Options: intel-media (new), intel-vaapi-driver (legacy), auto
+MEDIA_DRIVER="intel-media"
+
+# Enable hardware accelerated video decoding
+ENABLE_VAAPI=1
+
+# Enable Intel QuickSync Video (QSV)
+ENABLE_QSV=1
+
+# Enable Vulkan Video decode/encode (VK_KHR_video_decode_queue)
+ENABLE_VULKAN_VIDEO=1
+
+# ============================================================
+# COMPUTE
+# ============================================================
+
+# Enable Intel Level Zero API (for compute workloads)
+ENABLE_LEVEL_ZERO=1
+
+# Enable Intel OpenCL runtime
+ENABLE_OPENCL=1
+
+# ============================================================
+# DISPLAY / MODESETTING
+# ============================================================
+
+# Enable async flip (reduces page flip latency)
+# Requires i915.async_flip parameter
+ENABLE_ASYNC_FLIP=1
+
+# Disable PSR (Panel Self Refresh) during gaming
+# PSR can cause micro-stutters during input-heavy scenes
+DISABLE_PSR_ON_GAMING=1
+
+# ============================================================
+# VRR / ADAPTIVE SYNC
+# ============================================================
+
+# Enable Adaptive Sync (VRR) on supported displays
+ENABLE_VRR=1
+
+# VRR refresh rate range (min-max Hz)
+VRR_MIN_REFRESH=40
+VRR_MAX_REFRESH=0  # 0 = display max
+
+# ============================================================
+# HDR SUPPORT
+# ============================================================
+
+# Enable HDR output
+ENABLE_HDR=1
+
+# HDR mode for Intel GPUs
+# Options: auto, hdr10, bt2020
+HDR_MODE="auto"
+
+# ============================================================
+# FSYNC / FUTEX2
+# ============================================================
+
+ENABLE_FSYNC=1
+ENABLE_FUTEX2=1
+
+# ============================================================
+# LATENCY TUNING
+# ============================================================
+
+# Reduce GPU latency
+ENABLE_LOW_LATENCY=1
+
+# Intel-specific latency reduction
+# Enable GPU preemption (reduces long-running shader latency)
+ENABLE_GPU_PREEMPTION=1
+
+# GPU preemption timeout in ms (lower = more responsive)
+GPU_PREEMPTION_TIMEOUT=10
+
+# ============================================================
+# MULTI-GPU
+# ============================================================
+
+# Enable PRIME render offload (iGPU + dGPU laptops)
+ENABLE_PRIME=1
+
+# Default GPU for games when multi-GPU
+# Options: auto, integrated, discrete
+GAMING_GPU="auto"
+
+# ============================================================
+# DEBUG / LOGGING
+# ============================================================
+
+# Intel GPU debug flags
+INTEL_DEBUG=""
+
+# Enable verbose Mesa Intel driver logging
+INTEL_DEBUG_LEVEL=0  # 0=off, 1=info, 2=verbose
+
+# Intel GPU tools debugging
+ENABLE_GPU_TOP=0  # Enable intel_gpu_top stats collection in background

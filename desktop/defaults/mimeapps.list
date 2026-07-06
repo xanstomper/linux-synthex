@@ -1,0 +1,66 @@
+# Solus Default Applications (XDG MIME)
+# Defines which applications handle which file types
+# Install to: /usr/share/applications/defaults.list
+# Or per-user: ~/.config/mimeapps.list
+
+[Default Applications]
+
+# Web
+text/html=firefox.desktop
+x-scheme-handler/http=firefox.desktop
+x-scheme-handler/https=firefox.desktop
+x-scheme-handler/ftp=firefox.desktop
+x-scheme-handler/chrome=firefox.desktop
+
+# File Manager
+inode/directory=dolphin.desktop
+
+# Terminal
+application/x-terminal=konsole.desktop
+
+# Text Editor
+text/plain=kate.desktop
+text/markdown=kate.desktop
+
+# Images
+image/jpeg=gwenview.desktop
+image/png=gwenview.desktop
+image/gif=gwenview.desktop
+image/webp=gwenview.desktop
+image/svg+xml=gwenview.desktop
+
+# Video
+video/mp4=ffmpegthumbs.desktop
+video/x-matroska=ffmpegthumbs.desktop
+video/webm=ffmpegthumbs.desktop
+video/x-msvideo=ffmpegthumbs.desktop
+
+# Audio
+audio/mpeg=elisa.desktop
+audio/ogg=elisa.desktop
+audio/flac=elisa.desktop
+audio/wav=elisa.desktop
+
+# Documents
+application/pdf=okular.desktop
+application/epub+zip=okular.desktop
+
+# Archives
+application/zip=ark.desktop
+application/x-compressed-tar=ark.desktop
+application/x-bzip=ark.desktop
+application/gzip=ark.desktop
+
+# Code
+text/x-python=kate.desktop
+text/x-shellscript=kate.desktop
+text/x-c++src=kate.desktop
+text/x-java=kate.desktop
+text/x-rust=kate.desktop
+application/json=kate.desktop
+
+# Development
+x-scheme-handler/git=firefox.desktop
+
+# Solus Apps
+x-scheme-handler/solus=org.solus.SoftwareCenter.desktop

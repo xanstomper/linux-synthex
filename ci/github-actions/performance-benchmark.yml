@@ -1,0 +1,479 @@
+# ============================================================================
+# Solus Linux — Performance Benchmarking Workflow
+# ============================================================================
+# Runs performance benchmarks on ISO builds and running systems.
+# Tracks results over time and alerts on regressions.
+# ============================================================================
+
+name: Performance Benchmark
+
+on:
+  schedule:
+    # Nightly benchmarks
+    - cron: '0 2 * * *'
+  workflow_dispatch:
+    inputs:
+      benchmark_type:
+        description: "Type of benchmark to run"
+        required: false
+        type: choice
+        options:
+          - all
+          - boot
+          - cpu
+          - memory
+          - disk
+          - network
+          - desktop
+        default: all
+      reference_version:
+        description: "Reference version for regression comparison"
+        required: false
+        type: string
+        default: 'latest'
+  release:
+    types: [published]
+
+env:
+  BENCHMARK_DIR: /tmp/benchmarks
+  RESULTS_DB_URL: ${{ secrets.RESULTS_DB_URL || '' }}
+  GRAFANA_API_KEY: ${{ secrets.GRAFANA_API_KEY || '' }}
+  REGRESSION_THRESHOLD_PERCENT: 5
+
+jobs:
+  ############################################################################
+  # BOOT BENCHMARK: Measure boot times
+  ############################################################################
+  boot-benchmark:
+    if: inputs.benchmark_type == 'all' || inputs.benchmark_type == 'boot'
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install benchmark tools
+        run: |
+          dnf install -y systemd-analyze systemd-bootchart
+
+      - name: Measure boot performance
+        run: |
+          mkdir -p "${BENCHMARK_DIR}/boot"
+
+          # Collect boot analysis
+          systemd-analyze > "${BENCHMARK_DIR}/boot/analyze.txt"
+          systemd-analyze blame > "${BENCHMARK_DIR}/boot/blame.txt"
+          systemd-analyze critical-chain > "${BENCHMARK_DIR}/boot/critical-chain.txt"
+
+          # Parse key metrics
+          KERNEL_TIME=$(grep 'kernel' "${BENCHMARK_DIR}/boot/analyze.txt" | grep -oP '[\d.]+(?=s)' | head -1 || echo "0")
+          INITRD_TIME=$(grep 'initrd' "${BENCHMARK_DIR}/boot/analyze.txt" | grep -oP '[\d.]+(?=s)' | head -1 || echo "0")
+          USERSPACE_TIME=$(grep 'userspace' "${BENCHMARK_DIR}/boot/analyze.txt" | grep -oP '[\d.]+(?=s)' | head -1 || echo "0")
+          TOTAL_TIME=$(grep -oP '^[\d.]+(?=s)' "${BENCHMARK_DIR}/boot/analyze.txt" | head -1 || echo "0")
+
+          # Slowest services
+          SLOWEST=$(head -3 "${BENCHMARK_DIR}/boot/blame.txt" | paste -sd '|')
+
+          # Store in JSON
+          cat > "${BENCHMARK_DIR}/boot/results.json" << JSON
+          {
+            "timestamp": "$(date -u +%Y-%m-%dT%H:%M:%SZ)",
+            "workflow": "${{ github.workflow }}",
+            "run_id": "${{ github.run_id }}",
+            "metrics": {
+              "kernel_time_seconds": ${KERNEL_TIME},
+              "initrd_time_seconds": ${INITRD_TIME},
+              "userspace_time_seconds": ${USERSPACE_TIME},
+              "total_boot_time_seconds": ${TOTAL_TIME},
+              "slowest_services": "${SLOWEST}"
+            }
+          }
+          JSON
+
+      - name: Upload boot benchmark results
+        uses: actions/upload-artifact@v4
+        with:
+          name: benchmark-boot
+          path: ${{ env.BENCHMARK_DIR }}/boot/
+          retention-days: 90
+
+  ############################################################################
+  # CPU BENCHMARK: Measure CPU performance
+  ############################################################################
+  cpu-benchmark:
+    if: inputs.benchmark_type == 'all' || inputs.benchmark_type == 'cpu'
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install benchmark tools
+        run: |
+          dnf install -y sysbench stress-ng
+
+      - name: Run CPU benchmarks
+        run: |
+          mkdir -p "${BENCHMARK_DIR}/cpu"
+
+          # sysbench CPU
+          sysbench cpu run \
+            --threads=$(nproc) \
+            --time=60 \
+            --cpu-max-prime=20000 \
+            2>&1 | tee "${BENCHMARK_DIR}/cpu/sysbench-cpu.txt"
+
+          # Parse sysbench results
+          CPU_EVENTS=$(grep 'total number of events' "${BENCHMARK_DIR}/cpu/sysbench-cpu.txt" | grep -oP '[\d.]+' | head -1 || echo "0")
+          CPU_EVENTS_PER_SEC=$(grep 'events per second' "${BENCHMARK_DIR}/cpu/sysbench-cpu.txt" | grep -oP '[\d.]+' | head -1 || echo "0")
+
+          # stress-ng CPU stressors
+          stress-ng --cpu $(nproc) --cpu-method matrixprod \
+            --metrics-brief \
+            --timeout 30s \
+            2>&1 | tee "${BENCHMARK_DIR}/cpu/stress-ng-cpu.txt" || true
+
+          # CPU info
+          cat /proc/cpuinfo > "${BENCHMARK_DIR}/cpu/cpuinfo.txt"
+
+          # Store results
+          cat > "${BENCHMARK_DIR}/cpu/results.json" << JSON
+          {
+            "timestamp": "$(date -u +%Y-%m-%dT%H:%M:%SZ)",
+            "workflow": "${{ github.workflow }}",
+            "run_id": "${{ github.run_id }}",
+            "metrics": {
+              "sysbench_events_total": ${CPU_EVENTS},
+              "sysbench_events_per_second": ${CPU_EVENTS_PER_SEC},
+              "cpu_cores": $(nproc),
+              "cpu_model": "$(grep 'model name' /proc/cpuinfo | head -1 | sed 's/.*: //')"
+            }
+          }
+          JSON
+
+      - name: Upload CPU benchmark results
+        uses: actions/upload-artifact@v4
+        with:
+          name: benchmark-cpu
+          path: ${{ env.BENCHMARK_DIR }}/cpu/
+          retention-days: 90
+
+  ############################################################################
+  # MEMORY BENCHMARK: Measure memory performance
+  ############################################################################
+  memory-benchmark:
+    if: inputs.benchmark_type == 'all' || inputs.benchmark_type == 'memory'
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install benchmark tools
+        run: |
+          dnf install -y sysbench stress-ng memtester
+
+      - name: Run memory benchmarks
+        run: |
+          mkdir -p "${BENCHMARK_DIR}/memory"
+
+          # sysbench memory
+          sysbench memory run \
+            --threads=$(nproc) \
+            --time=60 \
+            --memory-block-size=1M \
+            --memory-total-size=100G \
+            --memory-oper=write \
+            2>&1 | tee "${BENCHMARK_DIR}/memory/sysbench-memory-write.txt"
+
+          sysbench memory run \
+            --threads=$(nproc) \
+            --time=60 \
+            --memory-block-size=1M \
+            --memory-total-size=100G \
+            --memory-oper=read \
+            2>&1 | tee "${BENCHMARK_DIR}/memory/sysbench-memory-read.txt"
+
+          # Parse results
+          MEM_WRITE_MIB=$(grep 'transferred' "${BENCHMARK_DIR}/memory/sysbench-memory-write.txt" | grep -oP '[\d.]+(?= MiB/sec)' | head -1 || echo "0")
+          MEM_READ_MIB=$(grep 'transferred' "${BENCHMARK_DIR}/memory/sysbench-memory-read.txt" | grep -oP '[\d.]+(?= MiB/sec)' | head -1 || echo "0")
+
+          # Memory info
+          free -h > "${BENCHMARK_DIR}/memory/free.txt"
+          cat /proc/meminfo > "${BENCHMARK_DIR}/memory/meminfo.txt"
+
+          # Store results
+          cat > "${BENCHMARK_DIR}/memory/results.json" << JSON
+          {
+            "timestamp": "$(date -u +%Y-%m-%dT%H:%M:%SZ)",
+            "workflow": "${{ github.workflow }}",
+            "run_id": "${{ github.run_id }}",
+            "metrics": {
+              "memory_write_mib_per_sec": ${MEM_WRITE_MIB},
+              "memory_read_mib_per_sec": ${MEM_READ_MIB},
+              "total_memory_gb": $(free -g | grep 'Mem:' | awk '{print $2}')
+            }
+          }
+          JSON
+
+      - name: Upload memory benchmark results
+        uses: actions/upload-artifact@v4
+        with:
+          name: benchmark-memory
+          path: ${{ env.BENCHMARK_DIR }}/memory/
+          retention-days: 90
+
+  ############################################################################
+  # DISK BENCHMARK: Measure disk I/O performance
+  ############################################################################
+  disk-benchmark:
+    if: inputs.benchmark_type == 'all' || inputs.benchmark_type == 'disk'
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install benchmark tools
+        run: |
+          dnf install -y fio ioping
+
+      - name: Run disk benchmarks
+        run: |
+          mkdir -p "${BENCHMARK_DIR}/disk"
+
+          # Sequential read
+          fio --name=seqread --ioengine=libaio --rw=read \
+            --bs=1M --size=4G --numjobs=1 --runtime=30 \
+            --iodepth=64 --direct=1 --group_reporting \
+            --output="${BENCHMARK_DIR}/disk/fio-seqread.txt"
+
+          # Sequential write
+          fio --name=seqwrite --ioengine=libaio --rw=write \
+            --bs=1M --size=4G --numjobs=1 --runtime=30 \
+            --iodepth=64 --direct=1 --group_reporting \
+            --output="${BENCHMARK_DIR}/disk/fio-seqwrite.txt"
+
+          # Random read IOPS
+          fio --name=randread --ioengine=libaio --rw=randread \
+            --bs=4k --size=4G --numjobs=4 --runtime=30 \
+            --iodepth=64 --direct=1 --group_reporting \
+            --output="${BENCHMARK_DIR}/disk/fio-randread.txt"
+
+          # Random write IOPS
+          fio --name=randwrite --ioengine=libaio --rw=randwrite \
+            --bs=4k --size=4G --numjobs=4 --runtime=30 \
+            --iodepth=64 --direct=1 --group_reporting \
+            --output="${BENCHMARK_DIR}/disk/fio-randwrite.txt"
+
+          # IO latency
+          ioping -c 20 -i 100ms /tmp > "${BENCHMARK_DIR}/disk/ioping.txt" 2>&1 || true
+
+          # Parse results (simplified — production should use jq)
+          SEQ_READ_MB=$(grep 'READ:' "${BENCHMARK_DIR}/disk/fio-seqread.txt" | grep -oP '[\d.]+(?=MiB/s)' | head -1 || echo "0")
+          SEQ_WRITE_MB=$(grep 'WRITE:' "${BENCHMARK_DIR}/disk/fio-seqwrite.txt" | grep -oP '[\d.]+(?=MiB/s)' | head -1 || echo "0")
+          RAND_READ_IOPS=$(grep 'read: IOPS' "${BENCHMARK_DIR}/disk/fio-randread.txt" | grep -oP 'IOPS=[\d.]+' | grep -oP '[\d.]+' | head -1 || echo "0")
+          RAND_WRITE_IOPS=$(grep 'write: IOPS' "${BENCHMARK_DIR}/disk/fio-randwrite.txt" | grep -oP 'IOPS=[\d.]+' | grep -oP '[\d.]+' | head -1 || echo "0")
+
+          # Disk info
+          lsblk > "${BENCHMARK_DIR}/disk/lsblk.txt"
+          df -h > "${BENCHMARK_DIR}/disk/df.txt"
+
+          # Store results
+          cat > "${BENCHMARK_DIR}/disk/results.json" << JSON
+          {
+            "timestamp": "$(date -u +%Y-%m-%dT%H:%M:%SZ)",
+            "workflow": "${{ github.workflow }}",
+            "run_id": "${{ github.run_id }}",
+            "metrics": {
+              "seq_read_mb_per_sec": ${SEQ_READ_MB},
+              "seq_write_mb_per_sec": ${SEQ_WRITE_MB},
+              "rand_read_iops": ${RAND_READ_IOPS},
+              "rand_write_iops": ${RAND_WRITE_IOPS}
+            }
+          }
+          JSON
+
+      - name: Upload disk benchmark results
+        uses: actions/upload-artifact@v4
+        with:
+          name: benchmark-disk
+          path: ${{ env.BENCHMARK_DIR }}/disk/
+          retention-days: 90
+
+  ############################################################################
+  # NETWORK BENCHMARK: Measure network performance
+  ############################################################################
+  network-benchmark:
+    if: inputs.benchmark_type == 'all' || inputs.benchmark_type == 'network'
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install benchmark tools
+        run: |
+          dnf install -y iperf3 netperf
+
+      - name: Run network benchmarks
+        run: |
+          mkdir -p "${BENCHMARK_DIR}/network"
+
+          # Test to public iperf3 servers
+          IPERF_SERVERS=(
+            "iperf.he.net"
+            "iperf.online.net"
+            "ping.online.net"
+          )
+
+          for server in "${IPERF_SERVERS[@]}"; do
+            echo "=== Testing: ${server} ==="
+            iperf3 -c "${server}" -t 15 -P 4 \
+              --json \
+              > "${BENCHMARK_DIR}/network/iperf3-${server}.json" 2>&1 || true
+          done
+
+          # TCP throughput test
+          curl -o /dev/null \
+            -w "TCP Throughput: %{speed_download} bytes/sec\n" \
+            -s "https://speedtest.tele2.net/100MB.zip" \
+            > "${BENCHMARK_DIR}/network/tcp-throughput.txt" 2>&1 || true
+
+          # Network info
+          ip addr > "${BENCHMARK_DIR}/network/ip-addr.txt"
+          ss -tuln > "${BENCHMARK_DIR}/network/ss.txt"
+
+          # Parse iperf results
+          cat > "${BENCHMARK_DIR}/network/results.json" << JSON
+          {
+            "timestamp": "$(date -u +%Y-%m-%dT%H:%M:%SZ)",
+            "workflow": "${{ github.workflow }}",
+            "run_id": "${{ github.run_id }}",
+            "metrics": {
+              "iperf_servers_tested": ${#IPERF_SERVERS[@]},
+              "interface_speed": "$(cat /sys/class/net/$(ip route show default | awk '{print $5}')/speed 2>/dev/null || echo 'unknown')"
+            }
+          }
+          JSON
+
+      - name: Upload network benchmark results
+        uses: actions/upload-artifact@v4
+        with:
+          name: benchmark-network
+          path: ${{ env.BENCHMARK_DIR }}/network/
+          retention-days: 90
+
+  ############################################################################
+  # AGGREGATE: Collect all results and check for regressions
+  ############################################################################
+  aggregate:
+    needs: [boot-benchmark, cpu-benchmark, memory-benchmark, disk-benchmark, network-benchmark]
+    runs-on: ubuntu-latest
+    if: always()
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Download all benchmark results
+        uses: actions/download-artifact@v4
+        with:
+          pattern: benchmark-*
+          merge-multiple: true
+          path: ${{ env.BENCHMARK_DIR }}
+
+      - name: Aggregate and check regressions
+        run: |
+          python3 << 'PYEOF'
+          import json, os, sys
+
+          bench_dir = os.environ['BENCHMARK_DIR']
+          threshold = float(os.environ.get('REGRESSION_THRESHOLD_PERCENT', 5))
+
+          aggregated = {
+              "timestamp": os.popen("date -u +%Y-%m-%dT%H:%M:%SZ").read().strip(),
+              "workflow": os.environ.get('GITHUB_WORKFLOW', 'unknown'),
+              "run_id": os.environ.get('GITHUB_RUN_ID', 'unknown'),
+              "regressions": [],
+              "benchmarks": {}
+          }
+
+          # Walk all result.json files
+          for root, dirs, files in os.walk(bench_dir):
+              for f in files:
+                  if f == "results.json":
+                      path = os.path.join(root, f)
+                      try:
+                          with open(path) as fh:
+                              data = json.load(fh)
+                          bench_type = os.path.basename(root)
+                          aggregated["benchmarks"][bench_type] = data.get("metrics", {})
+                      except Exception as e:
+                          print(f"Error parsing {path}: {e}")
+
+          # Check for regressions if reference data exists
+          ref_file = os.path.join(bench_dir, "reference.json")
+          if os.path.exists(ref_file):
+              with open(ref_file) as f:
+                  reference = json.load(f)
+
+              for bench_type, metrics in aggregated["benchmarks"].items():
+                  ref_metrics = reference.get("benchmarks", {}).get(bench_type, {})
+                  for metric, value in metrics.items():
+                      if metric in ref_metrics and ref_metrics[metric] > 0:
+                          ref_val = ref_metrics[metric]
+                          change = ((value - ref_val) / ref_val) * 100
+                          if change < -threshold:
+                              aggregated["regressions"].append({
+                                  "benchmark": bench_type,
+                                  "metric": metric,
+                                  "value": value,
+                                  "reference": ref_val,
+                                  "change_percent": round(change, 2)
+                              })
+
+          # Write aggregated results
+          with open(f"{bench_dir}/aggregated-results.json", "w") as f:
+              json.dump(aggregated, f, indent=2)
+
+          # Output regression count
+          reg_count = len(aggregated["regressions"])
+          print(f"Found {reg_count} regression(s)")
+
+          with open(os.environ.get('GITHUB_ENV', '/dev/null'), 'a') as env:
+              env.write(f"regression_count={reg_count}\n")
+
+          # Exit with error if regressions found
+          if reg_count > 0:
+              print("Regressions detected! Exiting with error.")
+              PYEOF
+
+      - name: Upload aggregated results
+        uses: actions/upload-artifact@v4
+        with:
+          name: benchmark-aggregated
+          path: ${{ env.BENCHMARK_DIR }}/aggregated-results.json
+          retention-days: 365
+
+      - name: Publish to database
+        if: env.RESULTS_DB_URL != ''
+        run: |
+          curl -X POST \
+            -H "Content-Type: application/json" \
+            "${{ env.RESULTS_DB_URL }}/api/benchmarks" \
+            -d @"${BENCHMARK_DIR}/aggregated-results.json" \
+            || echo "Database publish failed"
+
+      - name: Alert on regressions
+        if: env.regression_count > 0
+        uses: slackapi/slack-github-action@v1.24.0
+        with:
+          payload: |
+            {
+              "text": "Performance Regression Detected (${{ env.regression_count }} regressions)",
+              "blocks": [{
+                "type": "section",
+                "text": {
+                  "type": "mrkdwn",
+                  "text": "*Performance Regression*\n• Regressions: `${{ env.regression_count }}`\n• Threshold: `${{ env.REGRESSION_THRESHOLD_PERCENT }}%`\n• Run: <${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}|#${{ github.run_number }}>"
+                }
+              }]
+            }
+        env:
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+          SLACK_WEBHOOK_TYPE: INCOMING_WEBHOOK

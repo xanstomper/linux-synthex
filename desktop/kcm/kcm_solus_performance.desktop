@@ -1,0 +1,14 @@
+[Desktop Entry]
+Type=Service
+Name=Solus Performance
+Comment=Configure CPU governor, GPU profile, and system tuning
+Icon=preferences-system-performance
+Exec=/usr/bin/solus-control-center --page performance
+X-KDE-ServiceTypes=KCModule
+X-KDE-ParentApp=kcm_shell
+X-KDE-ParentComponents=SolusPerformance
+X-KDE-Library=kcm_shell
+X-KDE-FactoryName=solus-performance
+X-KDE-ParentWidget=true
+Categories=Qt;KDE;System;Settings;
+OnlyShowIn=KDE;

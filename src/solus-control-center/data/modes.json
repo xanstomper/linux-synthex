@@ -1,0 +1,59 @@
+{
+  "modes": {
+    "gaming": {
+      "name": "Gaming Mode",
+      "icon": "🎮",
+      "description": "Maximum gaming performance",
+      "cpu_governor": "performance",
+      "gpu_profile": "high",
+      "compositor": "disabled",
+      "services_stopped": ["bluetooth", "cups", "geoclue", "tracker-miner-fs"],
+      "tuned_profile": "throughput-performance",
+      "layout": "gaming"
+    },
+    "developer": {
+      "name": "Developer Mode",
+      "icon": "💻",
+      "description": "Development tools enabled",
+      "cpu_governor": "schedutil",
+      "gpu_profile": "auto",
+      "compositor": "enabled",
+      "services_started": ["podman", "docker"],
+      "tuned_profile": "desktop",
+      "layout": "balanced"
+    },
+    "battery": {
+      "name": "Battery Saver",
+      "icon": "🔋",
+      "description": "Maximum battery life",
+      "cpu_governor": "powersave",
+      "gpu_profile": "low",
+      "compositor": "enabled",
+      "services_stopped": ["geoclue", "tracker-miner-fs", "bluetooth"],
+      "tuned_profile": "powersave",
+      "layout": "balanced"
+    },
+    "balanced": {
+      "name": "Balanced Mode",
+      "icon": "⚖",
+      "description": "Default system behavior",
+      "cpu_governor": "ondemand",
+      "gpu_profile": "auto",
+      "compositor": "enabled",
+      "services_started": ["bluetooth", "cups"],
+      "tuned_profile": "desktop",
+      "layout": "balanced"
+    },
+    "creator": {
+      "name": "Creator Mode",
+      "icon": "🎨",
+      "description": "Creative workload optimized",
+      "cpu_governor": "performance",
+      "gpu_profile": "high",
+      "compositor": "enabled",
+      "services_started": ["pipewire", "wireplumber"],
+      "tuned_profile": "latency-performance",
+      "layout": "balanced"
+    }
+  }
+}

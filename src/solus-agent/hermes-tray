@@ -1,0 +1,355 @@
+#!/usr/bin/env python3
+"""Hermes — Native Cinnamon System Tray App.
+Runs in top-right panel. Single-click opens agent window.
+"""
+import os, sys, json, subprocess, threading, time, html
+import gi
+gi.require_version("Gtk", "3.0")
+gi.require_version("AppIndicator3", "0.1")
+from gi.repository import Gtk, Gio, GLib, AppIndicator3, Pango, Gdk
+
+ROOT = os.path.dirname(os.path.abspath(__file__))
+DAEMON = os.path.join(ROOT, "daemon", "hermesd")
+
+
+# ═══ DBus client ═══════════════════════════════════════════════════
+
+class HermesClient:
+    def __init__(self):
+        self.available = False
+        self.status = "disconnected"
+        self._connect()
+    def _connect(self):
+        try:
+            import dbus
+            bus = dbus.SessionBus()
+            self.obj = bus.get_object("org.solus.Hermes", "/org/solus/Hermes")
+            self.iface = dbus.Interface(self.obj, "org.solus.Hermes")
+            self.available = True
+            s = json.loads(self.iface.GetStatus())
+            self.status = s.get("status", "ready")
+        except:
+            self.available = False
+            self._start_daemon()
+    def _start_daemon(self):
+        if os.path.exists(DAEMON):
+            subprocess.Popen([DAEMON], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+            time.sleep(2)
+            try:
+                import dbus
+                bus = dbus.SessionBus()
+                self.obj = bus.get_object("org.solus.Hermes", "/org/solus/Hermes")
+                self.iface = dbus.Interface(self.obj, "org.solus.Hermes")
+                self.available = True
+            except: pass
+    def chat(self, query):
+        if not self.available: return {"response": "Daemon not running. Starting..."}
+        try: return json.loads(self.iface.Chat(query))
+        except Exception as e: return {"response": f"Error: {e}"}
+    def quick(self, cat, q=""):
+        if not self.available: return {"error": "offline"}
+        try: return json.loads(self.iface.QuickCommand(cat, q))
+        except: return {"error": "failed"}
+
+
+# ═══ Agent Window ══════════════════════════════════════════════════
+
+class AgentWindow(Gtk.Window):
+    def __init__(self, client):
+        Gtk.Window.__init__(self, title="Hermes")
+        self.client = client
+        self.set_default_size(500, 380)
+        self.set_position(Gtk.WindowPosition.CENTER)
+        self.set_keep_above(True)
+        self.set_decorated(False)
+        self.stick()
+
+        # CSS
+        css = b"""
+        #window { background-color: #1A1A2E; border: 1px solid #3A3A5E; border-radius: 12px; }
+        #search { background-color: #2A2A4E; color: #FFFFFF; border: 1px solid #3A3A5E;
+                  border-radius: 8px; font-size: 14px; padding: 8px 12px; }
+        #search:focus { border-color: #9BBD5C; }
+        #msg-user { background-color: #9BBD5C; color: #FFF; border-radius: 8px; padding: 8px; }
+        #msg-agent { background-color: #222240; color: #FFF; border-radius: 8px; padding: 8px; }
+        #label { color: #8899AA; font-size: 11px; }
+        #heading { color: #9BBD5C; font-size: 13px; font-weight: bold; }
+        #btn { background-color: #222240; color: #8899AA; border: 1px solid #3A3A5E; border-radius: 6px; }
+        #btn:hover { background-color: #2A2A4E; }
+        """
+        css_provider = Gtk.CssProvider()
+        css_provider.load_from_data(css)
+        Gtk.StyleContext.add_provider_for_screen(
+            Gdk.Screen.get_default(), css_provider,
+            Gtk.STYLE_PROVIDER_PRIORITY_APPLICATION
+        )
+
+        self._build_ui()
+
+    def _esc(self, text):
+        """Escape text for Pango markup."""
+        return html.escape(str(text))
+
+    def _build_ui(self):
+        self.set_name("window")
+        vbox = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=6)
+        vbox.set_margin_start(10); vbox.set_margin_end(10)
+        vbox.set_margin_top(10); vbox.set_margin_bottom(8)
+        self.add(vbox)
+
+        # Header
+        header = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=6)
+        lbl = Gtk.Label()
+        lbl.set_markup("<span color='#9BBD5C' size='large'><b>🟢 Hermes</b></span>")
+        header.pack_start(lbl, False, False, 0)
+        lbl2 = Gtk.Label(label="Desktop AI Agent")
+        lbl2.set_name("label")
+        header.pack_start(lbl2, False, False, 0)
+        hbox_end = Gtk.Box()
+        header.pack_end(hbox_end, True, True, 0)
+        close_btn = Gtk.Button(label="✕")
+        close_btn.set_relief(Gtk.ReliefStyle.NONE)
+        close_btn.connect("clicked", lambda w: self.hide())
+        close_btn.set_name("btn")
+        header.pack_end(close_btn, False, False, 0)
+        vbox.pack_start(header, False, False, 0)
+
+        # Search
+        self.entry = Gtk.Entry()
+        self.entry.set_name("search")
+        self.entry.set_placeholder_text("Ask anything... Install Steam, fix Wi-Fi, update system...")
+        self.entry.connect("activate", self._submit)
+        vbox.pack_start(self.entry, False, False, 0)
+
+        # Quick action chips
+        chip_box = Gtk.FlowBox()
+        chip_box.set_max_children_per_line(6)
+        chip_box.set_selection_mode(Gtk.SelectionMode.NONE)
+        chip_box.set_row_spacing(4)
+        chip_box.set_column_spacing(4)
+        for text in ["📦 Install", "🔄 Update", "🎮 Gaming", "🛡️ Status", "📋 Logs", "⚡ Doctor"]:
+            btn = Gtk.Button(label=text)
+            btn.set_name("btn")
+            btn.connect("clicked", self._quick_action, text)
+            chip_box.add(btn)
+        vbox.pack_start(chip_box, False, False, 0)
+
+        # Chat area
+        scroll = Gtk.ScrolledWindow()
+        scroll.set_policy(Gtk.PolicyType.NEVER, Gtk.PolicyType.AUTOMATIC)
+        scroll.set_min_content_height(220)
+        self.chat_box = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=4)
+        scroll.add(self.chat_box)
+        vbox.pack_start(scroll, True, True, 0)
+
+        # Welcome
+        w = Gtk.Label()
+        w.set_markup(
+            "<span color='#8899AA' size='small'>"
+            "🎮 \"Install Steam\"\n"
+            "🌐 \"Why is my Wi-Fi slow?\"\n"
+            "🖥️ \"Fix my NVIDIA drivers\"\n"
+            "📦 \"Update my system\"\n"
+            "🔍 \"Check system health\""
+            "</span>"
+        )
+        w.set_padding(10, 10)
+        self.chat_box.pack_start(w, True, True, 0)
+        self.chat_box.show_all()
+
+        # Footer
+        footer = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=6)
+        self.status_lbl = Gtk.Label()
+        self.status_lbl.set_name("label")
+        footer.pack_start(self.status_lbl, False, False, 0)
+        hbox_end2 = Gtk.Box()
+        footer.pack_end(hbox_end2, True, True, 0)
+        s = Gtk.Label(label="Super+Space · Esc close")
+        s.set_name("label")
+        footer.pack_end(s, False, False, 0)
+        vbox.pack_start(footer, False, False, 0)
+
+        self._update_status()
+
+    def _update_status(self):
+        s = self.client.status
+        icon = {"ready": "🟢", "thinking": "🟡", "working": "🔵", "needs_permission": "🔴"}.get(s, "🟢")
+        self.status_lbl.set_markup(f"<span color='#8899AA'>{icon} {s}</span>")
+        return True
+
+    def _add_msg(self, text, is_user=False):
+        lbl = Gtk.Label()
+        escaped = self._esc(text)
+        if is_user:
+            markup = f"<span color='#FFFFFF'><b>You:</b> {escaped}</span>"
+        else:
+            markup = f"<span color='#8899AA'>{escaped}</span>"
+        lbl.set_markup(markup)
+        lbl.set_line_wrap(True)
+        lbl.set_xalign(0)
+        lbl.set_padding(8, 6)
+        if is_user:
+            lbl.set_name("msg-user")
+        else:
+            lbl.set_name("msg-agent")
+        self.chat_box.pack_start(lbl, False, False, 0)
+        self.chat_box.show_all()
+
+    def _submit(self, entry):
+        text = entry.get_text().strip()
+        if not text: return
+        entry.set_text("")
+        self._add_msg(text, is_user=True)
+        self._add_msg("🤔 Thinking...")
+        threading.Thread(target=self._do_chat, args=(text,), daemon=True).start()
+
+    def _do_chat(self, text):
+        result = self.client.chat(text)
+        GLib.idle_add(self._show_result, result)
+
+    def _show_result(self, result):
+        # Remove "Thinking..." label
+        children = self.chat_box.get_children()
+        if children and "Thinking" in (children[-1].get_text() or ""):
+            self.chat_box.remove(children[-1])
+        response = result.get("response", result.get("error", "No response"))
+        self._add_msg(response[:2000])
+        self._update_status()
+
+    def _quick_action(self, btn, text):
+        self._add_msg(text, is_user=True)
+        self._add_msg("🤔 Working...")
+        threading.Thread(target=self._do_quick, args=(text,), daemon=True).start()
+
+    def _do_quick(self, text):
+        t = text.lower()
+        if "install" in t: r = self.client.quick("update", "")
+        elif "update" in t: r = self.client.quick("update", "")
+        elif "gaming" in t: r = self.client.quick("gaming", "on")
+        elif "status" in t or "health" in t: r = self.client.quick("doctor", "")
+        elif "logs" in t: r = self.client.quick("logs", "")
+        elif "doctor" in t: r = self.client.quick("doctor", "")
+        else: r = {"response": f"Running: {text}"}
+        GLib.idle_add(self._show_result, r)
+
+
+# ═══ System Tray App ═══════════════════════════════════════════════
+
+class HermesTray:
+    def __init__(self):
+        self.client = HermesClient()
+        self.window = None
+
+        # Create indicator
+        self.indicator = AppIndicator3.Indicator.new(
+            "hermes", "hermes",
+            AppIndicator3.IndicatorCategory.APPLICATION_STATUS
+        )
+        self.indicator.set_status(AppIndicator3.IndicatorStatus.ACTIVE)
+
+        # Create a 22x22 icon programmatically
+        self._create_icon()
+
+        # Build menu
+        self._build_menu()
+
+        # Periodic status check
+        GLib.timeout_add_seconds(15, self._tick)
+
+    def _create_icon(self):
+        """Create icon using Cairo."""
+        import cairo
+        surface = cairo.ImageSurface(cairo.FORMAT_ARGB32, 22, 22)
+        cr = cairo.Context(surface)
+        # Circle
+        cr.set_source_rgb(0.1, 0.1, 0.18)
+        cr.arc(11, 11, 10, 0, 6.28); cr.fill()
+        # Border
+        cr.set_source_rgb(0.61, 0.74, 0.36)
+        cr.set_line_width(1.5)
+        cr.arc(11, 11, 9, 0, 6.28); cr.stroke()
+        # S
+        cr.select_font_face("Sans", cairo.FONT_SLANT_NORMAL, cairo.FONT_WEIGHT_BOLD)
+        cr.set_font_size(13)
+        cr.move_to(6.5, 16)
+        cr.show_text("S")
+        # Save to temp
+        icon_path = "/tmp/hermes-tray-icon.png"
+        surface.write_to_png(icon_path)
+        self.indicator.set_icon_full(icon_path, "Hermes")
+
+    def _build_menu(self):
+        menu = Gtk.Menu()
+
+        items = [
+            ("💬 Open Hermes", self._open),
+            None,
+            ("📦 Install Package", lambda: self._quick("install")),
+            ("🔄 Update System", lambda: self._quick("update")),
+            ("🎮 Gaming Mode", lambda: self._quick("gaming")),
+            ("🏥 System Doctor", lambda: self._quick("doctor")),
+            None,
+        ]
+
+        for item in items:
+            if item is None:
+                menu.append(Gtk.SeparatorMenuItem())
+            else:
+                label, cb = item
+                mi = Gtk.MenuItem(label=label)
+                mi.connect("activate", lambda w, c=cb: c())
+                menu.append(mi)
+
+        menu.append(Gtk.SeparatorMenuItem())
+        quit_item = Gtk.MenuItem(label="✕ Quit")
+        quit_item.connect("activate", lambda w: Gtk.main_quit())
+        menu.append(quit_item)
+
+        menu.show_all()
+        self.indicator.set_menu(menu)
+
+    def _open(self):
+        if self.window is None:
+            self.window = AgentWindow(self.client)
+        self.window.show_all()
+        self.window.present()
+
+    def _quick(self, action):
+        self._open()
+        if self.window:
+            self.window._add_msg(f"⚡ {action}", is_user=True)
+            self.window._add_msg("🤔 Working...")
+            threading.Thread(target=self._do_quick, args=(action,), daemon=True).start()
+
+    def _do_quick(self, action):
+        if action == "install": r = self.client.quick("check-updates", "")
+        elif action == "update": r = self.client.quick("update", "")
+        elif action == "gaming": r = self.client.quick("gaming", "on")
+        elif action == "doctor": r = self.client.quick("doctor", "")
+        else: r = {"response": f"Running: {action}"}
+        GLib.idle_add(self.window._show_result, r)
+
+    def _tick(self):
+        """Periodic status update."""
+        old = self.client.status
+        if self.client.available:
+            try:
+                s = json.loads(self.client.iface.GetStatus())
+                self.client.status = s.get("status", "ready")
+            except: pass
+        if self.client.status != old and self.window:
+            self.window._update_status()
+        return True
+
+    def run(self):
+        Gtk.main()
+
+
+def main():
+    import signal
+    signal.signal(signal.SIGINT, signal.SIG_DFL)
+    app = HermesTray()
+    app.run()
+
+if __name__ == "__main__":
+    main()

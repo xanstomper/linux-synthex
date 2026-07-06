@@ -1,0 +1,36 @@
+{
+  "name": "gaming",
+  "description": "Optimized for gaming — reduced services, performance compositor, centered panel",
+  "panel": {
+    "position": "bottom",
+    "height": 42,
+    "dock": true,
+    "widgets": ["app-launcher", "pinned-apps", "system-tray", "clock"]
+  },
+  "compositor": {
+    "enabled": true,
+    "blur": false,
+    "vsync": "adaptive",
+    "latency_mode": "low",
+    "animation_speed": 1
+  },
+  "wallpaper": "/usr/share/wallpapers/solus/gaming-dark.png",
+  "services": {
+    "gamemode": true,
+    "tracker_services": false,
+    "background_services_stopped": ["bluetooth", "cups", "geoclue", "packagekit", "abrtd"]
+  },
+  "shortcuts": {
+    "super+d": "show-desktop",
+    "super+return": "konsole",
+    "super+f": "firefox",
+    "super+s": "steam"
+  },
+  "performance": {
+    "cpu_governor": "performance",
+    "gpu_profile": "high",
+    "io_scheduler": "none",
+    "zram_enabled": true,
+    "swappiness": 10
+  }
+}

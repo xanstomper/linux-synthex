@@ -1,0 +1,30 @@
+[Unit]
+Description=Solus GPU Detection and Driver Setup Daemon
+Documentation=https://docs.solus-project.org/gpu-setupd
+After=solus-hwdaemon.service
+Before=display-manager.service
+Wants=solus-hwdaemon.service
+
+[Service]
+Type=oneshot
+RemainAfterExit=yes
+ExecStart=/usr/bin/solus-gpu-setupd
+ExecStartPost=/usr/bin/bash -c 'echo "solus-gpu-setupd: GPU configuration complete"'
+TimeoutStartSec=60
+TimeoutStopSec=10
+
+# Security hardening
+ProtectSystem=full
+ProtectHome=yes
+PrivateTmp=yes
+NoNewPrivileges=yes
+CapabilityBoundingSet=CAP_SYS_ADMIN CAP_NET_ADMIN CAP_SYS_MODULE
+SystemCallArchitectures=native
+AmbientCapabilities=CAP_SYS_ADMIN CAP_NET_ADMIN
+
+# Write GPU profile to runtime directory
+RuntimeDirectory=solus
+RuntimeDirectoryPreserve=yes
+
+[Install]
+WantedBy=sysinit.target

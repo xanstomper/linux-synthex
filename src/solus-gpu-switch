@@ -1,0 +1,130 @@
+#!/usr/bin/env python3
+"""
+Solus GPU Switcher — hybrid graphics management for NVIDIA Optimus laptops
+Like Nobara's GPU switching tool.
+
+Usage:
+    solus-gpu-switch list         — List available GPUs
+    solus-gpu-switch nvidia       — Switch to NVIDIA GPU
+    solus-gpu-switch amd          — Switch to AMD GPU
+    solus-gpu-switch integrated   — Switch to integrated GPU
+    solus-gpu-switch hybrid       — Switch to hybrid mode (NVIDIA Optimus)
+    solus-gpu-switch status       — Show current GPU config
+"""
+import os, sys, subprocess, glob, json
+
+PRIME_PATH = "/sys/kernel/debug/vgaswitcheroo/switch"
+NVIDIA_CONF = "/etc/modprobe.d/nvidia.conf"
+OPTIMUS_STATE = "/var/lib/solus/gpu-mode"
+
+def log(msg): print(f"[gpu] {msg}")
+
+def detect_gpus():
+    """Detect available GPUs"""
+    gpus = []
+    try:
+        r = subprocess.run(["lspci", "-nn"], capture_output=True, text=True, timeout=10)
+        for line in r.stdout.splitlines():
+            if "VGA" in line or "3D" in line or "Display" in line:
+                if "NVIDIA" in line:
+                    gpus.append({"vendor": "nvidia", "name": line.split(":")[-1].strip()})
+                elif "AMD" in line or "ATI" in line or "Radeon" in line:
+                    gpus.append({"vendor": "amd", "name": line.split(":")[-1].strip()})
+                elif "Intel" in line:
+                    gpus.append({"vendor": "intel", "name": line.split(":")[-1].strip()})
+    except: pass
+    return gpus
+
+def detect_optimus():
+    """Check if this is a hybrid graphics laptop"""
+    gpus = detect_gpus()
+    vendors = set(g["vendor"] for g in gpus)
+    return len(gpus) >= 2 and "nvidia" in vendors
+
+def current_mode():
+    """Detect current GPU mode"""
+    # Check NVIDIA modeset
+    if os.path.exists(NVIDIA_CONF):
+        conf = open(NVIDIA_CONF).read()
+        if "modeset=0" in conf:
+            return "integrated"
+    # Check if NVIDIA driver is loaded
+    try:
+        r = subprocess.run(["lsmod"], capture_output=True, text=True, timeout=5)
+        if "nvidia" in r.stdout:
+            # Check if PRIME is active
+            if os.path.exists("/sys/class/drm/card1-DVI-I-1"):
+                return "nvidia"
+            return "hybrid"
+    except: pass
+    return "integrated"
+
+def switch_to_nvidia():
+    """Switch to NVIDIA GPU"""
+    log("Switching to NVIDIA GPU...")
+    # Enable NVIDIA modeset
+    with open(NVIDIA_CONF, "w") as f:
+        f.write("options nvidia-drm modeset=1\n")
+        f.write("options nvidia NVreg_UsePageAttributeTable=1\n")
+        f.write("options nvidia NVreg_InitializeSystemMemoryAllocations=1\n")
+        f.write("options nvidia NVreg_DynamicPowerManagement=0x02\n")
+    # Enable NVIDIA services
+    for svc in ["nvidia-persistenced", "nvidia-powerd"]:
+        subprocess.run(["systemctl", "enable", svc], capture_output=True, timeout=10)
+    # Rebuild initramfs
+    subprocess.run(["dracut", "--force"], capture_output=True, timeout=120)
+    with open(OPTIMUS_STATE, "w") as f: f.write("nvidia")
+    log("✅ Switched to NVIDIA. Reboot required.")
+
+def switch_to_hybrid():
+    """Switch to hybrid mode (NVIDIA Optimus)"""
+    log("Switching to hybrid mode...")
+    with open(NVIDIA_CONF, "w") as f:
+        f.write("options nvidia-drm modeset=1\n")
+        f.write("options nvidia NVreg_DynamicPowerManagement=0x02\n")
+        f.write("options nvidia NVreg_UsePageAttributeTable=1\n")
+    for svc in ["nvidia-persistenced"]:
+        subprocess.run(["systemctl", "enable", svc], capture_output=True, timeout=10)
+    subprocess.run(["dracut", "--force"], capture_output=True, timeout=120)
+    with open(OPTIMUS_STATE, "w") as f: f.write("hybrid")
+    log("✅ Hybrid mode enabled. Reboot required. Use DRI_PRIME=1 to run apps on NVIDIA.")
+
+def switch_to_integrated():
+    """Switch to integrated GPU only (power saving)"""
+    log("Switching to integrated GPU...")
+    with open(NVIDIA_CONF, "w") as f:
+        f.write("options nvidia-drm modeset=0\n")
+        f.write("blacklist nvidia\n")
+        f.write("blacklist nvidia-drm\n")
+        f.write("blacklist nvidia-modeset\n")
+    for svc in ["nvidia-persistenced", "nvidia-powerd"]:
+        subprocess.run(["systemctl", "disable", svc], capture_output=True, timeout=10)
+    subprocess.run(["dracut", "--force"], capture_output=True, timeout=120)
+    with open(OPTIMUS_STATE, "w") as f: f.write("integrated")
+    log("✅ Integrated mode. Reboot required.")
+
+def show_status():
+    gpus = detect_gpus()
+    optimus = detect_optimus()
+    mode = current_mode()
+    
+    print("🖥 GPU Configuration:")
+    for g in gpus:
+        print(f"  • {g['vendor'].title()}: {g['name']}")
+    print(f"  Optimus: {'✅' if optimus else '❌ Not detected'}")
+    print(f"  Current mode: {mode}")
+    if optimus:
+        print("\nAvailable modes:")
+        print("  • nvidia       — Discrete NVIDIA only (max performance)")
+        print("  • hybrid       — NVIDIA Optimus (PRIME render offload)")
+        print("  • integrated   — Integrated GPU only (power saving)")
+
+if __name__ == "__main__":
+    if len(sys.argv) > 1 and sys.argv[1] in ("nvidia", "hybrid", "integrated") and os.geteuid() != 0:
+        print("GPU switching requires root. Re-run with sudo.")
+        sys.exit(1)
+    
+    cmd = sys.argv[1] if len(sys.argv) > 1 else "status"
+    {"nvidia": switch_to_nvidia, "hybrid": switch_to_hybrid, 
+     "integrated": switch_to_integrated, "status": show_status,
+     "list": show_status}.get(cmd, show_status)()

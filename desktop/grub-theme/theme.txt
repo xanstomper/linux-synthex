@@ -1,0 +1,48 @@
+# Solus GRUB Theme
+
+# Global settings
+grub_background_color=#0B0F1A
+
+# Global title and text styling
+title-text: "☀️ Solus Linux"
+desktop-color: "#0B0F1A"
+top-bar: true
+top-bar-text-color: "#8899AA"
+top-bar-text-align: center
+
+# Menu styling
+menu_border=all
+menu_border_color=#2A2A3E
+menu_p_margin=30
+menu_c_margin=30
+
+menu_pw=500
+menu_ph=360
+menu_padding=20
+menu_spacing=8
+menu_radius=12
+menu_color_normal=#FFFFFF
+menu_color_highlight=#0B0F1A
+menu_color_help=#8899AA
+
+menu_entry_padding=14
+menu_entry_margin=6
+menu_entry_radius=8
+
+# Boot command styling
+terminal_box=true
+terminal_color=#FFFFFF
+
+# Progress bar
+progress_bar=true
+
+# Submenu styling
+submenu_color_normal=#FFFFFF
+submenu_color_highlight=#0B0F1A
+
+# Image
++ bitmap {
+    left = 50%-200
+    top = 60%-150
+    file = /boot/grub/solus-logo.png
+}

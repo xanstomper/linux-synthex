@@ -1,0 +1,32 @@
+[Unit]
+Description=Solus Hardware Detection Daemon
+Documentation=https://docs.solus-project.org/hwdaemon
+After=systemd-udevd.service
+Before=display-manager.service
+Wants=systemd-udevd.service
+
+[Service]
+Type=oneshot
+RemainAfterExit=yes
+ExecStart=/usr/bin/solus-hwdaemon
+ExecStartPost=/usr/bin/bash -c 'echo "solus-hwdaemon: hardware profile written"'
+TimeoutStartSec=30
+TimeoutStopSec=5
+
+# Security hardening
+ProtectSystem=full
+ProtectHome=yes
+PrivateTmp=yes
+NoNewPrivileges=yes
+CapabilityBoundingSet=CAP_SYS_ADMIN CAP_DAC_OVERRIDE
+SystemCallArchitectures=native
+
+# Resource limits — hardware detection is a one-shot, cap it tight
+MemoryMax=64M
+
+# Write runtime file
+RuntimeDirectory=solus
+RuntimeDirectoryPreserve=yes
+
+[Install]
+WantedBy=sysinit.target

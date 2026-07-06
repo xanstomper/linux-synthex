@@ -1,0 +1,36 @@
+{
+  "name": "balanced",
+  "description": "Default Solus layout — balanced performance and battery life",
+  "panel": {
+    "position": "bottom",
+    "height": 40,
+    "dock": false,
+    "widgets": ["app-launcher", "task-manager", "system-tray", "clock"]
+  },
+  "compositor": {
+    "enabled": true,
+    "blur": true,
+    "vsync": "auto",
+    "latency_mode": "normal",
+    "animation_speed": 2
+  },
+  "wallpaper": "/usr/share/wallpapers/solus/default-dark.png",
+  "services": {
+    "gamemode": false,
+    "tracker_services": true,
+    "background_services_stopped": []
+  },
+  "shortcuts": {
+    "super+d": "show-desktop",
+    "super+return": "konsole",
+    "super+e": "dolphin",
+    "super+f": "firefox"
+  },
+  "performance": {
+    "cpu_governor": "ondemand",
+    "gpu_profile": "auto",
+    "io_scheduler": "mq-deadline",
+    "zram_enabled": true,
+    "swappiness": 60
+  }
+}

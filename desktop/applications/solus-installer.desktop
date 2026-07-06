@@ -1,0 +1,18 @@
+[Desktop Entry]
+Type=Application
+Name=Install Solus
+Name[de]=Solus installieren
+Name[es]=Instalar Solus
+Name[fr]=Installer Solus
+Name[pt_BR]=Instalar Solus
+Name[zh_CN]=安装 Solus
+Comment=Install Solus Linux to your hard drive
+Comment[de]=Solus Linux auf Ihrer Festplatte installieren
+Comment[es]=Instalar Solus Linux en su disco duro
+Comment[fr]=Installer Solus Linux sur votre disque dur
+Exec=pkexec calamares -d
+Icon=solus-installer
+Terminal=false
+Categories=System;Settings;
+StartupNotify=true
+Keywords=install;installer;calamares;system;os;

@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE node PUBLIC "-//freedesktop//D-BUS Object Introspection 1.0//EN"
+ "http://www.freedesktop.org/standards/dbus/1.0/introspect.dtd">
+<node name="/org/solus/Agent">
+  <interface name="org.solus.Agent">
+    <method name="Chat"><arg name="query" type="s" direction="in"/><arg name="result" type="s" direction="out"/></method>
+    <method name="Search"><arg name="query" type="s" direction="in"/><arg name="result" type="s" direction="out"/></method>
+    <method name="CodeAction"><arg name="request" type="s" direction="in"/><arg name="result" type="s" direction="out"/></method>
+    <method name="KnowledgeSearch"><arg name="query" type="s" direction="in"/><arg name="result" type="s" direction="out"/></method>
+    <method name="KnowledgeAdd"><arg name="doc" type="s" direction="in"/><arg name="result" type="s" direction="out"/></method>
+    <method name="KnowledgeIndex"><arg name="folder" type="s" direction="in"/><arg name="result" type="s" direction="out"/></method>
+    <method name="QuickCommand"><arg name="category" type="s" direction="in"/><arg name="query" type="s" direction="in"/><arg name="result" type="s" direction="out"/></method>
+    <method name="GetStatus"><arg name="result" type="s" direction="out"/></method>
+    <method name="SetConfig"><arg name="json" type="s" direction="in"/><arg name="result" type="s" direction="out"/></method>
+    <method name="GetConfig"><arg name="result" type="s" direction="out"/></method>
+    <signal name="Notification"><arg name="message" type="s"/></signal>
+  </interface>
+</node>

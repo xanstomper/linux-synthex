@@ -1,0 +1,65 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128" width="128" height="128">
+  <defs>
+    <linearGradient id="amberGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#FFB300;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#FF8F00;stop-opacity:1" />
+    </linearGradient>
+    <linearGradient id="blueGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#1565C0;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#0D47A1;stop-opacity:1" />
+    </linearGradient>
+    <linearGradient id="bgGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#1A1A2E;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#16213E;stop-opacity:1" />
+    </linearGradient>
+  </defs>
+
+  <!-- Background circle -->
+  <circle cx="64" cy="64" r="62" fill="url(#bgGradient)" />
+
+  <!-- Outer glow ring -->
+  <circle cx="64" cy="64" r="55" fill="none" stroke="url(#amberGradient)" stroke-width="1.5" opacity="0.15" />
+
+  <!-- 8 sun rays / gear teeth -->
+  <g fill="url(#amberGradient)">
+    <!-- Top -->
+    <polygon points="56,10 72,10 68,22 60,22" />
+    <!-- Top-right -->
+    <polygon points="94,30 106,42 98,48 86,36" />
+    <!-- Right -->
+    <polygon points="118,56 118,72 106,68 106,60" />
+    <!-- Bottom-right -->
+    <polygon points="106,86 94,98 86,92 98,80" />
+    <!-- Bottom -->
+    <polygon points="72,118 56,118 60,106 68,106" />
+    <!-- Bottom-left -->
+    <polygon points="34,98 22,86 30,80 42,92" />
+    <!-- Left -->
+    <polygon points="10,72 10,56 22,60 22,68" />
+    <!-- Top-left -->
+    <polygon points="22,42 34,30 42,36 30,48" />
+  </g>
+
+  <!-- Outer ring -->
+  <circle cx="64" cy="64" r="42" fill="none" stroke="url(#amberGradient)" stroke-width="6" opacity="0.6"/>
+
+  <!-- Inner hexagon -->
+  <polygon points="64,32 88,44 88,84 64,96 40,84 40,44" fill="url(#blueGradient)" />
+
+  <!-- Open centre circle (masked cutout) -->
+  <mask id="centerCutout">
+    <rect x="0" y="0" width="128" height="128" fill="white" />
+    <circle cx="64" cy="64" r="16" fill="black" />
+  </mask>
+  <circle cx="64" cy="64" r="26" fill="url(#amberGradient)" mask="url(#centerCutout)" opacity="0.8" />
+
+  <!-- Centre accent glow -->
+  <circle cx="64" cy="64" r="14" fill="none" stroke="#FFD54F" stroke-width="2" opacity="0.4" />
+  <circle cx="64" cy="64" r="6" fill="#FFD54F" opacity="0.25" />
+
+  <!-- Subtle highlight overlay -->
+  <ellipse cx="48" cy="44" rx="24" ry="14" fill="white" opacity="0.06" transform="rotate(-30,48,44)" />
+
+  <!-- Border ring -->
+  <circle cx="64" cy="64" r="61" fill="none" stroke="#FFB300" stroke-width="1.5" opacity="0.3" />
+</svg>

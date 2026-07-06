@@ -1,0 +1,651 @@
+/* ╔══════════════════════════════════════════════════════════════════╗
+   ║  Solus GNOME Shell Theme — solus-shell.css                     ║
+   ║  Design Language: "Solus Refined"                              ║
+   ║  Curated GNOME experience with Material Rounded aesthetics     ║
+   ║  Version: 1.0.0                                                ║
+   ╚══════════════════════════════════════════════════════════════════╝
+   Installed to: /usr/share/gnome-shell/theme/solus-shell.css
+   Standalone theme file — load via GNOME Tweaks or User Themes extension
+*/
+
+/* ─── Import Base ─────────────────────────────────────────────────────── */
+/* Adwaita base is imported here so we only override specific tokens */
+@import url("/usr/share/gnome-shell/theme/gnome-shell.css");
+
+/* ─── Design Tokens ────────────────────────────────────────────────────── */
+
+:root {
+  /* Primary colors */
+  --solus-bg: #ffffff;
+  --solus-bg-dark: #1a1a2e;
+  --solus-surface: #f3f4f6;
+  --solus-surface-dark: #24243a;
+  --solus-fg: #1f2937;
+  --solus-fg-dark: #e4e4e7;
+  --solus-fg-secondary: #6b7280;
+  --solus-fg-secondary-dark: #9ca3af;
+  --solus-accent: #3b82f6;
+  --solus-accent-dark: #60a5fa;
+  --solus-accent-hover: #2563eb;
+  --solus-accent-hover-dark: #3b82f6;
+  --solus-border: #d1d5db;
+  --solus-border-dark: #3f3f5c;
+  --solus-error: #dc2626;
+  --solus-success: #16a34a;
+  --solus-warning: #d97706;
+
+  /* Typography */
+  --solus-font: "Inter", "Noto Sans", system-ui, sans-serif;
+  --solus-font-mono: "JetBrains Mono", monospace;
+  --solus-font-size: 11pt;
+
+  /* Radii */
+  --solus-radius-sm: 8px;
+  --solus-radius-md: 12px;
+  --solus-radius-lg: 16px;
+  --solus-radius-xl: 24px;
+
+  /* Shadows */
+  --solus-shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.08);
+  --solus-shadow-md: 0 4px 12px rgba(0, 0, 0, 0.12);
+  --solus-shadow-lg: 0 8px 24px rgba(0, 0, 0, 0.16);
+
+  /* Animations */
+  --solus-ease-standard: cubic-bezier(0.4, 0, 0.2, 1);
+  --solus-ease-decel: cubic-bezier(0.05, 0.7, 0.1, 1);
+  --solus-ease-accel: cubic-bezier(0.3, 0, 0.8, 0.15);
+  --solus-duration-fast: 100ms;
+  --solus-duration-normal: 200ms;
+  --solus-duration-slow: 350ms;
+}
+
+/* ─── Top Bar ──────────────────────────────────────────────────────────── */
+
+#panel {
+  height: 2.2em;
+  background-color: transparent;
+  font-weight: 500;
+  font-size: var(--solus-font-size);
+  transition: background-color var(--solus-duration-normal) var(--solus-ease-standard);
+}
+
+#panel:overview {
+  background: rgba(0, 0, 0, 0.6);
+  backdrop-filter: blur(20px);
+}
+
+#panel.unlock-screen,
+#panel.login-screen,
+#panel.lock-screen {
+  background-color: transparent;
+}
+
+#panel .panel-button {
+  border-radius: var(--solus-radius-sm);
+  padding: 0 10px;
+  -natural-hpadding: 10px;
+  -minimum-hpadding: 6px;
+  transition: background var(--solus-duration-fast) var(--solus-ease-standard);
+}
+
+#panel .panel-button:hover {
+  background-color: rgba(255, 255, 255, 0.1);
+}
+
+#panel .panel-button:active,
+#panel .panel-button:checked {
+  background-color: rgba(255, 255, 255, 0.15);
+}
+
+/* Activities button */
+#panel .panel-button#activities {
+  -natural-hpadding: 12px;
+}
+
+#panel .panel-button#activities .activities-icon {
+  background-image: url("/usr/share/gnome-shell/theme/solus-logo.svg");
+  background-size: 16px;
+  width: 16px;
+  height: 16px;
+}
+
+/* Clock */
+#panel .clock-display {
+  font-weight: 500;
+}
+
+/* System status icons */
+#panel .system-status-icon {
+  padding: 0 4px;
+  icon-size: 1.1em;
+}
+
+/* ─── Overview ─────────────────────────────────────────────────────────── */
+
+#overview {
+  background: rgba(0, 0, 0, 0.5);
+  backdrop-filter: blur(30px);
+}
+
+#overview .overview-icon {
+  border-radius: var(--solus-radius-md);
+}
+
+#overview .window-caption {
+  background: rgba(0, 0, 0, 0.7);
+  backdrop-filter: blur(10px);
+  border: none;
+  border-radius: var(--solus-radius-sm);
+  padding: 6px 12px;
+  font-size: 11pt;
+}
+
+/* Search entry */
+#overview .search-entry {
+  width: 600px;
+  height: 44px;
+  border-radius: var(--solus-radius-xl);
+  background: rgba(255, 255, 255, 0.15);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(10px);
+  padding: 0 20px;
+  font-size: 14pt;
+  color: white;
+  caret-color: var(--solus-accent);
+  selection-background-color: var(--solus-accent);
+  transition: all var(--solus-duration-normal) var(--solus-ease-standard);
+}
+
+#overview .search-entry:focus {
+  background: rgba(255, 255, 255, 0.2);
+  border: 1px solid var(--solus-accent);
+}
+
+/* Search results */
+#overview .search-section-header {
+  font-weight: 600;
+  font-size: 10pt;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  color: rgba(255, 255, 255, 0.7);
+}
+
+#overview .search-result {
+  border-radius: var(--solus-radius-md);
+  transition: all var(--solus-duration-fast) var(--solus-ease-standard);
+}
+
+#overview .search-result:hover {
+  background: rgba(255, 255, 255, 0.08);
+}
+
+#overview .search-result:focus {
+  background: rgba(255, 255, 255, 0.12);
+}
+
+/* Dash (in overview) */
+#dash {
+  background: rgba(0, 0, 0, 0.4);
+  backdrop-filter: blur(30px);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: var(--solus-radius-xl);
+  padding: 8px;
+  margin: 8px;
+}
+
+#dash .dash-item-container .app-well-app {
+  padding: 4px;
+}
+
+#dash .dash-item-container .app-well-app .overview-icon {
+  border-radius: var(--solus-radius-md);
+}
+
+#dash .dash-item-container .app-well-app .overview-icon:hover {
+  background: rgba(255, 255, 255, 0.1);
+}
+
+/* Running app indicator */
+#dash .dash-item-container .app-well-app.running .overview-icon {
+  border-bottom: 2px solid var(--solus-accent);
+}
+
+#dash .dash-item-container .app-well-app:focus .overview-icon {
+  background: rgba(255, 255, 255, 0.15);
+}
+
+/* ─── App Grid ─────────────────────────────────────────────────────────── */
+
+#viewContainer .app-well-app .overview-icon {
+  border-radius: var(--solus-radius-md);
+}
+
+#viewContainer .app-well-app:hover .overview-icon {
+  background: rgba(255, 255, 255, 0.08);
+}
+
+#viewContainer .app-well-app:focus .overview-icon {
+  background: rgba(255, 255, 255, 0.15);
+}
+
+/* App folder */
+.app-folder-dialog {
+  border-radius: var(--solus-radius-lg);
+  background: rgba(0, 0, 0, 0.7);
+  backdrop-filter: blur(40px);
+}
+
+.app-folder-dialog .folder-name-container {
+  padding: 16px;
+}
+
+.app-folder-dialog .icon-grid .overview-icon {
+  border-radius: var(--solus-radius-md);
+}
+
+/* ─── Notifications & Message List ─────────────────────────────────────── */
+
+.message-list {
+  background: transparent;
+}
+
+.message-list .message {
+  border-radius: var(--solus-radius-md);
+  background: rgba(255, 255, 255, 0.08);
+  margin: 4px 12px;
+  transition: background var(--solus-duration-fast) var(--solus-ease-standard);
+}
+
+.message-list .message:hover {
+  background: rgba(255, 255, 255, 0.12);
+}
+
+.message-list .message .message-icon {
+  border-radius: var(--solus-radius-sm);
+}
+
+/* Notification banner (incoming popup) */
+.notification-banner {
+  border-radius: var(--solus-radius-md);
+  background: rgba(26, 26, 46, 0.9);
+  backdrop-filter: blur(25px);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  box-shadow: var(--solus-shadow-lg);
+  margin: 8px;
+}
+
+.notification-banner .notification-actions {
+  border-top: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+.notification-banner .notification-actions .notification-action-button {
+  border-radius: 0;
+}
+
+.notification-banner .notification-actions .notification-action-button:first-child {
+  border-radius: 0 0 0 var(--solus-radius-md);
+}
+
+.notification-banner .notification-actions .notification-action-button:last-child {
+  border-radius: 0 0 var(--solus-radius-md) 0;
+}
+
+/* ─── Quick Settings ───────────────────────────────────────────────────── */
+
+.quick-settings {
+  border-radius: var(--solus-radius-lg);
+  background: rgba(26, 26, 46, 0.95);
+  backdrop-filter: blur(30px);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  padding: 12px;
+  margin: 8px;
+}
+
+.quick-settings .quick-toggle {
+  border-radius: var(--solus-radius-md);
+  background: rgba(255, 255, 255, 0.05);
+}
+
+.quick-settings .quick-toggle:hover {
+  background: rgba(255, 255, 255, 0.1);
+}
+
+.quick-settings .quick-toggle:checked {
+  background: var(--solus-accent);
+}
+
+/* Sliders */
+.quick-settings .slider {
+  height: 4px;
+  border-radius: 2px;
+}
+
+.quick-settings .slider .highlight {
+  background: var(--solus-accent);
+}
+
+.quick-settings .slider .handle {
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: white;
+  box-shadow: var(--solus-shadow-sm);
+}
+
+/* ─── Calendar Popup ───────────────────────────────────────────────────── */
+
+.calendar-popup {
+  border-radius: var(--solus-radius-lg);
+  background: rgba(26, 26, 46, 0.95);
+  backdrop-filter: blur(30px);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  box-shadow: var(--solus-shadow-lg);
+  margin: 8px;
+}
+
+.calendar-popup .calendar {
+  padding: 12px;
+}
+
+.calendar-popup .calendar .calendar-month-header {
+  font-weight: 600;
+}
+
+.calendar-popup .calendar .calendar-day {
+  border-radius: var(--solus-radius-sm);
+  transition: background var(--solus-duration-fast) var(--solus-ease-standard);
+}
+
+.calendar-popup .calendar .calendar-day:hover {
+  background: rgba(255, 255, 255, 0.1);
+}
+
+.calendar-popup .calendar .calendar-day:selected {
+  background: var(--solus-accent);
+  color: white;
+}
+
+.calendar-popup .calendar .calendar-day.today {
+  border: 1px solid var(--solus-accent);
+}
+
+/* ─── OSD (On Screen Display) ─────────────────────────────────────────── */
+
+.osd-window {
+  background: rgba(26, 26, 46, 0.85);
+  backdrop-filter: blur(20px);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  border-radius: var(--solus-radius-lg);
+  padding: 16px 24px;
+  box-shadow: var(--solus-shadow-lg);
+}
+
+.osd-window .osd-icon {
+  icon-size: 32px;
+}
+
+.osd-window .level {
+  height: 4px;
+  border-radius: 2px;
+  background: rgba(255, 255, 255, 0.1);
+}
+
+.osd-window .level .fill-block {
+  background: var(--solus-accent);
+}
+
+/* ─── Window Controls (Alt+Tab Switcher) ───────────────────────────────── */
+
+.switcher-popup {
+  background: rgba(26, 26, 46, 0.85);
+  backdrop-filter: blur(30px);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  border-radius: var(--solus-radius-lg);
+  padding: 8px;
+}
+
+.switcher-list .item-box {
+  border-radius: var(--solus-radius-md);
+  padding: 8px;
+  transition: background var(--solus-duration-fast) var(--solus-ease-standard);
+}
+
+.switcher-list .item-box:hover {
+  background: rgba(255, 255, 255, 0.08);
+}
+
+.switcher-list .item-box:selected {
+  background: var(--solus-accent);
+}
+
+.switcher-list .item-box:selected .switcher-icon {
+  color: white;
+}
+
+/* ─── Dialogs ──────────────────────────────────────────────────────────── */
+
+.modal-dialog {
+  border-radius: var(--solus-radius-lg);
+  background: rgba(26, 26, 46, 0.95);
+  backdrop-filter: blur(30px);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  box-shadow: var(--solus-shadow-lg);
+  padding: 24px;
+}
+
+.modal-dialog .modal-dialog-title {
+  font-size: 16pt;
+  font-weight: 600;
+  margin-bottom: 12px;
+}
+
+.modal-dialog .modal-dialog-description {
+  font-size: 11pt;
+  color: var(--solus-fg-secondary);
+}
+
+.modal-dialog .modal-dialog-button-box {
+  spacing: 8px;
+  margin-top: 16px;
+}
+
+.modal-dialog .modal-dialog-button {
+  border-radius: var(--solus-radius-sm);
+  padding: 8px 20px;
+  font-weight: 500;
+  transition: all var(--solus-duration-fast) var(--solus-ease-standard);
+}
+
+.modal-dialog .modal-dialog-button:hover {
+  background: rgba(255, 255, 255, 0.1);
+}
+
+.modal-dialog .modal-dialog-button:active {
+  background: rgba(255, 255, 255, 0.15);
+}
+
+.modal-dialog .modal-dialog-button.default-button {
+  background: var(--solus-accent);
+  color: white;
+}
+
+.modal-dialog .modal-dialog-button.default-button:hover {
+  background: var(--solus-accent-hover);
+}
+
+/* ─── Login / Lock Screen ──────────────────────────────────────────────── */
+
+.login-dialog {
+  background: rgba(0, 0, 0, 0.4);
+  backdrop-filter: blur(20px);
+}
+
+.login-dialog .login-dialog-prompt-layout {
+  background: rgba(26, 26, 46, 0.8);
+  backdrop-filter: blur(30px);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  border-radius: var(--solus-radius-lg);
+  padding: 32px;
+  min-width: 360px;
+}
+
+.login-dialog .login-dialog-prompt-layout .login-dialog-user-list {
+  spacing: 12px;
+}
+
+.login-dialog .login-dialog-prompt-layout .login-dialog-user-list .login-dialog-user-list-item {
+  border-radius: var(--solus-radius-md);
+  padding: 12px;
+}
+
+.login-dialog .login-dialog-prompt-layout .login-dialog-user-list .login-dialog-user-list-item:hover {
+  background: rgba(255, 255, 255, 0.08);
+}
+
+.login-dialog .login-dialog-prompt-layout .login-dialog-user-list .login-dialog-user-list-item:selected {
+  background: var(--solus-accent);
+}
+
+.login-dialog .login-dialog-prompt-layout .login-dialog-user-list .login-dialog-user-list-item .user-icon {
+  border-radius: 50%;
+  border: 2px solid var(--solus-accent);
+}
+
+.login-dialog .login-dialog-prompt-layout .login-dialog-message {
+  font-size: 32pt;
+  font-weight: 300;
+  color: white;
+}
+
+.login-dialog .login-dialog-prompt-layout .login-dialog-timed-login-indicator {
+  height: 2px;
+  background: var(--solus-accent);
+}
+
+.login-dialog .login-dialog-button {
+  border-radius: var(--solus-radius-sm);
+}
+
+/* ─── Screen Shield (Lock Screen) ──────────────────────────────────────── */
+
+.screen-shield-background {
+  background: black;
+}
+
+.screen-shield-container {
+  background: rgba(0, 0, 0, 0.3);
+  backdrop-filter: blur(15px);
+}
+
+.screen-shield-clock {
+  font-size: 64pt;
+  font-weight: 300;
+  color: white;
+}
+
+.screen-shield-clock .screen-shield-clock-date {
+  font-size: 14pt;
+  font-weight: 400;
+  color: rgba(255, 255, 255, 0.7);
+}
+
+/* ─── Misc UI Elements ─────────────────────────────────────────────────── */
+
+/* Workspace thumbnails */
+.workspace-thumbnails {
+  background: rgba(0, 0, 0, 0.4);
+  backdrop-filter: blur(20px);
+  border-radius: var(--solus-radius-lg);
+  padding: 8px;
+}
+
+.workspace-thumbnail-indicator {
+  border: 2px solid var(--solus-accent);
+  border-radius: var(--solus-radius-sm);
+}
+
+/* Window picker */
+.window-picker {
+  spacing: 12px;
+}
+
+.window-picker .window-clone-border {
+  border: 2px solid var(--solus-accent);
+  border-radius: var(--solus-radius-md);
+  box-shadow: var(--solus-shadow-lg);
+}
+
+/* Running indicator dot */
+.app-well-app-running-dot {
+  height: 3px;
+  width: 20px;
+  border-radius: 2px;
+  background: var(--solus-accent);
+  margin-bottom: 4px;
+}
+
+/* Scrollbars */
+StScrollBar {
+  padding: 2px;
+}
+
+StScrollBar StThumb {
+  border-radius: var(--solus-radius-sm);
+  background: rgba(255, 255, 255, 0.2);
+}
+
+StScrollBar StThumb:hover {
+  background: rgba(255, 255, 255, 0.3);
+}
+
+/* Tooltips */
+.tooltip {
+  background: rgba(26, 26, 46, 0.9);
+  backdrop-filter: blur(15px);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  border-radius: var(--solus-radius-sm);
+  padding: 6px 10px;
+  font-size: 10pt;
+  color: var(--solus-fg-dark);
+}
+
+/* ─── Dark Mode Overrides ───────────────────────────────────────────────- */
+
+/* Applied when GNOME is in Dark Mode */
+.dark-mode,
+.dark {
+  --solus-bg: var(--solus-bg-dark);
+  --solus-surface: var(--solus-surface-dark);
+  --solus-fg: var(--solus-fg-dark);
+  --solus-fg-secondary: var(--solus-fg-secondary-dark);
+  --solus-accent: var(--solus-accent-dark);
+  --solus-accent-hover: var(--solus-accent-hover-dark);
+  --solus-border: var(--solus-border-dark);
+}
+
+/* ─── Animations ───────────────────────────────────────────────────────── */
+
+/* Reduce motion preference */
+@media (prefers-reduced-motion: reduce) {
+  * {
+    transition-duration: 0ms !important;
+    animation-duration: 0ms !important;
+  }
+}
+
+/* Smooth fade transitions */
+StWidget {
+  transition: all var(--solus-duration-fast) var(--solus-ease-standard);
+}
+
+/* Panel enter/exit */
+#panel {
+  transition: background-color var(--solus-duration-normal) var(--solus-ease-standard);
+}
+
+/* Overview open/close */
+#overview {
+  transition: opacity var(--solus-duration-slow) var(--solus-ease-decel);
+}
+
+/* ─── End of Solus GNOME Shell Theme ────────────────────────────────────── */

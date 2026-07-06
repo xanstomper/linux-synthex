@@ -1,0 +1,6 @@
+# /etc/crypttab — Solus LUKS configuration
+# This file lists encrypted block devices that should be unlocked at boot.
+# Format: <name>  <device>  <password>  <options>
+
+# Example (uncomment and modify for your system):
+# root_crypt  UUID=xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx  none  luks,discard

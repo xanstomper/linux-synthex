@@ -1,0 +1,92 @@
+# Solus Default Wallpaper Configuration
+# ======================================
+# This file documents the generation parameters for the
+# default-dark.png wallpaper that ships with Solus.
+#
+# Generated: July 2026
+# Edition:   default
+# Filename:  solus-default-1920x1080.png → default-dark.png
+#
+# --- Visual Description ---
+#
+# The default-dark.png wallpaper features:
+#
+# 1. Background: Deep dark gradient from #1A1A2E (top) to #16213E (bottom)
+# 2. Glow Effect: Large soft amber (#FFB300) radial glow emanating from
+#    centre-right, blended with screen mode → gives a warm sunrise effect
+# 3. Secondary Glow: Deep purple (#6A1B9A) soft glow in upper-right quadrant,
+#    creating the signature Solus amber→purple gradient feel
+# 4. Vignette: Subtle dark overlay at the bottom edge for icon readability
+# 5. Branding Text:
+#    - "Solus" in Inter Bold, centred, sized proportionally to resolution
+#      (approx. 80px at 1080p), coloured in Solus Amber (#FFB300)
+#    - "Illuminate Your Desktop" tagline in Inter Regular, 40px,
+#      coloured in soft grey (#C0C0D0), positioned below main title
+# 6. Accent Line: Thin amber underline beneath the tagline as a subtle
+#    brand marker
+# 7. Hex Grid Overlay (optional): Very faint (#FFFFFF at 3% opacity)
+#    repeating hexagonal pattern derived from the logo geometry,
+#    visible only on close inspection
+
+# --- Generation Parameters (for ImageMagick) ---
+
+COLORS:
+  base:           "#1A1A2E"
+  surface:        "#16213E"
+  accent:         "#FFB300"
+  accent_dark:    "#E6A000"
+  secondary:      "#6A1B9A"
+  text_primary:   "#E8E8F0"
+  text_secondary: "#C0C0D0"
+  text_muted:     "#707090"
+
+GRADIENT:
+  type: linear
+  direction: south (top → bottom)
+  stops:
+    - "#1A1A2E" at 0%
+    - "#16213E" at 100%
+
+GLOW_RADIAL:
+  - colour:  "#FFB300"
+    opacity: 0.30
+    centre:  65%, 50%
+    radius:  40% of width
+    blend:   screen
+  - colour:  "#6A1B9A"
+    opacity: 0.20
+    centre:  80%, 30%
+    radius:  25% of width
+    blend:   screen
+
+VIGNETTE:
+  colour:    "#1A1A2E"
+  opacity:   0.60
+  position:  bottom 15%
+  gradient:  transparent → solid bottom
+
+TYPOGRAPHY:
+  title:
+    text:      "Solus"
+    font:      Inter Bold
+    size:      80px (at 1920x1080)
+    colour:    "#FFB300"
+    position:  centre, offset -40px vertical
+  tagline:
+    text:      "Illuminate Your Desktop"
+    font:      Inter Regular
+    size:      36px (at 1920x1080)
+    colour:    "#C0C0D0"
+    position:  centre, offset +60px vertical
+  accent_line:
+    width:     60px
+    height:    2px
+    colour:    "#FFB300"
+    opacity:   0.40
+    position:  centre, 20px below tagline
+
+OVERLAY:
+  type:        hex-grid (optional)
+  hex_colour:  "#FFFFFF"
+  opacity:     0.03
+  hex_size:    24px

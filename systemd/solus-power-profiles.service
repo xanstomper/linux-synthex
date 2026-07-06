@@ -1,0 +1,28 @@
+[Unit]
+Description=Solus Power Profiles Daemon
+Documentation=https://docs.solus-project.org/power-profiles
+After=multi-user.target
+
+[Service]
+Type=forking
+ExecStart=/usr/bin/solus-power-profiles daemon
+ExecStop=/bin/kill $(cat /run/solus-power-profiles.pid)
+PIDFile=/run/solus-power-profiles.pid
+RemainAfterExit=yes
+
+# Resource limits
+MemoryMax=32M
+CPUQuota=10%
+
+# Security — needs CPU governor writes
+ProtectSystem=full
+ProtectHome=read-only
+PrivateTmp=yes
+NoNewPrivileges=yes
+SystemCallArchitectures=native
+ProtectKernelTunables=yes
+ProtectControlGroups=yes
+CapabilityBoundingSet=CAP_SYS_ADMIN
+
+[Install]
+WantedBy=multi-user.target

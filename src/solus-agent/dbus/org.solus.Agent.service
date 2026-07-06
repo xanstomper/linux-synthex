@@ -1,0 +1,4 @@
+[D-BUS Service]
+Name=org.solus.Agent
+Exec=/usr/bin/solus-agentd
+SystemdService=solus-agent.service

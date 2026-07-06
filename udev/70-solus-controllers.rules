@@ -1,0 +1,49 @@
+# Solus controller access rules
+# Grants the active seat (uaccess) and the games group read/write access to
+# game controllers so they work without root under Wayland/X and inside Steam.
+
+# --- Valve (Steam Controller / Steam Deck / Index controllers) ---
+SUBSYSTEM=="usb", ATTRS{idVendor}=="28de", MODE="0660", GROUP="games", TAG+="uaccess"
+KERNEL=="hidraw*", SUBSYSTEM=="hidraw", ATTRS{idVendor}=="28de", MODE="0660", GROUP="games", TAG+="uaccess"
+
+# --- Microsoft Xbox (wired + Bluetooth, handled by xpad / xpadneo) ---
+SUBSYSTEM=="usb", ATTRS{idVendor}=="045e", ATTRS{idProduct}=="02d1", MODE="0660", GROUP="games", TAG+="uaccess"
+SUBSYSTEM=="usb", ATTRS{idVendor}=="045e", ATTRS{idProduct}=="02dd", MODE="0660", GROUP="games", TAG+="uaccess"
+SUBSYSTEM=="usb", ATTRS{idVendor}=="045e", ATTRS{idProduct}=="02e3", MODE="0660", GROUP="games", TAG+="uaccess"
+SUBSYSTEM=="usb", ATTRS{idVendor}=="045e", ATTRS{idProduct}=="02ea", MODE="0660", GROUP="games", TAG+="uaccess"
+SUBSYSTEM=="usb", ATTRS{idVendor}=="045e", ATTRS{idProduct}=="02fd", MODE="0660", GROUP="games", TAG+="uaccess"
+SUBSYSTEM=="usb", ATTRS{idVendor}=="045e", ATTRS{idProduct}=="02fe", MODE="0660", GROUP="games", TAG+="uaccess"
+SUBSYSTEM=="usb", ATTRS{idVendor}=="045e", ATTRS{idProduct}=="0b00", MODE="0660", GROUP="games", TAG+="uaccess"
+SUBSYSTEM=="usb", ATTRS{idVendor}=="045e", ATTRS{idProduct}=="0b05", MODE="0660", GROUP="games", TAG+="uaccess"
+KERNEL=="hidraw*", SUBSYSTEM=="hidraw", ATTRS{idVendor}=="045e", MODE="0660", GROUP="games", TAG+="uaccess"
+# Load xpadneo for Bluetooth Xbox One controllers
+KERNEL=="hidraw*", SUBSYSTEM=="hidraw", ATTRS{idVendor}=="045e", ATTRS{idProduct}=="02fd|02fe|0b00|0b05", \
+    RUN+="/sbin/modprobe xpadneo", TAG+="uaccess"
+
+# --- Sony PlayStation: DualShock 4 (PS4) and DualSense (PS5) ---
+# DualShock 4 v1/v2
+KERNEL=="hidraw*", SUBSYSTEM=="hidraw", ATTRS{idVendor}=="054c", ATTRS{idProduct}=="05c4", MODE="0660", GROUP="games", TAG+="uaccess"
+KERNEL=="hidraw*", SUBSYSTEM=="hidraw", ATTRS{idVendor}=="054c", ATTRS{idProduct}=="09cc", MODE="0660", GROUP="games", TAG+="uaccess"
+KERNEL=="hidraw*", SUBSYSTEM=="hidraw", ATTRS{idVendor}=="054c", ATTRS{idProduct}=="0ba0", MODE="0660", GROUP="games", TAG+="uaccess"
+# DualSense + DualSense Edge
+KERNEL=="hidraw*", SUBSYSTEM=="hidraw", ATTRS{idVendor}=="054c", ATTRS{idProduct}=="0ce6", MODE="0660", GROUP="games", TAG+="uaccess"
+KERNEL=="hidraw*", SUBSYSTEM=="hidraw", ATTRS{idVendor}=="054c", ATTRS{idProduct}=="0df2", MODE="0660", GROUP="games", TAG+="uaccess"
+# DualSense over Bluetooth exposes the same vendor id on hidraw
+SUBSYSTEM=="input", ATTRS{idVendor}=="054c", ATTRS{idProduct}=="0ce6|0df2", MODE="0660", GROUP="games", TAG+="uaccess"
+
+# --- Nintendo: Switch Pro Controller and Joy-Con (joycond) ---
+KERNEL=="hidraw*", SUBSYSTEM=="hidraw", ATTRS{idVendor}=="057e", ATTRS{idProduct}=="2006", MODE="0660", GROUP="games", TAG+="uaccess"
+KERNEL=="hidraw*", SUBSYSTEM=="hidraw", ATTRS{idVendor}=="057e", ATTRS{idProduct}=="2007", MODE="0660", GROUP="games", TAG+="uaccess"
+KERNEL=="hidraw*", SUBSYSTEM=="hidraw", ATTRS{idVendor}=="057e", ATTRS{idProduct}=="2009", MODE="0660", GROUP="games", TAG+="uaccess"
+KERNEL=="hidraw*", SUBSYSTEM=="hidraw", ATTRS{idVendor}=="057e", ATTRS{idProduct}=="200e", MODE="0660", GROUP="games", TAG+="uaccess"
+# Trigger joycond pairing daemon on Nintendo controller connect
+SUBSYSTEM=="hidraw", ATTRS{idVendor}=="057e", ACTION=="add", \
+    RUN+="/usr/bin/systemctl try-restart joycond.service", TAG+="uaccess"
+
+# --- 8BitDo / generic DInput controllers ---
+SUBSYSTEM=="usb", ATTRS{idVendor}=="2dc8", MODE="0660", GROUP="games", TAG+="uaccess"
+KERNEL=="hidraw*", SUBSYSTEM=="hidraw", ATTRS{idVendor}=="2dc8", MODE="0660", GROUP="games", TAG+="uaccess"
+
+# --- Steam input passthrough: any evdev js device in the games group ---
+KERNEL=="js*", SUBSYSTEM=="input", MODE="0660", GROUP="games", TAG+="uaccess"
+KERNEL=="event*", SUBSYSTEM=="input", ENV{ID_INPUT_JOYSTICK}=="1", MODE="0660", GROUP="games", TAG+="uaccess"

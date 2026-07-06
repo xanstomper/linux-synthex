@@ -1,0 +1,28 @@
+[Unit]
+Description=Hermes OS Agent — Desktop AI Daemon
+Documentation=https://docs.solus-project.org/hermes
+After=graphical-session.target
+PartOf=graphical-session.target
+
+[Service]
+Type=dbus
+BusName=org.solus.Hermes
+ExecStart=/usr/bin/hermesd
+Restart=on-failure
+RestartSec=3
+
+# Resource limits
+MemoryMax=384M
+CPUQuota=40%
+
+# Security
+ProtectSystem=full
+ProtectHome=read-only
+PrivateTmp=yes
+NoNewPrivileges=yes
+SystemCallArchitectures=native
+ProtectKernelTunables=yes
+ProtectControlGroups=yes
+
+[Install]
+WantedBy=graphical-session.target

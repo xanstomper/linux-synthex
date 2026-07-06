@@ -1,0 +1,32 @@
+[Unit]
+Description=Solus Software Center Daemon
+Documentation=https://docs.solus-project.org/stored
+After=network-online.target
+Wants=network-online.target
+Requires=dbus.service
+After=dbus.service
+
+[Service]
+Type=simple
+ExecStart=/usr/bin/solus-stored
+Restart=on-failure
+RestartSec=5
+TimeoutStopSec=30
+
+# Resource limits
+CPUQuota=50%
+MemoryMax=512M
+
+# Security hardening — needs btrfs snapshots, flatpak package mgmt
+ProtectSystem=full
+ProtectHome=read-only
+PrivateTmp=yes
+NoNewPrivileges=yes
+CapabilityBoundingSet=CAP_SYS_ADMIN CAP_DAC_OVERRIDE
+SystemCallArchitectures=native
+ProtectKernelTunables=yes
+ProtectKernelModules=yes
+ProtectControlGroups=yes
+
+[Install]
+WantedBy=multi-user.target

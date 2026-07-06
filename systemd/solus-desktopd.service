@@ -1,0 +1,36 @@
+[Unit]
+Description=Solus Desktop Customization Daemon
+Documentation=https://docs.solus-project.org/desktopd
+After=graphical-session.target
+Wants=graphical-session.target
+Requires=dbus.service
+After=dbus.service
+
+[Service]
+Type=simple
+ExecStart=/usr/bin/solus-desktopd
+Restart=on-failure
+RestartSec=5
+TimeoutStopSec=10
+
+# Environment
+Environment=DISPLAY=:0
+Environment=WAYLAND_DISPLAY=wayland-0
+Environment=QT_QPA_PLATFORM=wayland
+Environment=XDG_SESSION_TYPE=wayland
+
+# Security hardening
+ProtectSystem=full
+ProtectHome=read-only
+PrivateTmp=yes
+NoNewPrivileges=yes
+CapabilityBoundingSet=CAP_SYS_ADMIN CAP_SYS_NICE
+SystemCallArchitectures=native
+
+# Resource limits — prevent the desktop daemon from eating RAM
+MemoryMax=256M
+MemoryHigh=128M
+CPUQuota=25%
+
+[Install]
+WantedBy=graphical-session.target

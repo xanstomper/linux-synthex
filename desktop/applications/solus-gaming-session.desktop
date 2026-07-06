@@ -1,0 +1,8 @@
+[Desktop Entry]
+Name=Solus Gaming Mode (Gamescope)
+Comment=Log in directly to Steam Big Picture via Gamescope
+Exec=/usr/bin/solus-gaming-mode session
+TryExec=/usr/bin/gamescope
+Type=Application
+DesktopNames=KDE
+Categories=Game;

@@ -1,0 +1,257 @@
+import QtQuick 2.15
+import QtQuick.Controls 2.15
+import QtQuick.Layouts 1.15
+import QtQuick.Window 2.15
+import org.solus.Backend 1.0
+
+Window {
+    id: mainWindow
+    visible: true
+    width: 1200
+    height: 800
+    minimumWidth: 960
+    minimumHeight: 640
+    title: "Solus Control Center"
+    color: "#0B0F1A"
+
+    property int activeNavIndex: 0
+    property string currentPage: "Dashboard"
+
+    // Accent color
+    readonly property color accentColor: "#9BBD5C"
+    readonly property color bgColor: "#0B0F1A"
+    readonly property color surfaceColor: "#1A1A2E"
+    readonly property color textColor: "#FFFFFF"
+    readonly property color mutedText: "#8899AA"
+
+    RowLayout {
+        anchors.fill: parent
+        spacing: 0
+
+        // Sidebar
+        Rectangle {
+            id: sidebar
+            Layout.preferredWidth: 240
+            Layout.fillHeight: true
+            color: "#121624"
+            anchors.top: parent.top
+            anchors.bottom: parent.bottom
+
+            ColumnLayout {
+                anchors.fill: parent
+                spacing: 0
+
+                // Logo area
+                Rectangle {
+                    Layout.fillWidth: true
+                    Layout.preferredHeight: 80
+                    color: "transparent"
+
+                    RowLayout {
+                        anchors.centerIn: parent
+                        spacing: 10
+
+                        Rectangle {
+                            width: 36
+                            height: 36
+                            radius: 8
+                            color: accentColor
+                            Text {
+                                anchors.centerIn: parent
+                                text: "S"
+                                font.pixelSize: 22
+                                font.bold: true
+                                color: "#0B0F1A"
+                            }
+                        }
+
+                        ColumnLayout {
+                            spacing: 2
+                            Text {
+                                text: "Solus"
+                                font.pixelSize: 18
+                                font.bold: true
+                                color: textColor
+                            }
+                            Text {
+                                text: "Control Center"
+                                font.pixelSize: 11
+                                color: mutedText
+                            }
+                        }
+                    }
+                }
+
+                // Separator
+                Rectangle {
+                    Layout.fillWidth: true
+                    Layout.preferredHeight: 1
+                    color: "#2A2A3E"
+                    Layout.leftMargin: 16
+                    Layout.rightMargin: 16
+                }
+
+                // Navigation items
+                ListView {
+                    id: navList
+                    Layout.fillWidth: true
+                    Layout.fillHeight: true
+                    Layout.topMargin: 12
+                    clip: true
+                    interactive: false
+                    model: ListModel {
+                        ListElement { name: "Dashboard"; icon: "\u{1F4CA}" }
+                        ListElement { name: "System"; icon: "\u{1F4BB}" }
+                        ListElement { name: "Performance"; icon: "\u{26A1}" }
+                        ListElement { name: "Gaming"; icon: "\u{1F3AE}" }
+                        ListElement { name: "Developer"; icon: "\u{1F4D1}" }
+                        ListElement { name: "Themes"; icon: "\u{1F3A8}" }
+                        ListElement { name: "Security"; icon: "\u{1F6E1}" }
+                        ListElement { name: "Updates"; icon: "\u{1F504}" }
+                        ListElement { name: "Drivers"; icon: "\u{1F527}" }
+                        ListElement { name: "RGB"; icon: "\u{1F308}" }
+                        ListElement { name: "Snapshots"; icon: "\u{1F4BE}" }
+                        ListElement { name: "Kernel"; icon: "\u{1F9A0}" }
+                        ListElement { name: "Controllers"; icon: "\u{1F579}" }
+                    }
+
+                    delegate: ItemDelegate {
+                        width: parent.width
+                        height: 48
+                        highlighted: ListView.isCurrentItem
+                        leftPadding: 20
+                        rightPadding: 16
+
+                        background: Rectangle {
+                            color: highlighted ? Qt.rgba(0.608, 0.741, 0.361, 0.12) : (hovered ? "#1E2030" : "transparent")
+                            radius: 8
+                            anchors.leftMargin: 8
+                            anchors.rightMargin: 8
+                            Behavior on color { ColorAnimation { duration: 140 } }
+
+                            Rectangle {
+                                visible: highlighted
+                                width: 3
+                                height: 24
+                                color: accentColor
+                                radius: 2
+                                anchors.verticalCenter: parent.verticalCenter
+                                anchors.left: parent.left
+                                anchors.leftMargin: 0
+                            }
+                        }
+
+                        contentItem: RowLayout {
+                            spacing: 14
+                            Text {
+                                text: model.icon
+                                font.pixelSize: 18
+                            }
+                            Text {
+                                text: model.name
+                                font.pixelSize: 14
+                                color: highlighted ? textColor : mutedText
+                                font.bold: highlighted
+                            }
+                            Item { Layout.fillWidth: true }
+                        }
+
+                        onClicked: {
+                            navList.currentIndex = index;
+                            activeNavIndex = index;
+                            currentPage = model.name;
+                            pageStack.replace(pageComponent, { pageName: model.name });
+                        }
+                    }
+                }
+
+                // Footer
+                Rectangle {
+                    Layout.fillWidth: true
+                    Layout.preferredHeight: 1
+                    color: "#2A2A3E"
+                    Layout.leftMargin: 16
+                    Layout.rightMargin: 16
+                }
+
+                Item { Layout.preferredHeight: 16 }
+            }
+        }
+
+        // Content area
+        Rectangle {
+            Layout.fillWidth: true
+            Layout.fillHeight: true
+            color: bgColor
+
+            StackView {
+                id: pageStack
+                anchors.fill: parent
+                anchors.margins: 24
+                initialItem: pageComponent
+
+                replaceEnter: Transition {
+                    NumberAnimation { property: "opacity"; from: 0; to: 1; duration: 200; easing.type: Easing.OutCubic }
+                }
+                replaceExit: Transition {
+                    NumberAnimation { property: "opacity"; from: 1; to: 0; duration: 150 }
+                }
+
+                Component {
+                    id: pageComponent
+                    Loader {
+                        property string pageName: "Dashboard"
+                        source: {
+                            switch(pageName) {
+                                case "Dashboard":    return "pages/Dashboard.qml";
+                                case "System":       return "pages/System.qml";
+                                case "Performance":  return "pages/Performance.qml";
+                                case "Gaming":       return "pages/Gaming.qml";
+                                case "Developer":    return "pages/Developer.qml";
+                                case "Themes":       return "pages/Themes.qml";
+                                case "Security":     return "pages/Security.qml";
+                                case "Updates":      return "pages/Updates.qml";
+                                case "Drivers":      return "pages/Drivers.qml";
+                                case "RGB":          return "pages/RGB.qml";
+                                case "Snapshots":    return "pages/Snapshots.qml";
+                                case "Kernel":       return "pages/Kernel.qml";
+                                case "Controllers":  return "pages/Controllers.qml";
+                                default:             return "pages/Dashboard.qml";
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    // Page title header
+    Rectangle {
+        id: pageHeader
+        anchors.top: parent.top
+        anchors.left: sidebar.right
+        anchors.right: parent.right
+        height: 60
+        color: "#0D1117"
+        z: 10
+
+        Text {
+            anchors.left: parent.left
+            anchors.leftMargin: 24
+            anchors.verticalCenter: parent.verticalCenter
+            text: currentPage
+            font.pixelSize: 22
+            font.bold: true
+            color: textColor
+        }
+    }
+
+    // Adjust content area for header
+    onCurrentPageChanged: {
+        pageStack.anchors.topMargin = 60 + 24;
+    }
+
+    Component.onCompleted: {
+        pageStack.anchors.topMargin = 60 + 24;
+    }
+}

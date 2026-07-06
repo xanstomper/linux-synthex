@@ -1,0 +1,15 @@
+{
+  "name": "glass",
+  "description": "Acrylic, transparent, glassmorphism aesthetic with soft blur",
+  "colorscheme": "BreezeDark",
+  "icons": "Tela-Circle-Dark",
+  "cursor": "Bibata-Modern-Classic",
+  "font": {"family": "Inter", "size": 10},
+  "layout": "macos",
+  "compositor": {
+    "enabled": true,
+    "blur": true,
+    "vsync": "auto"
+  },
+  "wallpaper": "glass-gradient"
+}

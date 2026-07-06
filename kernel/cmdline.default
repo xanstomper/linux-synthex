@@ -1,0 +1,80 @@
+# Linux Solus — Default Kernel Command Line Parameters
+# Used by GRUB/systemd-boot to boot the system
+# These provide the optimal out-of-box experience for Solus
+
+# Default boot parameters for Solus Linux
+# Format: KEY=VALUE or single options
+# Used in: GRUB_CMDLINE_LINUX_DEFAULT in /etc/default/grub
+
+# Quiet boot (Plymouth splash)
+quiet
+
+# Show splash screen during boot
+splash
+
+# Fast boot — no watchdog overhead, active P-state drivers, schedutil governor
+rw
+nowatchdog
+amd-pstate=active
+intel_pstate=active
+cpufreq.default_governor=schedutil
+processor.max_freq=0
+
+# LUKS full disk encryption support
+rd.luks=1
+rd.lvm=1
+
+# MD RAID support
+rd.md=1
+rd.dm=1
+
+# Auto-detection of root filesystem
+rd.auto=1
+
+# SELinux enforcing at boot
+selinux=1
+enforcing=1
+
+# Use systemd as init
+init=/usr/lib/systemd/systemd
+
+# Log level (errors and worse only)
+loglevel=3
+
+# Audit subsystem
+audit=1
+
+# IPv6 (enable)
+ipv6.disable=0
+
+# Security
+slab_nomerge=1
+init_on_alloc=1
+init_on_free=1
+page_alloc.shuffle=1
+randomize_kstack_offset=1
+pti=on
+spectre_v2=on
+spec_store_bypass_disable=on
+tsx=off
+tsx_async_abort=full,nosmt
+mds=full,nosmt
+l1tf=full,force
+nosmt=0
+
+# Storage
+nvme_core.default_ps_max_latency_us=0
+libata.force=noncq
+
+# Power management
+intel_idle.max_cstate=4
+processor.max_cstate=4
+
+# Graphics (for NVIDIA compatibility)
+nvidia_drm.modeset=1
+nvidia.NVreg_UsePageAttributeTable=1
+nvidia.NVreg_InitializeSystemMemoryAllocations=1
+nvidia.NVreg_DynamicPowerManagement=0x02
+
+# Sound
+snd-hda-intel.probe_mask=1

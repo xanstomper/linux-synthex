@@ -1,0 +1,22 @@
+[Unit]
+Description=Solus First Boot Setup
+Documentation=https://solus-linux.org/docs/firstboot
+After=network-online.target syslog.target systemd-udevd.service
+Wants=network-online.target
+ConditionPathExists=!/var/lib/solus/firstboot-complete
+
+[Service]
+Type=oneshot
+ExecStart=/usr/libexec/solus/firstboot.sh
+RemainAfterExit=yes
+StandardOutput=journal+console
+
+# Security hardening — needs broad access for first-time setup
+ProtectSystem=full
+PrivateTmp=yes
+NoNewPrivileges=yes
+SystemCallArchitectures=native
+ProtectKernelTunables=yes
+ProtectControlGroups=yes
+MemoryMax=512M
+CPUQuota=50%

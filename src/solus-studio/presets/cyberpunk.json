@@ -1,0 +1,15 @@
+{
+  "name": "cyberpunk",
+  "description": "Neon-drenched RGB aesthetic with dark glass and cyan/pink accents",
+  "colorscheme": "SolusNeon",
+  "icons": "Tela-Circle-Cyan",
+  "cursor": "Bibata-Modern-Ice",
+  "font": {"family": "JetBrains Mono", "size": 10},
+  "layout": "gaming",
+  "compositor": {
+    "enabled": true,
+    "blur": true,
+    "vsync": "adaptive"
+  },
+  "wallpaper": "neon-city"
+}

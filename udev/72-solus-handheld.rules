@@ -1,0 +1,40 @@
+# Solus handheld gaming PC rules
+# Exposes TDP / power / gyro / IMU / RGB control sysfs nodes to the active
+# seat and the games group for Steam Deck, ASUS ROG Ally and Lenovo Legion Go.
+
+# --- Steam Deck (Valve Jupiter/Galileo) ---
+# AMD APU power limits and fan via hwmon; Deck specific sysfs under valve
+SUBSYSTEM=="hwmon", ATTRS{name}=="amdgpu", ATTRS{power*_average}=="*", GROUP="games", MODE="0660", TAG+="uaccess"
+SUBSYSTEM=="hwmon", DRIVERS=="steamdeck-hwmon", GROUP="games", MODE="0660", TAG+="uaccess"
+KERNEL=="iio:device*", SUBSYSTEM=="iio", ATTRS{name}=="steamdeck-hid-*.accel|*.gyro", GROUP="games", MODE="0660", TAG+="uaccess"
+
+# --- ASUS ROG Ally / ROG Ally X (RC71L / RC72L) ---
+# TDP + CPU/GPU boost + fan curve via asus-nb-wmi / asus-armoury hwmon
+SUBSYSTEM=="hwmon", DRIVERS=="asus_rog_ryujin|asus_wmi_sensors|asus-armoury", GROUP="games", MODE="0660", TAG+="uaccess"
+SUBSYSTEM=="hwmon", ATTRS{name}=="asus_wmi_sensors", GROUP="games", MODE="0660", TAG+="uaccess"
+# ROG Ally IMU (BMI323 over hidraw / iio)
+KERNEL=="iio:device*", SUBSYSTEM=="iio", ATTRS{name}=="bmi323-imu.*|incellation imu.*", GROUP="games", MODE="0660", TAG+="uaccess"
+# ROG Ally RGB (AniMe matrix / boot LED) hidraw
+KERNEL=="hidraw*", SUBSYSTEM=="hidraw", ATTRS{idVendor}=="0b05", ATTRS{idProduct}=="18f3|184e|1866", MODE="0660", GROUP="games", TAG+="uaccess"
+# armoury / asusd control daemon
+SUBSYSTEM=="usb", ACTION=="add", ATTRS{idVendor}=="0b05", ATTRS{idProduct}=="18f3|184e|1866", \
+    RUN+="/usr/bin/systemctl try-restart asusd.service"
+
+# --- Lenovo Legion Go (83E1) ---
+# TDP / custom mode via legion-laptop / ideapad hwmon
+SUBSYSTEM=="hwmon", DRIVERS=="legion-hwmon|ideapad_acpi|legion", GROUP="games", MODE="0660", TAG+="uaccess"
+SUBSYSTEM=="hwmon", ATTRS{name}=="legion-*", GROUP="games", MODE="0660", TAG+="uaccess"
+# Legion Go detached controllers (Lenovo USB)
+SUBSYSTEM=="usb", ATTRS{idVendor}=="17ef", ATTRS{idProduct}=="6182|6184", MODE="0660", GROUP="games", TAG+="uaccess"
+KERNEL=="hidraw*", SUBSYSTEM=="hidraw", ATTRS{idVendor}=="17ef", MODE="0660", GROUP="games", TAG+="uaccess"
+
+# --- Generic handheld: AMD APU perf + IMU access ---
+# AMD Ryzen SMU / power play tables for manual TDP on AYANEO / GPD / AOKZOE
+SUBSYSTEM=="hwmon", ATTRS{name}=="amdgpu", GROUP="games", MODE="0660", TAG+="uaccess"
+SUBSYSTEM=="powercap", KERNEL=="intel-rapl:*", GROUP="games", MODE="0640", TAG+="uaccess"
+# IMU / gyro for any handheld controller board
+KERNEL=="iio:device*", SUBSYSTEM=="iio", ATTRS{name}=="*accel*|*gyro*", GROUP="games", MODE="0660", TAG+="uaccess"
+
+# --- Backlight / fan control sysfs for handhelds ---
+SUBSYSTEM=="backlight", GROUP="games", MODE="0660", TAG+="uaccess"
+KERNEL=="pwmconfig|fan*_control", SUBSYSTEM=="hwmon", GROUP="games", MODE="0660", TAG+="uaccess"
