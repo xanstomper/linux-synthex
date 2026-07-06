@@ -1,0 +1,39 @@
+# Solus Linux — RPM Build Pipeline Docker Compose
+# Builds all Solus RPMs (including Rust) in a clean Fedora container
+services:
+  rpmbuild:
+    build:
+      context: ..
+      dockerfile: build/Dockerfile.rpmbuild
+    image: solus/rpmbuild:latest
+    container_name: solus-rpmbuilder
+    volumes:
+      - ..:/build:ro
+      - ../build/rpmbuild:/build/rpmbuild
+      - ../build/repo:/build/repo
+      - cargo-cache:/root/.cargo
+    command: ["/build/scripts/build-rust-rpms.sh", "all"]
+    environment:
+      - CARGO_TERM_COLOR=always
+      - RUST_BACKTRACE=1
+      - CARGO_REGISTRIES_CRATES_IO_PROTOCOL=sparse
+
+  # Build all RPMs (including C++ and Python packages)
+  full-build:
+    build:
+      context: ..
+      dockerfile: build/Dockerfile.rpmbuild
+    image: solus/rpmbuild:latest
+    container_name: solus-full-builder
+    volumes:
+      - ..:/build:ro
+      - ../build/rpmbuild:/build/rpmbuild
+      - ../build/repo:/build/repo
+      - cargo-cache:/root/.cargo
+    command: ["/build/scripts/build-all-rpms.sh"]
+    environment:
+      - CARGO_TERM_COLOR=always
+      - RUST_BACKTRACE=1
+
+volumes:
+  cargo-cache:

@@ -97,6 +97,16 @@ make check    # validation targets for systemd, JSON, Python, desktop files
 | `du` | `dust` | `dust` | Visual disk usage with bar charts |
 | `htop` | `btm` (bottom) | `bottom` | Graphical terminal system monitor |
 | `sed` | `sd` | `sd` | Intuitive find & replace CLI |
+| prompt | `starship` | `starship` | Cross-shell prompt, minimal and fast |
+| `tmux` | `zellij` | `zellij` | Terminal multiplexer with workspace layout |
+| `diff` | `delta` | `git-delta` | Syntax-highlighted git diff pager |
+| `ps` | `procs` | `procs` | Modern process list with tree view |
+| `time` | `hyperfine` | `hyperfine` | Statistical command benchmarking |
+| `dig` | `dog` | `dog` | DNS lookup client with color |
+| `nethogs` | `bandwhich` | `bandwhich` | Real-time bandwidth per process |
+| `du` (TUI) | `dua` | `dua-cli` | Interactive disk usage analyzer |
+| `ping` | `gping` | `gping` | Latency with real-time graph |
+| `make` | `just` | `just` | Command runner (simpler make) |
 
 ### Solus Native Rust Tools
 | Command | Description |

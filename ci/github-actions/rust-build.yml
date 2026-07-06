@@ -49,24 +49,30 @@ jobs:
   build:
     name: cargo build
     runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        workspace: [root, solus-rust-tools]
     steps:
       - uses: actions/checkout@v4
       - uses: actions-rust-lang/setup-rust-toolchain@v1
         with:
           toolchain: stable
-      - name: Build all Rust tools
-        working-directory: src/solus-rust-tools
+      - name: Build Rust (${{ matrix.workspace }})
+        working-directory: ${{ matrix.workspace == 'root' && '.' || format('src/{0}', matrix.workspace) }}
         run: cargo build --workspace --release --verbose
-      - name: Upload artifacts
+      - name: Upload artifacts (${{ matrix.workspace }})
         uses: actions/upload-artifact@v4
         with:
-          name: solus-rust-tools
-          path: src/solus-rust-tools/target/release/solus-*
-          if-no-files-found: error
+          name: rust-${{ matrix.workspace }}
+          path: ${{ matrix.workspace == 'root' && 'target/release/solus-*' || format('src/{0}/target/release/solus-*', matrix.workspace) }}
+          if-no-files-found: warn
 
   test:
     name: cargo test
     runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        workspace: [root, solus-rust-tools]
     steps:
       - uses: actions/checkout@v4
       - uses: actions-rust-lang/setup-rust-toolchain@v1

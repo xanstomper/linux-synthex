@@ -132,10 +132,20 @@
       <packagereq type="mandatory">ripgrep</packagereq>
       <packagereq type="mandatory">fd-find</packagereq>
       <packagereq type="mandatory">bat</packagereq>
+      <packagereq type="mandatory">starship</packagereq>
+      <packagereq type="mandatory">just</packagereq>
       <packagereq type="default">eza</packagereq>
       <packagereq type="default">dust</packagereq>
       <packagereq type="default">bottom</packagereq>
       <packagereq type="default">sd</packagereq>
+      <packagereq type="default">zellij</packagereq>
+      <packagereq type="default">git-delta</packagereq>
+      <packagereq type="default">procs</packagereq>
+      <packagereq type="default">hyperfine</packagereq>
+      <packagereq type="default">dog</packagereq>
+      <packagereq type="default">dua-cli</packagereq>
+      <packagereq type="default">gping</packagereq>
+      <packagereq type="default">bandwhich</packagereq>
     </packagelist>
   </group>
 

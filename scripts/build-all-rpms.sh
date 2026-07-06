@@ -32,6 +32,7 @@ cp "$ROOT"/packages/spec-files/*.spec "$BUILDROOT/SPECS/"
 
 # Copy source files to SOURCES
 echo "📁 Copying source files..."
+# Shell tools
 cp "$ROOT/src/solus-ujust/ujust"                              "$BUILDROOT/SOURCES/"
 cp "$ROOT/src/solus-nvidia-installer/solus-nvidia-installer"  "$BUILDROOT/SOURCES/"
 cp "$ROOT/src/solus-codec-installer/solus-codec-installer"    "$BUILDROOT/SOURCES/"

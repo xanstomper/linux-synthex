@@ -50,8 +50,27 @@ System management tools written in Rust for Solus:
 
 ### Layer 4: RPM Specs
 
-- **Toolchain:** `packages/spec-files/rust-toolchain.spec` — rustc + cargo + std + src
-- **Rust Utilities:** `packages/spec-files/rust-utils-*.spec` (7 specs)
+| **Toolchain:** `packages/spec-files/rust-toolchain.spec` — rustc + cargo + std + src
+| **Rust Utilities:** `packages/spec-files/rust-utils-*.spec` (17 specs)
+| | Tool | Replaces | Spec |
+| |------|----------|------|
+| | ripgrep (rg) | grep | `rust-utils-ripgrep.spec` |
+| | fd-find (fd) | find | `rust-utils-fd-find.spec` |
+| | bat | cat | `rust-utils-bat.spec` |
+| | eza | ls | `rust-utils-eza.spec` |
+| | dust | du | `rust-utils-dust.spec` |
+| | bottom (btm) | htop | `rust-utils-bottom.spec` |
+| | sd | sed | `rust-utils-sd.spec` |
+| | starship | prompt | `rust-utils-starship.spec` |
+| | zellij | tmux | `rust-utils-zellij.spec` |
+| | git-delta | diff | `rust-utils-delta.spec` |
+| | procs | ps | `rust-utils-procs.spec` |
+| | hyperfine | benchmark | `rust-utils-hyperfine.spec` |
+| | dog | dig | `rust-utils-dog.spec` |
+| | bandwhich | nethogs | `rust-utils-bandwhich.spec` |
+| | dua-cli | du (interactive) | `rust-utils-dua-cli.spec` |
+| | gping | ping (graphical) | `rust-utils-gping.spec` |
+| | just | make | `rust-utils-just.spec` |
 - **Native Tools:** `packages/spec-files/solus-update-manager.spec`, `solus-driver-manager.spec`, `solus-pkg.spec`
 - **System Daemon:** `packages/spec-files/solus-system-daemon.spec`
 
