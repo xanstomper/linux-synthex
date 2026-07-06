@@ -35,6 +35,9 @@ dist/
 *~
 .DS_Store
 
+# Rust build artifacts
+target/
+
 # Generated
 project-inventory.json
 project-tree.txt
@@ -42,6 +45,10 @@ project-tree.txt
 # Environment
 .env
 *.local
+
+# OpenCode/Cline
+.commandcode/
+.opencode/
 
 # Large files
 *.img

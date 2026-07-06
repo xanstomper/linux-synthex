@@ -1,0 +1,66 @@
+# Solus Linux — RPM spec validation CI
+# Validates all RPM spec files for syntax correctness
+name: RPM — Validate Specs
+
+on:
+  push:
+    branches: [master, main]
+    paths:
+      - 'packages/spec-files/**'
+      - 'packages/groups/**'
+  pull_request:
+    paths:
+      - 'packages/spec-files/**'
+
+jobs:
+  validate-specs:
+    name: Validate RPM Specs
+    runs-on: ubuntu-latest
+    container:
+      image: fedora:41
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install RPM tools
+        run: dnf install -y rpm-build rpmdevtools specdiff
+      - name: Validate all spec files
+        run: |
+          failed=0
+          for spec in packages/spec-files/*.spec; do
+            name=$(basename "$spec")
+            echo "🔍 Validating $name..."
+            if rpmlint "$spec"; then
+              echo "  ✅ $name"
+            else
+              echo "  ❌ $name has issues"
+              failed=$((failed+1))
+            fi
+          done
+          exit $failed
+
+  validate-rust-specs:
+    name: Validate Rust Specs
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Verify all Rust tool specs exist
+        run: |
+          expected=(
+            "rust-toolchain.spec"
+            "rust-utils-ripgrep.spec"
+            "rust-utils-fd.spec"
+            "rust-utils-bat.spec"
+            "rust-utils-eza.spec"
+            "rust-utils-dust.spec"
+            "rust-utils-bottom.spec"
+            "rust-utils-sd.spec"
+          )
+          failed=0
+          for spec in "${expected[@]}"; do
+            if [ -f "packages/spec-files/$spec" ]; then
+              echo "✅ $spec"
+            else
+              echo "❌ MISSING: $spec"
+              failed=$((failed+1))
+            fi
+          done
+          exit $failed

@@ -1,0 +1,28 @@
+[workspace]
+resolver = "2"
+members = [
+    "src/hwdaemon",
+    "src/desktopd",
+    "src/solus-cli",
+    "src/stored",
+    "src/gpu-setupd",
+    # FIXME: solus-rust-tools has incompatible dep versions (zbus 4 vs 5, sysinfo 0.31 vs 0.33)
+    # Build them separately from src/solus-rust-tools/ until deps are unified
+]
+
+[workspace.package]
+version = "0.1.0"
+edition = "2024"
+license = "MIT OR Apache-2.0"
+authors = ["Solus Linux Team <dev@solus.org>"]
+
+[workspace.dependencies]
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+tokio = { version = "1", features = ["full"] }
+tracing = "0.1"
+tracing-subscriber = { version = "0.3", features = ["env-filter"] }
+zbus = "5"
+anyhow = "1"
+clap = { version = "4", features = ["derive"] }
+sysinfo = "0.33"

@@ -1,32 +1,17 @@
 [Unit]
-Description=Solus Software Center Daemon
-Documentation=https://docs.solus-project.org/stored
+Description=Solus Software Center Backend (Rust)
+Documentation=https://github.com/xanstomper/solus-linux
 After=network-online.target
 Wants=network-online.target
-Requires=dbus.service
-After=dbus.service
 
 [Service]
 Type=simple
-ExecStart=/usr/bin/solus-stored
+ExecStart=/usr/libexec/solus/solus-stored
 Restart=on-failure
-RestartSec=5
+RestartSec=10
+StandardOutput=journal
+StandardError=journal
 TimeoutStopSec=30
-
-# Resource limits
-CPUQuota=50%
-MemoryMax=512M
-
-# Security hardening — needs btrfs snapshots, flatpak package mgmt
-ProtectSystem=full
-ProtectHome=read-only
-PrivateTmp=yes
-NoNewPrivileges=yes
-CapabilityBoundingSet=CAP_SYS_ADMIN CAP_DAC_OVERRIDE
-SystemCallArchitectures=native
-ProtectKernelTunables=yes
-ProtectKernelModules=yes
-ProtectControlGroups=yes
 
 [Install]
 WantedBy=multi-user.target

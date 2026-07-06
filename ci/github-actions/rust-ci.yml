@@ -1,0 +1,97 @@
+name: Rust — check, lint, test, build
+
+on:
+  push:
+    branches: ["master"]
+    paths: ["src/**/*.rs", "src/**/Cargo.toml", "Cargo.toml"]
+  pull_request:
+    paths: ["src/**/*.rs", "src/**/Cargo.toml", "Cargo.toml"]
+
+env:
+  CARGO_TERM_COLOR: always
+  RUST_BACKTRACE: 1
+
+jobs:
+  check:
+    name: Rust ${{ matrix.tool }} (${{ matrix.target }})
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        target: [x86_64-unknown-linux-gnu]
+        tool: [check, clippy, test]
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install Rust toolchain
+        run: |
+          rustup toolchain install stable --profile minimal
+          rustup target add ${{ matrix.target }}
+
+      - name: Cache cargo registry
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.cargo/registry
+            ~/.cargo/git
+            target/
+          key: ${{ runner.os }}-cargo-${{ hashFiles('**/Cargo.lock') }}
+
+      - name: cargo ${{ matrix.tool }}
+        run: cargo ${{ matrix.tool }} --workspace --all-targets -- -D warnings
+
+  build:
+    name: Build release binaries
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install Rust
+        run: |
+          rustup toolchain install stable
+          rustup target add x86_64-unknown-linux-gnu
+
+      - name: Build release
+        run: cargo build --release --workspace
+
+      - name: Verify binaries
+        run: |
+          file target/release/solus
+          file target/release/solus-hwdaemon
+          file target/release/solus-desktopd
+          file target/release/solus-stored
+          file target/release/solus-gpu-setupd
+          ls -lh target/release/
+
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: solus-rust-binaries
+          path: target/release/solus*
+
+  security-audit:
+    name: Security audit
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install Rust
+        run: rustup toolchain install stable
+
+      - name: cargo-audit
+        uses: rustsec/audit-check@v2
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+  fmt:
+    name: Rust formatting
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install Rust
+        run: rustup toolchain install stable --component rustfmt
+
+      - name: cargo fmt
+        run: cargo fmt --all --check

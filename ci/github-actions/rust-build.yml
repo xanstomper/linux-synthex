@@ -1,0 +1,92 @@
+# Solus Linux — Rust workspace CI pipeline
+# Builds, tests, and lints all Rust tools on PRs and merges to master
+name: Rust — Build & Test
+
+on:
+  push:
+    branches: [master, main]
+    paths:
+      - 'src/solus-rust-tools/**'
+      - 'packages/spec-files/rust-*.spec'
+      - '.github/workflows/rust-*.yml'
+  pull_request:
+    paths:
+      - 'src/solus-rust-tools/**'
+      - 'packages/spec-files/rust-*.spec'
+
+env:
+  CARGO_TERM_COLOR: always
+  RUST_BACKTRACE: 1
+  CARGO_REGISTRIES_CRATES_IO_PROTOCOL: sparse
+
+jobs:
+  fmt:
+    name: cargo fmt
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions-rust-lang/setup-rust-toolchain@v1
+        with:
+          toolchain: stable
+          components: rustfmt
+      - name: Check formatting
+        working-directory: src/solus-rust-tools
+        run: cargo fmt --check
+
+  clippy:
+    name: cargo clippy
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions-rust-lang/setup-rust-toolchain@v1
+        with:
+          toolchain: stable
+          components: clippy
+      - name: Lint
+        working-directory: src/solus-rust-tools
+        run: cargo clippy --workspace -- -D warnings
+
+  build:
+    name: cargo build
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions-rust-lang/setup-rust-toolchain@v1
+        with:
+          toolchain: stable
+      - name: Build all Rust tools
+        working-directory: src/solus-rust-tools
+        run: cargo build --workspace --release --verbose
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: solus-rust-tools
+          path: src/solus-rust-tools/target/release/solus-*
+          if-no-files-found: error
+
+  test:
+    name: cargo test
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions-rust-lang/setup-rust-toolchain@v1
+        with:
+          toolchain: stable
+      - name: Run tests
+        working-directory: src/solus-rust-tools
+        run: cargo test --workspace --verbose
+
+  audit:
+    name: cargo audit
+    runs-on: ubuntu-latest
+    continue-on-error: true  # Advisory-only; security advisories don't block CI
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install cargo-audit
+        uses: actions-rust-lang/setup-rust-toolchain@v1
+        with:
+          toolchain: stable
+      - run: cargo install cargo-audit --locked
+      - name: Security audit
+        working-directory: src/solus-rust-tools
+        run: cargo audit

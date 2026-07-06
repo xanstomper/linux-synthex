@@ -1,0 +1,6 @@
+[package]
+name = "solus-rust-tools"
+version = "0.1.0"
+edition = "2021"
+description = "Solus Linux Rust tool suite — update manager, driver manager, package manager"
+authors = ["Solus Rust Team <rust@solus-project.org>"]

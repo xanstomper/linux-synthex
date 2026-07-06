@@ -13,7 +13,8 @@ desktop responsiveness, gaming, and security enhancements.
 | 4 | `btrfs-zstd-fast.patch` | [CachyOS/kernel-patches](https://github.com/CachyOS/kernel-patches) | **BTRFS zstd-fast**: Adds faster BTRFS compression levels for zstd, allowing compression at levels 1-3 with better throughput while maintaining reasonable compression ratios. |
 | 5 | `clear-pkeys.patch` | [Clear Linux](https://clearlinux.org) | **Memory Protection Keys**: Enables userspace protection keys for finer-grained memory protection, improving security isolation between processes. |
 | 6 | `lru-multigen.patch` | Linux Kernel (backport) | **Multi-Gen LRU**: Multi-Generational LRU framework for more efficient page reclaim, reducing memory pressure during gaming and heavy workloads. |
-| 7 | `bcachefs.patch` | [bcachefs](https://bcachefs.org) | **bcachefs Filesystem**: Support for the bcachefs copy-on-write filesystem (if not yet merged upstream at the time of this kernel build). |
+|| 5 | `solus-0005-rust-for-linux.patch` | Solus Linux Team | **Rust for Linux**: Enables Rust support on x86_64 (upstream in 6.14+). Adds `CONFIG_RUST=y` and Rust-based PHY driver support to the default kernel configuration. Requires rustc >= 1.80.0 to build. |
+|| 7 | `bcachefs.patch` | [bcachefs](https://bcachefs.org) | **bcachefs Filesystem**: Support for the bcachefs copy-on-write filesystem (if not yet merged upstream at the time of this kernel build). |
 
 ## Applying Patches
 

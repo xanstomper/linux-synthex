@@ -72,12 +72,15 @@ BuildRequires: git-core, diffutils, hostname
 BuildRequires: rpm-build, redhat-rpm-config
 BuildRequires: elfutils-devel, numactl-devel, libbpf-devel
 BuildRequires: systemd-devel, libudev-devel, libattr-devel
+# Rust-for-Linux support (memory-safe kernel drivers)
+BuildRequires: rust-toolchain >= 1.80.0, clang-devel >= 17, lld-devel >= 17
+BuildRequires: rust-std, cargo
 
 Requires: coreutils, bash, dracut, grub2-tools
 Requires(pre): /usr/sbin/dracut
 Requires(post): /usr/sbin/dracut, /usr/sbin/grub2-mkconfig
 
-%description
+|%description
 Solus Linux custom kernel with BORE (Burst-Oriented Response Enhancer) scheduler.
 Optimized for desktop responsiveness, gaming (PROTON_GE, fsync, futex2),
 Wayland graphics, container workloads, and power efficiency.
@@ -87,6 +90,7 @@ Includes:
 - EEVDF latency improvements
 - x86-64-%{variant} optimizations
 - PREEMPT_FULL for low-latency scheduling
+- Rust-for-Linux support (CONFIG_RUST=y) for memory-safe kernel drivers
 - Comprehensive BTRFS + zstd compression support
 - SELinux + AppArmor + Lockdown security
 - Full AMD/Intel GPU support (i915, amdgpu, NVIDIA)

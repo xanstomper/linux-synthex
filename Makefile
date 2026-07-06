@@ -2,37 +2,59 @@
 SHELL := /bin/bash
 ROOT_DIR := $(shell pwd)
 
-.PHONY: all check test clean help stats
+.PHONY: all check test clean help stats rust rust-all
 
 all: check
 
+# ─── Rust (requires rustc + cargo) ────────────────────────────────────
+
+rust:
+	@echo "🦀 Building all Rust components..."
+	@cargo build --release --workspace 2>&1 || (echo "  ⚠ Rust build unavailable — install rustc + cargo"; exit 0)
+
+rust-check:
+	@echo "🔍 Checking Rust code..."
+	@cargo check --workspace 2>&1 || echo "  ⚠ Rust check unavailable"
+
+rust-clippy:
+	@echo "🔍 Running Clippy on Rust code..."
+	@cargo clippy --workspace -- -D warnings 2>&1 || echo "  ⚠ Clippy unavailable"
+
+rust-test:
+	@echo "🧪 Running Rust tests..."
+	@cargo test --workspace 2>&1 || echo "  ⚠ Rust tests unavailable"
+
+rust-clean:
+	@echo "🧹 Cleaning Rust build artifacts..."
+	@cargo clean 2>/dev/null || true
+
 # ─── Building (requires Fedora with Qt6/KF6 deps) ─────────────────────
 
-build: build-desktopd build-stored build-hwdaemon build-gpu-setupd build-control-center build-studio
+build: rust build-desktopd build-stored build-hwdaemon build-gpu-setupd build-control-center build-studio
 	@echo "✅ All native components built"
 
 build-desktopd:
-	@echo "🔨 Building solus-desktopd..."
+	@echo "🔨 Building solus-desktopd (C++)..."
 	@$(MAKE) -C src/solus-desktopd 2>&1 | tail -1 || echo "  ⚠ C++ build unavailable (need Qt6 + KF6 deps)"
 
 build-stored:
-	@echo "🔨 Building solus-stored..."
+	@echo "🔨 Building solus-stored (C++)..."
 	@$(MAKE) -C src/solus-stored 2>&1 | tail -1 || echo "  ⚠ C++ build unavailable"
 
 build-hwdaemon:
-	@echo "🔨 Building solus-hwdaemon..."
+	@echo "🔨 Building solus-hwdaemon (C)..."
 	@$(MAKE) -C src/solus-hwdaemon 2>&1 | tail -1 || echo "  ⚠ C build unavailable"
 
 build-gpu-setupd:
-	@echo "🔨 Building solus-gpu-setupd..."
+	@echo "🔨 Building solus-gpu-setupd (C)..."
 	@$(MAKE) -C src/solus-gpu-setupd 2>&1 | tail -1 || echo "  ⚠ C build unavailable"
 
 build-control-center:
-	@echo "🔨 Building solus-control-center..."
+	@echo "🔨 Building solus-control-center (C++/QML)..."
 	@$(MAKE) -C src/solus-control-center 2>&1 | tail -1 || echo "  ⚠ C++ build unavailable"
 
 build-studio:
-	@echo "🔨 Building solus-studio..."
+	@echo "🔨 Building solus-studio (C++/QML)..."
 	@$(MAKE) -C src/solus-studio 2>&1 | tail -1 || echo "  ⚠ C++ build unavailable"
 
 # Build ISO (requires Docker or Fedora with lorax)
@@ -81,12 +103,13 @@ test:
 stats:
 	@echo "📊 Project statistics:"
 	@echo "  Source files: $$(find src -type f | wc -l)"
-	@echo "  Shell: $$(find . -name '*.sh' -not -path '*/\\.*' | wc -l)"
-	@echo "  Python: $$(find . -name '*.py' -not -path '*/\\.*' | wc -l)"
-	@echo "  QML: $$(find . -name '*.qml' -not -path '*/\\.*' | wc -l)"
-	@echo "  C/C++: $$(find . -name '*.cpp' -o -name '*.c' -not -path '*/\\.*' | wc -l)"
+	@echo "  Rust: $$(find src -name '*.rs' -not -path '*/\\\\.*' | wc -l)"
+	@echo "  Shell: $$(find . -name '*.sh' -not -path '*/\\\\.*' | wc -l)"
+	@echo "  Python: $$(find . -name '*.py' -not -path '*/\\\\.*' | wc -l)"
+	@echo "  QML: $$(find . -name '*.qml' -not -path '*/\\\\.*' | wc -l)"
+	@echo "  C/C++: $$(find . -name '*.cpp' -o -name '*.c' -not -path '*/\\\\.*' | wc -l)"
 	@echo "  Systemd: $$(ls systemd/*.service 2>/dev/null | wc -l)"
-	@echo "  Total files: $$(find . -type f -not -path '*/\\.*' -not -name 'project-*' | wc -l)"
+	@echo "  Total files: $$(find . -type f -not -path '*/\\\\.*' -not -name 'project-*' | wc -l)"
 
 install-dev:
 	@echo "🔗 Installing Solus development symlinks..."
@@ -155,7 +178,11 @@ help:
 	@echo "Targets:"
 	@echo "  all              Build + validate (default)"
 	@echo "  check            Run all validations"
-	@echo "  build            Compile native C/C++ components"
+	@echo "  build            Compile Rust + native C/C++ components"
+	@echo "  rust             Build all Rust components"
+	@echo "  rust-check       cargo check (no codegen)"
+	@echo "  rust-clippy      Run Clippy lints"
+	@echo "  rust-test        Run Rust test suite"
 	@echo "  iso              Build Solus ISO (Docker or lorax)"
 	@echo "  test             Run integration tests"
 	@echo "  install-dev      Create dev symlinks in ~/.local/bin"

@@ -75,10 +75,35 @@ make check    # validation targets for systemd, JSON, Python, desktop files
 
 ### Development
 - **VS Code** pre-installed
-- **Git, Rust, Go, Node.js, Java 21**
+- **Git, Rust 1.80+, Go, Node.js, Java 21**
 - **Docker, Podman, Buildah, Skopeo** — containers
 - **QEMU/KVM + Virt-Manager** — virtualization
 - **SystemTap, GDB, Valgrind, strace** — debugging
+
+### Rust Toolchain
+- **rustc** — Rust compiler (v1.80.0+, LLVM 17 backend)
+- **cargo** — Package manager and build system
+- **rust-src** — Source code for IDE/rust-analyzer
+- **rustfmt, clippy, rust-analyzer** — Developer tooling
+- **Rust-for-Linux** — Kernel module development support
+
+### Rust Utility Suite
+| Traditional | Rust Replacement | Package | Description |
+|-------------|-----------------|---------|-------------|
+| `grep` | `rg` (ripgrep) | `ripgrep` | Ultra-fast recursive search, .gitignore-aware |
+| `find` | `fd` | `fd-find` | Intuitive file finder with sensible defaults |
+| `cat` | `bat` | `bat` | Syntax-highlighted output, git integration |
+| `ls` | `eza` | `eza` | Colorised, tree view, icons, git status |
+| `du` | `dust` | `dust` | Visual disk usage with bar charts |
+| `htop` | `btm` (bottom) | `bottom` | Graphical terminal system monitor |
+| `sed` | `sd` | `sd` | Intuitive find & replace CLI |
+
+### Solus Native Rust Tools
+| Command | Description |
+|---------|-------------|
+| `solus-update-manager` | System update manager with BTRFS snapshots |
+| `solus-driver-manager` | GPU detection and driver auto-install |
+| `solus-pkg` (alias `spkg`) | Package manager with Solus repo awareness |
 
 ### Solus Tools
 | Command | Description |
@@ -89,7 +114,9 @@ make check    # validation targets for systemd, JSON, Python, desktop files
 | `solus-gpu-switch` | NVIDIA Optimus GPU switching |
 | `solus-proton` | Proton version manager |
 | `solus-firewall` | Firewall profile switcher |
-| `solus-update` | Update manager with snapshots |
+| `solus-update` | Update manager with snapshots (Rust) |
+| `solus-driver-manager` | GPU driver auto-install (Rust) |
+| `solus-pkg` | Package manager with repo awareness (Rust) |
 | `solus-blueprint` | Export/import system identity (.zbp) |
 | `solus-ai-hub` | Local AI model management via Ollama |
 | `solus-webapp` | Turn websites into native apps |
@@ -110,17 +137,21 @@ make check    # validation targets for systemd, JSON, Python, desktop files
 linux-solus/
 ├── branding/         # Logos, themes, wallpapers, icons
 ├── build/            # ISO build scripts, kickstart files
-├── ci/               # GitHub Actions workflows
+├── ci/               # GitHub Actions workflows (incl Rust CI)
 ├── desktop/          # KDE configs, KCM modules, launchers
 ├── installer/        # Calamares config and modules
-├── kernel/           # Kernel config (BORE + EEVDF + FSYNC)
+├── kernel/           # Kernel config (BORE + EEVDF + FSYNC + Rust)
 ├── layouts/          # Desktop layout presets
 ├── modes/            # Performance mode scripts
 ├── packages/         # RPM spec files, repo configs
 ├── scripts/          # Docker build scripts
 ├── security/         # SELinux policy, hardening configs
-├── src/              # All source code (daemons, tools, GUIs)
-└── systemd/          # systemd service units
+├── src/
+│   ├── solus-rust-tools/   # Rust workspace (update-manager, driver-manager, pkg)
+│   ├── solus-*/            # C/C++/Python/QML system tools
+│   └── ...
+├── systemd/          # systemd service units
+└── tests/            # Integration tests and validation
 ```
 
 ## Included from other distros

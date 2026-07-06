@@ -108,8 +108,8 @@
       <packagereq type="mandatory">cmake</packagereq>
       <packagereq type="mandatory">python3</packagereq>
       <packagereq type="mandatory">python3-devel</packagereq>
-      <packagereq type="default">rust</packagereq>
-      <packagereq type="default">cargo</packagereq>
+      <packagereq type="mandatory">rust-toolchain</packagereq>
+      <packagereq type="mandatory">cargo</packagereq>
       <packagereq type="default">golang</packagereq>
       <packagereq type="default">nodejs</packagereq>
       <packagereq type="default">java-21-openjdk</packagereq>
@@ -117,6 +117,37 @@
       <packagereq type="default">toolbox</packagereq>
       <packagereq type="default">distrobox</packagereq>
       <packagereq type="default">@development-tools</packagereq>
+    </packagelist>
+  </group>
+
+  <!-- Rust Toolchain & Utilities -->
+  <group>
+    <id>solus-rust-tools</id>
+    <name>Solus Rust Utility Suite</name>
+    <description>Modern Rust-based replacements for classic Unix tools: ripgrep, fd, bat, eza, dust, bottom, sd</description>
+    <uservisible>true</uservisible>
+    <packagelist>
+      <packagereq type="mandatory">rust-toolchain</packagereq>
+      <packagereq type="mandatory">ripgrep</packagereq>
+      <packagereq type="mandatory">fd-find</packagereq>
+      <packagereq type="mandatory">bat</packagereq>
+      <packagereq type="default">eza</packagereq>
+      <packagereq type="default">dust</packagereq>
+      <packagereq type="default">bottom</packagereq>
+      <packagereq type="default">sd</packagereq>
+    </packagelist>
+  </group>
+
+  <!-- Solus Native Rust Tools -->
+  <group>
+    <id>solus-rust-native</id>
+    <name>Solus Native Rust Tools</name>
+    <description>Solus system management tools written in Rust: update-manager, driver-manager, pkg</description>
+    <uservisible>false</uservisible>
+    <packagelist>
+      <packagereq type="mandatory">solus-update-manager</packagereq>
+      <packagereq type="mandatory">solus-driver-manager</packagereq>
+      <packagereq type="default">solus-pkg</packagereq>
     </packagelist>
   </group>
 

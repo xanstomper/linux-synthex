@@ -1,0 +1,41 @@
+name: Build kernel (with Rust support)
+
+on:
+  workflow_dispatch:
+    inputs:
+      kernel_version:
+        description: "Kernel version to build"
+        required: true
+        default: "6.12.8"
+
+jobs:
+  build-kernel:
+    name: Build Solus kernel ${{ github.event.inputs.kernel_version }}
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install Rust for kernel
+        run: |
+          rustup toolchain install stable --component rust-std --target x86_64-unknown-linux-gnu
+          rustup override set stable
+          rustc --version
+
+      - name: Install kernel build deps
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y flex bison libelf-dev libssl-dev dwarves
+          sudo apt-get install -y clang llvm lld
+
+      - name: Build kernel with Rust support
+        run: |
+          bash kernel/build.sh \
+            --version ${{ github.event.inputs.kernel_version }} \
+            --config kernel/configs/solus-x86_64-defconfig \
+            --rust
+
+      - name: Upload kernel RPMs
+        uses: actions/upload-artifact@v4
+        with:
+          name: solus-kernel-rpms
+          path: build/rpmbuild/*.rpm
