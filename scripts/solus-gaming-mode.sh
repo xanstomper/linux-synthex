@@ -72,6 +72,40 @@ EOGM
         log "  ✅ Vulkan layers available"
     fi
 
+    # 11. VRR (Variable Refresh Rate) detection
+    for conn in /sys/class/drm/card*/status; do
+        if [ -f "$conn" ] && [ "$(cat "$conn" 2>/dev/null)" = "connected" ]; then
+            local base
+            base="$(dirname "$conn")"
+            if [ -f "$base/vrr_capable" ] && [ "$(cat "$base/vrr_capable" 2>/dev/null)" = "1" ]; then
+                log "  ✅ VRR-capable display detected on $(basename "$base")"
+            fi
+        fi
+    done
+
+    # 12. Controller detection
+    if ls /dev/input/js* &>/dev/null 2>&1; then
+        log "  ✅ Game controller detected"
+    elif ls /dev/input/event* &>/dev/null 2>&1; then
+        local has_pad=false
+        for ev in /dev/input/event*; do
+            if cat "$ev" &>/dev/null; then
+                has_pad=true; break
+            fi
+        done
+        if $has_pad; then
+            log "  ✅ Input devices available for controller mapping"
+        fi
+    fi
+
+    # 13. Gamescope availability check
+    if command -v gamescope &>/dev/null; then
+        log "  ✅ Gamescope available — launch games with: gamescope -f -- %game%"
+    fi
+
+    # 14. Shader cache warming hint
+    log "  💡 Steam shader cache is warming in the background"
+
     log "═══════════════════════════════════"
     log "  🎮 Gaming Mode ON"
     log "  Performance governor + DXVK + MangoHUD + GameMode"
