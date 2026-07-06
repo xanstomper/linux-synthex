@@ -129,9 +129,22 @@ make check    # validation targets for systemd, JSON, Python, desktop files
 | `solus-pkg` | Package manager with repo awareness (Rust) |
 || `solus-system-daemon` | Performance auto-tuner for VRR, HDR, CPU, TDP (Rust) |
 || `solus-ai-daemon` | Local AI assistant via Ollama, whisper voice commands (Rust) |
-|| `solus-installer-detect` | HW auto-detection for Calamares installs (Rust) |
-|| `solus-blueprint` | Export/import system identity (.zbp) |
-| `solus-ai-hub` | Local AI model management via Ollama |
+||| `solus-installer-detect` | HW auto-detection for Calamares installs (Rust) |
+||| `solus-blueprint` | Export/import system identity (.zbp) |
+
+### COSMIC Desktop (Pop!_OS Rust Port)
+| Component | Package | Role |
+|---|---|---|
+| ![cosmic-comp] | `cosmic-comp` | Wayland compositor — tiling/stacking, GPU-accelerated |
+| ![cosmic-bg] | `cosmic-bg` | Wallpaper and background daemon |
+| ![cosmic-panel] | `cosmic-panel` | Desktop panel with app launcher, workspaces, system tray |
+| ![cosmic-app-library] | `cosmic-app-library` | Searchable application launcher |
+| ![cosmic-randr] | `cosmic-randr` | Display configuration (xrandr replacement) |
+| ![cosmic-osd] | `cosmic-osd` | Volume, brightness, media on-screen display |
+| ![cosmic-notifications] | `cosmic-notifications` | Desktop notification daemon |
+| ![cosmic-epoch] | `cosmic-epoch` | PAM-based greeter/login manager |
+
+`solus-ai-hub`
 | `solus-webapp` | Turn websites into native apps |
 
 ### System Services

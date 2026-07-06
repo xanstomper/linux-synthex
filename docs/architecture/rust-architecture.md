@@ -79,7 +79,22 @@ System management tools written in Rust for Solus:
 | solus-ai-daemon | AI assistant (Rust) | `solus-ai-daemon.spec` |
 | solus-installer-detect | HW auto-detector (Rust) | `solus-installer-detect.spec` |
 
-### Layer 5: CI/CD
+### Layer 5: COSMIC Desktop (Pop!_OS Rust Port)
+
+Port of System76's COSMIC desktop environment — a full Rust-based Wayland desktop using the Iced GUI toolkit.
+
+| **Component** | **Package** | **Purpose** | **Spec** |
+|---|---|---|---|
+| cosmic-comp | Wayland compositor | GPU-accelerated compositor with tiling/stacking | `cosmic-comp.spec` |
+| cosmic-bg | Background daemon | Wallpaper and background management | `cosmic-bg.spec` |
+| cosmic-panel | Desktop panel | Bar with launcher, workspaces, system tray | `cosmic-panel.spec` |
+| cosmic-app-library | App launcher | Searchable application grid | `cosmic-app-library.spec` |
+| cosmic-randr | Display config | xrandr replacement in Rust | `cosmic-randr.spec` |
+| cosmic-osd | On-screen display | Volume, brightness, media OSD | `cosmic-osd.spec` |
+| cosmic-notifications | Notification daemon | Desktop notifications (XDG spec) | `cosmic-notifications.spec` |
+| cosmic-epoch | Login greeter | PAM-based Wayland greeter | `cosmic-epoch.spec` |
+
+### Layer 6: CI/CD
 
 - `.github/workflows/rust-build.yml` — cargo fmt, clippy, build, test, audit
 - `.github/workflows/validate-specs.yml` — rpmlint on all spec files

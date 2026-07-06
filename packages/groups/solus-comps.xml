@@ -243,4 +243,23 @@
       <packagereq type="default">nvidia-vaapi-driver</packagereq>
     </packagelist>
   </group>
+
+  <!-- COSMIC Rust Desktop Environment (Port from Pop!_OS) -->
+  <group>
+    <id>solus-cosmic-desktop</id>
+    <name>Solus COSMIC Desktop</name>
+    <description>Pop!_OS COSMIC desktop environment — Rust-based Wayland desktop with Iced GUI toolkit</description>
+    <uservisible>true</uservisible>
+    <packagelist>
+      <packagereq type="mandatory">cosmic-comp</packagereq>
+      <packagereq type="mandatory">cosmic-bg</packagereq>
+      <packagereq type="mandatory">cosmic-panel</packagereq>
+      <packagereq type="mandatory">cosmic-app-library</packagereq>
+      <packagereq type="default">cosmic-randr</packagereq>
+      <packagereq type="default">cosmic-osd</packagereq>
+      <packagereq type="default">cosmic-notifications</packagereq>
+      <packagereq type="default">cosmic-epoch</packagereq>
+    </packagelist>
+  </group>
+
 </comps>
