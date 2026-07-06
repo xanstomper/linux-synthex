@@ -117,6 +117,7 @@ make check    # validation targets for systemd, JSON, Python, desktop files
 | `solus-update` | Update manager with snapshots (Rust) |
 | `solus-driver-manager` | GPU driver auto-install (Rust) |
 | `solus-pkg` | Package manager with repo awareness (Rust) |
+| `solus-system-daemon` | Performance auto-tuner for VRR, HDR, CPU, TDP (Rust) |
 | `solus-blueprint` | Export/import system identity (.zbp) |
 | `solus-ai-hub` | Local AI model management via Ollama |
 | `solus-webapp` | Turn websites into native apps |

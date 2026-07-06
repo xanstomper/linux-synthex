@@ -1,0 +1,23 @@
+[package]
+name = "solus-system-daemon"
+version = "0.1.0"
+edition = "2024"
+license = "MIT OR Apache-2.0"
+authors = ["Solus Linux Team <dev@solus.org>"]
+description = "Solus system performance auto-tuner — VRR, HDR, CPU governor, TDP, form factor detection"
+
+[[bin]]
+name = "solus-system-daemon"
+path = "src/main.rs"
+
+[dependencies]
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+tokio = { version = "1", features = ["full", "process", "signal"] }
+tracing = "0.1"
+tracing-subscriber = { version = "0.3", features = ["env-filter", "json"] }
+zbus = "5"
+anyhow = "1"
+clap = { version = "4", features = ["derive"] }
+sysinfo = "0.33"
+inotify = "0.11"

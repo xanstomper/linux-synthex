@@ -45,13 +45,15 @@ System management tools written in Rust for Solus:
 | `solus-driver-manager` | GPU detection and driver install | `src/solus-rust-tools/solus-driver-manager/` |
 | `solus-pkg` (`spkg`) | Package manager with Solus repo awareness | `src/solus-rust-tools/solus-pkg/` |
 
-These all share a Cargo workspace at `src/solus-rust-tools/Cargo.toml`.
+| `solus-system-daemon` | Performance auto-tuner (VRR, HDR, CPU, TDP, form factor) | `src/system-daemon/` |
+| `solus-cli` | Unified `solus` CLI (info, hardware, gpu, status) | `src/solus-cli/` |
 
 ### Layer 4: RPM Specs
 
 - **Toolchain:** `packages/spec-files/rust-toolchain.spec` — rustc + cargo + std + src
 - **Rust Utilities:** `packages/spec-files/rust-utils-*.spec` (7 specs)
 - **Native Tools:** `packages/spec-files/solus-update-manager.spec`, `solus-driver-manager.spec`, `solus-pkg.spec`
+- **System Daemon:** `packages/spec-files/solus-system-daemon.spec`
 
 ### Layer 5: CI/CD
 
@@ -88,3 +90,5 @@ rust-toolchain (rustc + cargo + std)
 - **solus-stored** — software center backend (currently C++)
 - **solus-agent** — desktop AI agent daemon
 - **kernel Rust GPU drivers** — as they mature upstream
+- **Calamares installer modules** — auto-detect GPU/filesystem/laptop profile
+- **VRR/HDR auto-detection** — display capability polling daemon

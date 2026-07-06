@@ -1,0 +1,22 @@
+[Unit]
+Description=Solus System Performance Auto-Tuner (Rust)
+Documentation=https://github.com/xanstomper/solus-linux
+After=sysinit.target local-fs.target
+Before=display-manager.service
+
+[Service]
+Type=simple
+ExecStart=/usr/libexec/solus/solus-system-daemon
+Restart=on-failure
+RestartSec=5
+StandardOutput=journal
+StandardError=journal
+TimeoutStopSec=10
+# Runs as root for sysfs access (CPU governor, GPU DPM, TDP)
+User=root
+Nice=0
+CPUAccounting=true
+MemoryAccounting=true
+
+[Install]
+WantedBy=multi-user.target

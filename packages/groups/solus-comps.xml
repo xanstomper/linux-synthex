@@ -36,6 +36,7 @@
       <packagereq type="mandatory">solus-software-center</packagereq>
       <packagereq type="mandatory">solus-recovery</packagereq>
       <packagereq type="mandatory">solus-oobe</packagereq>
+      <packagereq type="mandatory">solus-system-daemon</packagereq>
     </packagelist>
   </group>
 
