@@ -153,12 +153,14 @@
   <group>
     <id>solus-rust-native</id>
     <name>Solus Native Rust Tools</name>
-    <description>Solus system management tools written in Rust: update-manager, driver-manager, pkg</description>
+    <description>Solus system management tools written in Rust: update-manager, driver-manager, pkg, system-daemon, ai-daemon</description>
     <uservisible>false</uservisible>
     <packagelist>
       <packagereq type="mandatory">solus-update-manager</packagereq>
       <packagereq type="mandatory">solus-driver-manager</packagereq>
       <packagereq type="default">solus-pkg</packagereq>
+      <packagereq type="mandatory">solus-system-daemon</packagereq>
+      <packagereq type="default">solus-ai-daemon</packagereq>
     </packagelist>
   </group>
 

@@ -1,0 +1,24 @@
+[package]
+name = "solus-ai-daemon"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+authors.workspace = true
+description = "Solus AI daemon — local LLM integration via Ollama, D-Bus API for system-wide AI access, voice commands via Whisper"
+
+[package.metadata.rpm]
+name = "solus-ai-daemon"
+summary = "Solus AI daemon — Rust-powered local LLM management and system AI API"
+
+[dependencies]
+serde.workspace = true
+serde_json.workspace = true
+tokio.workspace = true
+tracing.workspace = true
+tracing-subscriber.workspace = true
+zbus.workspace = true
+anyhow.workspace = true
+clap.workspace = true
+sysinfo.workspace = true
+reqwest = { version = "0.12", features = ["json", "stream"] }
+futures-util = "0.3"

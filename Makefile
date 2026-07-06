@@ -30,7 +30,7 @@ rust-clean:
 
 # ─── Building (requires Fedora with Qt6/KF6 deps) ─────────────────────
 
-build: rust build-desktopd build-stored build-hwdaemon build-gpu-setupd build-system-daemon build-control-center build-studio
+build: rust build-desktopd build-stored build-hwdaemon build-gpu-setupd build-system-daemon build-ai-daemon build-control-center build-studio
 	@echo "✅ All native components built"
 
 build-desktopd:

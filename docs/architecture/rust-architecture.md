@@ -73,6 +73,10 @@ System management tools written in Rust for Solus:
 | | just | make | `rust-utils-just.spec` |
 - **Native Tools:** `packages/spec-files/solus-update-manager.spec`, `solus-driver-manager.spec`, `solus-pkg.spec`
 - **System Daemon:** `packages/spec-files/solus-system-daemon.spec`
+- **AI Daemon:** `packages/spec-files/solus-ai-daemon.spec`
+| **Tool** | **Type** | **Spec** |
+|----------|----------|----------|
+| solus-ai-daemon | AI assistant (Rust) | `solus-ai-daemon.spec` |
 
 ### Layer 5: CI/CD
 

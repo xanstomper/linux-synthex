@@ -127,8 +127,9 @@ make check    # validation targets for systemd, JSON, Python, desktop files
 | `solus-update` | Update manager with snapshots (Rust) |
 | `solus-driver-manager` | GPU driver auto-install (Rust) |
 | `solus-pkg` | Package manager with repo awareness (Rust) |
-| `solus-system-daemon` | Performance auto-tuner for VRR, HDR, CPU, TDP (Rust) |
-| `solus-blueprint` | Export/import system identity (.zbp) |
+|| `solus-system-daemon` | Performance auto-tuner for VRR, HDR, CPU, TDP (Rust) |
+|| `solus-ai-daemon` | Local AI assistant via Ollama, whisper voice commands (Rust) |
+|| `solus-blueprint` | Export/import system identity (.zbp) |
 | `solus-ai-hub` | Local AI model management via Ollama |
 | `solus-webapp` | Turn websites into native apps |
 
@@ -140,7 +141,7 @@ make check    # validation targets for systemd, JSON, Python, desktop files
 | `solus-gpu-setupd` | GPU driver auto-installer |
 | `solus-stored` | Software center backend |
 | `solus-workspace` | System mode switcher |
-| `solus-recovery` | Boot failure recovery |
+|| `solus-ai` | solus-ai-daemon CLI — chat, start, stop, models, pull, advise |
 
 ## Project Structure
 
