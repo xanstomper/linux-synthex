@@ -125,7 +125,7 @@
   <group>
     <id>solus-rust-tools</id>
     <name>Solus Rust Utility Suite</name>
-    <description>Modern Rust-based replacements for classic Unix tools: ripgrep, fd, bat, eza, dust, bottom, sd</description>
+    <description>Modern Rust-based replacements for classic Unix tools plus new Rust power tools: ripgrep, fd, bat, eza, dust, bottom, sd, helix, nushell, zoxide, atuin</description>
     <uservisible>true</uservisible>
     <packagelist>
       <packagereq type="mandatory">rust-toolchain</packagereq>
@@ -146,6 +146,12 @@
       <packagereq type="default">dua-cli</packagereq>
       <packagereq type="default">gping</packagereq>
       <packagereq type="default">bandwhich</packagereq>
+      <packagereq type="default">helix</packagereq>
+      <packagereq type="default">nushell</packagereq>
+      <packagereq type="default">zoxide</packagereq>
+      <packagereq type="default">atuin</packagereq>
+      <packagereq type="default">tldr</packagereq>
+      <packagereq type="default">ouch</packagereq>
     </packagelist>
   </group>
 
@@ -248,7 +254,7 @@
   <group>
     <id>solus-cosmic-desktop</id>
     <name>Solus COSMIC Desktop</name>
-    <description>Pop!_OS COSMIC desktop environment — Rust-based Wayland desktop with Iced GUI toolkit</description>
+    <description>Pop!_OS COSMIC desktop environment — full Rust Wayland desktop with Iced GUI toolkit: compositor, panel, app library, settings, terminal, files, and more</description>
     <uservisible>true</uservisible>
     <packagelist>
       <packagereq type="mandatory">cosmic-comp</packagereq>
@@ -259,6 +265,14 @@
       <packagereq type="default">cosmic-osd</packagereq>
       <packagereq type="default">cosmic-notifications</packagereq>
       <packagereq type="default">cosmic-epoch</packagereq>
+      <packagereq type="default">cosmic-settings</packagereq>
+      <packagereq type="default">cosmic-term</packagereq>
+      <packagereq type="default">cosmic-files</packagereq>
+      <packagereq type="default">cosmic-text-editor</packagereq>
+      <packagereq type="default">cosmic-workspaces</packagereq>
+      <packagereq type="default">xdg-desktop-portal-cosmic</packagereq>
+      <packagereq type="default">cosmic-applets</packagereq>
+      <packagereq type="default">cosmic-screenshot</packagereq>
     </packagelist>
   </group>
 

@@ -71,6 +71,12 @@ System management tools written in Rust for Solus:
 | | dua-cli | du (interactive) | `rust-utils-dua-cli.spec` |
 | | gping | ping (graphical) | `rust-utils-gping.spec` |
 | | just | make | `rust-utils-just.spec` |
+| | helix | modal text editor | `rust-utils-helix.spec` |
+| | nushell (nu) | modern shell | `rust-utils-nushell.spec` |
+| | zoxide | smarter cd | `rust-utils-zoxide.spec` |
+| | atuin | shell history sync | `rust-utils-atuin.spec` |
+| | tealdeer | tldr client | `rust-utils-tealdeer.spec` |
+| | ouch | compression CLI | `rust-utils-ouch.spec` |
 - **Native Tools:** `packages/spec-files/solus-update-manager.spec`, `solus-driver-manager.spec`, `solus-pkg.spec`
 - **System Daemon:** `packages/spec-files/solus-system-daemon.spec`
 - **AI Daemon:** `packages/spec-files/solus-ai-daemon.spec`
@@ -93,6 +99,14 @@ Port of System76's COSMIC desktop environment — a full Rust-based Wayland desk
 | cosmic-osd | On-screen display | Volume, brightness, media OSD | `cosmic-osd.spec` |
 | cosmic-notifications | Notification daemon | Desktop notifications (XDG spec) | `cosmic-notifications.spec` |
 | cosmic-epoch | Login greeter | PAM-based Wayland greeter | `cosmic-epoch.spec` |
+| cosmic-settings | Settings app | Full graphical settings with 12+ categories | `cosmic-settings.spec` |
+| cosmic-term | Terminal emulator | GPU-accelerated terminal with split panes, tabs | `cosmic-term.spec` |
+| cosmic-files | File manager | Dual-pane file browser with preview, search | `cosmic-files.spec` |
+| cosmic-text-editor | Text editor | Modern GUI editor with syntax highlighting | `cosmic-text-editor.spec` |
+| cosmic-workspaces | Workspace manager | Virtual desktop overview with exposé | `cosmic-workspaces.spec` |
+| xdg-desktop-portal-cosmic | Portal backend | Flatpak/Snap file chooser, screen share, print | `xdg-desktop-portal-cosmic.spec` |
+| cosmic-applets | Desktop applets | System monitor, clock, network, power, weather | `cosmic-applets.spec` |
+| cosmic-screenshot | Screenshot tool | Screenshot + screen recording with annotations | `cosmic-screenshot.spec` |
 
 ### Layer 6: CI/CD
 

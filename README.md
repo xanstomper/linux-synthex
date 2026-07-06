@@ -125,24 +125,59 @@ make check    # validation targets for systemd, JSON, Python, desktop files
 | `solus-proton` | Proton version manager |
 | `solus-firewall` | Firewall profile switcher |
 | `solus-update` | Update manager with snapshots (Rust) |
-| `solus-driver-manager` | GPU driver auto-install (Rust) |
-| `solus-pkg` | Package manager with repo awareness (Rust) |
-|| `solus-system-daemon` | Performance auto-tuner for VRR, HDR, CPU, TDP (Rust) |
-|| `solus-ai-daemon` | Local AI assistant via Ollama, whisper voice commands (Rust) |
+|| `solus-driver-manager` | GPU driver auto-install (Rust) |
+|| `solus-pkg` | Package manager with repo awareness (Rust) |
+||| `solus-system-daemon` | Performance auto-tuner for VRR, HDR, CPU, TDP (Rust) |
+||| `solus-ai-daemon` | Local AI assistant via Ollama, whisper voice commands (Rust) |
 ||| `solus-installer-detect` | HW auto-detection for Calamares installs (Rust) |
 ||| `solus-blueprint` | Export/import system identity (.zbp) |
 
 ### COSMIC Desktop (Pop!_OS Rust Port)
 | Component | Package | Role |
 |---|---|---|
-| ![cosmic-comp] | `cosmic-comp` | Wayland compositor — tiling/stacking, GPU-accelerated |
-| ![cosmic-bg] | `cosmic-bg` | Wallpaper and background daemon |
-| ![cosmic-panel] | `cosmic-panel` | Desktop panel with app launcher, workspaces, system tray |
-| ![cosmic-app-library] | `cosmic-app-library` | Searchable application launcher |
-| ![cosmic-randr] | `cosmic-randr` | Display configuration (xrandr replacement) |
-| ![cosmic-osd] | `cosmic-osd` | Volume, brightness, media on-screen display |
-| ![cosmic-notifications] | `cosmic-notifications` | Desktop notification daemon |
-| ![cosmic-epoch] | `cosmic-epoch` | PAM-based greeter/login manager |
+| | `cosmic-comp` | Wayland compositor — tiling/stacking, GPU-accelerated |
+| | `cosmic-bg` | Wallpaper and background daemon |
+| | `cosmic-panel` | Desktop panel with app launcher, workspaces, system tray |
+| | `cosmic-app-library` | Searchable application launcher |
+| | `cosmic-randr` | Display configuration (xrandr replacement) |
+| | `cosmic-osd` | Volume, brightness, media on-screen display |
+| | `cosmic-notifications` | Desktop notification daemon |
+| | `cosmic-epoch` | PAM-based greeter/login manager |
+| | `cosmic-settings` | Full graphical settings (12+ categories) |
+| | `cosmic-term` | GPU-accelerated terminal with split panes |
+| | `cosmic-files` | Dual-pane file manager |
+| | `cosmic-text-editor` | Modern text editor with syntax highlighting |
+| | `cosmic-workspaces` | Virtual desktop workspace overview |
+| | `cosmic-applets` | Desktop applets (monitor, clock, network) |
+| | `cosmic-screenshot` | Screenshot + recording + annotations |
+| | `xdg-desktop-portal-cosmic` | Portal backend for Flatpak/Snap |
+
+### Rust CLI Utilities (Ported from Fedora, Arch)
+| Tool | Replaces | Spec |
+|---|---|---|
+| `ripgrep (rg)` | grep | `rust-utils-ripgrep.spec` |
+| `fd-find (fd)` | find | `rust-utils-fd.spec` |
+| `bat` | cat | `rust-utils-bat.spec` |
+| `eza` | ls | `rust-utils-eza.spec` |
+| `dust` | du | `rust-utils-dust.spec` |
+| `bottom (btm)` | htop | `rust-utils-bottom.spec` |
+| `sd` | sed | `rust-utils-sd.spec` |
+| `starship` | shell prompt | `rust-utils-starship.spec` |
+| `zellij` | tmux | `rust-utils-zellij.spec` |
+| `git-delta` | diff | `rust-utils-delta.spec` |
+| `procs` | ps | `rust-utils-procs.spec` |
+| `hyperfine` | time (benchmark) | `rust-utils-hyperfine.spec` |
+| `dog` | dig (DNS) | `rust-utils-dog.spec` |
+| `dua-cli` | ncdu | `rust-utils-dua-cli.spec` |
+| `gping` | ping | `rust-utils-gping.spec` |
+| `bandwhich` | nethogs | `rust-utils-bandwhich.spec` |
+| `just` | make | `rust-utils-just.spec` |
+| `helix` | vim/nano (editor) | `rust-utils-helix.spec` |
+| `nushell (nu)` | bash | `rust-utils-nushell.spec` |
+| `zoxide` | cd | `rust-utils-zoxide.spec` |
+| `atuin` | history | `rust-utils-atuin.spec` |
+| `tealdeer` | man (tldr) | `rust-utils-tealdeer.spec` |
+| `ouch` | tar/gzip/zip | `rust-utils-ouch.spec` |
 
 `solus-ai-hub`
 | `solus-webapp` | Turn websites into native apps |
