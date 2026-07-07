@@ -6,7 +6,7 @@ After=multi-user.target
 [Service]
 Type=forking
 ExecStart=/usr/bin/synthex-power-profiles daemon
-ExecStop=/bin/kill $(cat /run/synthex-power-profiles.pid)
+ExecStop=/bin/kill -s TERM $MAINPID
 PIDFile=/run/synthex-power-profiles.pid
 RemainAfterExit=yes
 

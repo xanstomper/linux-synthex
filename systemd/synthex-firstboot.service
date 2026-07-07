@@ -11,12 +11,12 @@ ExecStart=/usr/libexec/synthex/firstboot.sh
 RemainAfterExit=yes
 StandardOutput=journal+console
 
-# Security hardening — needs broad access for first-time setup
-ProtectSystem=full
+# First boot needs full write access (user creation, package install, system config)
 PrivateTmp=yes
 NoNewPrivileges=yes
 SystemCallArchitectures=native
-ProtectKernelTunables=yes
-ProtectControlGroups=yes
 MemoryMax=512M
 CPUQuota=50%
+
+[Install]
+WantedBy=multi-user.target

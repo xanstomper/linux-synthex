@@ -16,4 +16,7 @@ SystemCallArchitectures=native
 ProtectKernelTunables=yes
 ProtectControlGroups=yes
 MemoryMax=128M
+[Install]
+WantedBy=graphical-session.target
+
 CPUQuota=30%

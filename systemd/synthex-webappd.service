@@ -11,9 +11,8 @@ RestartSec=5
 StandardOutput=journal
 StandardError=journal
 
-# Security hardening — needs network + write for web app .desktop creation
+# Security hardening — needs network + home write access for web app .desktop creation
 ProtectSystem=full
-ProtectHome=read-only
 PrivateTmp=yes
 NoNewPrivileges=yes
 SystemCallArchitectures=native
@@ -21,3 +20,6 @@ ProtectKernelTunables=yes
 ProtectControlGroups=yes
 MemoryMax=128M
 CPUQuota=30%
+
+[Install]
+WantedBy=multi-user.target

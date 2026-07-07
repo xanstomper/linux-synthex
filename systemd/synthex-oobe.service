@@ -20,3 +20,6 @@ ProtectKernelTunables=yes
 ProtectControlGroups=yes
 MemoryMax=256M
 CPUQuota=50%
+
+[Install]
+WantedBy=graphical-session.target

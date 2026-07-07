@@ -101,9 +101,10 @@ EOGM
     if ls /dev/input/js* &>/dev/null 2>&1; then
         log "  ✅ Game controller detected"
     elif ls /dev/input/event* &>/dev/null 2>&1; then
-        local has_pad=false
+        has_pad=false
         for ev in /dev/input/event*; do
-            if cat "$ev" &>/dev/null; then
+            # Use timeout to avoid hang on blocking read
+            if timeout 1 cat "$ev" 2>/dev/null 1>&2; then
                 has_pad=true; break
             fi
         done

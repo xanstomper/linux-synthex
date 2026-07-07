@@ -14,6 +14,16 @@
 
 set -euo pipefail
 
+# ── Locally-defined notify_user for mode scripts (standalone execution) ─
+notify_user() {
+    local title="$1"
+    local message="$2"
+    if command -v notify-send &>/dev/null; then
+        notify-send -i preferences-system "Synthex Workspace" "${title}: ${message}" 2>/dev/null || true
+    fi
+    echo "[${title}] ${message}"
+}
+
 # Guard: some operations need root
 if [[ $EUID -ne 0 ]]; then
     echo "Some gaming mode operations need root. Re-run with: sudo synthex-workspace set gaming"
@@ -47,9 +57,11 @@ fi
 notify_user "Gaming Mode" "Suspending desktop compositor..."
 if command -v qdbus &>/dev/null; then
     qdbus org.kde.KWin /Compositor suspend 2>/dev/null || true
-elif command -v killall &>/dev/null; then
-    # Fallback: kill and restart later
-    killall plasmashell 2>/dev/null || true
+elif command -v qdbus6 &>/dev/null; then
+    qdbus6 org.kde.KWin /Compositor suspend 2>/dev/null || true
+else
+    # Fallback notification — warn instead of forcibly killing
+    notify_user "Gaming Mode" "Could not suspend compositor — install qdbus or qdbus6"
 fi
 
 # --- Stop Non-Essential Services --------------------------------------------

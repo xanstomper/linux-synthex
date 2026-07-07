@@ -3,7 +3,7 @@ Description=Synthex AI Daemon — Rust-powered Ollama manager + D-Bus AI API
 Documentation=https://github.com/xanstomper/synthex-linux
 After=network.target network-online.target
 Wants=network-online.target
-ConditionFileNotEmpty=|/usr/bin/ollama
+ConditionPathExists=/usr/bin/ollama
 
 [Service]
 Type=simple

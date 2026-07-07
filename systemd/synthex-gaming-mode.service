@@ -6,11 +6,12 @@ After=graphical.target
 Type=oneshot
 ExecStart=/usr/libexec/synthex/synthex-gaming-mode on
 RemainAfterExit=yes
-ProtectSystem=full
+# Gaming mode needs root for CPU governor, GPU performance, sysctl writes
 PrivateTmp=yes
 NoNewPrivileges=yes
 SystemCallArchitectures=native
-ProtectKernelTunables=yes
-ProtectControlGroups=yes
 MemoryMax=64M
 CPUQuota=20%
+
+[Install]
+WantedBy=graphical.target
