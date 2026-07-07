@@ -8,5 +8,13 @@ ExecStart=/usr/bin/synthex-kernel list
 RemainAfterExit=yes
 StandardOutput=journal
 
+# Security hardening
+ProtectSystem=full
+PrivateTmp=yes
+NoNewPrivileges=yes
+SystemCallArchitectures=native
+ProtectKernelTunables=yes
+ProtectControlGroups=yes
+
 [Install]
 WantedBy=multi-user.target

@@ -4,9 +4,12 @@
  */
 
 /* ─── Accent color ──────────────────────────────────────────────────── */
-@define-color solus_accent #e94560;
-@define-color solus_accent_hover #ff5470;
-@define-color solus_accent_active #c91e3e;
+@define-color synthex_accent #FFB300;
+@define-color synthex_accent_hover #ffc333;
+@define-color synthex_accent_active #e6a200;
+@define-color solus_accent #FFB300;
+@define-color solus_accent_hover #ffc333;
+@define-color solus_accent_active #e6a200;
 @define-color solus_bg #1a1a2e;
 @define-color solus_bg_alt #16213e;
 @define-color solus_surface #0f3460;

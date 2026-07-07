@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Synthex Agent Daemon — org.solus.Agent DBus service.
+"""Synthex Agent Daemon — org.synthex.Agent DBus service.
 Powers: taskbar assistant, codex IDE, knowledge base, agentic framework.
 No HTTP. No localhost. No browser.
 """
@@ -19,9 +19,9 @@ CONFIG_FILE = CONFIG_DIR / "config.json"
 MEMORY_FILE = DATA_DIR / "memory.json"
 KB_INDEX = DATA_DIR / "knowledge.index"
 
-BUS_NAME = "org.solus.Agent"
+BUS_NAME = "org.synthex.Agent"
 OBJ_PATH = "/org/synthex/Agent"
-IFACE = "org.solus.Agent"
+IFACE = "org.synthex.Agent"
 
 DEFAULT_CONFIG = {
     "model": {"provider": "ollama", "model": "llama3.2:3b", "temperature": 0.7, "max_tokens": 4096},

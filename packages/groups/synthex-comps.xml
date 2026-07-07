@@ -222,6 +222,41 @@
       </group>
 
       <!-- ═══════════════════════════════════════════════════════════════
+           synthex-safety — System protection and rollback
+           ═══════════════════════════════════════════════════════════════ -->
+      <group>
+        <id>synthex-safety</id>
+        <name>Synthex Safety</name>
+        <description>System protection, snapshots, and rollback safety net</description>
+        <default>true</default>
+        <packagelist>
+          <packagereq type="mandatory">synthex-safety-check</packagereq>
+          <packagereq type="mandatory">snapper</packagereq>
+          <packagereq type="mandatory">btrfs-progs</packagereq>
+          <packagereq type="default">timeshift</packagereq>
+        </packagelist>
+      </group>
+
+      <!-- ═══════════════════════════════════════════════════════════════
+           synthex-essentials — Flatpak, VPN, scanner, disk health
+           ═══════════════════════════════════════════════════════════════ -->
+      <group>
+        <id>synthex-essentials</id>
+        <name>Synthex Essentials</name>
+        <description>Flatpak ecosystem, VPN, scanning, and disk health</description>
+        <default>true</default>
+        <packagelist>
+          <packagereq type="mandatory">synthex-essentials</packagereq>
+          <packagereq type="default">flatpak</packagereq>
+          <packagereq type="default">flatseal</packagereq>
+          <packagereq type="default">wireguard-tools</packagereq>
+          <packagereq type="default">openvpn</packagereq>
+          <packagereq type="default">simple-scan</packagereq>
+          <packagereq type="default">smartmontools</packagereq>
+        </packagelist>
+      </group>
+
+      <!-- ═══════════════════════════════════════════════════════════════
            synthex-creator — Content creation
            ═══════════════════════════════════════════════════════════════ -->
       <group>

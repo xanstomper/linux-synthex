@@ -9,5 +9,13 @@ ExecStart=/usr/bin/synthex-service --json health
 ExecStop=/usr/bin/synthex-service --json summary
 RemainAfterExit=yes
 
+# Security hardening
+ProtectSystem=full
+PrivateTmp=yes
+NoNewPrivileges=yes
+SystemCallArchitectures=native
+ProtectKernelTunables=yes
+ProtectControlGroups=yes
+
 [Install]
 WantedBy=synthex.target
