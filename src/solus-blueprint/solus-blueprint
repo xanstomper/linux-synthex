@@ -1,7 +1,0 @@
-#!/usr/bin/env python3
-"""solus-blueprint — Export/Import System Identity entry point."""
-import os, sys
-HERE = os.path.dirname(os.path.abspath(__file__))
-sys.path.insert(0, HERE)
-from blueprint import main
-sys.exit(main())

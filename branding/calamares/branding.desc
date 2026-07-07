@@ -1,25 +1,26 @@
-# ─── Solus Linux Calamares Branding Descriptor ────────────────────────
+# ─── Synthex Calamares Branding Descriptor ────────────────────────
 # This file defines the visual identity of the installer.
-# Location: /usr/share/calamares/branding/solus/branding.desc
+# Location: /usr/share/calamares/branding/synthex/branding.desc
 ---
-componentName: solus
+componentName: synthex
 
 strings:
-  productName: "Solus Linux"
-  shortProductName: "Solus"
+  productName: "Synthex"
+  shortProductName: "Synthex"
   version: "2026.1"
   shortVersion: "2026.1"
-  versionedName: "Solus Linux 2026.1"
-  shortVersionedName: "Solus 2026.1"
-  bootloaderEntryName: "Solus Linux"
-  productUrl: "https://getsol.us"
-  supportUrl: "https://discuss.getsol.us"
-  bugUrl: "https://dev.getsol.us"
+  versionedName: "Synthex 2026.1"
+  shortVersionedName: "Synthex 2026.1"
+  bootloaderEntryName: "Synthex"
+  productUrl: "https://getsynthex.org"
+  supportUrl: "https://discuss.getsynthex.org"
+  bugUrl: "https://dev.getsynthex.org"
+  releaseNotesUrl: "https://getsynthex.org/releases"
 
 images:
-  productLogo: "solus-logo.png"
-  productIcon: "solus-icon.png"
-  productWelcome: "solus-welcome.png"
+  productLogo: "synthex-logo.png"
+  productIcon: "synthex-icon.png"
+  productWelcome: "synthex-welcome.png"
 
 slideshow: "show.qml"
 slideshowAPI: 2
@@ -27,11 +28,11 @@ slideshowAPI: 2
 style:
   SidebarBackground: "#1a1a2e"
   SidebarText: "#ffffff"
-  SidebarTextCurrent: "#e94560"
+  SidebarTextCurrent: "#33ccff"
   SidebarBackgroundCurrent: "#16213e"
 
 colors:
   sidebarBackground: "#1a1a2e"
   sidebarText: "#ffffff"
-  sidebarTextSelect: "#e94560"
+  sidebarTextSelect: "#33ccff"
   sidebarBackgroundSelect: "#16213e"

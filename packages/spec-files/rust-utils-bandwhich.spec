@@ -1,4 +1,4 @@
-# Solus Linux RPM Spec — bandwhich
+# SynthOS RPM Spec — bandwhich
 # Terminal bandwidth utilization monitor written in Rust
 # Origin: Fedora, Arch Linux
 %global bandwhich_version 0.40.0
@@ -48,6 +48,6 @@ mkdir -p %{buildroot}%{_datadir}/bash-completion/completions
 %{_bindir}/bandwhich
 
 %changelog
-* Mon Jul 07 2026 Solus Rust Team <rust@solus-project.org> - 0.40.0-1
-- Initial Solus package
+* Mon Jul 07 2026 Synthex Rust Team <rust@synthex-project.org> - 0.40.0-1
+- Initial Synthex package
 - Network bandwidth monitor in Rust

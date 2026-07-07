@@ -1,0 +1,13 @@
+[package]
+name = "synthbox"
+version = "0.1.0"
+edition = "2021"
+description = "SynthBox - Sandboxed Application Runner"
+
+[dependencies]
+anyhow = { workspace = true }
+clap = { workspace = true, features = ["derive"] }
+serde = { workspace = true, features = ["derive"] }
+serde_json = { workspace = true }
+tracing = { workspace = true }
+chrono = { workspace = true }

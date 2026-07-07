@@ -1,15 +1,15 @@
-# Solus Linux Gaming Platform Architecture
+# SynthOS Gaming Platform Architecture
 
 ## Gaming Vision and Philosophy
 
-Solus Gaming Platform aims to deliver a **zero-friction, high-performance gaming experience** on Linux by integrating the entire gaming software stack — from the kernel to the compositor to the launcher — into a cohesive, well-tested ecosystem.
+Synthex Gaming Platform aims to deliver a **zero-friction, high-performance gaming experience** on Linux by integrating the entire gaming software stack — from the kernel to the compositor to the launcher — into a cohesive, well-tested ecosystem.
 
 ### Core Tenets
 
 1. **Performance First** — Every component is tuned for minimal overhead, low latency, and maximum frame throughput. No bloat, no unnecessary abstraction layers.
 2. **Out-of-the-Box** — Install the gaming meta-package, reboot, and play. Automatic GPU detection, driver installation, and Proton configuration.
 3. **Freedom to Choose** — AMD (open-source), NVIDIA (open-source Nouveau or proprietary), and Intel are all first-class citizens. The platform detects your hardware and picks the optimal stack.
-4. **Upstream Collaboration** — Patches and improvements flow back to Mesa, Wine, Proton, Gamescope, and the Linux kernel. Solus doesn't fork; it integrates.
+4. **Upstream Collaboration** — Patches and improvements flow back to Mesa, Wine, Proton, Gamescope, and the Linux kernel. Synthex doesn't fork; it integrates.
 5. **User Sovereignty** — Every optimization can be disabled. Per-game profiles let you override global settings. The Gaming Control Center puts all knobs in one GUI.
 
 ---
@@ -50,7 +50,7 @@ Solus Gaming Platform aims to deliver a **zero-friction, high-performance gaming
 | Wayland | `nvidia-drm` modesetting + EGLDevice | Requires `nvidia-drm.modeset=1` |
 | GSP firmware | Included in driver package | Supports firmware-loaded GSP on Turing+ |
 
-**Driver Switcher:** The `solus-gpu-drivers` package ships a `gpu-driver-manager` that can switch between Nouveau and proprietary at boot via kernel cmdline + initramfs rebuild.
+**Driver Switcher:** The `synthex-gpu-drivers` package ships a `gpu-driver-manager` that can switch between Nouveau and proprietary at boot via kernel cmdline + initramfs rebuild.
 
 ### Intel — Open-Source Native
 
@@ -69,7 +69,7 @@ Solus Gaming Platform aims to deliver a **zero-friction, high-performance gaming
 
 ### Mesa 3D (24.x+)
 
-The core of the graphics stack on Solus. Built with:
+The core of the graphics stack on Synthex. Built with:
 
 ```
 -Dgallium-drivers=radeonsi,r600,nouveau,iris,zink,virgl,panfrost
@@ -91,7 +91,7 @@ The core of the graphics stack on Solus. Built with:
 
 ### VKD3D-Proton
 
-DirectX 12 → Vulkan translation. Solus ships `vkd3d-proton` built from the Proton fork:
+DirectX 12 → Vulkan translation. Synthex ships `vkd3d-proton` built from the Proton fork:
 
 - Feature level 12_1+ support
 - DXR (Raytracing) 1.0/1.1 via Vulkan ray tracing extensions
@@ -113,7 +113,7 @@ DirectX 9/10/11 → Vulkan translation:
 
 ## Proton Architecture
 
-Solus ships **Proton GE** (GloriousEggroll's Proton builds) as the default, alongside upstream Valve Proton.
+Synthex ships **Proton GE** (GloriousEggroll's Proton builds) as the default, alongside upstream Valve Proton.
 
 ### Proton GE vs Upstream Proton
 
@@ -151,7 +151,7 @@ Build outputs:
 
 ## Wine Integration
 
-Solus Gaming provides Wine 9.x+ with the following patchsets:
+Synthex Gaming provides Wine 9.x+ with the following patchsets:
 
 - **Staging patches** — Full Wine-Staging
 - **Wayland driver** — Native Wayland support (no XWayland needed)
@@ -184,8 +184,8 @@ Solus Gaming provides Wine 9.x+ with the following patchsets:
 
 ### Native Steam Client
 
-- Steam installed via Solus repository (`steam` package) or Flatpak
-- Runtime: `steam-runtime` (Valve's container) or Solus-native runtime
+- Steam installed via Synthex repository (`steam` package) or Flatpak
+- Runtime: `steam-runtime` (Valve's container) or Synthex-native runtime
 - Steam Play enabled by default
 - Proton GE auto-detected in `compatibilitytools.d/`
 
@@ -220,7 +220,7 @@ A launch wrapper that optionally:
 
 **Gamescope** is the micro-compositor from Valve that wraps games in their own sandboxed display environment.
 
-### Features Enabled in Solus
+### Features Enabled in Synthex
 
 - **NIS/FSR upscaling** — Built-in AMD FidelityFX Super Resolution 1.0 + NVIDIA Image Scaling
 - **HDR support** — HDR → SDR conversion, real HDR output on HDR displays (Wayland)
@@ -335,12 +335,12 @@ pin_cores=auto           # Auto-pin to physical cores
 
 ## Shader Cache Management
 
-Solus includes a **Shader Cache Manager** daemon that:
+Synthex includes a **Shader Cache Manager** daemon that:
 
 1. **Pre-warms caches** — Background download of known shader caches for popular games
 2. **Monitors new game launches** — Watches `~/.cache/mesa_shader_cache_db/` and `~/.steam/root/steamapps/shadercache/`
 3. **Compresses idle caches** — Periodically compresses shader caches with zstd for space savings
-4. **Synchronizes DXVK caches** — Downloads community DXVK state caches from `github.com/SolusOS/dxvk-caches`
+4. **Synchronizes DXVK caches** — Downloads community DXVK state caches from `github.com/SynthexOS/dxvk-caches`
 5. **Auto-purges stale caches** — Removes caches for uninstalled games after 30 days
 
 ### Key Environment Variables
@@ -363,8 +363,8 @@ export RADV_DEBUG=nocache               # Disable when debugging shader issues
 Implemented via the Linux `futex` syscall with `FUTEX_WAIT_BITSET`/`FUTEX_WAKE_BITSET`.
 
 ```
-Kernel requirement: CONFIG_FUTEX=y (default on all Solus kernels)
-Enabled in Wine/Proton: WINEFSYNC=1 (default on Solus)
+Kernel requirement: CONFIG_FUTEX=y (default on all Synthex kernels)
+Enabled in Wine/Proton: WINEFSYNC=1 (default on Synthex)
 ```
 
 ### Futex2
@@ -376,7 +376,7 @@ Next-generation futex interface enabling:
 - Lower overhead for heavily contested locks (games with many threads)
 
 ```
-Kernel requirement: CONFIG_FUTEX2=y (enabled in Solus kernel ≥6.6)
+Kernel requirement: CONFIG_FUTEX2=y (enabled in Synthex kernel ≥6.6)
 Enabled in Wine/Proton: WINEFSYNC_FUTEX2=1
 ```
 
@@ -384,11 +384,11 @@ Enabled in Wine/Proton: WINEFSYNC_FUTEX2=1
 
 ## HDR Support (Wayland)
 
-Solus Gaming delivers **end-to-end HDR** via:
+Synthex Gaming delivers **end-to-end HDR** via:
 
 ### Display Server
 
-- **Wayland compositor:** Solus Budgie/KDE/GNOME with Wayland session
+- **Wayland compositor:** Synthex Budgie/KDE/GNOME with Wayland session
 - **Color management protocol:** `wp-color-management-v1` (merged in wayland-protocols)
 - **HDR output:** Enabled via `wlr-gamma-control-unstable-v1` or `kde-hdr-metadata` protocol
 
@@ -438,7 +438,7 @@ gamescope --adaptive-sync
 
 ## Latency Reduction Pipeline
 
-Solus Gaming implements a complete latency reduction chain:
+Synthex Gaming implements a complete latency reduction chain:
 
 ```
 Game Engine → Wine/Proton → Vulkan/OpenGL → Kernel → Hardware
@@ -500,7 +500,7 @@ Game Engine → Wine/Proton → Vulkan/OpenGL → Kernel → Hardware
 
 ### udev Rules
 
-Solus includes `60-game-controllers.rules` with correct permissions (`MODE="0660"`, `GROUP="games"`) and default polling rates (1000 Hz for all supported controllers).
+Synthex includes `60-game-controllers.rules` with correct permissions (`MODE="0660"`, `GROUP="games"`) and default polling rates (1000 Hz for all supported controllers).
 
 ---
 
@@ -535,7 +535,7 @@ Profiles can be extended by the user (per-game overrides).
 Each game can have a profile stored in:
 
 ```
-~/.config/solus-gaming-center/games/<game-id>.conf
+~/.config/synthex-gaming-center/games/<game-id>.conf
 ```
 
 ### Profile Contents
@@ -590,7 +590,7 @@ See the full specification in `gaming-control-center-spec.md`.
 High-level summary:
 
 - **Language:** Rust + GTK4 (libadwaita)
-- **Backend:** D-Bus systemd service (`solus-gaming-daemon`)
+- **Backend:** D-Bus systemd service (`synthex-gaming-daemon`)
 - **Features:**
   - Performance profile switcher (tray icon + UI)
   - Game library scan (Steam, Lutris, Heroic, custom)
@@ -610,11 +610,11 @@ High-level summary:
 ## Package Layout Summary
 
 ```
-solus-gaming-platform        # Meta-package (depends on all below)
-├── solus-gpu-drivers        # GPU detection, driver installation, switcher
-├── solus-gaming-control-center  # GUI application
-├── solus-gaming-tools       # CLI tools (gamemode, mangohud, etc.)
-└── solus-steam-optimizer    # Steam scripts and service files
+synthex-gaming-platform        # Meta-package (depends on all below)
+├── synthex-gpu-drivers        # GPU detection, driver installation, switcher
+├── synthex-gaming-control-center  # GUI application
+├── synthex-gaming-tools       # CLI tools (gamemode, mangohud, etc.)
+└── synthex-steam-optimizer    # Steam scripts and service files
 ```
 
 See the RPM spec files in `packages/spec-files/` for complete dependency trees.

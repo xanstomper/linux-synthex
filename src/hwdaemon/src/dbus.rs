@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: MIT OR Apache-2.0
-// D-Bus service for solus-hwdaemon — exposes hardware info via org.solus.Hardware
+// D-Bus service for synthex-hwdaemon — exposes hardware info via org.synthex.Hardware
 
 use anyhow::Result;
 use tracing::info;
@@ -8,12 +8,12 @@ use zbus::interface;
 
 struct HardwareInterface;
 
-#[interface(name = "org.solus.Hardware")]
+#[interface(name = "org.synthex.Hardware")]
 impl HardwareInterface {
     /// Returns the cached hardware profile as JSON
     #[zbus(property, name = "HardwareJson")]
     async fn hardware_json(&self) -> String {
-        std::fs::read_to_string("/run/solus/hardware.json").unwrap_or_default()
+        std::fs::read_to_string("/run/synthex/hardware.json").unwrap_or_default()
     }
 
     /// Returns the number of CPU threads
@@ -42,7 +42,7 @@ impl HardwareInterface {
         match crate::HardwareProfile::detect() {
             Ok(profile) => {
                 if let Ok(json) = serde_json::to_string_pretty(&profile) {
-                    let _ = std::fs::write("/run/solus/hardware.json", &json);
+                    let _ = std::fs::write("/run/synthex/hardware.json", &json);
                 }
                 "ok".to_string()
             }
@@ -64,12 +64,12 @@ fn proc_info() -> crate::MemoryInfo {
 
 pub async fn run_service() -> Result<()> {
     let _connection = Builder::session()?
-        .name("org.solus.Hardware")?
-        .serve_at("/org/solus/Hardware", HardwareInterface)?
+        .name("org.synthex.Hardware")?
+        .serve_at("/org/synthex/Hardware", HardwareInterface)?
         .build()
         .await?;
 
-    info!("solus-hwdaemon D-Bus service running on org.solus.Hardware");
+    info!("synthex-hwdaemon D-Bus service running on org.synthex.Hardware");
 
     // Block forever
     std::future::pending::<()>().await;

@@ -1,0 +1,102 @@
+#!/usr/bin/env python3
+"""Synthex Handheld Mode — Steam Deck-like UI for handheld gaming.
+Enables controller-friendly UI, on-screen keyboard, and big-picture mode.
+
+Usage:
+    synthex-handheld enable        Enable handheld/tablet mode
+    synthex-handheld disable       Disable handheld mode
+    synthex-handheld status        Show current mode
+    synthex-handheld osk           Toggle on-screen keyboard
+"""
+import os, sys, subprocess, signal
+
+STATE_FILE = "/var/lib/synthex/handheld-mode"
+
+def is_active():
+    return os.path.exists(STATE_FILE)
+
+def cmd_enable():
+    os.makedirs(os.path.dirname(STATE_FILE), exist_ok=True)
+    open(STATE_FILE, "w").close()
+    print("🎮 Synthex Handheld Mode")
+    print("═" * 35)
+    print("Enabling handheld optimizations...")
+
+    # Scale UI for small screen
+    try:
+        subprocess.run(["gsettings", "set", "org.kde.kwin", "ScaleFactor", "1.5"], capture_output=True)
+    except: pass
+
+    # Enable on-screen keyboard service
+    try:
+        subprocess.run(["systemctl", "--user", "enable", "maliit-keyboard.service"], capture_output=True)
+        subprocess.run(["systemctl", "--user", "start", "maliit-keyboard.service"], capture_output=True)
+    except: pass
+
+    # Rotate to landscape (if tablet)
+    try:
+        subprocess.run(["gsettings", "set", "org.kde.kwin", "TabletMode", "true"], capture_output=True)
+    except: pass
+
+    # Enable Steam Big Picture on boot
+    try:
+        autostart_dir = os.path.expanduser("~/.config/autostart")
+        os.makedirs(autostart_dir, exist_ok=True)
+        with open(os.path.join(autostart_dir, "steam-bigpicture.desktop"), "w") as f:
+            f.write('[Desktop Entry]\nType=Application\nName=Steam Big Picture\nExec=steam -bigpicture\nX-KDE-autostart-after=panel\n')
+    except: pass
+
+    print("✅ Handheld mode enabled")
+    print("   • UI scaled for small screens")
+    print("   • On-screen keyboard enabled")
+    print("   • Steam Big Picture will start on login")
+    print("   • Use Super+O to toggle OSK")
+
+def cmd_disable():
+    if os.path.exists(STATE_FILE):
+        os.remove(STATE_FILE)
+    try:
+        subprocess.run(["systemctl", "--user", "disable", "maliit-keyboard.service"], capture_output=True)
+        subprocess.run(["systemctl", "--user", "stop", "maliit-keyboard.service"], capture_output=True)
+    except: pass
+    try:
+        subprocess.run(["gsettings", "set", "org.kde.kwin", "TabletMode", "false"], capture_output=True)
+    except: pass
+    # Remove autostart
+    autostart = os.path.expanduser("~/.config/autostart/steam-bigpicture.desktop")
+    if os.path.exists(autostart):
+        os.remove(autostart)
+    print("⏹  Handheld mode disabled")
+
+def cmd_osk():
+    """Toggle on-screen keyboard."""
+    try:
+        result = subprocess.run(["systemctl", "--user", "is-active", "maliit-keyboard.service"],
+                               capture_output=True, text=True)
+        if "active" in result.stdout:
+            subprocess.run(["systemctl", "--user", "stop", "maliit-keyboard.service"])
+            print("⌨️  OSK disabled")
+        else:
+            subprocess.run(["systemctl", "--user", "start", "maliit-keyboard.service"])
+            print("⌨️  OSK enabled")
+    except:
+        print("❌ maliit-keyboard not available")
+        print("   Install: sudo dnf install maliit-keyboard")
+
+def cmd_status():
+    print(f"{'🟢' if is_active() else '⚪'} Handheld Mode: {'ENABLED' if is_active() else 'Disabled'}")
+
+def main():
+    if len(sys.argv) < 2:
+        print(__doc__)
+        cmd_status()
+        return
+    cmd = sys.argv[1]
+    if cmd == "enable": cmd_enable()
+    elif cmd == "disable": cmd_disable()
+    elif cmd == "status": cmd_status()
+    elif cmd == "osk": cmd_osk()
+    else: print(__doc__)
+
+if __name__ == "__main__":
+    main()

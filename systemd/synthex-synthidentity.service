@@ -1,0 +1,18 @@
+[Unit]
+Description=SynthIdentity Credential Manager
+After=local-fs.target
+
+[Service]
+Type=oneshot
+ExecStart=/usr/bin/synthidentity lock
+RemainAfterExit=no
+
+ProtectSystem=strict
+PrivateTmp=yes
+ReadWritePaths=/var/lib/synthidentity /etc/synthidentity /var/log/synthidentity
+CapabilityBoundingSet=
+SystemCallArchitectures=native
+NoNewPrivileges=yes
+
+[Install]
+WantedBy=multi-user.target

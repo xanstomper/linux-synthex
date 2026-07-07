@@ -1,0 +1,10 @@
+[Desktop Entry]
+Type=Application
+Name=Synthex Codex
+Comment=Built-in AI Agent IDE — Code editor with Synthex Agent integration
+Exec=synthex-agent --codex
+Icon=synthex-agent
+Terminal=false
+Categories=Development;AI;IDE;
+StartupNotify=true
+X-KDE-StartupNotify=true

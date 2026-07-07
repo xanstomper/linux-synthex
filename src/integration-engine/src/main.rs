@@ -1,10 +1,10 @@
 // SPDX-License-Identifier: MIT OR Apache-2.0
 //
-// solus-integration-engine — Upstream monitoring and integration for Solus Linux
+// synthex-integration-engine — Upstream monitoring and integration for SynthOS
 //
 // Monitors upstream Linux projects (Arch, Fedora, Nobara, Bazzite, CachyOS,
 // KDE, Mesa, Kernel, Proton-GE, Wine-GE, PipeWire), classifies changes,
-// and feeds approved candidates into the Solus testing pipeline.
+// and feeds approved candidates into the Synthex testing pipeline.
 //
 // Does NOT automatically merge. All changes require review + testing.
 
@@ -17,8 +17,8 @@ use std::path::PathBuf;
 use tracing::{error, info};
 
 #[derive(Parser)]
-#[command(name = "solus-integration-engine", version = "0.1.0",
-          about = "Solus Linux upstream integration and monitoring engine")]
+#[command(name = "synthex-integration-engine", version = "0.1.0",
+          about = "SynthOS upstream integration and monitoring engine")]
 struct Cli {
     #[command(subcommand)]
     command: Commands,
@@ -147,7 +147,7 @@ struct Candidate {
     title: String,
     description: String,
     upstream_version: String,
-    current_solus_version: Option<String>,
+    current_synthex_version: Option<String>,
     changelog_url: Option<String>,
     commit_hash: Option<String>,
     detected_at: DateTime<Utc>,
@@ -155,7 +155,7 @@ struct Candidate {
     compatibility_score: Option<u8>,
     risk_level: Option<String>,
     affected_packages: Vec<String>,
-    solus_patches_needed: Vec<String>,
+    synthex_patches_needed: Vec<String>,
     notes: String,
 }
 
@@ -205,7 +205,7 @@ impl EngineState {
     }
     fn state_path() -> PathBuf {
         dirs::state_dir().unwrap_or_else(|| PathBuf::from("/var/lib"))
-            .join("solus").join("integration-engine").join("state.json")
+            .join("synthex").join("integration-engine").join("state.json")
     }
     fn update_stats(&mut self) {
         self.stats.total_found = self.candidates.len() as u64;
@@ -221,7 +221,7 @@ impl EngineState {
 async fn scan_proton_ge(client: &reqwest::Client) -> Vec<Candidate> {
     let mut out = vec![];
     let url = "https://api.github.com/repos/GloriousEggroll/proton-ge-custom/releases/latest";
-    if let Ok(r) = client.get(url).header("User-Agent", "solus-ie/0.1").send().await {
+    if let Ok(r) = client.get(url).header("User-Agent", "synthex-ie/0.1").send().await {
         if r.status().is_success() {
             if let Ok(rel) = r.json::<serde_json::Value>().await {
                 let tag = rel["tag_name"].as_str().unwrap_or("unknown");
@@ -231,13 +231,13 @@ async fn scan_proton_ge(client: &reqwest::Client) -> Vec<Candidate> {
                     category: ChangeCategory::Gaming, priority: Priority::Recommended,
                     title: format!("Proton-GE update: {tag}"),
                     description: body.chars().take(500).collect(),
-                    upstream_version: tag.into(), current_solus_version: None,
+                    upstream_version: tag.into(), current_synthex_version: None,
                     changelog_url: rel["html_url"].as_str().map(String::from),
                     commit_hash: None, detected_at: Utc::now(),
                     status: CandidateStatus::PendingReview,
                     compatibility_score: Some(90), risk_level: Some("low".into()),
                     affected_packages: vec!["proton-ge-custom".into()],
-                    solus_patches_needed: vec![],
+                    synthex_patches_needed: vec![],
                     notes: "Latest Proton-GE release".into(),
                 });
             }
@@ -249,7 +249,7 @@ async fn scan_proton_ge(client: &reqwest::Client) -> Vec<Candidate> {
 async fn scan_kernel(client: &reqwest::Client) -> Vec<Candidate> {
     let mut out = vec![];
     let url = "https://www.kernel.org/releases.json";
-    if let Ok(r) = client.get(url).header("User-Agent", "solus-ie/0.1").send().await {
+    if let Ok(r) = client.get(url).header("User-Agent", "synthex-ie/0.1").send().await {
         if r.status().is_success() {
             if let Ok(releases) = r.json::<serde_json::Value>().await {
                 if let Some(entries) = releases["releases"].as_array() {
@@ -263,12 +263,12 @@ async fn scan_kernel(client: &reqwest::Client) -> Vec<Candidate> {
                             category: ChangeCategory::Security, priority: pri,
                             title: format!("Linux kernel {ver} available"),
                             description: format!("Kernel {ver} ({})", if stable { "stable" } else if lt { "longterm" } else { "mainline" }),
-                            upstream_version: ver.into(), current_solus_version: None,
+                            upstream_version: ver.into(), current_synthex_version: None,
                             changelog_url: None, commit_hash: None, detected_at: Utc::now(),
                             status: CandidateStatus::PendingReview,
                             compatibility_score: Some(75), risk_level: Some("medium".into()),
                             affected_packages: vec!["kernel-core".into(), "kernel-zen".into()],
-                            solus_patches_needed: vec!["Reapply BORE/EEVDF patches".into(), "Validate NVIDIA compat".into()],
+                            synthex_patches_needed: vec!["Reapply BORE/EEVDF patches".into(), "Validate NVIDIA compat".into()],
                             notes: "Kernel update — requires full validation".into(),
                         });
                     }
@@ -282,7 +282,7 @@ async fn scan_kernel(client: &reqwest::Client) -> Vec<Candidate> {
 async fn scan_mesa(client: &reqwest::Client) -> Vec<Candidate> {
     let mut out = vec![];
     let url = "https://gitlab.freedesktop.org/api/v4/projects/1293864/repository/tags?per_page=3";
-    if let Ok(r) = client.get(url).header("User-Agent", "solus-ie/0.1").send().await {
+    if let Ok(r) = client.get(url).header("User-Agent", "synthex-ie/0.1").send().await {
         if r.status().is_success() {
             if let Ok(tags) = r.json::<serde_json::Value>().await {
                 if let Some(arr) = tags.as_array() {
@@ -293,13 +293,13 @@ async fn scan_mesa(client: &reqwest::Client) -> Vec<Candidate> {
                             category: ChangeCategory::Hardware, priority: Priority::Recommended,
                             title: format!("Mesa update: {name}"),
                             description: format!("Mesa GPU driver stack update: {name}"),
-                            upstream_version: name.into(), current_solus_version: None,
+                            upstream_version: name.into(), current_synthex_version: None,
                             changelog_url: Some(format!("https://gitlab.freedesktop.org/mesa/mesa/-/tags/{name}")),
                             commit_hash: None, detected_at: Utc::now(),
                             status: CandidateStatus::PendingReview,
                             compatibility_score: Some(80), risk_level: Some("low".into()),
                             affected_packages: vec!["mesa".into(), "mesa-vulkan-drivers".into()],
-                            solus_patches_needed: vec![],
+                            synthex_patches_needed: vec![],
                             notes: "GPU driver stack update".into(),
                         });
                     }
@@ -313,7 +313,7 @@ async fn scan_mesa(client: &reqwest::Client) -> Vec<Candidate> {
 async fn scan_bazzite(client: &reqwest::Client) -> Vec<Candidate> {
     let mut out = vec![];
     let url = "https://api.github.com/repos/ublue-os/bazzite/releases/latest";
-    if let Ok(r) = client.get(url).header("User-Agent", "solus-ie/0.1").send().await {
+    if let Ok(r) = client.get(url).header("User-Agent", "synthex-ie/0.1").send().await {
         if r.status().is_success() {
             if let Ok(rel) = r.json::<serde_json::Value>().await {
                 let tag = rel["tag_name"].as_str().unwrap_or("unknown");
@@ -323,13 +323,13 @@ async fn scan_bazzite(client: &reqwest::Client) -> Vec<Candidate> {
                     category: ChangeCategory::Gaming, priority: Priority::Recommended,
                     title: format!("Bazzite release: {tag}"),
                     description: body.chars().take(500).collect(),
-                    upstream_version: tag.into(), current_solus_version: None,
+                    upstream_version: tag.into(), current_synthex_version: None,
                     changelog_url: rel["html_url"].as_str().map(String::from),
                     commit_hash: None, detected_at: Utc::now(),
                     status: CandidateStatus::PendingReview,
                     compatibility_score: Some(65), risk_level: Some("medium".into()),
                     affected_packages: vec!["gamescope".into()],
-                    solus_patches_needed: vec!["Review Gamescope patches".into()],
+                    synthex_patches_needed: vec!["Review Gamescope patches".into()],
                     notes: "Bazzite gaming improvements".into(),
                 });
             }
@@ -341,7 +341,7 @@ async fn scan_bazzite(client: &reqwest::Client) -> Vec<Candidate> {
 async fn scan_nobara(client: &reqwest::Client) -> Vec<Candidate> {
     let mut out = vec![];
     let url = "https://api.github.com/repos/nicor-dev/nobara-meta/commits?per_page=3";
-    if let Ok(r) = client.get(url).header("User-Agent", "solus-ie/0.1").send().await {
+    if let Ok(r) = client.get(url).header("User-Agent", "synthex-ie/0.1").send().await {
         if r.status().is_success() {
             if let Ok(commits) = r.json::<serde_json::Value>().await {
                 if let Some(arr) = commits.as_array() {
@@ -353,13 +353,13 @@ async fn scan_nobara(client: &reqwest::Client) -> Vec<Candidate> {
                             category: ChangeCategory::Gaming, priority: Priority::Recommended,
                             title: format!("Nobara: {}", msg.chars().take(80).collect::<String>()),
                             description: msg.into(), upstream_version: sha[..8].into(),
-                            current_solus_version: None,
+                            current_synthex_version: None,
                             changelog_url: commit["html_url"].as_str().map(String::from),
                             commit_hash: Some(sha.into()), detected_at: Utc::now(),
                             status: CandidateStatus::PendingReview,
                             compatibility_score: Some(75), risk_level: Some("medium".into()),
                             affected_packages: vec![],
-                            solus_patches_needed: vec!["Review Nobara gaming patches".into()],
+                            synthex_patches_needed: vec!["Review Nobara gaming patches".into()],
                             notes: "Check Nobara-specific gaming patches".into(),
                         });
                     }
@@ -373,7 +373,7 @@ async fn scan_nobara(client: &reqwest::Client) -> Vec<Candidate> {
 async fn scan_cachyos(client: &reqwest::Client) -> Vec<Candidate> {
     let mut out = vec![];
     let url = "https://api.github.com/repos/CachyOS/linux-cachyos/commits?per_page=3";
-    if let Ok(r) = client.get(url).header("User-Agent", "solus-ie/0.1").send().await {
+    if let Ok(r) = client.get(url).header("User-Agent", "synthex-ie/0.1").send().await {
         if r.status().is_success() {
             if let Ok(commits) = r.json::<serde_json::Value>().await {
                 if let Some(arr) = commits.as_array() {
@@ -385,13 +385,13 @@ async fn scan_cachyos(client: &reqwest::Client) -> Vec<Candidate> {
                             category: ChangeCategory::Performance, priority: Priority::Recommended,
                             title: format!("CachyOS: {}", msg.chars().take(80).collect::<String>()),
                             description: msg.into(), upstream_version: sha[..8].into(),
-                            current_solus_version: None,
+                            current_synthex_version: None,
                             changelog_url: commit["html_url"].as_str().map(String::from),
                             commit_hash: Some(sha.into()), detected_at: Utc::now(),
                             status: CandidateStatus::PendingReview,
                             compatibility_score: Some(70), risk_level: Some("medium".into()),
                             affected_packages: vec!["kernel-zen".into()],
-                            solus_patches_needed: vec!["Review BORE scheduler patches".into()],
+                            synthex_patches_needed: vec!["Review BORE scheduler patches".into()],
                             notes: "Performance kernel patches".into(),
                         });
                     }
@@ -405,7 +405,7 @@ async fn scan_cachyos(client: &reqwest::Client) -> Vec<Candidate> {
 async fn scan_arch(client: &reqwest::Client) -> Vec<Candidate> {
     let mut out = vec![];
     let url = "https://archlinux.org/packages/?q=&repo=Core&arch=x86_64&sort=pkg_last_update";
-    if let Ok(r) = client.get(url).header("User-Agent", "solus-ie/0.1").send().await {
+    if let Ok(r) = client.get(url).header("User-Agent", "synthex-ie/0.1").send().await {
         if r.status().is_success() {
             let body = r.text().await.unwrap_or_default();
             if body.contains("2026") {
@@ -413,14 +413,14 @@ async fn scan_arch(client: &reqwest::Client) -> Vec<Candidate> {
                     id: "arch-core-updates".into(), source: UpstreamSource::Arch,
                     category: ChangeCategory::Packaging, priority: Priority::Recommended,
                     title: "Arch Linux core repository updates available".into(),
-                    description: "Arch core packages updated. Review for Solus-relevant improvements.".into(),
-                    upstream_version: "latest".into(), current_solus_version: None,
+                    description: "Arch core packages updated. Review for Synthex-relevant improvements.".into(),
+                    upstream_version: "latest".into(), current_synthex_version: None,
                     changelog_url: Some("https://archlinux.org/packages/".into()),
                     commit_hash: None, detected_at: Utc::now(),
                     status: CandidateStatus::PendingReview,
                     compatibility_score: Some(80), risk_level: Some("low".into()),
                     affected_packages: vec![],
-                    solus_patches_needed: vec!["Review for relevant package updates".into()],
+                    synthex_patches_needed: vec!["Review for relevant package updates".into()],
                     notes: "Arch core repo monitoring".into(),
                 });
             }
@@ -432,7 +432,7 @@ async fn scan_arch(client: &reqwest::Client) -> Vec<Candidate> {
 async fn scan_wine_ge(client: &reqwest::Client) -> Vec<Candidate> {
     let mut out = vec![];
     let url = "https://api.github.com/repos/GloriousEggroll/Wine-GE/releases/latest";
-    if let Ok(r) = client.get(url).header("User-Agent", "solus-ie/0.1").send().await {
+    if let Ok(r) = client.get(url).header("User-Agent", "synthex-ie/0.1").send().await {
         if r.status().is_success() {
             if let Ok(rel) = r.json::<serde_json::Value>().await {
                 let tag = rel["tag_name"].as_str().unwrap_or("unknown");
@@ -442,13 +442,13 @@ async fn scan_wine_ge(client: &reqwest::Client) -> Vec<Candidate> {
                     category: ChangeCategory::Gaming, priority: Priority::Recommended,
                     title: format!("Wine-GE update: {tag}"),
                     description: body.chars().take(500).collect(),
-                    upstream_version: tag.into(), current_solus_version: None,
+                    upstream_version: tag.into(), current_synthex_version: None,
                     changelog_url: rel["html_url"].as_str().map(String::from),
                     commit_hash: None, detected_at: Utc::now(),
                     status: CandidateStatus::PendingReview,
                     compatibility_score: Some(85), risk_level: Some("low".into()),
                     affected_packages: vec!["wine-ge".into()],
-                    solus_patches_needed: vec![],
+                    synthex_patches_needed: vec![],
                     notes: "Wine-GE compatibility update".into(),
                 });
             }
@@ -462,7 +462,7 @@ async fn scan_wine_ge(client: &reqwest::Client) -> Vec<Candidate> {
 fn print_status(state: &EngineState) {
     println!();
     println!("{}", "\u{2550}".repeat(60));
-    println!("  Solus Integration Engine \u{2014} Status");
+    println!("  Synthex Integration Engine \u{2014} Status");
     println!("{}", "\u{2560}".repeat(60));
     println!("  Last Scan:     {}", state.last_scan.map(|d| d.format("%Y-%m-%d %H:%M UTC").to_string()).unwrap_or_else(|| "never".into()));
     println!("  Total:         {} candidates", state.stats.total_found);
@@ -491,7 +491,7 @@ fn print_status(state: &EngineState) {
 async fn main() -> Result<()> {
     tracing_subscriber::fmt()
         .with_env_filter(tracing_subscriber::EnvFilter::try_from_default_env()
-            .unwrap_or_else(|_| "solus_integration_engine=info".into()))
+            .unwrap_or_else(|_| "synthex_integration_engine=info".into()))
         .with_target(false).compact().init();
 
     let cli = Cli::parse();
@@ -605,9 +605,9 @@ async fn main() -> Result<()> {
                     if !c.affected_packages.is_empty() {
                         println!("\n  Packages: {}", c.affected_packages.join(", "));
                     }
-                    if !c.solus_patches_needed.is_empty() {
+                    if !c.synthex_patches_needed.is_empty() {
                         println!("\n  Patches needed:");
-                        for p in &c.solus_patches_needed { println!("    \u{26a0} {p}"); }
+                        for p in &c.synthex_patches_needed { println!("    \u{26a0} {p}"); }
                     }
                 }
                 None => error!("Not found: {id}"),
@@ -637,7 +637,7 @@ async fn main() -> Result<()> {
         }
 
         Commands::Config => {
-            println!("Solus Integration Engine Configuration\n");
+            println!("Synthex Integration Engine Configuration\n");
             for s in UpstreamSource::all() {
                 println!("  {} — {}", s, s.tracking_url());
             }

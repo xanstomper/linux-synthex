@@ -1,4 +1,4 @@
-# Solus Linux RPM Spec — fd-find (fd)
+# SynthOS RPM Spec — fd-find (fd)
 # Faster than find, written in Rust, sensible defaults
 # Origin: https://github.com/sharkdp/fd
 
@@ -31,7 +31,7 @@ Key features:
 - Unicode-aware
 - Regular expression and glob-based patterns
 
-Part of the Solus Rust utility suite.
+Part of the Synthex Rust utility suite.
 
 %prep
 %setup -q -n fd-%{version}
@@ -62,7 +62,7 @@ mkdir -p %{buildroot}%{_datadir}/fish/vendor_completions.d
 %doc README.md LICENSE-APACHE
 
 %changelog
-* Sun Jul 06 2026 Solus Rust Team <rust@solus-project.org> - 10.2.0-1
-- Initial Solus package of fd-find 10.2.0
+* Sun Jul 06 2026 Synthex Rust Team <rust@synthex-project.org> - 10.2.0-1
+- Initial Synthex package of fd-find 10.2.0
 - find replacement — fast, colorized, .gitignore-aware
 - Shell completions: bash, zsh, fish

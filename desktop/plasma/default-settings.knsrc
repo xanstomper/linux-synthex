@@ -8,21 +8,21 @@ animationsEnabled=true
 desktopToolTips=1
 
 [KDE Look and Feel]
-Package=org.solus.desktop
+Package=org.synthex.desktop
 Theme=Breeze
 
 [KDE Global Theme]
-Theme=org.solus.desktop
+Theme=org.synthex.desktop
 
 [Icons]
-Theme=Solus-Tela-circle
+Theme=Synthex-Tela-circle
 
 [Plasma Theme]
-theme=Solus-Fluent-Material
+theme=Synthex-Fluent-Material
 
 [Color Scheme]
-ColorScheme=SolusFluent
-Theme=SolusFluent
+ColorScheme=SynthexFluent
+Theme=SynthexFluent
 shading=41
 
 [Fonts]
@@ -33,7 +33,7 @@ hinting=slight
 excludeRegular=Inter,10,-1,5,50,0,0,0,0,0
 
 [Cursor]
-Theme=Solus-Cursor
+Theme=Synthex-Cursor
 Size=24
 
 [ScreenScaleFactors]
@@ -98,7 +98,7 @@ DoNotDisturb=false
 
 [Wallpaper]
 plugin=image
-DefaultWallpaper=/usr/share/wallpapers/solus-default.jpg
+DefaultWallpaper=/usr/share/wallpapers/synthex-default.jpg
 FillMode=2
 
 [Task Manager]

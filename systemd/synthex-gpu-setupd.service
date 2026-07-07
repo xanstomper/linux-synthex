@@ -1,0 +1,23 @@
+[Unit]
+Description=Synthex GPU Driver Setup Daemon (Rust)
+Documentation=https://github.com/xanstomper/synthex-linux
+After=multi-user.target
+
+[Service]
+Type=simple
+ExecStart=/usr/libexec/synthex/synthex-gpu-setupd
+Restart=on-failure
+RestartSec=5
+StandardOutput=journal
+StandardError=journal
+TimeoutStopSec=30
+MemoryMax=128M
+NoNewPrivileges=yes
+PrivateTmp=yes
+ProtectSystem=strict
+SystemCallArchitectures=native
+ProtectKernelTunables=yes
+ProtectControlGroups=yes
+
+[Install]
+WantedBy=multi-user.target

@@ -1,19 +1,19 @@
 // SPDX-License-Identifier: MIT OR Apache-2.0
 //
-// solus-ai-daemon — Rust-powered AI integration for Solus Linux
+// synthex-ai-daemon — Rust-powered AI integration for SynthOS
 //
 // Manages Ollama as a subprocess, provides D-Bus API for system-wide AI
 // access, integrates whisper for voice commands, and offers a CLI interface.
 //
 // Architecture:
-//   ┌────────────────┐     D-Bus (org.solus.AI)
-//   │  solus-ai-dae  │◄────► Chat, Query, Troubleshoot, Voice
-//   │  mon (Rust)    │◄────► CLI (solus ai ...)
+//   ┌────────────────┐     D-Bus (org.synthex.AI)
+//   │  synthex-ai-dae  │◄────► Chat, Query, Troubleshoot, Voice
+//   │  mon (Rust)    │◄────► CLI (synthex ai ...)
 //   ├────────────────┤
 //   │  Ollama Mgmt   │────► start/stop/health check
 //   │  HTTP Client   │◄────► Ollama REST API (127.0.0.1:11434)
 //   │  Whisper Pipe  │────► voice → text via subprocess
-//   │  State Reader  │────► reads /run/solus/system-daemon/state.json
+//   │  State Reader  │────► reads /run/synthex/system-daemon/state.json
 //   └────────────────┘
 
 use anyhow::Result;
@@ -30,13 +30,13 @@ use zbus::interface;
 
 const OLLAMA_HOST: &str = "http://127.0.0.1:11434";
 const OLLAMA_BIN: &str = "/usr/bin/ollama";
-const SYSTEM_STATE_PATH: &str = "/run/solus/system-daemon/state.json";
-const SOLUS_STATE_DIR: &str = "/run/solus/ai-daemon";
+const SYSTEM_STATE_PATH: &str = "/run/synthex/system-daemon/state.json";
+const SYNTHEX_STATE_DIR: &str = "/run/synthex/ai-daemon";
 
 // ─── CLI ──────────────────────────────────────────────────────────────
 
 #[derive(Parser)]
-#[command(name = "solus", about = "Solus AI Daemon CLI")]
+#[command(name = "synthex", about = "Synthex AI Daemon CLI")]
 struct Cli {
     #[command(subcommand)]
     command: AiCommand,
@@ -113,7 +113,7 @@ struct AiDaemon {
     client: reqwest::Client,
 }
 
-#[interface(name = "org.solus.AI")]
+#[interface(name = "org.synthex.AI")]
 impl AiDaemon {
     /// Chat with a local LLM
     async fn chat(&self, prompt: String, model: String) -> zbus::fdo::Result<String> {
@@ -419,7 +419,7 @@ impl AiDaemon {
 
     /// Generate hardware-aware system advisory using AI
     async fn generate_advisory(&self) -> Result<SystemAdvisory> {
-        // Read system state from solus-system-daemon
+        // Read system state from synthex-system-daemon
         let sys_state = tokio::fs::read_to_string(SYSTEM_STATE_PATH).await
             .unwrap_or_else(|_| "{}".to_string());
         let state: serde_json::Value = serde_json::from_str(&sys_state)
@@ -433,7 +433,7 @@ impl AiDaemon {
         let hostname = sysinfo::System::host_name().unwrap_or_default();
 
         let prompt = format!(
-            "You are Solus AI, the intelligent assistant for Solus Linux. \
+            "You are Synthex AI, the intelligent assistant for SynthOS. \
              Analyze this system and provide brief optimization advice.\n\n\
              HOST: {hostname}\n\
              CPU cores: {cpu_count}\n\
@@ -489,7 +489,7 @@ impl AiDaemon {
                     } else {
                         "Limited RAM — Q4 quantized models recommended (7B max)".to_string()
                     },
-                    gpu_advice: "Enable GPU acceleration via Solus AI Hub for faster inference".to_string(),
+                    gpu_advice: "Enable GPU acceleration via Synthex AI Hub for faster inference".to_string(),
                     gaming_advice: "Enable gaming mode for compositor suspend + performance governor".to_string(),
                     ai_model_recommendation: if ram_gb >= 32 {
                         "DeepSeek R1 14B or Llama 3.1 8B recommended (Q5_K_M)".to_string()
@@ -548,7 +548,7 @@ fn extract_section(text: &str, section: &str) -> String {
 
 fn print_header(bus_name: &str) {
     println!("╔══════════════════════════════════════════════╗");
-    println!("║        Solus AI Daemon v0.1.0               ║");
+    println!("║        Synthex AI Daemon v0.1.0               ║");
     println!("╠══════════════════════════════════════════════╣");
     println!("║  D-Bus: {:29} ║", bus_name);
     println!("║  Ollama: {:28} ║", OLLAMA_HOST);
@@ -560,16 +560,16 @@ async fn run_daemon() -> Result<()> {
     tracing_subscriber::fmt()
         .with_env_filter(
             tracing_subscriber::EnvFilter::try_from_default_env()
-                .unwrap_or_else(|_| "solus_ai_daemon=info".into()),
+                .unwrap_or_else(|_| "synthex_ai_daemon=info".into()),
         )
         .with_target(false)
         .compact()
         .init();
 
-    info!("Solus AI Daemon starting");
+    info!("Synthex AI Daemon starting");
 
     // Ensure state directory exists
-    tokio::fs::create_dir_all(SOLUS_STATE_DIR).await?;
+    tokio::fs::create_dir_all(SYNTHEX_STATE_DIR).await?;
 
     let daemon = AiDaemon::new();
 
@@ -586,16 +586,16 @@ async fn run_daemon() -> Result<()> {
         Err(e) => warn!("Ollama not ready: {e}"),
     }
 
-    print_header("org.solus.AI");
+    print_header("org.synthex.AI");
 
     // Export D-Bus interface
     let _connection = zbus::connection::Builder::system()?
-        .name("org.solus.AI")?
-        .serve_at("/org/solus/AI", daemon)?
+        .name("org.synthex.AI")?
+        .serve_at("/org/synthex/AI", daemon)?
         .build()
         .await?;
 
-    info!("D-Bus API available at org.solus.AI");
+    info!("D-Bus API available at org.synthex.AI");
 
     // Block until Ctrl+C
     tokio::signal::ctrl_c().await?;
@@ -639,7 +639,7 @@ async fn run_status() -> Result<()> {
     if health == "healthy" {
         let models = daemon.list_models_inner().await?;
         if models.is_empty() {
-            println!("  No models installed. Pull one: solus-ai pull llama3.2:3b");
+            println!("  No models installed. Pull one: synthex-ai pull llama3.2:3b");
         } else {
             println!("  Installed models:");
             for m in &models {
@@ -688,12 +688,12 @@ async fn main() -> Result<()> {
         AiCommand::Models => {
             let daemon = AiDaemon::new();
             if !daemon.ollama_health().await.is_ok_and(|s| s == "healthy") {
-                println!("Ollama is not running. Start with: solus-ai start");
+                println!("Ollama is not running. Start with: synthex-ai start");
                 return Ok(());
             }
             let models = daemon.list_models_inner().await?;
             if models.is_empty() {
-                println!("No models installed. Pull one: solus-ai pull llama3.2:3b");
+                println!("No models installed. Pull one: synthex-ai pull llama3.2:3b");
             } else {
                 for m in &models {
                     println!("  📦 {} ({})", m.name, m.size);

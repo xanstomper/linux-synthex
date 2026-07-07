@@ -1,8 +1,8 @@
-# Solus Security Guide
+# Synthex Security Guide
 
 > **Audience:** Security-conscious users, system administrators  
 > **Last updated:** July 2026  
-> **Solus version:** 4.6 "Fortitude"
+> **Synthex version:** 4.6 "Fortitude"
 
 ---
 
@@ -29,7 +29,7 @@
 
 ### 1.1 Core Principles
 
-Solus follows a **defense-in-depth** security philosophy:
+Synthex follows a **defense-in-depth** security philosophy:
 
 ```
 ┌────────────────────────────────────────────────────────────────┐
@@ -74,12 +74,12 @@ Solus follows a **defense-in-depth** security philosophy:
 | **Seccomp in systemd** | Systemd services run with filtered syscalls |
 | **No sudo password persistence** | Every sudo call requires authentication |
 
-### 1.3 What Solus Does NOT Do
+### 1.3 What Synthex Does NOT Do
 
-- Solus does **not** include an antivirus (not needed on Linux with proper configuration)
-- Solus does **not** include a VPN (user choice)
-- Solus does **not** restrict user freedoms (you can disable SELinux if needed)
-- Solus does **not** phone home with telemetry (privacy-respecting)
+- Synthex does **not** include an antivirus (not needed on Linux with proper configuration)
+- Synthex does **not** include a VPN (user choice)
+- Synthex does **not** restrict user freedoms (you can disable SELinux if needed)
+- Synthex does **not** phone home with telemetry (privacy-respecting)
 
 ---
 
@@ -251,7 +251,7 @@ SELinux (Security-Enhanced Linux) implements **Mandatory Access Control (MAC)**,
 > **MAC:** System-wide policy defines what every process can do, regardless of the user running it.
 > **DAC (Traditional):** Users control their own files. Root can do anything.
 
-### 4.2 SELinux on Solus
+### 4.2 SELinux on Synthex
 
 ```bash
 # Current status
@@ -268,7 +268,7 @@ sestatus
 # Max kernel policy version:      33
 ```
 
-**Solus runs SELinux in `targeted` mode:**
+**Synthex runs SELinux in `targeted` mode:**
 - Most processes run under their own confined domains
 - User processes run under unconfined domains (limited restrictions for usability)
 - Network-facing services are strictly confined
@@ -411,7 +411,7 @@ Always try these before disabling:
 
 ### 5.1 firewalld Overview
 
-Solus uses **firewalld** with **nftables** as its backend:
+Synthex uses **firewalld** with **nftables** as its backend:
 
 ```
 ┌────────────────────────────────────────────────────────────────┐
@@ -555,7 +555,7 @@ sudo ufw enable
 
 ### 6.1 Full Disk Encryption (LUKS2)
 
-Solus uses **LUKS2** (Linux Unified Key Setup version 2) for full-disk encryption:
+Synthex uses **LUKS2** (Linux Unified Key Setup version 2) for full-disk encryption:
 
 ```bash
 # Current LUKS status
@@ -752,8 +752,8 @@ sudo sbsign --key MOK.key --cert MOK.pem \
 
 # Sign EFI binary
 sudo sbsign --key MOK.key --cert MOK.pem \
-  --output /boot/efi/EFI/solus/grubx64.efi.signed \
-  /boot/efi/EFI/solus/grubx64.efi
+  --output /boot/efi/EFI/synthex/grubx64.efi.signed \
+  /boot/efi/EFI/synthex/grubx64.efi
 
 # Enroll the key
 sudo mokutil --import MOK.pem
@@ -797,15 +797,15 @@ sudo mokutil --import MOK.pem
 | **Flexibility** | More granular control | Simpler, less flexible |
 | **Learning curve** | Steep | Moderate |
 | **Performance** | Slightly higher overhead | Minimal overhead |
-| **Default on Solus** | ✅ Yes | ❌ Not installed |
+| **Default on Synthex** | ✅ Yes | ❌ Not installed |
 
-### 8.2 Why Solus Uses SELinux
+### 8.2 Why Synthex Uses SELinux
 
-Solus chose SELinux over AppArmor for several reasons:
+Synthex chose SELinux over AppArmor for several reasons:
 
 1. **Granularity** — SELinux can distinguish between "Apache reading /var/www" and "Apache reading /etc/shadow" at the kernel level
 2. **Fine-grained network control** — SELinux can control which ports a process can bind to
-3. **Standardization** — SELinux is the standard for Red Hat/Fedora ecosystem (Solus is RPM-based)
+3. **Standardization** — SELinux is the standard for Red Hat/Fedora ecosystem (Synthex is RPM-based)
 4. **Multi-level security** — MLS/MCS support for compartmentalized environments
 5. **Established tooling** — audit2allow, semanage, sealert are mature
 
@@ -815,7 +815,7 @@ Solus chose SELinux over AppArmor for several reasons:
 - Systems with limited administration overhead
 - Ubuntu/Debian-based environments (AppArmor is standard there)
 
-### 8.4 Using AppArmor on Solus (Optional)
+### 8.4 Using AppArmor on Synthex (Optional)
 
 ```bash
 # Install AppArmor alongside SELinux
@@ -837,7 +837,7 @@ sudo aa-status
 
 ### 9.1 Sandboxing Options
 
-| Method | Technology | Isolation Level | Available on Solus |
+| Method | Technology | Isolation Level | Available on Synthex |
 |--------|-----------|----------------|-------------------|
 | **Flatpak** | bubblewrap + seccomp + namespaces | Strong, user-friendly | ✅ Default |
 | **Firejail** | Namespaces + seccomp | Strong, manual config | ✅ `dnf5 install firejail` |
@@ -1102,7 +1102,7 @@ sudo chmod u-s /usr/bin/umount
 minlen = 12
 minclass = 4
 maxrepeat = 3
-badwords = solus linux password
+badwords = synthex linux password
 
 # Account lockout after failed attempts
 # /etc/pam.d/system-auth
@@ -1241,7 +1241,7 @@ sudo oscap xccdf eval \
   --profile xccdf_org.ssgproject.content_profile_standard \
   --results-arf /tmp/oscap-results.xml \
   --report /tmp/oscap-report.html \
-  /usr/share/xml/scap/ssg/content/ssg-solus-ds.xml
+  /usr/share/xml/scap/ssg/content/ssg-synthex-ds.xml
 
 # View HTML report
 xdg-open /tmp/oscap-report.html
@@ -1471,10 +1471,10 @@ sudo rkhunter --check
 
 ### 14.1 Responsible Disclosure
 
-Solus takes security seriously. If you discover a security vulnerability:
+Synthex takes security seriously. If you discover a security vulnerability:
 
-**Email: security@getsol.us**
-**PGP Key:** https://getsol.us/security-pgp.asc
+**Email: security@getsynthex.org**
+**PGP Key:** https://getsynthex.org/security-pgp.asc
 
 ### 14.2 What to Include
 
@@ -1502,10 +1502,10 @@ Body:
 
 ### 14.4 Bug Bounty
 
-Currently, Solus does not operate a paid bug bounty program. However, security researchers who report valid vulnerabilities will be:
+Currently, Synthex does not operate a paid bug bounty program. However, security researchers who report valid vulnerabilities will be:
 
 - Acknowledged in release notes
-- Listed on the Solus Security Hall of Fame
+- Listed on the Synthex Security Hall of Fame
 - Considered for maintainer roles if interested
 
 ### 14.5 Security Mailing List
@@ -1513,7 +1513,7 @@ Currently, Solus does not operate a paid bug bounty program. However, security r
 Subscribe to security advisories:
 
 ```
-https://lists.getsol.us/mailman/listinfo/solus-security-announce
+https://lists.getsynthex.org/mailman/listinfo/synthex-security-announce
 ```
 
 ---

@@ -1,0 +1,29 @@
+{
+  "name": "Synthex Lite",
+  "tagline": "Lightweight. Fast. Old hardware friendly.",
+  "theme": "synthex-graphite",
+  "accent": "#8899AA",
+  "panels": {
+    "bottom": {
+      "type": "panel",
+      "height": 32,
+      "opacity": 1.0,
+      "blur": false,
+      "widgets": [
+        "launcher",
+        "tasks",
+        "tray",
+        "clock"
+      ]
+    }
+  },
+  "dock": false,
+  "animations": "off",
+  "compositor": "xrender",
+  "menu": "simplemenu",
+  "desktop": "color",
+  "wallpaper": "solid",
+  "description": "Maximum performance on old hardware. No blur, no animations, no compositor effects. Everything stripped for speed.",
+  "performance": "lightweight",
+  "target": "Old hardware, VMs, low-spec systems"
+}

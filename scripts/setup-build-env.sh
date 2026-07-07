@@ -1,9 +1,9 @@
 #!/usr/bin/env bash
-# setup-build-env.sh — Set up the RPM build environment for Solus
+# setup-build-env.sh — Set up the RPM build environment for Synthex
 # Installs all build dependencies needed to compile specs into RPMs
 set -euo pipefail
 
-echo "🔧 Setting up Solus RPM build environment..."
+echo "🔧 Setting up Synthex RPM build environment..."
 echo ""
 
 # ─── Install build tools ───────────────────────────────────────────────
@@ -44,7 +44,7 @@ echo "  Build tree at: $BUILDROOT"
 # ─── Generate GPG keys ─────────────────────────────────────────────────
 echo ""
 echo "🔐 Setting up GPG signing..."
-if [ ! -f "$HOME/.gnupg-solus/RPM-GPG-KEY-solus" ]; then
+if [ ! -f "$HOME/.gnupg-synthex/RPM-GPG-KEY-synthex" ]; then
     "$ROOT/scripts/generate-gpg-keys.sh"
 else
     echo "  GPG keys already exist."

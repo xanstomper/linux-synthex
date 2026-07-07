@@ -1,0 +1,17 @@
+[Unit]
+Description=Synthex Slim Services — disable unused background daemons
+After=synthex-firstboot.service synthex-hwdaemon.service
+ConditionPathExists=/var/lib/synthex/firstboot-complete
+ConditionPathExists=!/var/lib/synthex/slim-done
+
+[Service]
+Type=oneshot
+ExecStart=/usr/libexec/synthex/synthex-slim-services
+ExecStartPost=/usr/bin/bash -c 'touch /var/lib/synthex/slim-done'
+RemainAfterExit=no
+StandardOutput=journal
+StandardError=journal
+SuccessExitStatus=0 1
+
+[Install]
+WantedBy=multi-user.target

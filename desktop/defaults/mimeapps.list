@@ -1,4 +1,4 @@
-# Solus Default Applications (XDG MIME)
+# Synthex Default Applications (XDG MIME)
 # Defines which applications handle which file types
 # Install to: /usr/share/applications/defaults.list
 # Or per-user: ~/.config/mimeapps.list
@@ -62,5 +62,5 @@ application/json=kate.desktop
 # Development
 x-scheme-handler/git=firefox.desktop
 
-# Solus Apps
-x-scheme-handler/solus=org.solus.SoftwareCenter.desktop
+# Synthex Apps
+x-scheme-handler/solus=org.synthex.SoftwareCenter.desktop

@@ -1,0 +1,167 @@
+{
+  "editions": {
+    "plasma": {
+      "name": "Synthex Plasma Edition",
+      "description": "Full KDE Plasma desktop with gaming, development, and multimedia support",
+      "size": "~4.5GB",
+      "package_groups": [
+        "synthex-core",
+        "synthex-plasma",
+        "synthex-gaming",
+        "synthex-codecs",
+        "synthex-developer"
+      ],
+      "default_packages": [
+        "firefox",
+        "libreoffice-writer",
+        "libreoffice-calc",
+        "vlc",
+        "gwenview",
+        "okular",
+        "ark",
+        "kcalc",
+        "spectacle",
+        "kdenlive",
+        "audacity",
+        "git",
+        "make",
+        "cmake",
+        "ffmpeg",
+        "ffmpeg-libs",
+        "ffmpegthumbnailer",
+        "noto-fonts",
+        "noto-fonts-emoji",
+        "jetbrains-mono-fonts",
+        "discord"
+      ],
+      "exclude_packages": []
+    },
+    "gnome": {
+      "name": "Synthex GNOME Edition",
+      "description": "GNOME desktop with Synthex tooling and gaming support",
+      "size": "~3.8GB",
+      "package_groups": [
+        "synthex-core",
+        "synthex-gnome",
+        "synthex-gaming",
+        "synthex-codecs"
+      ],
+      "default_packages": [
+        "firefox",
+        "libreoffice",
+        "totem",
+        "nautilus",
+        "evince",
+        "gnome-calculator",
+        "gnome-screenshot",
+        "git",
+        "noto-fonts"
+      ],
+      "exclude_packages": [
+        "plasma-desktop",
+        "kwin",
+        "dolphin",
+        "konsole"
+      ]
+    },
+    "hyprland": {
+      "name": "Synthex Hyprland Edition",
+      "description": "Minimal Hyprland compositor for power users",
+      "size": "~2.2GB",
+      "package_groups": [
+        "synthex-core"
+      ],
+      "default_packages": [
+        "hyprland",
+        "waybar",
+        "wofi",
+        "dunst",
+        "kitty",
+        "firefox",
+        "foot",
+        "swaylock",
+        "swayidle"
+      ],
+      "exclude_packages": [
+        "plasma-desktop",
+        "kwin",
+        "dolphin",
+        "konsole",
+        "sddm",
+        "discover"
+      ]
+    },
+    "minimal": {
+      "name": "Synthex Minimal Edition",
+      "description": "Minimal CLI-only system for servers/containers",
+      "size": "~800MB",
+      "package_groups": [
+        "synthex-core"
+      ],
+      "default_packages": [],
+      "exclude_packages": [
+        "plasma-desktop",
+        "*display*",
+        "*xorg*",
+        "*wayland*",
+        "*pipewire*",
+        "*pulse*"
+      ]
+    },
+    "gaming": {
+      "name": "Synthex Gaming Edition",
+      "description": "Optimized for gaming with Steam, Gamescope, MangoHUD, and handheld support",
+      "size": "~5.2GB",
+      "package_groups": [
+        "synthex-core",
+        "synthex-plasma",
+        "synthex-gaming",
+        "synthex-codecs",
+        "synthex-handheld",
+        "synthex-nvidia"
+      ],
+      "default_packages": [
+        "steam",
+        "lutris",
+        "heroic-games-launcher",
+        "gamescope",
+        "mangohud",
+        "gamemode",
+        "protontricks",
+        "protonup-qt",
+        "wine",
+        "discord",
+        "obs-studio",
+        "firefox"
+      ],
+      "exclude_packages": [
+        "libreoffice*",
+        "calligra*",
+        "kdepim*"
+      ]
+    }
+  },
+  "kernel_flavors": {
+    "default": "kernel",
+    "zen": "kernel-zen (optimized for desktop/gaming)",
+    "lts": "kernel-lts (long-term support, stable)",
+    "rt": "kernel-rt (real-time, low-latency)"
+  },
+  "firmware": {
+    "default": "linux-firmware",
+    "amd": "amd-gpu-firmware",
+    "intel": "intel-gpu-firmware",
+    "nvidia": "nvidia-gpu-firmware"
+  },
+  "filesystem": {
+    "root": "btrfs",
+    "compress": "zstd:3",
+    "subvolumes": [
+      "@",
+      "@home",
+      "@snapshots",
+      "@var",
+      "@tmp"
+    ]
+  }
+}

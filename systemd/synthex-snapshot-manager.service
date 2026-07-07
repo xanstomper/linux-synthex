@@ -1,0 +1,13 @@
+[Unit]
+Description=Synthex Snapshot Manager — Btrfs snapshot maintenance
+After=local-fs.target
+
+[Service]
+Type=oneshot
+ExecStart=/usr/bin/synthex-snapshot verify
+ExecStart=/usr/bin/synthex-snapshot clean --keep 10
+StandardOutput=journal
+StandardError=journal
+
+[Install]
+WantedBy=multi-user.target

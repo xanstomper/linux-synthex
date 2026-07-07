@@ -1,0 +1,8 @@
+# Synthex Workspace: Default
+# Balanced workspace for everyday use
+
+id=default
+name=Default
+wallpaper=synthex-graphite.png
+panels=topbar,dock
+description=Balanced workspace for everyday use

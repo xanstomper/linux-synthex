@@ -1,0 +1,13 @@
+[package]
+name = "synthex-perf-tuning-rs"
+version = "0.1.0"
+edition = "2021"
+description = "Synthex Performance Tuning — CachyOS-style auto-tuning daemon."
+
+[dependencies]
+anyhow = { workspace = true }
+clap = { workspace = true }
+serde = { workspace = true }
+serde_json = { workspace = true }
+tracing = { workspace = true }
+tracing-subscriber = { workspace = true }

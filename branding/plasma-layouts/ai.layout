@@ -1,0 +1,8 @@
+# Synthex Workspace: AI Workspace
+# AI assistant with chat sidebar, model browser, and agent tasks
+
+id=ai
+name=AI Workspace
+wallpaper=synthex-midnight.png
+panels=topbar,dock,ai-sidebar
+description=AI assistant with chat sidebar, model browser, and agent tasks

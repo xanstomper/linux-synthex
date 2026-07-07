@@ -1,0 +1,15 @@
+[SddmGreeterTheme]
+Name=Synthex
+Description=SynthOS SDDM Theme — gaming-focused dark theme with amber accents
+Author=Synthex Team
+Copyright=(c) 2026 SynthOS
+License=GPL-2.0-or-later
+Type=sddm-theme
+Version=2026.1
+Website=https://getsynthex.org
+Screenshot=screenshot.png
+MainScript=Main.qml
+ConfigFile=theme.conf
+TranslationsDirectory=translations
+Email=release@getsynthex.org
+Theme-Id=synthex

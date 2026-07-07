@@ -1,0 +1,8 @@
+# Synthex Workspace: Development
+# Coding-focused layout with terminal integration
+
+id=development
+name=Development
+wallpaper=synthex-graphite.png
+panels=topbar,dock
+description=Coding-focused layout with terminal integration

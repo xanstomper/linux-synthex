@@ -1,0 +1,40 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: Synthex Linux Team <kernel@getsynthex.org>
+Date: Sun, 6 Jul 2026 00:00:00 +0000
+Subject: [PATCH] synthex-0005-rust-for-linux.patch
+
+Enable Rust for Linux support on x86_64.
+
+Rust has been upstream in the Linux kernel since v6.1 and is
+stabilised for production use as of v6.14. This patch enables Rust
+support in the default x86_64 kernel configuration so that `make
+defconfig` produces a Rust-ready kernel out of the box.
+
+Enabled Rust subsystems:
+  - Core Rust support (CONFIG_RUST)
+  - PHYLIB abstractions — Rust bindings for network PHY drivers
+  - ASIX PHY driver — Rust-based Ethernet PHY driver
+  - Sample PHY driver — Rust-based PHY driver template
+
+Build requirements:
+  - rustc >= 1.80.0 with rust-src and rust-std components
+  - bindgen for generating FFI bindings
+  - cargo (for Rust module builds)
+
+Signed-off-by: Synthex Linux Team <kernel@getsynthex.org>
+---
+ arch/x86/configs/x86_64_defconfig | 6 ++++++
+ 1 file changed, 6 insertions(+)
+
+diff --git a/arch/x86/configs/x86_64_defconfig b/arch/x86/configs/x86_64_defconfig
+--- a/arch/x86/configs/x86_64_defconfig
++++ b/arch/x86/configs/x86_64_defconfig
+@@ -0,0 +0,0 @@
++# Rust for Linux — memory-safe kernel modules
++CONFIG_RUST=y
++CONFIG_RUST_BUILD_ASSERT_ALLOW=y
++CONFIG_RUST_PHYLIB_ABSTRACTIONS=y
++CONFIG_RUST_DRIVER_ASIX=m
++CONFIG_RUST_DRIVER_PHY=m
+-- 
+2.45.0

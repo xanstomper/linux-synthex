@@ -1,0 +1,216 @@
+#!/usr/bin/env python3
+"""
+synthex-layout — Desktop layout switching for Synthex OS.
+
+Usage:
+    synthex-layout set <layout>
+    synthex-layout list
+    synthex-layout current
+    synthex-layout export <file.json>
+    synthex-layout import <file.json>
+"""
+
+import sys
+import os
+import json
+import subprocess
+import shutil
+
+LAYOUTS_DIR = "/usr/share/synthex/layouts"
+USER_CONFIG_DIR = os.path.expanduser("~/.config/solus")
+
+
+def get_layout_path(name):
+    """Get the full path to a layout JSON file."""
+    path = os.path.join(LAYOUTS_DIR, f"{name}.json")
+    if os.path.exists(path):
+        return path
+    # Check user config
+    user_path = os.path.join(USER_CONFIG_DIR, "layouts", f"{name}.json")
+    if os.path.exists(user_path):
+        return user_path
+    return None
+
+
+def apply_layout(config):
+    """Apply a layout configuration to the system."""
+    print(f"🎨 Applying layout: {config.get('name', 'unknown')}")
+
+    home = os.path.expanduser("~")
+
+    # Panel position
+    panel = config.get("panel", {})
+    if "position" in panel:
+        pos_map = {"bottom": "Bottom", "top": "Top", "left": "Left", "right": "Right"}
+        pos = pos_map.get(panel["position"], "Bottom")
+        subprocess.run([
+            "kwriteconfig6", "--file", os.path.join(home, ".config/plasma-org.kde.plasma.desktop-appletsrc"),
+            "--group", "Containments", "--group", "1", "--group", "General",
+            "--key", "location", pos
+        ])
+    
+    if "height" in panel:
+        subprocess.run([
+            "kwriteconfig6", "--file", os.path.join(home, ".config/plasma-org.kde.plasma.desktop-appletsrc"),
+            "--group", "Containments", "--group", "1", "--group", "General",
+            "--key", "panelSize", str(panel["height"])
+        ])
+
+    # Compositor settings
+    compositor = config.get("compositor", {})
+    blur = str(compositor.get("blur", True)).lower()
+    vsync = compositor.get("vsync", "auto")
+    latency = compositor.get("latency_mode", "normal")
+
+    subprocess.run([
+        "kwriteconfig6", "--file", os.path.join(home, ".config/kwinrc"),
+        "--group", "Compositing", "--key", "Backend", "OpenGL"
+    ])
+    subprocess.run([
+        "kwriteconfig6", "--file", os.path.join(home, ".config/kwinrc"),
+        "--group", "Compositing", "--key", "Enabled", "true" if compositor.get("enabled", True) else "false"
+    ])
+    subprocess.run([
+        "kwriteconfig6", "--file", os.path.join(home, ".config/kwinrc"),
+        "--group", "Compositing", "--key", "OpenGLIsUnsafe", "false"
+    ])
+
+    # Wallpaper
+    wallpaper = config.get("wallpaper", "")
+    if wallpaper and os.path.exists(wallpaper):
+        subprocess.run([
+            "kwriteconfig6", "--file", os.path.join(home, ".config/plasma-org.kde.plasma.desktop-appletsrc"),
+            "--group", "Containments", "--group", "1", "--group", "Wallpaper",
+            "--group", "org.kde.image", "--group", "General",
+            "--key", "Image", f"file://{wallpaper}"
+        ])
+
+    # Restart Plasma to apply
+    subprocess.run(["plasmashell", "--replace"], start_new_session=True)
+    print("✅ Layout applied. Plasma restarted.")
+
+
+def cmd_set(name):
+    """Set active layout."""
+    path = get_layout_path(name)
+    if not path:
+        print(f"❌ Layout '{name}' not found.")
+        print("Available layouts:")
+        cmd_list()
+        return
+
+    with open(path) as f:
+        config = json.load(f)
+
+    # Create snapshot before applying
+    subprocess.run(["snapper", "-c", "root", "create", "-d", f"layout-{name}"])
+    
+    apply_layout(config)
+    
+    # Save current layout
+    os.makedirs(USER_CONFIG_DIR, exist_ok=True)
+    with open(os.path.join(USER_CONFIG_DIR, "current-layout"), "w") as f:
+        f.write(name)
+
+
+def cmd_list():
+    """List available layouts."""
+    if os.path.exists(LAYOUTS_DIR):
+        for f in sorted(os.listdir(LAYOUTS_DIR)):
+            if f.endswith(".json"):
+                name = f.replace(".json", "")
+                path = os.path.join(LAYOUTS_DIR, f)
+                with open(path) as fp:
+                    config = json.load(fp)
+                desc = config.get("description", "")
+                print(f"  • {name:15} {desc}")
+    
+    user_dir = os.path.join(USER_CONFIG_DIR, "layouts")
+    if os.path.exists(user_dir):
+        for f in sorted(os.listdir(user_dir)):
+            if f.endswith(".json"):
+                name = f.replace(".json", "")
+                print(f"  • {name:15} (user)")
+
+
+def cmd_current():
+    """Show current layout."""
+    path = os.path.join(USER_CONFIG_DIR, "current-layout")
+    if os.path.exists(path):
+        with open(path) as f:
+            print(f"Current layout: {f.read().strip()}")
+    else:
+        print("No layout set (using system defaults)")
+
+
+def cmd_export(path):
+    """Export current layout to JSON file."""
+    config = {
+        "name": "exported",
+        "description": "Exported Synthex desktop layout",
+        "panel": {
+            "position": "bottom",
+            "height": 42,
+            "dock": True
+        },
+        "compositor": {
+            "enabled": True,
+            "blur": True,
+            "vsync": "adaptive",
+            "latency_mode": "low"
+        },
+        "wallpaper": "",
+        "services": {
+            "gamemode": False,
+            "tracker_services": False
+        }
+    }
+    with open(path, "w") as f:
+        json.dump(config, f, indent=2)
+    print(f"✅ Layout exported to {path}")
+
+
+def cmd_import(path):
+    """Import layout from JSON file."""
+    if not os.path.exists(path):
+        print(f"❌ File not found: {path}")
+        return
+    with open(path) as f:
+        config = json.load(f)
+    
+    name = config.get("name", "imported")
+    user_dir = os.path.join(USER_CONFIG_DIR, "layouts")
+    os.makedirs(user_dir, exist_ok=True)
+    
+    dest = os.path.join(user_dir, f"{name}.json")
+    shutil.copy2(path, dest)
+    print(f"✅ Layout imported as '{name}'")
+    
+    # Apply
+    apply_layout(config)
+
+
+def main():
+    if len(sys.argv) < 2:
+        print(__doc__)
+        return
+
+    command = sys.argv[1]
+
+    if command == "set" and len(sys.argv) >= 3:
+        cmd_set(sys.argv[2])
+    elif command == "list":
+        cmd_list()
+    elif command == "current":
+        cmd_current()
+    elif command == "export" and len(sys.argv) >= 3:
+        cmd_export(sys.argv[2])
+    elif command == "import" and len(sys.argv) >= 3:
+        cmd_import(sys.argv[2])
+    else:
+        print("Usage: synthex-layout <set|list|current|export|import> [args]")
+        sys.exit(1)
+
+
+if __name__ == "__main__":
+    main()

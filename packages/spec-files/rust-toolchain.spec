@@ -1,9 +1,9 @@
-# Solus Linux Rust Toolchain RPM Spec
+# SynthOS Rust Toolchain RPM Spec
 # Package: rust-toolchain
 # Provides: rustc, cargo, rust-std, rust-src, rust-docs, cargo-doc
-# Origin: Fedora/RHEL upstream with Solus tuning
+# Origin: Fedora/RHEL upstream with Synthex tuning
 #
-# Solus ships a full Rust toolchain for kernel module development,
+# Synthex ships a full Rust toolchain for kernel module development,
 # system utility rewrites, and user-facing application development.
 # This spec tracks upstream Fedora's rust-packaging closely.
 #
@@ -30,7 +30,7 @@ Source1: https://static.rust-lang.org/dist/rustc-%{version}-src.tar.xz.asc
 # GPG key for verification (Rust release signing key)
 Source2: https://keybase.io/rust/pgp_keys.asc
 
-# Solus cargo config (default registry, mirrors, settings)
+# Synthex cargo config (default registry, mirrors, settings)
 Source3: cargo-config.toml
 
 # Pre-built Rust bootstrap compiler for bootstrapping
@@ -62,10 +62,10 @@ This package provides:
 - rust-docs — HTML documentation
 - cargo-doc — Cargo documentation
 
-Solus uses Rust for:
+Synthex uses Rust for:
 - Kernel module development (Rust-for-Linux)
 - System utility rewrites (ripgrep, fd, bat, eza, etc.)
-- Solus system daemons (update-manager, driver-manager, pkg)
+- Synthex system daemons (update-manager, driver-manager, pkg)
 - Desktop application development
 
 %package compiler
@@ -129,7 +129,7 @@ including the Cargo Book and API reference.
 # Verify GPG signature if possible
 %{?gpgverify: %gpgverify --data='%{SOURCE0}' --sig='%{SOURCE1}' --key='%{SOURCE2}'}
 
-# Apply any Solus-specific patches (none yet)
+# Apply any Synthex-specific patches (none yet)
 # %patch0 -p1
 
 %build
@@ -215,8 +215,8 @@ find %{buildroot} -name '*.o' -type f -delete
 %{_datadir}/doc/cargo/*
 
 %changelog
-* Sun Jul 06 2026 Solus Rust Team <rust@solus-project.org> - 1.80.0-1
-- Initial Solus Rust toolchain package (v1.80.0 stable)
+* Sun Jul 06 2026 Synthex Rust Team <rust@synthex-project.org> - 1.80.0-1
+- Initial Synthex Rust toolchain package (v1.80.0 stable)
 - Extended tool profile: rustc, cargo, rust-std, rust-src, docs
 - ThinLTO enabled for optimised compiler performance
 - LLVM 17 codegen backend bundled

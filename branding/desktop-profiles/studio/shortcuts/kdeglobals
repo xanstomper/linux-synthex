@@ -1,0 +1,13 @@
+# Solus Studio — Keyboard Shortcuts
+
+[org.kde.kglobalaccel]
+components=org.kde.kglobalaccel.Component
+
+[org.kde.kglobalaccel.Component][org.kde.krunner]
+_k_friendly_name=Run Command
+_id=org.kde.krunner
+_manual=Use the command interface
+
+[org.kde.kglobalaccel.Component][org.kde.plasma]
+_k_friendly_name=Plasma
+_id=org.kde.plasma

@@ -1,0 +1,32 @@
+[Desktop Entry]
+Name=Synthex Classic
+Comment=Synthex Classic - Warm green, familiar feel
+Type=ColorScheme
+Encoding=UTF-8
+
+[Scheme]
+BackgroundColor=#F0F5F0
+ForegroundColor=#1A2E1A
+SelectionBackgroundColor=#86C166
+SelectionForegroundColor=#1A2E1A
+InactiveSelectionBackgroundColor=#E8F0E8
+InactiveSelectionForegroundColor=#3A5E3A
+WindowBackgroundColor=#FFFFFF
+WindowForegroundColor=#1A2E1A
+LinkColor=#86C166
+VisitedLinkColor=#6DAA4D
+HoverColor=#86C166
+FocusColor=#86C166
+HoverBackgroundColor=#E8F0E8
+FocusBackgroundColor=#E8F0E8
+AlternateBackgroundColor=#F8FBF8
+AlternateForegroundColor=#3A5E3A
+ButtonBackgroundColor=#E8F0E8
+ButtonForegroundColor=#1A2E1A
+ButtonHoverColor=#FFFFFF
+ButtonFocusColor=#E8F0E8
+ViewBackgroundColor=#F0F5F0
+ViewForegroundColor=#1A2E1A
+ViewHoverColor=#F8FBF8
+ViewFocusColor=#F8FBF8
+ComplementaryColor=#A8D88A

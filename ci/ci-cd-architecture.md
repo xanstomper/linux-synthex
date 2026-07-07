@@ -1,8 +1,8 @@
-# CI/CD Architecture — Linux Solus
+# CI/CD Architecture — Linux Synthex
 
 ## Overview
 
-Linux Solus uses a fully automated CI/CD pipeline built on:
+Linux Synthex uses a fully automated CI/CD pipeline built on:
 
 - **GitHub Actions** — Trigger, build, test, release
 - **Fedora Copr** — Community package building and hosting
@@ -116,7 +116,7 @@ Fedora Copr provides:
 Docker/Podman container with:
 - Fedora 41+ base
 - livecd-tools, lorax, createrepo_c
-- All Solus packages resolvable
+- All Synthex packages resolvable
 - Reproducible build configuration
 
 ### Artifact Storage

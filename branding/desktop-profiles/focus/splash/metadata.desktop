@@ -1,0 +1,10 @@
+[Desktop Entry]
+Name=Synthex Focus Splash
+Comment=Synthex Focus boot splash screen
+Type=Service
+X-KDE-PluginInfo-Author=Synthex Team
+X-KDE-PluginInfo-Email=dev@synthex.org
+X-KDE-PluginInfo-Name=SolusFocusSplash
+X-KDE-PluginInfo-Version=2026.10
+X-KDE-PluginInfo-License=MIT
+X-KDE-Splash-Progress-Indicator=true

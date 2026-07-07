@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-Linux Solus Project Inventory Script
+Linux Synthex Project Inventory Script
 Generates a complete inventory of all project files with metadata.
 """
 
@@ -34,7 +34,7 @@ def get_file_info(path):
 
 def main():
     inventory = {
-        "project": "Linux Solus",
+        "project": "Linux Synthex",
         "generated": datetime.now().isoformat(),
         "root": str(ROOT),
         "files": [],

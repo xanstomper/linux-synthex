@@ -1,0 +1,16 @@
+[Unit]
+Description=SynthBox Sandbox Runtime
+After=local-fs.target
+
+[Service]
+Type=oneshot
+ExecStart=/bin/true
+RemainAfterExit=yes
+
+ProtectSystem=strict
+PrivateTmp=yes
+NoNewPrivileges=yes
+SystemCallArchitectures=native
+
+[Install]
+WantedBy=multi-user.target

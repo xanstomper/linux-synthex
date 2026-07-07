@@ -1,0 +1,10 @@
+[Unit]
+Description=SynthShield Integrity Check Timer
+
+[Timer]
+OnBootSec=120
+OnUnitActiveSec=600
+Persistent=yes
+
+[Install]
+WantedBy=timers.target

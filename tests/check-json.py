@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""JSON validation script for Solus project."""
+"""JSON validation script for Synthex project."""
 import json, glob, sys, os
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))

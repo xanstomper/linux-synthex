@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Solus Battery Mode
+# Synthex Battery Mode
 # Optimizes system for maximum battery life
 
 set -euo pipefail

@@ -1,9 +1,9 @@
 #!/usr/bin/env bash
-# /usr/libexec/solus/live-setup.sh — Live environment setup
+# /usr/libexec/synthex/live-setup.sh — Live environment setup
 # Creates liveuser, configures autologin, sets up Calamares
 set -euo pipefail
 
-echo "💿 Setting up Solus live environment..."
+echo "💿 Setting up Synthex live environment..."
 
 # Create live user
 echo "  Creating liveuser..."
@@ -26,29 +26,42 @@ EOF
 # Enable Calamares desktop icon
 echo "  Configuring Calamares..."
 mkdir -p /home/liveuser/Desktop
-cat > /home/liveuser/Desktop/install-solus.desktop << 'EOF'
+cat > /home/liveuser/Desktop/install-synthex.desktop << 'EOF'
 [Desktop Entry]
 Type=Application
-Name=Install Solus Linux
-Name[de]=Solus Linux installieren
-Comment=Launch the Solus installer
-Comment[de]=Solus Installer starten
+Name=Install SynthOS
+Name[de]=SynthOS installieren
+Comment=Launch the Synthex installer
+Comment[de]=Synthex Installer starten
 Exec=sudo calamares
 Icon=calamares
 Terminal=false
 Categories=System;
 StartupNotify=true
 EOF
-chown liveuser:liveuser /home/liveuser/Desktop/install-solus.desktop
-chmod +x /home/liveuser/Desktop/install-solus.desktop
+chown liveuser:liveuser /home/liveuser/Desktop/install-synthex.desktop
+chmod +x /home/liveuser/Desktop/install-synthex.desktop
 
 # Create Calamares desktop entry in applications menu
-cp /home/liveuser/Desktop/install-solus.desktop /usr/share/applications/ 2>/dev/null || true
+cp /home/liveuser/Desktop/install-synthex.desktop /usr/share/applications/ 2>/dev/null || true
 
 # Disable persistent services that don't make sense in live
 systemctl disable snapper-timeline.timer 2>/dev/null || true
 systemctl disable snapper-cleanup.timer 2>/dev/null || true
 systemctl disable dnf-automatic.timer 2>/dev/null || true
+systemctl disable synthex-system-daemon 2>/dev/null || true
+systemctl disable synthex-hwdaemon 2>/dev/null || true
+systemctl disable synthex-desktopd 2>/dev/null || true
+systemctl disable synthex-gpu-setupd 2>/dev/null || true
+systemctl disable synthex-stored 2>/dev/null || true
+
+# Run hardware detection hook for Calamares pre-seeding
+echo "  Running hardware detection..." 
+if [ -x /usr/libexec/synthex/installer-hook.sh ]; then
+    /usr/libexec/synthex/installer-hook.sh 2>/dev/null || true
+elif [ -f /synthex/installer/scripts/synthex-installer-hook ]; then
+    bash /synthex/installer/scripts/synthex-installer-hook 2>/dev/null || true
+fi
 
 # Mount shared folders if running in VM
 if [ -d /run/media ]; then
@@ -56,7 +69,7 @@ if [ -d /run/media ]; then
 fi
 
 # Set hostname
-hostnamectl set-hostname "solus-live" 2>/dev/null || true
+hostnamectl set-hostname "synthex-live" 2>/dev/null || true
 
 # Enable network
 systemctl enable NetworkManager 2>/dev/null || true

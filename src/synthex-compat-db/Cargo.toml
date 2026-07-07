@@ -1,0 +1,16 @@
+[package]
+name = "synthex-compat-db"
+version = "0.1.0"
+edition = "2021"
+description = "SynthOS — Hardware compatibility database"
+
+[dependencies]
+anyhow = { workspace = true }
+clap = { workspace = true }
+serde = { workspace = true }
+serde_json = { workspace = true }
+sysinfo = { workspace = true }
+tracing = { workspace = true }
+tracing-subscriber = { workspace = true }
+chrono = { workspace = true }
+hostname = "0.4"

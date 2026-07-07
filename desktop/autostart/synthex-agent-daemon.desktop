@@ -1,0 +1,11 @@
+[Desktop Entry]
+Type=Application
+Name=Synthex Agent Daemon
+Comment=Background AI service for Synthex Agent — required for Super+Space, Codex, Knowledge Base
+Exec=synthex-agent --daemon
+Icon=synthex-agent
+Terminal=false
+Categories=System;
+OnlyShowIn=KDE;
+X-KDE-autostart-after=panel
+X-KDE-StartupNotify=false

@@ -1,0 +1,43 @@
+{
+  "name": "Synthex Touch",
+  "tagline": "Tablet & handheld. Finger-friendly. Bold.",
+  "theme": "synthex-frost",
+  "accent": "#5B9BD5",
+  "panels": {
+    "top": {
+      "type": "panel",
+      "height": 48,
+      "opacity": 0.95,
+      "blur": true,
+      "widgets": [
+        "back",
+        "launcher",
+        "spacer",
+        "clock",
+        "battery",
+        "tray"
+      ]
+    },
+    "bottom": {
+      "type": "dock",
+      "height": 64,
+      "opacity": 0.95,
+      "blur": true,
+      "floating": true,
+      "widgets": [
+        "icons",
+        "spacer",
+        "home"
+      ]
+    }
+  },
+  "dock": true,
+  "animations": "slow",
+  "compositor": "opengl",
+  "menu": "kickoff-grid",
+  "desktop": "color",
+  "wallpaper": "synthex-frost.png",
+  "description": "Touch-optimized. Large targets. On-screen keyboard. Handheld mode for ROG Ally / Legion Go / Steam Deck.",
+  "performance": "balanced",
+  "target": "Tablet, handheld, touch-screen users"
+}

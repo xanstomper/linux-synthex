@@ -1,0 +1,9 @@
+[Desktop Entry]
+Type=Application
+Name=Synthex Security Dashboard
+Comment=View system security status
+Exec=synthex-security-dashboard
+Icon=synthex-security-dashboard
+Categories=Applications;System;Security;
+Terminal=false
+StartupNotify=true

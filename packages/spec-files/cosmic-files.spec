@@ -1,4 +1,4 @@
-# Solus Linux RPM Spec — cosmic-files
+# SynthOS RPM Spec — cosmic-files
 # COSMIC file manager (Rust/Iced)
 # Origin: Pop!_OS (System76)
 
@@ -47,5 +47,5 @@ install -D -m 0755 target/release/cosmic-files %{buildroot}%{_bindir}/cosmic-fil
 %{_bindir}/cosmic-files
 
 %changelog
-* Mon Jul 07 2026 Solus Rust Team <rust@solus-project.org> - %{cosmicfiles_version}-1
-- Initial Solus package — COSMIC file manager
+* Mon Jul 07 2026 Synthex Rust Team <rust@synthex-project.org> - %{cosmicfiles_version}-1
+- Initial Synthex package — COSMIC file manager

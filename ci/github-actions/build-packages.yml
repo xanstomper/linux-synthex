@@ -1,5 +1,5 @@
 # ============================================================================
-# Solus Linux — Package Build Workflow
+# SynthOS — Package Build Workflow
 # ============================================================================
 # Builds RPM packages from spec files using Copr build service or direct
 # mock chroots. Handles dependency ordering, parallel builds, and
@@ -25,7 +25,7 @@ on:
         description: "Mock chroot profile"
         required: false
         type: string
-        default: 'solus-rawhide-x86_64-v3'
+        default: 'synthex-rawhide-x86_64-v3'
       rebuild_reverse_deps:
         description: "Rebuild reverse dependencies"
         required: false
@@ -67,7 +67,7 @@ on:
 env:
   MOCK_CONFIG: /etc/mock
   RPMBUILD_DIR: /tmp/rpmbuild
-  REPO_SERVER: https://repo.solus.org
+  REPO_SERVER: https://repo.synthex.org
 
 jobs:
   ############################################################################
@@ -228,12 +228,12 @@ jobs:
           usermod -aG mock $(whoami)
 
           # Write mock config
-          cat > "${MOCK_CONFIG}/solus-rawhide-${{ inputs.arch }}.cfg" << 'MOCKCFG'
-          config_opts['root'] = 'solus-rawhide-${{ inputs.arch }}'
+          cat > "${MOCK_CONFIG}/synthex-rawhide-${{ inputs.arch }}.cfg" << 'MOCKCFG'
+          config_opts['root'] = 'synthex-rawhide-${{ inputs.arch }}'
           config_opts['target_arch'] = 'x86_64'
           config_opts['chroot_setup_cmd'] = 'install @buildsys-build'
-          config_opts['macros']['%vendor'] = 'Solus Linux'
-          config_opts['macros']['%dist'] = '.solus'
+          config_opts['macros']['%vendor'] = 'SynthOS'
+          config_opts['macros']['%dist'] = '.synthex'
           config_opts['yum.conf'] = """
           [main]
           cachedir=/var/cache/mock
@@ -241,8 +241,8 @@ jobs:
           reposdir=/dev/null
           logfile=/var/log/mock.log
 
-          [solus-rawhide]
-          name=Solus $arch rawhide
+          [synthex-rawhide]
+          name=Synthex $arch rawhide
           baseurl=${{ env.REPO_SERVER }}/rawhide/${{ inputs.arch }}
           enabled=1
           gpgcheck=1
@@ -258,16 +258,16 @@ jobs:
           fi
 
           mock \
-            --root="solus-rawhide-${{ inputs.arch }}" \
+            --root="synthex-rawhide-${{ inputs.arch }}" \
             --resultdir="${RPMBUILD_DIR}/results" \
             --rebuild "${SRPM}"
 
       - name: Sign RPMs
         if: github.ref_type == 'tag' || github.ref_name == 'main'
         run: |
-          echo "${{ secrets.SOLUS_RELEASE_KEY_PASSPHRASE }}" | \
+          echo "${{ secrets.SYNTHEX_RELEASE_KEY_PASSPHRASE }}" | \
             rpm --addsign \
-              --define "_gpg_name Solus Release Key" \
+              --define "_gpg_name Synthex Release Key" \
               --passphrase-fd 0 \
               ${RPMBUILD_DIR}/results/*.rpm
 
@@ -283,7 +283,7 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: build-log-${{ matrix.package }}
-          path: /var/lib/mock/solus-rawhide-${{ inputs.arch }}/result/build.log
+          path: /var/lib/mock/synthex-rawhide-${{ inputs.arch }}/result/build.log
           retention-days: 30
 
   ############################################################################
@@ -308,7 +308,7 @@ jobs:
 
       - name: Create/update repository
         run: |
-          REPO_DIR="/repo/solus/rawhide/${{ inputs.arch }}"
+          REPO_DIR="/repo/synthex/rawhide/${{ inputs.arch }}"
           mkdir -p "${REPO_DIR}/Packages"
 
           # Move RPMs to package pool
@@ -323,9 +323,9 @@ jobs:
             "${REPO_DIR}"
 
           # Sign repomd.xml
-          echo "${{ secrets.SOLUS_REPO_KEY_PASSPHRASE }}" | \
+          echo "${{ secrets.SYNTHEX_REPO_KEY_PASSPHRASE }}" | \
             gpg --batch --yes --passphrase-fd 0 \
-              --default-key "Solus Repo <repo@solus.org>" \
+              --default-key "Synthex Repo <repo@synthex.org>" \
               --detach-sign --armor \
               "${REPO_DIR}/repodata/repomd.xml"
 
@@ -333,5 +333,5 @@ jobs:
         run: |
           # Rsync to primary repository server
           rsync -avz --delete-delay \
-            /repo/solus/ \
-            repo@repo.solus.org:/repo/solus/
+            /repo/synthex/ \
+            repo@repo.synthex.org:/repo/synthex/

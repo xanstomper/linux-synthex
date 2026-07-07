@@ -1,4 +1,4 @@
-# Solus Linux RPM Spec — cosmic-term
+# SynthOS RPM Spec — cosmic-term
 # COSMIC terminal emulator (Rust/Iced)
 # Origin: Pop!_OS (System76)
 
@@ -46,5 +46,5 @@ install -D -m 0755 target/release/cosmic-term %{buildroot}%{_bindir}/cosmic-term
 %{_bindir}/cosmic-term
 
 %changelog
-* Mon Jul 07 2026 Solus Rust Team <rust@solus-project.org> - %{cosmicterm_version}-1
-- Initial Solus package — COSMIC terminal
+* Mon Jul 07 2026 Synthex Rust Team <rust@synthex-project.org> - %{cosmicterm_version}-1
+- Initial Synthex package — COSMIC terminal

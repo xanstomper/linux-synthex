@@ -1,6 +1,6 @@
 // ╔══════════════════════════════════════════════════════════════╗
-// ║  Solus Hyprland — Waybar Configuration                      ║
-// ║  Design: "Solus Dynamic Tiling" — Minimal, information-rich ║
+// ║  Synthex Hyprland — Waybar Configuration                      ║
+// ║  Design: "Synthex Dynamic Tiling" — Minimal, information-rich ║
 // ║  Version: 1.0.0                                             ║
 // ╚══════════════════════════════════════════════════════════════╝
 // Installed to: /etc/xdg/waybar/config.jsonc
@@ -18,7 +18,7 @@
 
     // ─── Modules ──────────────────────────────────────────────────────────
     "modules-left": [
-        "custom/hyprland-soluspulse",
+        "custom/hyprland-synthexpulse",
         "hyprland/workspaces"
     ],
     "modules-center": [
@@ -195,10 +195,10 @@
         "interval": "once"
     },
 
-    // ─── Custom: Solus Pulse ─────────────────────────────────────────────
-    "custom/hyprland-soluspulse": {
+    // ─── Custom: Synthex Pulse ─────────────────────────────────────────────
+    "custom/hyprland-synthexpulse": {
         "format": "⬟",
-        "tooltip": "Solus Hyprland",
+        "tooltip": "Synthex Hyprland",
         "on-click": "hyprctl splash",
         "interval": "once"
     }

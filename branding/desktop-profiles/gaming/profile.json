@@ -1,0 +1,30 @@
+{
+  "name": "Synthex Gaming",
+  "tagline": "Console-like. Big Picture. Zero distractions.",
+  "theme": "synthex-midnight",
+  "accent": "#FFB300",
+  "panels": {
+    "bottom": {
+      "type": "dock",
+      "height": 48,
+      "opacity": 0.9,
+      "blur": true,
+      "floating": true,
+      "widgets": [
+        "steam",
+        "launcher",
+        "icons",
+        "showdesktop"
+      ]
+    }
+  },
+  "dock": true,
+  "animations": "smooth",
+  "compositor": "opengl",
+  "menu": "kickoff-simple",
+  "desktop": "color",
+  "wallpaper": "synthex-midnight.png",
+  "description": "Console-like gaming UI. Amber accents, deep blacks. Steam launcher. GameMode auto-enabled. HDR/VRR ready.",
+  "performance": "balanced",
+  "target": "Gamers, Steam Deck-like experience"
+}

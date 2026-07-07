@@ -10,7 +10,7 @@ on:
 
 jobs:
   build-kernel:
-    name: Build Solus kernel ${{ github.event.inputs.kernel_version }}
+    name: Build Synthex kernel ${{ github.event.inputs.kernel_version }}
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -31,11 +31,11 @@ jobs:
         run: |
           bash kernel/build.sh \
             --version ${{ github.event.inputs.kernel_version }} \
-            --config kernel/configs/solus-x86_64-defconfig \
+            --config kernel/configs/synthex-x86_64-defconfig \
             --rust
 
       - name: Upload kernel RPMs
         uses: actions/upload-artifact@v4
         with:
-          name: solus-kernel-rpms
+          name: synthex-kernel-rpms
           path: build/rpmbuild/*.rpm

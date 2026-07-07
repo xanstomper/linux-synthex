@@ -1,9 +1,9 @@
 [package]
-name = "solus-stored"
+name = "synthex-stored"
 version.workspace = true
 edition.workspace = true
 license.workspace = true
-description = "Solus Software Center backend daemon — package management, repo management, updates"
+description = "Synthex Software Center backend daemon — package management, repo management, updates"
 
 [dependencies]
 serde.workspace = true

@@ -1,4 +1,4 @@
-# Solus Linux RPM Spec — nushell (nu)
+# SynthOS RPM Spec — nushell (nu)
 # Modern shell written in Rust
 # Origin: Fedora, Arch Linux
 
@@ -52,6 +52,6 @@ done
 %{_bindir}/nu-plugin-ext
 
 %changelog
-* Mon Jul 07 2026 Solus Rust Team <rust@solus-project.org> - %{nu_version}-1
-- Initial Solus package — nushell
+* Mon Jul 07 2026 Synthex Rust Team <rust@synthex-project.org> - %{nu_version}-1
+- Initial Synthex package — nushell
 - Ported from Fedora and Arch Linux packaging

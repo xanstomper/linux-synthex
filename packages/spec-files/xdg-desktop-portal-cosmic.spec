@@ -1,4 +1,4 @@
-# Solus Linux RPM Spec — xdg-desktop-portal-cosmic
+# SynthOS RPM Spec — xdg-desktop-portal-cosmic
 # COSMIC portal backend for xdg-desktop-portal (Rust)
 # Origin: Pop!_OS (System76)
 
@@ -57,5 +57,5 @@ EOF
 %{_datadir}/xdg-desktop-portal/portals/cosmic.portal
 
 %changelog
-* Mon Jul 07 2026 Solus Rust Team <rust@solus-project.org> - %{cosmicportal_version}-1
-- Initial Solus package — COSMIC portal backend
+* Mon Jul 07 2026 Synthex Rust Team <rust@synthex-project.org> - %{cosmicportal_version}-1
+- Initial Synthex package — COSMIC portal backend

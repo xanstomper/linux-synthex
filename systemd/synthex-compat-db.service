@@ -1,0 +1,12 @@
+[Unit]
+Description=Synthex Hardware Compatibility Database Scanner
+After=synthex-hwdaemon.service
+Wants=synthex-hwdaemon.service
+
+[Service]
+Type=oneshot
+ExecStart=/usr/bin/synthex-compat scan
+StandardOutput=journal
+
+[Install]
+WantedBy=multi-user.target

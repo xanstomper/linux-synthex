@@ -14,7 +14,7 @@
     "latency_mode": "normal",
     "animation_speed": 2
   },
-  "wallpaper": "/usr/share/wallpapers/solus/windows-style.png",
+  "wallpaper": "/usr/share/wallpapers/synthex/windows-style.png",
   "services": {
     "gamemode": false,
     "tracker_services": true,

@@ -1,4 +1,4 @@
-// D-Bus interface for solus-stored
+// D-Bus interface for synthex-stored
 
 use anyhow::Result;
 use std::sync::Mutex;
@@ -18,7 +18,7 @@ impl StoreInterface {
     }
 }
 
-#[interface(name = "org.solus.SoftwareCenter")]
+#[interface(name = "org.synthex.SoftwareCenter")]
 impl StoreInterface {
     /// Get available updates
     #[zbus(name = "CheckUpdates")]
@@ -93,12 +93,12 @@ impl StoreInterface {
 pub async fn run_service(daemon: StoreDaemon) -> Result<()> {
     let interface = StoreInterface::new(daemon);
     let _connection = Builder::session()?
-        .name("org.solus.SoftwareCenter")?
-        .serve_at("/org/solus/SoftwareCenter", interface)?
+        .name("org.synthex.SoftwareCenter")?
+        .serve_at("/org/synthex/SoftwareCenter", interface)?
         .build()
         .await?;
 
-    info!("solus-stored D-Bus service running on org.solus.SoftwareCenter");
+    info!("synthex-stored D-Bus service running on org.synthex.SoftwareCenter");
     std::future::pending::<()>().await;
     Ok(())
 }

@@ -1,0 +1,13 @@
+# Solus Studio — Dolphin File Manager
+
+[General]
+ShowFullPath=true
+ShowToolTips=true
+Version=5
+
+[MainWindow]
+MenuBar=Disabled
+ToolBar=Enabled
+
+[Preview]
+ShowPreview=true

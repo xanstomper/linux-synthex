@@ -1,0 +1,11 @@
+[Desktop Entry]
+Type=Application
+Name=Synthex Agent
+Comment=AI Desktop Assistant — Super+Space to open. Search, chat, code, knowledge, system control.
+Exec=synthex-agent
+Icon=synthex-agent
+Terminal=false
+Categories=Utility;System;AI;Development;
+StartupNotify=true
+X-GNOME-UsesNotifications=true
+X-KDE-StartupNotify=true

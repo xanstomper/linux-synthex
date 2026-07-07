@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# build-rust-rpms.sh — Build Rust-based RPM packages for Solus
+# build-rust-rpms.sh — Build Rust-based RPM packages for Synthex
 #
 # This script compiles Rust crates (daemons + tools) into release binaries,
 # creates source tarballs, and builds them into RPMs.
@@ -9,9 +9,9 @@
 #
 # Examples:
 #   ./build-rust-rpms.sh daemons       # Build all Rust daemons
-#   ./build-rust-rpms.sh tools         # Build solus-update-manager, driver-manager, pkg
+#   ./build-rust-rpms.sh tools         # Build synthex-update-manager, driver-manager, pkg
 #   ./build-rust-rpms.sh utils         # Build ripgrep, fd, bat, etc. (from upstream source)
-#   ./build-rust-rpms.sh solus-system-daemon  # Build single package
+#   ./build-rust-rpms.sh synthex-system-daemon  # Build single package
 set -euo pipefail
 
 ROOT="$(cd "$(dirname "$0")/.." && pwd)"
@@ -24,7 +24,7 @@ mkdir -p "$BUILDROOT"/{BUILD,RPMS,SOURCES,SPECS,SRPMS}
 mkdir -p "$REPO_DIR"/{x86_64,noarch}
 
 echo "╔══════════════════════════════════════════════════╗"
-echo "║      Solus Rust RPM Build Pipeline v0.1          ║"
+echo "║      Synthex Rust RPM Build Pipeline v0.1          ║"
 echo "╠══════════════════════════════════════════════════╣"
 echo "║  Rust: $(rustc --version 2>/dev/null || echo 'NOT FOUND')"
 echo "║  Cargo: $(cargo --version 2>/dev/null || echo 'NOT FOUND')"
@@ -38,7 +38,7 @@ build_daemons() {
     echo "🦀 Building Rust daemons..."
     cd "$ROOT"
 
-    # Build the root workspace (hwdaemon, desktopd, stored, gpu-setupd, solus-cli, system-daemon)
+    # Build the root workspace (hwdaemon, desktopd, stored, gpu-setupd, synthex-cli, system-daemon)
     cargo build --workspace $CARGO_FLAGS
 
     echo "  Binaries built in target/$RUST_TARGET/"
@@ -50,15 +50,15 @@ build_daemons() {
     # target/release/ which is in the build root.
 
     local daemon_specs=(
-        "solus-hwdaemon"
-        "solus-desktopd"
-        "solus-stored"
-        "solus-gpu-setupd"
-        "solus-system-daemon"
-        "solus-cli"
-        "solus-ai-daemon"
-        "solus-installer-detect"
-        "solus-control-center"
+        "synthex-hwdaemon"
+        "synthex-desktopd"
+        "synthex-stored"
+        "synthex-gpu-setupd"
+        "synthex-system-daemon"
+        "synthex-cli"
+        "synthex-ai-daemon"
+        "synthex-installer-detect"
+        "synthex-control-center"
     )
 
     for spec_name in "${daemon_specs[@]}"; do
@@ -87,20 +87,20 @@ build_daemons() {
     done
 }
 
-# ─── Build solus-rust-tools (separate workspace) ──────────────────────
+# ─── Build synthex-rust-tools (separate workspace) ──────────────────────
 
 build_tools() {
     echo ""
-    echo "🦀 Building Solus Rust tools (update-manager, driver-manager, pkg)..."
+    echo "🦀 Building Synthex Rust tools (update-manager, driver-manager, pkg)..."
 
     local tools=(
-        "solus-update-manager"
-        "solus-driver-manager"
-        "solus-pkg"
+        "synthex-update-manager"
+        "synthex-driver-manager"
+        "synthex-pkg"
     )
 
     for tool in "${tools[@]}"; do
-        local src_dir="$ROOT/src/solus-rust-tools/$tool"
+        local src_dir="$ROOT/src/synthex-rust-tools/$tool"
         local spec_path="$ROOT/packages/spec-files/$tool.spec"
 
         if [ ! -d "$src_dir" ]; then
@@ -121,8 +121,8 @@ build_tools() {
         local archive_name="${tool}-${version}.tar.gz"
         cd "$ROOT"
         tar czf "$BUILDROOT/SOURCES/$archive_name" \
-            --transform "s,src/solus-rust-tools/$tool,${tool}-${version}," \
-            "src/solus-rust-tools/$tool/" 2>/dev/null || true
+            --transform "s,src/synthex-rust-tools/$tool,${tool}-${version}," \
+            "src/synthex-rust-tools/$tool/" 2>/dev/null || true
 
         cp "$spec_path" "$BUILDROOT/SPECS/"
 

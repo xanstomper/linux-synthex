@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: MIT OR Apache-2.0
 //
-// solus-stored — Software Center backend daemon for Solus Linux
+// synthex-stored — Software Center backend daemon for SynthOS
 //
 // Manages DNF/RPM package operations, Flatpak, repository config,
 // and system updates. Exposes state via D-Bus for the control center.
@@ -54,28 +54,28 @@ impl StoreDaemon {
     pub fn new() -> Self {
         let mut repos = Vec::new();
 
-        // Solus repositories
+        // Synthex repositories
         repos.push(RepoInfo {
-            id: "solus-stable".into(),
-            name: "Solus Stable".into(),
+            id: "synthex-stable".into(),
+            name: "Synthex Stable".into(),
             enabled: true,
-            baseurl: "https://repo.solus.org/stable/$releasever/$basearch".into(),
+            baseurl: "https://repo.synthex.org/stable/$releasever/$basearch".into(),
             gpgcheck: true,
             priority: 5,
         });
         repos.push(RepoInfo {
-            id: "solus-updates".into(),
-            name: "Solus Updates".into(),
+            id: "synthex-updates".into(),
+            name: "Synthex Updates".into(),
             enabled: true,
-            baseurl: "https://repo.solus.org/updates/$releasever/$basearch".into(),
+            baseurl: "https://repo.synthex.org/updates/$releasever/$basearch".into(),
             gpgcheck: true,
             priority: 5,
         });
         repos.push(RepoInfo {
-            id: "solus-testing".into(),
-            name: "Solus Testing".into(),
+            id: "synthex-testing".into(),
+            name: "Synthex Testing".into(),
             enabled: false,
-            baseurl: "https://repo.solus.org/testing/$releasever/$basearch".into(),
+            baseurl: "https://repo.synthex.org/testing/$releasever/$basearch".into(),
             gpgcheck: true,
             priority: 10,
         });
@@ -228,11 +228,11 @@ fn main() -> Result<()> {
     tracing_subscriber::fmt()
         .with_env_filter(
             tracing_subscriber::EnvFilter::try_from_default_env()
-                .unwrap_or_else(|_| "solus_stored=info".into()),
+                .unwrap_or_else(|_| "synthex_stored=info".into()),
         )
         .init();
 
-    info!("Solus Software Store Daemon starting");
+    info!("Synthex Software Store Daemon starting");
     let daemon = StoreDaemon::new();
 
     let rt = tokio::runtime::Runtime::new()?;

@@ -1,4 +1,4 @@
-# Solus Linux RPM Spec — cosmic-applets
+# SynthOS RPM Spec — cosmic-applets
 # COSMIC applets (Rust/Iced)
 # Origin: Pop!_OS (System76)
 
@@ -44,5 +44,5 @@ install -D -m 0755 target/release/cosmic-applets %{buildroot}%{_bindir}/cosmic-a
 %{_bindir}/cosmic-applets
 
 %changelog
-* Mon Jul 07 2026 Solus Rust Team <rust@solus-project.org> - %{cosmicapplets_version}-1
-- Initial Solus package — COSMIC applets
+* Mon Jul 07 2026 Synthex Rust Team <rust@synthex-project.org> - %{cosmicapplets_version}-1
+- Initial Synthex package — COSMIC applets

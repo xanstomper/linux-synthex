@@ -1,4 +1,4 @@
-# Linux Solus Security Audit Checklist
+# Linux Synthex Security Audit Checklist
 
 > Version: 1.0.0
 > Last Updated: 2026-07-04
@@ -67,19 +67,19 @@ Each section contains control items with the following format:
 
 [ ] SB-03: Shim bootloader is installed and valid
     Expected: shimx64.efi present
-    Command: ls -la /boot/efi/EFI/solus/shimx64.efi
+    Command: ls -la /boot/efi/EFI/synthex/shimx64.efi
     Result: ________________
     Pass/Fail: ___/___
 
 [ ] SB-04: GRUB is signed and measured
     Expected: grubx64.efi signed
-    Command: pesign -S -i /boot/efi/EFI/solus/grubx64.efi
+    Command: pesign -S -i /boot/efi/EFI/synthex/grubx64.efi
     Result: ________________
     Pass/Fail: ___/___
 
 [ ] SB-05: Kernel is signed
     Expected: Valid signature
-    Command: sbsign --verify /boot/vmlinuz-*-solus 2>&1 | grep -i "signed"
+    Command: sbsign --verify /boot/vmlinuz-*-synthex 2>&1 | grep -i "signed"
     Result: ________________
     Pass/Fail: ___/___
 
@@ -101,7 +101,7 @@ Each section contains control items with the following format:
 ```
 [ ] FB-01: UEFI BIOS password is set
     Expected: Password enabled
-    Command: /usr/libexec/solus-check-bios-password
+    Command: /usr/libexec/synthex-check-bios-password
     Result: ________________
     Pass/Fail: ___/___
 
@@ -325,9 +325,9 @@ Each section contains control items with the following format:
 ### 3.3 Sysctl Configuration
 
 ```
-[ ] SC-01: /etc/sysctl.d/99-solus-hardening.conf exists
+[ ] SC-01: /etc/sysctl.d/99-synthex-hardening.conf exists
     Expected: File present
-    Command: ls -la /etc/sysctl.d/99-solus-hardening.conf
+    Command: ls -la /etc/sysctl.d/99-synthex-hardening.conf
     Result: ________________
     Pass/Fail: ___/___
 
@@ -375,19 +375,19 @@ Each section contains control items with the following format:
     Result: ________________
     Pass/Fail: ___/___
 
-[ ] SE-04: Solus policy module is loaded
-    Expected: solus-policy listed
-    Command: semodule -l | grep solus
+[ ] SE-04: Synthex policy module is loaded
+    Expected: synthex-policy listed
+    Command: semodule -l | grep synthex
     Result: ________________
     Pass/Fail: ___/___
 
-[ ] SE-05: File contexts for Solus binaries are correct
+[ ] SE-05: File contexts for Synthex binaries are correct
     Expected: solus_software_center_exec_t, etc.
-    Command: ls -Z /usr/bin/solus-*
+    Command: ls -Z /usr/bin/synthex-*
     Result: ________________
     Pass/Fail: ___/___
 
-[ ] SE-06: Solus policy module has no errors
+[ ] SE-06: Synthex policy module has no errors
     Expected: No semantic errors
     Command: secload -P -M -o /dev/null 2>&1 | grep -i "error" || echo "No errors"
     Result: ________________
@@ -701,7 +701,7 @@ Each section contains control items with the following format:
 
 [ ] LG-07: Audit rules file is immutable
     Expected: -e 2 present
-    Command: tail -1 /etc/audit/rules.d/99-solus-hardening.rules | grep "\-e 2"
+    Command: tail -1 /etc/audit/rules.d/99-synthex-hardening.rules | grep "\-e 2"
     Result: ________________
     Pass/Fail: ___/___
 ```
@@ -733,9 +733,9 @@ Each section contains control items with the following format:
     Result: ________________
     Pass/Fail: ___/___
 
-[ ] AC-05: Solus-specific events are audited
-    Expected: eopkg, flatpak, solus-* monitored
-    Command: auditctl -l | grep -c "eopkg\|flatpak\|solus"
+[ ] AC-05: Synthex-specific events are audited
+    Expected: eopkg, flatpak, synthex-* monitored
+    Command: auditctl -l | grep -c "eopkg\|flatpak\|synthex"
     Result: ________________
     Pass/Fail: ___/___
 ```
@@ -816,18 +816,18 @@ Each section contains control items with the following format:
     Pass/Fail: ___/___
 ```
 
-### 8.3 Solus Software Center
+### 8.3 Synthex Software Center
 
 ```
 [ ] SW-01: Software Center runs with SELinux restrictions
     Expected: solus_software_center_t context
-    Command: ps -Z -C solus-software-center 2>/dev/null | awk '{print $1}'
+    Command: ps -Z -C synthex-software-center 2>/dev/null | awk '{print $1}'
     Result: ________________
     Pass/Fail: ___/___
 
 [ ] SW-02: Software Center uses polkit for privileged operations
-    Expected: org.solus.software-center.policy exists
-    Command: ls -la /usr/share/polkit-1/actions/org.solus.software-center.* 2>/dev/null
+    Expected: org.synthex.software-center.policy exists
+    Command: ls -la /usr/share/polkit-1/actions/org.synthex.software-center.* 2>/dev/null
     Result: ________________
     Pass/Fail: ___/___
 ```
@@ -839,21 +839,21 @@ Each section contains control items with the following format:
 ### 9.1 Automatic Updates
 
 ```
-[ ] AU-01: Solus auto-update timer is enabled
+[ ] AU-01: Synthex auto-update timer is enabled
     Expected: Enabled and running
-    Command: systemctl is-enabled solus-update.timer
+    Command: systemctl is-enabled synthex-update.timer
     Result: ________________
     Pass/Fail: ___/___
 
 [ ] AU-02: Automatic updates check is configured
     Expected: Enabled=true in config
-    Command: grep "Enabled" /etc/solus/auto-update.conf 2>/dev/null
+    Command: grep "Enabled" /etc/synthex/auto-update.conf 2>/dev/null
     Result: ________________
     Pass/Fail: ___/___
 
 [ ] AU-03: Automatic firmware updates are enabled
     Expected: UpdateFirmware=true
-    Command: grep "UpdateFirmware" /etc/solus/auto-update.conf 2>/dev/null
+    Command: grep "UpdateFirmware" /etc/synthex/auto-update.conf 2>/dev/null
     Result: ________________
     Pass/Fail: ___/___
 
@@ -1122,20 +1122,20 @@ Each section contains control items with the following format:
 
 ```
 [ ] BR-01: Chromium managed policies are applied
-    Expected: solus-security.json exists
-    Command: ls -la /etc/chromium/policies/managed/solus-security.json 2>/dev/null || ls -la /etc/opt/chrome/policies/managed/solus-security.json 2>/dev/null
+    Expected: synthex-security.json exists
+    Command: ls -la /etc/chromium/policies/managed/synthex-security.json 2>/dev/null || ls -la /etc/opt/chrome/policies/managed/synthex-security.json 2>/dev/null
     Result: ________________
     Pass/Fail: ___/___
 
 [ ] BR-02: Chromium policy enforces site isolation
     Expected: EnableSiteIsolation=true
-    Command: grep "EnableSiteIsolation" /etc/chromium/policies/managed/solus-security.json 2>/dev/null
+    Command: grep "EnableSiteIsolation" /etc/chromium/policies/managed/synthex-security.json 2>/dev/null
     Result: ________________
     Pass/Fail: ___/___
 
 [ ] BR-03: Chromium Safe Browsing is enabled
     Expected: SafeBrowsingEnabled=true
-    Command: grep "SafeBrowsing" /etc/chromium/policies/managed/solus-security.json 2>/dev/null
+    Command: grep "SafeBrowsing" /etc/chromium/policies/managed/synthex-security.json 2>/dev/null
     Result: ________________
     Pass/Fail: ___/___
 
@@ -1159,7 +1159,7 @@ Each section contains control items with the following format:
 
 [ ] BR-07: DNS over HTTPS is enforced
     Expected: DoH enabled and locked
-    Command: grep "DNSOverHTTPS" /etc/firefox/syspolicy.json 2>/dev/null || grep "DNSOverHttpsMode" /etc/chromium/policies/managed/solus-security.json 2>/dev/null
+    Command: grep "DNSOverHTTPS" /etc/firefox/syspolicy.json 2>/dev/null || grep "DNSOverHttpsMode" /etc/chromium/policies/managed/synthex-security.json 2>/dev/null
     Result: ________________
     Pass/Fail: ___/___
 ```
@@ -1234,32 +1234,32 @@ Each section contains control items with the following format:
 
 ```
 [ ] SD-01: Security Dashboard is installed
-    Expected: solus-security-dashboard binary present
-    Command: which solus-security-dashboard
+    Expected: synthex-security-dashboard binary present
+    Command: which synthex-security-dashboard
     Result: ________________
     Pass/Fail: ___/___
 
 [ ] SD-02: Security Gatherer service is running
     Expected: Active (running)
-    Command: systemctl status solus-security-gatherer 2>/dev/null | grep "Active"
+    Command: systemctl status synthex-security-gatherer 2>/dev/null | grep "Active"
     Result: ________________
     Pass/Fail: ___/___
 
 [ ] SD-03: Security score is above 80/100
     Expected: >= 80
-    Command: dbus-send --system --print-reply --dest=org.solus.SecurityGatherer1 /org/solus/SecurityGatherer1 org.solus.SecurityGatherer1.get_security_score 2>/dev/null
+    Command: dbus-send --system --print-reply --dest=org.synthex.SecurityGatherer1 /org/synthex/SecurityGatherer1 org.synthex.SecurityGatherer1.get_security_score 2>/dev/null
     Result: ________________
     Pass/Fail: ___/___
 
 [ ] SD-04: Dashboard receives security events
     Expected: Recent events visible
-    Command: dbus-send --system --print-reply --dest=org.solus.SecurityGatherer1 /org/solus/SecurityGatherer1 org.solus.SecurityGatherer1.get_recent_events 2>/dev/null
+    Command: dbus-send --system --print-reply --dest=org.synthex.SecurityGatherer1 /org/synthex/SecurityGatherer1 org.synthex.SecurityGatherer1.get_recent_events 2>/dev/null
     Result: ________________
     Pass/Fail: ___/___
 
 [ ] SD-05: Dashboard is accessible via app menu
     Expected: .desktop file present
-    Command: ls -la /usr/share/applications/org.solus.SecurityDashboard.desktop
+    Command: ls -la /usr/share/applications/org.synthex.SecurityDashboard.desktop
     Result: ________________
     Pass/Fail: ___/___
 ```
@@ -1345,7 +1345,7 @@ Each section contains control items with the following format:
 | **OS Version** | ________________ |
 | **Kernel Version** | ________________ |
 | **SELinux Policy** | ________________ |
-| **Solus Version** | ________________ |
+| **Synthex Version** | ________________ |
 | **Audit Date** | ________________ |
 | **Auditor** | ________________ |
 | **Audit Type** | [ ] Internal  [ ] External  [ ] Compliance  [ ] Full |
@@ -1353,7 +1353,7 @@ Each section contains control items with the following format:
 
 ### Attestation
 
-I have performed the above security audit of this Linux Solus system and attest
+I have performed the above security audit of this Linux Synthex system and attest
 that the results accurately represent the system's current security posture.
 
 **Auditor Signature**: ________________         **Date**: ________________
@@ -1373,5 +1373,5 @@ that the results accurately represent the system's current security posture.
 
 ---
 
-*This checklist is part of the Linux Solus Security Architecture v1.0.0*
-*Reference: https://github.com/solus-project/security*
+*This checklist is part of the Linux Synthex Security Architecture v1.0.0*
+*Reference: https://github.com/synthex-project/security*

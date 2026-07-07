@@ -2,7 +2,7 @@
   "metadata": {
     "version": "1.0.0",
     "updated": "2026-07-04",
-    "description": "Solus AI preconfigured model library for quick one-click install",
+    "description": "Synthex AI preconfigured model library for quick one-click install",
     "total_models": 50,
     "source": "Ollama Library + Hugging Face"
   },
@@ -19,7 +19,7 @@
       "family": "llama",
       "author": "Meta AI",
       "license": "Llama 3.1 Community License",
-      "description": "Flagship general-purpose model with strong reasoning, coding, and multilingual capabilities. Solus recommended default.",
+      "description": "Flagship general-purpose model with strong reasoning, coding, and multilingual capabilities. Synthex recommended default.",
       "homepage": "https://ai.meta.com/llama/",
       "sizes": ["8b", "70b", "405b"],
       "quantizations": ["Q4_K_M", "Q5_K_M", "Q8_0", "F16"],

@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# setup-flathub.sh — Flathub auto-setup for Solus
+# setup-flathub.sh — Flathub auto-setup for Synthex
 # Configures Flathub repository and essential runtimes
 set -euo pipefail
 
@@ -16,8 +16,8 @@ fi
 echo "Adding Flathub remote..."
 sudo flatpak remote-add --if-not-exists flathub https://flathub.org/repo/flathub.flatpakrepo
 
-# Add Solus-specific remote
-sudo flatpak remote-add --if-not-exists solus https://flatpak.solus-project.org/repo/ 2>/dev/null || true
+# Add Synthex-specific remote
+sudo flatpak remote-add --if-not-exists synthex https://flatpak.synthex-project.org/repo/ 2>/dev/null || true
 
 # Install essential runtimes
 echo "Installing essential Flatpak runtimes..."

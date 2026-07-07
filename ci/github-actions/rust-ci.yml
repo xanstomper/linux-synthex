@@ -57,18 +57,18 @@ jobs:
 
       - name: Verify binaries
         run: |
-          file target/release/solus
-          file target/release/solus-hwdaemon
-          file target/release/solus-desktopd
-          file target/release/solus-stored
-          file target/release/solus-gpu-setupd
+          file target/release/synthex
+          file target/release/synthex-hwdaemon
+          file target/release/synthex-desktopd
+          file target/release/synthex-stored
+          file target/release/synthex-gpu-setupd
           ls -lh target/release/
 
       - name: Upload artifacts
         uses: actions/upload-artifact@v4
         with:
-          name: solus-rust-binaries
-          path: target/release/solus*
+          name: synthex-rust-binaries
+          path: target/release/synthex*
 
   security-audit:
     name: Security audit

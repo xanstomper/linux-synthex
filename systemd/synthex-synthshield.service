@@ -1,0 +1,19 @@
+[Unit]
+Description=SynthShield File Integrity Monitor
+After=local-fs.target
+
+[Service]
+Type=oneshot
+ExecStart=/usr/bin/synthshield scan
+RemainAfterExit=no
+
+User=root
+ProtectSystem=strict
+ProtectHome=read-only
+PrivateTmp=yes
+ReadWritePaths=/var/lib/synthshield /etc/synthbox
+CapabilityBoundingSet=CAP_DAC_READ_SEARCH
+SystemCallArchitectures=native
+
+[Install]
+WantedBy=multi-user.target

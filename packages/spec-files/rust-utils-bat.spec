@@ -1,4 +1,4 @@
-# Solus Linux RPM Spec — bat
+# SynthOS RPM Spec — bat
 # A cat(1) clone with syntax highlighting and Git integration
 # Origin: https://github.com/sharkdp/bat
 
@@ -33,7 +33,7 @@ Key features:
 - Customisable themes (over 30 built-in)
 - Paging, searching, and customisation
 
-Part of the Solus Rust utility suite.
+Part of the Synthex Rust utility suite.
 
 %prep
 %setup -q -n bat-v%{version}
@@ -65,7 +65,7 @@ mkdir -p %{buildroot}%{_datadir}/fish/vendor_completions.d
 %doc README.md LICENSE-MIT
 
 %changelog
-* Sun Jul 06 2026 Solus Rust Team <rust@solus-project.org> - 0.24.0-1
-- Initial Solus package of bat 0.24.0
+* Sun Jul 06 2026 Synthex Rust Team <rust@synthex-project.org> - 0.24.0-1
+- Initial Synthex package of bat 0.24.0
 - cat replacement — syntax highlighting, Git integration, paging
 - Shell completions: bash, zsh, fish

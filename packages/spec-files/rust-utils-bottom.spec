@@ -1,4 +1,4 @@
-# Solus Linux RPM Spec — bottom (btm)
+# SynthOS RPM Spec — bottom (btm)
 # A cross-platform graphical process/system monitor, written in Rust
 # Origin: https://github.com/ClementTsang/bottom
 
@@ -31,7 +31,7 @@ Key features:
 - Auto-expanding widgets for detailed views
 - History mode for tracking over time
 
-Part of the Solus Rust utility suite — replaces htop and btop.
+Part of the Synthex Rust utility suite — replaces htop and btop.
 
 %prep
 %setup -q -n bottom-%{version}
@@ -60,8 +60,8 @@ mkdir -p %{buildroot}%{_datadir}/fish/vendor_completions.d
 %doc README.md LICENSE
 
 %changelog
-* Sun Jul 06 2026 Solus Rust Team <rust@solus-project.org> - 0.10.2-1
-- Initial Solus package of bottom 0.10.2
+* Sun Jul 06 2026 Synthex Rust Team <rust@synthex-project.org> - 0.10.2-1
+- Initial Synthex package of bottom 0.10.2
 - htop replacement — graphical process/system monitor
 - Widgets: CPU, memory, disk, network, GPU, temperature, battery
 - Shell completions: bash, zsh, fish

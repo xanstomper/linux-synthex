@@ -1,0 +1,24 @@
+{
+  "rules": [
+    {"name": "steam", "priority": "high", "cgroup": "gaming"},
+    {"name": "gamescope", "priority": "realtime", "cgroup": "gaming"},
+    {"name": "mangohud", "priority": "high", "cgroup": "gaming"},
+    {"name": "gamemoded", "priority": "high", "cgroup": "gaming"},
+    {"name": "wine", "priority": "high", "cgroup": "gaming"},
+    {"name": "wine64", "priority": "high", "cgroup": "gaming"},
+    {"name": "wine-preloader", "priority": "high", "cgroup": "gaming"},
+    {"name": "lutris", "priority": "high", "cgroup": "gaming"},
+    {"name": "heroic", "priority": "high", "cgroup": "gaming"},
+    {"name": "obs", "priority": "high", "cgroup": "multimedia"},
+    {"name": "blender", "priority": "high", "cgroup": "multimedia"},
+    {"name": "rustc", "priority": "idle", "cgroup": "compile"},
+    {"name": "gcc", "priority": "idle", "cgroup": "compile"},
+    {"name": "make", "priority": "idle", "cgroup": "compile"},
+    {"name": "firefox", "priority": "normal", "cgroup": "browser"},
+    {"name": "discord", "priority": "normal", "cgroup": "comms"},
+    {"name": "pipewire", "priority": "high", "cgroup": "audio"},
+    {"name": "plasmashell", "priority": "normal", "cgroup": "display"},
+    {"name": "synthex-system-daemon", "priority": "high", "cgroup": "system"},
+    {"name": "synthex-ai-daemon", "priority": "idle", "cgroup": "system"}
+  ]
+}

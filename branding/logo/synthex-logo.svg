@@ -1,0 +1,73 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 64" width="256" height="64">
+  <defs>
+    <linearGradient id="amberGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#FFB300;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#FF8F00;stop-opacity:1" />
+    </linearGradient>
+    <linearGradient id="bgGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#1A1A2E;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#16213E;stop-opacity:1" />
+    </linearGradient>
+    <linearGradient id="blueGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#1565C0;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#0D47A1;stop-opacity:1" />
+    </linearGradient>
+  </defs>
+
+  <!-- Background circle (subtle) -->
+  <circle cx="32" cy="32" r="30" fill="url(#bgGradient)" opacity="0.3"/>
+
+  <!-- Outer gear ring -->
+  <g fill="url(#amberGradient)">
+    <!-- 8 gear teeth / sun rays -->
+    <!-- Top -->
+    <polygon points="26,4 38,4 36,10 28,10" />
+    <!-- Top-right -->
+    <polygon points="46,12 54,20 49,24 42,17" />
+    <!-- Right -->
+    <polygon points="60,26 60,38 54,36 54,28" />
+    <!-- Bottom-right -->
+    <polygon points="54,44 46,52 42,47 49,42" />
+    <!-- Bottom -->
+    <polygon points="38,54 26,54 28,48 36,48" />
+    <!-- Bottom-left -->
+    <polygon points="10,52 18,44 22,47 15,42" />
+    <!-- Left -->
+    <polygon points="4,38 4,26 10,28 10,36" />
+    <!-- Top-left -->
+    <polygon points="10,20 18,12 22,17 15,22" />
+  </g>
+
+  <!-- Outer ring circle -->
+  <circle cx="32" cy="32" r="20" fill="none" stroke="url(#amberGradient)" stroke-width="4" opacity="0.7"/>
+
+  <!-- Inner hexagon -->
+  <polygon points="32,16 44,24 44,40 32,48 20,40 20,24" fill="url(#blueGradient)" />
+
+  <!-- Open centre circle (transparent cutout via mask) -->
+  <mask id="centerCutout">
+    <rect x="0" y="0" width="64" height="64" fill="white" />
+    <circle cx="32" cy="32" r="7" fill="black" />
+  </mask>
+  <circle cx="32" cy="32" r="12" fill="url(#amberGradient)" mask="url(#centerCutout)" />
+
+  <!-- Inner glow accent -->
+  <circle cx="32" cy="32" r="6" fill="none" stroke="#FFD54F" stroke-width="1" opacity="0.5" />
+  <circle cx="32" cy="32" r="3" fill="#FFD54F" opacity="0.3" />
+
+  <!-- Subtle highlight on icon -->
+  <ellipse cx="24" cy="22" rx="10" ry="6" fill="white" opacity="0.08" transform="rotate(-30,24,22)" />
+
+  <!-- Wordmark "Synthex" -->
+  <g transform="translate(64, 20)">
+    <text x="0" y="0" font-family="'Inter','Segoe UI',Arial,sans-serif" font-size="32" font-weight="700" fill="#FFFFFF" letter-spacing="3">
+      Synthex
+    </text>
+    <!-- Subtle underline accent -->
+    <line x1="0" y1="6" x2="140" y2="6" stroke="#FFB300" stroke-width="2" opacity="0.6" />
+    <!-- Tagline -->
+    <text x="0" y="28" font-family="'Inter','Segoe UI',Arial,sans-serif" font-size="11" font-weight="400" fill="#C0C0D0" letter-spacing="4">
+      ILLUMINATE YOUR DESKTOP
+    </text>
+  </g>
+</svg>

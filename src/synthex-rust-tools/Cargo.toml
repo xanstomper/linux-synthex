@@ -1,0 +1,6 @@
+[package]
+name = "synthex-rust-tools"
+version = "0.1.0"
+edition = "2021"
+description = "SynthOS Rust tool suite — update manager, driver manager, package manager"
+authors = ["Synthex Rust Team <rust@synthex-project.org>"]

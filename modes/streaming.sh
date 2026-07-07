@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
-# Solus Streaming Mode — OBS-ready pipeline for streamers/creators
-# Part of the Solus Workspace Engine
+# Synthex Streaming Mode — OBS-ready pipeline for streamers/creators
+# Part of the Synthex Workspace Engine
 
 set -euo pipefail
 

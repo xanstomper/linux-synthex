@@ -1,0 +1,143 @@
+#!/usr/bin/env python3
+"""
+Synthex Proton Manager — manage Proton versions per game
+Like Nobara's Proton management tool.
+
+Usage:
+    synthex-proton list                 — List installed Proton versions
+    synthex-proton install <version>    — Install a Proton version (GE, Official)
+    synthex-proton set <game> <proton>  — Set Proton version for a game
+    synthex-proton config <game>        — Configure game-specific Proton settings
+"""
+import os, sys, subprocess, json, glob, shutil
+
+PROTON_DIR = "/usr/share/steam/compatibilitytools.d"
+STEAM_CONFIG = os.path.expanduser("~/.steam/steam/config/config.vdf")
+GAME_CONFIG = "/etc/synthex/proton-games.json"
+
+KNOWN_PROTONS = {
+    "GE-Proton": "https://api.github.com/repos/GloriousEggroll/proton-ge-custom/releases/latest",
+    "Proton-Exp": "https://api.github.com/repos/GloriousEggroll/proton-ge-custom/releases",
+    "Official": "steam"  # Steam's built-in Proton
+}
+
+def log(msg): print(f"[proton] {msg}")
+
+def list_installed():
+    """List installed Proton versions"""
+    versions = []
+    if os.path.exists(PROTON_DIR):
+        for d in os.listdir(PROTON_DIR):
+            ver_path = os.path.join(PROTON_DIR, d, "version")
+            if os.path.exists(ver_path):
+                ver = open(ver_path).read().strip()
+                versions.append({"name": d, "version": ver})
+            else:
+                versions.append({"name": d, "version": "unknown"})
+    return versions
+
+def list_official():
+    """List Steam's built-in Proton versions"""
+    official = ["Proton 9.0", "Proton 8.0", "Proton Experimental", "Proton Hotfix"]
+    return official
+
+def list_all():
+    installed = list_installed()
+    print("📦 Installed Proton Versions:")
+    if installed:
+        for v in installed:
+            print(f"  ✅ {v['name']} ({v['version']})")
+    else:
+        print("  (none installed)")
+    
+    print("\n📥 Available Official Versions (via Steam):")
+    for v in list_official():
+        print(f"  • {v}")
+    
+    print("\n🌐 Available GE-Proton (latest):")
+    print("  • GE-Proton (latest) — auto-download from GitHub")
+    
+    return installed
+
+def install_ge():
+    """Download and install latest GE-Proton"""
+    log("Downloading GE-Proton...")
+    try:
+        import urllib.request, tarfile
+        # Get latest release URL
+        api = urllib.request.urlopen("https://api.github.com/repos/GloriousEggroll/proton-ge-custom/releases/latest")
+        data = json.loads(api.read())
+        download_url = None
+        for asset in data["assets"]:
+            if asset["name"].endswith(".tar.gz"):
+                download_url = asset["browser_download_url"]
+                break
+        
+        if not download_url:
+            log("Could not find download URL")
+            return False
+        
+        # Download
+        os.makedirs(PROTON_DIR, exist_ok=True)
+        log(f"Downloading from {download_url}")
+        urllib.request.urlretrieve(download_url, "/tmp/proton-ge.tar.gz")
+        
+        # Extract
+        log("Extracting...")
+        shutil.unpack_archive("/tmp/proton-ge.tar.gz", PROTON_DIR)
+        os.remove("/tmp/proton-ge.tar.gz")
+        
+        # Get version name
+        name = data["name"] or os.path.basename(download_url).replace(".tar.gz", "")
+        log(f"✅ Installed: {name}")
+        return True
+    except Exception as e:
+        log(f"Failed: {e}")
+        return False
+
+def set_game_proton(game_id, proton_name):
+    """Set Proton version for a specific Steam game"""
+    config = {}
+    if os.path.exists(GAME_CONFIG):
+        with open(GAME_CONFIG) as f:
+            config = json.load(f)
+    
+    if "games" not in config:
+        config["games"] = {}
+    
+    config["games"][str(game_id)] = {"proton": proton_name}
+    
+    os.makedirs(os.path.dirname(GAME_CONFIG), exist_ok=True)
+    with open(GAME_CONFIG, "w") as f:
+        json.dump(config, f, indent=2)
+    log(f"Set {game_id} → {proton_name}")
+
+def game_config_menu(game_id):
+    """Show per-game configuration options"""
+    config = {}
+    if os.path.exists(GAME_CONFIG):
+        with open(GAME_CONFIG) as f:
+            config = json.load(f)
+    
+    game = config.get("games", {}).get(str(game_id), {})
+    print(f"\n🎮 Game {game_id} configuration:")
+    print(f"  Proton: {game.get('proton', 'default')}")
+    print(f"  Options: --no-esync, --no-fsync, --norb, --win10")
+
+if __name__ == "__main__":
+    cmd = sys.argv[1] if len(sys.argv) > 1 else "list"
+    
+    if cmd == "list":
+        list_all()
+    elif cmd == "install":
+        version = sys.argv[2] if len(sys.argv) > 2 else "GE-Proton"
+        if version == "GE-Proton":
+            install_ge()
+        else:
+            log(f"Unknown version: {version}")
+    elif cmd == "set" and len(sys.argv) >= 4:
+        set_game_proton(sys.argv[2], sys.argv[3])
+    elif cmd == "config" and len(sys.argv) >= 3:
+        game_config_menu(sys.argv[2])
+    else:
+        print(__doc__)

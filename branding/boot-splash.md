@@ -1,13 +1,13 @@
-# Solus Plymouth Boot Splash — Design Specification
+# Synthex Plymouth Boot Splash — Design Specification
 
 > Version 1.0 | July 2026  
-> Part of the Linux Solus Brand Identity
+> Part of the Linux Synthex Brand Identity
 
 ---
 
 ## 1. Overview
 
-The Solus Plymouth boot splash provides a branded, smooth boot animation displayed during system startup. It combines the Solus icon mark with the signature amber→purple gradient on a dark background.
+The Synthex Plymouth boot splash provides a branded, smooth boot animation displayed during system startup. It combines the Synthex icon mark with the signature amber→purple gradient on a dark background.
 
 ---
 
@@ -24,7 +24,7 @@ The Solus Plymouth boot splash provides a branded, smooth boot animation display
 │                                                       │
 │                    ┌─────────────┐                     │
 │                    │  █████████  │                     │
-│                    │  ██ ○ ██   │  ← Solus icon        │
+│                    │  ██ ○ ██   │  ← Synthex icon        │
 │                    │  █████████  │     animated         │
 │                    └─────────────┘                     │
 │                                                       │
@@ -32,7 +32,7 @@ The Solus Plymouth boot splash provides a branded, smooth boot animation display
 │                    Progress bar                        │
 │                    (amber, pulsing)                    │
 │                                                       │
-│                    Solus                               │
+│                    Synthex                               │
 │                    Illuminate Your Desktop             │
 │                                                       │
 │                                                       │
@@ -58,7 +58,7 @@ The Solus Plymouth boot splash provides a branded, smooth boot animation display
 | Icon glow            | `#FFB300` | Icon ambient glow (50% opacity)  |
 | Progress bar fill    | `#FFB300` | Active progress                  |
 | Progress bar track   | `#0F3460` | Inactive progress                |
-| Title text           | `#E8E8F0` | "Solus" wordmark                 |
+| Title text           | `#E8E8F0` | "Synthex" wordmark                 |
 | Tagline text         | `#C0C0D0` | "Illuminate Your Desktop"        |
 | Edition indicator    | `#707090` | Edition name                     |
 | Dot markers          | `#0F3460` | Inactive dots                    |
@@ -68,7 +68,7 @@ The Solus Plymouth boot splash provides a branded, smooth boot animation display
 
 | Element           | Font              | Size  | Weight | Colour    |
 |-------------------|-------------------|-------|--------|-----------|
-| "Solus"           | Inter Bold        | 36px  | 700    | `#E8E8F0` |
+| "Synthex"           | Inter Bold        | 36px  | 700    | `#E8E8F0` |
 | Tagline           | Inter Regular     | 16px  | 400    | `#C0C0D0` |
 | Edition           | Inter Medium      | 12px  | 500    | `#707090` |
 
@@ -78,7 +78,7 @@ The Solus Plymouth boot splash provides a branded, smooth boot animation display
 
 ### Phase 1: Logo Fade-In (0–1.5s)
 - Background fades from black to `#1A1A2E`
-- Solus icon mark fades in (opacity: 0 → 1) at centre
+- Synthex icon mark fades in (opacity: 0 → 1) at centre
 - Subtle radial glow expands from centre
 
 ### Phase 2: Icon Pulse (1.5s → continuous)
@@ -120,7 +120,7 @@ The Solus Plymouth boot splash provides a branded, smooth boot animation display
 ## 5. Component Details
 
 ### 5.1 Icon Mark Animation
-- Base: Solus icon mark in amber with deep blue hexagon
+- Base: Synthex icon mark in amber with deep blue hexagon
 - Scale pulse: 1.0 → 1.05 → 1.0 (3s sine wave)
 - Rotation: 0° → +5° CW → 0° → -5° CCW → 0° (6s loop)
 - Glow: Radial gradient behind icon, opacity 0.3 → 0.6 → 0.3 (3s)
@@ -152,7 +152,7 @@ Bottom bar (actual progress):
 
 ## 6. Themes
 
-The Plymouth theme supports all Solus editions:
+The Plymouth theme supports all Synthex editions:
 
 | Edition  | Icon Colour       | Progress Colour   | Edition Text |
 |----------|-------------------|-------------------|--------------|
@@ -168,11 +168,11 @@ The Plymouth theme supports all Solus editions:
 ```
 boot-splash/
 ├── boot-splash.md              # This design specification
-├── solus/                      # Plymouth theme directory
-│   ├── solus.plymouth          # Theme metadata file
-│   ├── solus.script            # Plymouth script file
-│   ├── logo.png                # Solus icon mark (128×128, amber)
-│   ├── logo-16.png             # Solus icon (16×16, fallback)
+├── synthex/                      # Plymouth theme directory
+│   ├── synthex.plymouth          # Theme metadata file
+│   ├── synthex.script            # Plymouth script file
+│   ├── logo.png                # Synthex icon mark (128×128, amber)
+│   ├── logo-16.png             # Synthex icon (16×16, fallback)
 │   ├── box.png                 # Progress bar background
 │   ├── box-inactive.png        # Inactive progress bar
 │   ├── bullet.png              # Active dot marker
@@ -182,11 +182,11 @@ boot-splash/
 └── README.md                   # Build and install instructions
 ```
 
-### solus.plymouth
+### synthex.plymouth
 ```
 [Plymouth Theme]
-Name=Solus
-Description=Solus branded boot splash with amber accents
+Name=Synthex
+Description=Synthex branded boot splash with amber accents
 ModuleName=script
 ```
 
@@ -204,10 +204,10 @@ ModuleName=script
 
 ```bash
 # Copy theme
-sudo cp -r solus /usr/share/plymouth/themes/solus
+sudo cp -r synthex /usr/share/plymouth/themes/synthex
 
 # Install theme
-sudo plymouth-set-default-theme solus
+sudo plymouth-set-default-theme synthex
 
 # Regenerate initramfs
 sudo update-initramfs -u
@@ -243,4 +243,4 @@ sudo plymouth --quit
 
 ---
 
-*© 2026 Linux Solus Project. Licensed under GPL-3.0+.*
+*© 2026 Linux Synthex Project. Licensed under GPL-3.0+.*

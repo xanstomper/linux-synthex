@@ -1,4 +1,4 @@
-# Solus Linux RPM Spec — cosmic-text-editor
+# SynthOS RPM Spec — cosmic-text-editor
 # COSMIC text editor (Rust/Iced)
 # Origin: Pop!_OS (System76)
 
@@ -45,5 +45,5 @@ install -D -m 0755 target/release/cosmic-text-editor %{buildroot}%{_bindir}/cosm
 %{_bindir}/cosmic-text-editor
 
 %changelog
-* Mon Jul 07 2026 Solus Rust Team <rust@solus-project.org> - %{cosmicte_version}-1
-- Initial Solus package — COSMIC text editor
+* Mon Jul 07 2026 Synthex Rust Team <rust@synthex-project.org> - %{cosmicte_version}-1
+- Initial Synthex package — COSMIC text editor

@@ -1,4 +1,4 @@
-# Solus Linux RPM Spec — sd (sed replacement)
+# SynthOS RPM Spec — sd (sed replacement)
 # An intuitive find & replace CLI, written in Rust
 # Origin: https://github.com/chmln/sd
 
@@ -30,7 +30,7 @@ Key features:
 - UTF-8 aware by default
 - Faster than sed for most common patterns
 
-Part of the Solus Rust utility suite — replaces sed for most use cases.
+Part of the Synthex Rust utility suite — replaces sed for most use cases.
 
 %prep
 %setup -q -n sd-%{version}
@@ -54,7 +54,7 @@ mkdir -p %{buildroot}%{_datadir}/zsh/site-functions
 %doc README.md LICENSE
 
 %changelog
-* Sun Jul 06 2026 Solus Rust Team <rust@solus-project.org> - 1.0.0-1
-- Initial Solus package of sd 1.0.0
+* Sun Jul 06 2026 Synthex Rust Team <rust@synthex-project.org> - 1.0.0-1
+- Initial Synthex package of sd 1.0.0
 - sed replacement — intuitive find & replace syntax
 - Shell completions: bash, zsh

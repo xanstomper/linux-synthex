@@ -1,0 +1,86 @@
+#!/usr/bin/env bash
+# Synthex Workspace Engine — Mode Switcher
+# Usage: synthex-workspace <mode>
+#   gaming    — Max gaming performance
+#   dev       — Development tools enabled
+#   creator   — Creative workload optimized
+#   battery   — Power saving
+#   balanced  — Default system behavior
+#   status    — Show current mode
+
+set -euo pipefail
+
+MODE_DIR="/usr/share/synthex/modes"
+STATE_FILE="/var/run/synthex-workspace-mode"
+
+show_usage() {
+    echo "Synthex Workspace Engine"
+    echo "Usage: synthex-workspace <mode>"
+    echo ""
+    echo "Modes:"
+    echo "  gaming     — Max gaming performance"
+    echo "  dev        — Development tools enabled"
+    echo "  creator    — Creative workload optimized"
+    echo "  battery    — Power saving"
+    echo "  balanced   — Default system behavior"
+    echo "  status     — Show current mode"
+    echo "  list       — List available modes"
+    exit 1
+}
+
+show_status() {
+    if [ -f "$STATE_FILE" ]; then
+        current=$(cat "$STATE_FILE")
+        echo "Current mode: $current"
+    else
+        echo "Current mode: balanced (default)"
+    fi
+}
+
+list_modes() {
+    echo "Available modes:"
+    for mode in "$MODE_DIR"/*.sh; do
+        name=$(basename "$mode" .sh)
+        desc=$(head -2 "$mode" | tail -1 | sed 's/# //')
+        echo "  • $name"
+    done
+}
+
+if [ $# -lt 1 ]; then
+    show_usage
+fi
+
+case "${1,,}" in
+    gaming|dev|creator|battery|balanced)
+        mode="${1,,}"
+        script="$MODE_DIR/$mode.sh"
+        
+        if [ ! -f "$script" ]; then
+            echo "Error: Mode script not found: $script"
+            exit 1
+        fi
+        
+        echo "🔄 Switching to $mode mode..."
+        
+        # Create snapshot before mode switch
+        snapper -c root create -d "mode-$mode" 2>/dev/null || true
+        
+        # Run mode script
+        bash "$script"
+        
+        # Save state
+        echo "$mode" > "$STATE_FILE"
+        
+        echo ""
+        echo "✅ System now in $mode mode"
+        ;;
+    status)
+        show_status
+        ;;
+    list)
+        list_modes
+        ;;
+    *)
+        show_usage
+        ;;
+esac

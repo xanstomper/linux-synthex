@@ -1,4 +1,4 @@
-# Solus Linux RPM Spec — cosmic-workspaces
+# SynthOS RPM Spec — cosmic-workspaces
 # COSMIC workspace overview (Rust/Iced)
 # Origin: Pop!_OS (System76)
 
@@ -42,5 +42,5 @@ install -D -m 0755 target/release/cosmic-workspaces %{buildroot}%{_bindir}/cosmi
 %{_bindir}/cosmic-workspaces
 
 %changelog
-* Mon Jul 07 2026 Solus Rust Team <rust@solus-project.org> - %{cosmicws_version}-1
-- Initial Solus package — COSMIC workspace manager
+* Mon Jul 07 2026 Synthex Rust Team <rust@synthex-project.org> - %{cosmicws_version}-1
+- Initial Synthex package — COSMIC workspace manager

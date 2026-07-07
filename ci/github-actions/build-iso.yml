@@ -12,7 +12,7 @@ on:
 
 jobs:
   build-iso-docker:
-    name: Build Solus ISO
+    name: Build Synthex ISO
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -22,12 +22,12 @@ jobs:
 
       - name: Build ISO
         run: |
-          sudo bash scripts/build-solus.sh docker-build 2>&1 | tail -5
-          sudo bash scripts/build-solus.sh build-rootfs 2>&1 | tail -5
+          sudo bash scripts/build-synthex.sh docker-build 2>&1 | tail -5
+          sudo bash scripts/build-synthex.sh build-rootfs 2>&1 | tail -5
 
       - name: Upload ISO
         uses: actions/upload-artifact@v4
         with:
-          name: solus-iso
+          name: synthex-iso
           path: build/out/*.iso
           retention-days: 7

@@ -1,0 +1,16 @@
+# Solus Gaming — KWin Configuration
+
+[Compositing]
+Backend=opengl
+Enabled=true
+AnimationSpeed=3
+
+[Windows]
+FocusPolicy=ClickFocus
+
+[Effects]
+Blur=true
+
+[Plugins]
+blurEnabled=true
+slidingpopupsEnabled=true

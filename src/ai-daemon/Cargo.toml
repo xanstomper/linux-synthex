@@ -1,14 +1,14 @@
 [package]
-name = "solus-ai-daemon"
+name = "synthex-ai-daemon"
 version.workspace = true
 edition.workspace = true
 license.workspace = true
 authors.workspace = true
-description = "Solus AI daemon — local LLM integration via Ollama, D-Bus API for system-wide AI access, voice commands via Whisper"
+description = "Synthex AI daemon — local LLM integration via Ollama, D-Bus API for system-wide AI access, voice commands via Whisper"
 
 [package.metadata.rpm]
-name = "solus-ai-daemon"
-summary = "Solus AI daemon — Rust-powered local LLM management and system AI API"
+name = "synthex-ai-daemon"
+summary = "Synthex AI daemon — Rust-powered local LLM management and system AI API"
 
 [dependencies]
 serde.workspace = true

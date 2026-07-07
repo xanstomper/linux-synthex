@@ -3,7 +3,7 @@
 > **Document Classification**: CONFIDENTIAL
 > **Report Version**: 1.0
 > **Assessment Date**: ________________
-> **Prepared For**: Linux Solus Project
+> **Prepared For**: Linux Synthex Project
 > **Prepared By**: ________________ (Red Team Lead)
 
 ---
@@ -33,10 +33,10 @@
 
 ### 1.1 Overview
 
-The Linux Solus Red Team assessment was conducted from [START_DATE] to [END_DATE]
+The Linux Synthex Red Team assessment was conducted from [START_DATE] to [END_DATE]
 against [TARGET_ENVIRONMENT]. The objective was to evaluate the effectiveness of
 defense-in-depth security controls, SELinux policies, and the overall security
-posture of the Linux Solus operating system.
+posture of the Linux Synthex operating system.
 
 ### 1.2 Scope Summary
 
@@ -76,7 +76,7 @@ significant gaps? What should leadership prioritize?]
 
 #### Key Strengths
 
-1. **SELinux Enforcement**: Solus SELinux policy successfully contained [X] types
+1. **SELinux Enforcement**: Synthex SELinux policy successfully contained [X] types
    of attacks within the targeted domain space.
 2. **[Another Strength]**: ...
 3. **[Another Strength]**: ...
@@ -103,9 +103,9 @@ significant gaps? What should leadership prioritize?]
 
 | Application | Version | Service Owner | Notes |
 |-------------|---------|--------------|-------|
-| Solus Software Center | | | |
-| Solus Update Manager | | | |
-| Solus Settings Daemon | | | |
+| Synthex Software Center | | | |
+| Synthex Update Manager | | | |
+| Synthex Settings Daemon | | | |
 | Budgie Desktop | | | |
 | Security Dashboard | | | |
 | [Other] | | | |
@@ -208,7 +208,7 @@ Phase 5: Impact
 
 | Attribute | Value |
 |-----------|-------|
-| **OS** | Solus [Version] |
+| **OS** | Synthex [Version] |
 | **Kernel** | [Version] |
 | **Architecture** | x86_64 |
 | **SELinux Policy** | targeted v[Version] |
@@ -563,7 +563,7 @@ Day 5 - Objectives
 ### 12.2 YARA Rules
 
 ```yara
-rule Solus_RedTeam_Backdoor_v1
+rule Synthex_RedTeam_Backdoor_v1
 {
     meta:
         description = "Detects backdoor planted during Red Team assessment"
@@ -582,7 +582,7 @@ rule Solus_RedTeam_Backdoor_v1
 ### 12.3 Sigma Rules
 
 ```yaml
-title: Solus Red Team Backdoor Detection
+title: Synthex Red Team Backdoor Detection
 id: [UUID]
 status: test
 description: Detects backdoor behavioral patterns
@@ -670,7 +670,7 @@ level: critical
 #### Falco Rules
 
 ```yaml
-- rule: Solus Unauthorized Kernel Module Load
+- rule: Synthex Unauthorized Kernel Module Load
   desc: Detect unauthorized kernel module loading
   condition: >
     evt.type=init_module and
@@ -679,7 +679,7 @@ level: critical
     unauthorized kernel module load
     (user=%user.name command=%proc.cmdline module=%evt.arg.name)
   priority: CRITICAL
-  tags: [solus, kernel, persistence]
+  tags: [synthex, kernel, persistence]
 ```
 
 ### 14.3 SOAR Playbook Recommendations
@@ -756,7 +756,7 @@ level: critical
 - [CIS Linux Benchmark v3.0](https://www.cisecurity.org/benchmark/linux)
 - [MITRE ATT&CK Framework](https://attack.mitre.org)
 - [NIST SP 800-115](https://csrc.nist.gov/publications/detail/sp/800-115/final)
-- [Solus Security Architecture](https://github.com/solus-project/security)
+- [Synthex Security Architecture](https://github.com/synthex-project/security)
 - [SELinux Documentation](https://selinuxproject.org)
 - [OWASP Testing Guide](https://owasp.org/www-project-web-security-testing-guide/)
 - [PTES Technical Guidelines](http://www.pentest-standard.org)
@@ -781,6 +781,6 @@ level: critical
 ---
 
 *This document contains confidential information and should be handled in
-accordance with the Linux Solus Project security policies.*
+accordance with the Linux Synthex Project security policies.*
 
-*Copyright (c) 2026 Linux Solus Project. All rights reserved.*
+*Copyright (c) 2026 Linux Synthex Project. All rights reserved.*

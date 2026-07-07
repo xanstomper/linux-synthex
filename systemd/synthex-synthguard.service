@@ -1,0 +1,26 @@
+[Unit]
+Description=SynthGuard Kernel Security Monitor
+After=auditd.service
+Wants=auditd.service
+
+[Service]
+Type=oneshot
+ExecStart=/usr/bin/synthguard monitor
+ExecStart=/usr/bin/synthguard integrity check
+RemainAfterExit=no
+
+# Security hardening
+User=root
+ProtectSystem=strict
+ProtectHome=read-only
+PrivateTmp=yes
+NoNewPrivileges=no
+ReadWritePaths=/var/log/synthguard /var/lib/synthguard /etc/synthguard
+CapabilityBoundingSet=CAP_DAC_READ_SEARCH CAP_SYSLOG CAP_NET_ADMIN
+SystemCallArchitectures=native
+ProtectKernelTunables=yes
+ProtectKernelModules=yes
+ProtectControlGroups=yes
+
+[Install]
+WantedBy=multi-user.target

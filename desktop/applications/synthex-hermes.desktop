@@ -1,0 +1,12 @@
+[Desktop Entry]
+Type=Application
+Name=Hermes OS Agent
+Comment=Native AI assistant — Super+Space to open. Search files, apps, settings, and chat with AI.
+Exec=synthex-hermes
+Icon=hermes
+Terminal=false
+Categories=Utility;System;AI;
+StartupNotify=true
+StartupWMClass=hermes
+X-GNOME-UsesNotifications=true
+X-KDE-StartupNotify=true

@@ -1,4 +1,4 @@
-# Solus AI — Artificial Intelligence Integration Architecture
+# Synthex AI — Artificial Intelligence Integration Architecture
 
 > **Version:** 1.0  
 > **Status:** Draft  
@@ -8,9 +8,9 @@
 
 ## Table of Contents
 
-1. [AI Vision for Solus](#1-ai-vision-for-solus)
+1. [AI Vision for Synthex](#1-ai-vision-for-synthex)
 2. [Core Design Principles](#2-core-design-principles)
-3. [Solus AI Hub Overview](#3-solus-ai-hub-overview)
+3. [Synthex AI Hub Overview](#3-synthex-ai-hub-overview)
 4. [Local LLM Stack Architecture](#4-local-llm-stack-architecture)
 5. [Ollama Integration](#5-ollama-integration)
 6. [Open WebUI Integration](#6-open-webui-integration)
@@ -23,20 +23,20 @@
 13. [AI-Powered System Features](#13-ai-powered-system-features)
 14. [Developer AI Tools](#14-developer-ai-tools)
 15. [Resource Management](#15-resource-management)
-16. [Solus AI Hub GUI Design Specification](#16-solus-ai-hub-gui-design-specification)
+16. [Synthex AI Hub GUI Design Specification](#16-synthex-ai-hub-gui-design-specification)
 17. [Roadmap](#17-roadmap)
 
 ---
 
-## 1. AI Vision for Solus
+## 1. AI Vision for Synthex
 
 ### 1.1 The Mission
 
-Solus AI aims to make artificial intelligence **accessible, local, private, and performant** for every Solus Linux user. Our vision is a desktop operating system where AI is not a cloud subscription or a remote API call, but a deeply integrated, locally-running capability that respects user privacy and works entirely offline.
+Synthex AI aims to make artificial intelligence **accessible, local, private, and performant** for every SynthOS user. Our vision is a desktop operating system where AI is not a cloud subscription or a remote API call, but a deeply integrated, locally-running capability that respects user privacy and works entirely offline.
 
 ### 1.2 Why Local AI?
 
-| Cloud AI | Local AI (Solus) |
+| Cloud AI | Local AI (Synthex) |
 |----------|------------------|
 | Data leaves your machine | **Everything stays on-device** |
 | Subscription costs | **Free, once downloaded** |
@@ -63,13 +63,13 @@ Solus AI aims to make artificial intelligence **accessible, local, private, and 
 4. **Performance** — GPU-accelerated inference with dynamic resource management.
 5. **User-Friendly** — One-click model install, intuitive GUI, minimal configuration.
 6. **Respectful** — No telemetry, no phoning home, no hidden data collection.
-7. **Open Source** — All Solus AI components are GPL-compatible open source.
+7. **Open Source** — All Synthex AI components are GPL-compatible open source.
 
 ---
 
-## 3. Solus AI Hub Overview
+## 3. Synthex AI Hub Overview
 
-Solus AI Hub is the central GUI application for managing the entire AI stack. It provides:
+Synthex AI Hub is the central GUI application for managing the entire AI stack. It provides:
 
 - **Model Manager** — Browse, download, cache, prune, and update local models
 - **Runtime Manager** — Start/stop Ollama and Open WebUI services
@@ -82,7 +82,7 @@ Solus AI Hub is the central GUI application for managing the entire AI stack. It
 
 ```
 ┌─────────────────────────────────────────────────────────────┐
-│                    Solus AI Hub (GUI)                        │
+│                    Synthex AI Hub (GUI)                        │
 ├─────────────────────────────────────────────────────────────┤
 │  ┌─────────┐  ┌──────────┐  ┌──────────┐  ┌─────────────┐  │
 │  │ Model   │  │ Chat     │  │ System   │  │ Settings &  │  │
@@ -105,7 +105,7 @@ Solus AI Hub is the central GUI application for managing the entire AI stack. It
             │                            │
     ┌───────┴────────────┐    ┌──────────┴──────────┐
     │ Model Storage      │    │ ROCm / CUDA / oneAPI│
-    │ ~/.solus/ai/models/│    │ Intel GPU drivers   │
+    │ ~/.synthex/ai/models/│    │ Intel GPU drivers   │
     └────────────────────┘    └─────────────────────┘
 ```
 
@@ -118,7 +118,7 @@ Solus AI Hub is the central GUI application for managing the entire AI stack. It
 ```
 ┌──────────────────────────────────────────────────────────────┐
 │                    USER APPLICATIONS                          │
-│  (Solus AI Hub, Terminal, File Manager, Search, IDE)         │
+│  (Synthex AI Hub, Terminal, File Manager, Search, IDE)         │
 ├──────────────────────────────────────────────────────────────┤
 │                    AI ASSISTANT API                           │
 │  (Local REST/gRPC — system-wide AI integration)              │
@@ -144,7 +144,7 @@ Solus AI Hub is the central GUI application for managing the entire AI stack. It
 │  │ CPU AVX2 │  │ (RX 5000+)   │  │ (GTX 900+, RTX all)  │   │
 │  └──────────┘  └──────────────┘  └──────────────────────┘   │
 │  ┌──────────────────┐  ┌────────────────────────────────┐   │
-│  │ Intel oneAPI     │  │ Apple Silicon (Solus ARM)      │   │
+│  │ Intel oneAPI     │  │ Apple Silicon (Synthex ARM)      │   │
 │  │ (Arc, Iris Xe)   │  │ (M1/M2/M3/M4 — Metal)         │   │
 │  └──────────────────┘  └────────────────────────────────┘   │
 └──────────────────────────────────────────────────────────────┘
@@ -203,23 +203,23 @@ AI Assistant API ──→ Intent Classification
 
 ### 5.1 Package
 
-Solus AI ships `ollama` as a first-party package maintained in the Solus repository.
+Synthex AI ships `ollama` as a first-party package maintained in the Synthex repository.
 
-**Package Spec:** `solus-ai-platform.spec` includes `ollama` as a dependency.
+**Package Spec:** `synthex-ai-platform.spec` includes `ollama` as a dependency.
 
 ### 5.2 Configuration
 
 Ollama configuration is managed through:
 - `/etc/ollama/ollama.json` — system-wide config (installed by package)
 - `~/.ollama/` — user-specific overrides
-- Solus AI Hub GUI — visual configuration editor
+- Synthex AI Hub GUI — visual configuration editor
 
-### 5.3 Solus-Specific Defaults
+### 5.3 Synthex-Specific Defaults
 
-| Setting | Solus Default | Rationale |
+| Setting | Synthex Default | Rationale |
 |---------|---------------|-----------|
 | `OLLAMA_HOST` | `127.0.0.1:11434` | Local-only binding for security |
-| `OLLAMA_MODELS` | `~/.solus/ai/models/` | Unified model storage location |
+| `OLLAMA_MODELS` | `~/.synthex/ai/models/` | Unified model storage location |
 | `OLLAMA_KEEP_ALIVE` | `5m` | Balance memory and responsiveness |
 | `OLLAMA_NUM_PARALLEL` | `1` | Single-user desktop optimization |
 | `OLLAMA_MAX_LOADED_MODELS` | `1` | Memory conservation for desktop |
@@ -227,16 +227,16 @@ Ollama configuration is managed through:
 
 ### 5.4 systemd Integration
 
-- `ollama.service` — upstream service unit with Solus-specific hardening
+- `ollama.service` — upstream service unit with Synthex-specific hardening
 - `ollama.socket` — socket-activated service (optional, start on demand)
-- Automatic start/stop via Solus AI Hub
+- Automatic start/stop via Synthex AI Hub
 
 ### 5.5 Security Hardening
 
 - Service runs as `ollama` user (dedicated system account)
 - No network exposure beyond `127.0.0.1`
 - `ProtectHome=true`, `PrivateTmp=true` in systemd unit
-- Model files stored under `/var/lib/ollama/` (package-managed) or `~/.solus/ai/models/` (user)
+- Model files stored under `/var/lib/ollama/` (package-managed) or `~/.synthex/ai/models/` (user)
 
 ---
 
@@ -244,26 +244,26 @@ Ollama configuration is managed through:
 
 ### 6.1 Overview
 
-[Open WebUI](https://github.com/open-webui/open-webui) is an extensible, feature-rich, and user-friendly self-hosted WebUI for LLMs. Solus AI Hub bundles Open WebUI as an optional component.
+[Open WebUI](https://github.com/open-webui/open-webui) is an extensible, feature-rich, and user-friendly self-hosted WebUI for LLMs. Synthex AI Hub bundles Open WebUI as an optional component.
 
 ### 6.2 Installation
 
 - Available as a containerized deployment (`podman` / `docker`)
-- Native installation via `python-open-webui` package (Solus repository)
-- One-click enable from Solus AI Hub
+- Native installation via `python-open-webui` package (Synthex repository)
+- One-click enable from Synthex AI Hub
 
-### 6.3 Features Enabled for Solus
+### 6.3 Features Enabled for Synthex
 
 - **Multi-model chat** — switch between installed models mid-conversation
 - **RAG pipeline** — document Q&A with local embeddings
 - **Collaborative mode** — share session links on local network
-- **Voice input** — via Solus Whisper integration
-- **Tools & plugins** — Solus-specific plugins for file system access
+- **Voice input** — via Synthex Whisper integration
+- **Tools & plugins** — Synthex-specific plugins for file system access
 - **Authentication** — optional, defaults to single-user mode
 
-### 6.4 Solus Skin
+### 6.4 Synthex Skin
 
-- Matches Solus Budgie/GTK theme
+- Matches Synthex Budgie/GTK theme
 - Respects system dark/light mode
 - Adwaita/Qt styling consistency
 
@@ -273,7 +273,7 @@ Ollama configuration is managed through:
 
 ### 7.1 Detection and Selection
 
-On first run, Solus AI Hub detects available GPU hardware and configures acceleration automatically:
+On first run, Synthex AI Hub detects available GPU hardware and configures acceleration automatically:
 
 ```bash
 # Detection logic (simplified)
@@ -336,7 +336,7 @@ Model Layers
 └────────────────────────────────────┘
 ```
 
-**Solus AI Hub automatically optimizes offloading** based on available VRAM:
+**Synthex AI Hub automatically optimizes offloading** based on available VRAM:
 
 | VRAM | 7B Model | 13B Model | 34B Model | 70B Model |
 |------|----------|-----------|-----------|-----------|
@@ -353,7 +353,7 @@ Model Layers
 ### 8.1 Storage Layout
 
 ```
-~/.solus/ai/
+~/.synthex/ai/
 ├── models/           # Symbolic link target for model storage
 │   ├── llama/        # Organized by model family
 │   ├── qwen/
@@ -424,7 +424,7 @@ Ready for inference
 
 ## 9. Quantization Support
 
-Solus AI supports all major quantization formats to enable running models on consumer hardware.
+Synthex AI supports all major quantization formats to enable running models on consumer hardware.
 
 ### 9.1 Quantization Formats
 
@@ -512,7 +512,7 @@ Solus AI supports all major quantization formats to enable running models on con
 
 ### 11.1 Overview
 
-The AI Assistant API provides a standardized interface for any Solus application to request AI services from the locally-running model stack. It exposes a REST/gRPC API on localhost.
+The AI Assistant API provides a standardized interface for any Synthex application to request AI services from the locally-running model stack. It exposes a REST/gRPC API on localhost.
 
 ### 11.2 Architecture
 
@@ -576,7 +576,7 @@ User Data ──→ Local Model ──→ Local Output
 
 | Feature | Implementation |
 |---------|---------------|
-| **No telemetry** | Solus AI Hub never phones home |
+| **No telemetry** | Synthex AI Hub never phones home |
 | **Offline mode** | Full AI capability without internet |
 | **Opt-in updates** | Model updates require user confirmation |
 | **Clear logs** | One-click clear all inference logs |
@@ -586,16 +586,16 @@ User Data ──→ Local Model ──→ Local Output
 
 ### 12.3 Data Residency
 
-- **Model files:** `~/.solus/ai/models/` (user-controlled)
-- **Conversation history:** `~/.solus/ai/logs/` (encrypted at rest, optional)
-- **Indexes & embeddings:** `~/.solus/ai/cache/` (local only)
-- **Configuration:** `~/.config/solus-ai-hub/`
+- **Model files:** `~/.synthex/ai/models/` (user-controlled)
+- **Conversation history:** `~/.synthex/ai/logs/` (encrypted at rest, optional)
+- **Indexes & embeddings:** `~/.synthex/ai/cache/` (local only)
+- **Configuration:** `~/.config/synthex-ai-hub/`
 
 ---
 
 ## 13. AI-Powered System Features
 
-### 13.1 Smart Search (Buddie / Solus Search)
+### 13.1 Smart Search (Buddie / Synthex Search)
 
 Local embeddings index file contents, enabling natural language search:
 
@@ -662,10 +662,10 @@ ai docs --file src/*.py --format markdown
 
 ### 14.5 IDE Integration
 
-- **VS Code / Cursor** — via Continue.dev extension pointing to local Solus API
+- **VS Code / Cursor** — via Continue.dev extension pointing to local Synthex API
 - **JetBrains** — via local Ollama plugin
 - **Neovim** — via llm.nvim or avante.nvim
-- **GNOME Builder** — via Solus AI plugin
+- **GNOME Builder** — via Synthex AI plugin
 
 ---
 
@@ -673,7 +673,7 @@ ai docs --file src/*.py --format markdown
 
 ### 15.1 Dynamic GPU Memory Allocation
 
-Solus AI Hub monitors GPU memory and adjusts model offloading dynamically:
+Synthex AI Hub monitors GPU memory and adjusts model offloading dynamically:
 
 ```python
 # Pseudocode for dynamic allocation
@@ -703,7 +703,7 @@ When the system needs GPU memory for other workloads (gaming, rendering):
 
 ### 15.4 Storage Management
 
-Solus AI Hub monitors model storage and provides tools to manage space:
+Synthex AI Hub monitors model storage and provides tools to manage space:
 
 - **Per-model size display** with quantized variant comparison
 - **Download estimation** — "This will use 4.7 GB. You have 12 GB free."
@@ -712,25 +712,25 @@ Solus AI Hub monitors model storage and provides tools to manage space:
 
 ---
 
-## 16. Solus AI Hub GUI Design Specification
+## 16. Synthex AI Hub GUI Design Specification
 
 ### 16.1 Technology Stack
 
 | Component | Technology | Rationale |
 |-----------|------------|-----------|
-| **GUI Framework** | GTK 4 + Libadwaita | Native Solus Budgie integration |
+| **GUI Framework** | GTK 4 + Libadwaita | Native Synthex Budgie integration |
 | **Backend** | Python 3.12+ | Rapid development, AI ecosystem |
 | **IPC** | D-Bus | System integration |
 | **Async** | asyncio + aiohttp | Non-blocking API calls |
-| **Settings** | dconf / GSettings | Solus-native config system |
+| **Settings** | dconf / GSettings | Synthex-native config system |
 | **Notifications** | libnotify | Desktop notifications |
-| **Build System** | Meson | Solus standard |
+| **Build System** | Meson | Synthex standard |
 
 ### 16.2 Window Layout
 
 ```
 ┌────────────────────────────────────────────────────────────┐
-│ Solus AI Hub                                       — ☐ ✕  │
+│ Synthex AI Hub                                       — ☐ ✕  │
 ├────────────────────────────────────────────────────────────┤
 │  ⚙️ Model Manager  │  💬 Chat  │  🔌 Services  │  ⚡ Status │
 ├────────────────────────────────────────────────────────────┤
@@ -786,13 +786,13 @@ Solus AI Hub monitors model storage and provides tools to manage space:
 - Privacy (history retention, telemetry, logging)
 - Advanced (API port, thread count, keep-alive)
 
-### 16.4 Color Palette (Matches Solus Budgie)
+### 16.4 Color Palette (Matches Synthex Budgie)
 
 | Role | Light | Dark | Hex (Light/Dark) |
 |------|-------|------|-------------------|
 | Background | White | #1a1a1a | #FFFFFF / #1A1A1A |
 | Surface | #f5f5f5 | #2d2d2d | #F5F5F5 / #2D2D2D |
-| Primary | Solus Blue | Solus Blue | #5294E2 / #5294E2 |
+| Primary | Synthex Blue | Synthex Blue | #5294E2 / #5294E2 |
 | Success | Green | Green | #26A269 / #33D17A |
 | Warning | Orange | Orange | #E66100 / #FF7800 |
 | Error | Red | Red | #C01C28 / #E01B2C |
@@ -804,8 +804,8 @@ Solus AI Hub monitors model storage and provides tools to manage space:
 
 ### Phase 1 — Foundation (Q3 2026)
 - [x] Architecture design
-- [ ] Ollama packaging for Solus
-- [ ] Base Solus AI Hub GUI (Model Manager only)
+- [ ] Ollama packaging for Synthex
+- [ ] Base Synthex AI Hub GUI (Model Manager only)
 - [ ] Model library configuration
 - [ ] systemd service units
 
@@ -860,10 +860,10 @@ Solus AI Hub monitors model storage and provides tools to manage space:
 
 | Path | Purpose |
 |------|---------|
-| `/etc/solus-ai/` | System-wide configuration |
-| `~/.config/solus-ai-hub/` | User configuration |
-| `~/.solus/ai/models/` | Model storage |
-| `~/.solus/ai/cache/` | Download cache |
-| `~/.solus/ai/logs/` | Inference & service logs |
-| `/var/log/solus-ai/` | System service logs |
-| `/usr/lib/solus-ai/` | Backend daemon files |
+| `/etc/synthex-ai/` | System-wide configuration |
+| `~/.config/synthex-ai-hub/` | User configuration |
+| `~/.synthex/ai/models/` | Model storage |
+| `~/.synthex/ai/cache/` | Download cache |
+| `~/.synthex/ai/logs/` | Inference & service logs |
+| `/var/log/synthex-ai/` | System service logs |
+| `/usr/lib/synthex-ai/` | Backend daemon files |

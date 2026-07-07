@@ -1,9 +1,9 @@
 [package]
-name = "solus-desktopd"
+name = "synthex-desktopd"
 version.workspace = true
 edition.workspace = true
 license.workspace = true
-description = "Solus desktop layout/theme/mode daemon — manages KDE Plasma layouts, Mint theme, SDDM"
+description = "Synthex desktop layout/theme/mode daemon — manages KDE Plasma layouts, Mint theme, SDDM"
 
 [dependencies]
 serde.workspace = true

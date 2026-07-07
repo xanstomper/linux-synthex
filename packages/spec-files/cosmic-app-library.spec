@@ -1,4 +1,4 @@
-# Solus Linux RPM Spec — cosmic-app-library
+# SynthOS RPM Spec — cosmic-app-library
 # COSMIC app library/launcher (Rust/Iced)
 # Origin: Pop!_OS (System76)
 
@@ -39,5 +39,5 @@ install -D -m 0755 target/release/cosmic-app-library %{buildroot}%{_bindir}/cosm
 %{_bindir}/cosmic-app-library
 
 %changelog
-* Mon Jul 07 2026 Solus Rust Team <rust@solus-project.org> - %{cosmical_version}-1
-- Initial Solus package — COSMIC app library launcher
+* Mon Jul 07 2026 Synthex Rust Team <rust@synthex-project.org> - %{cosmical_version}-1
+- Initial Synthex package — COSMIC app library launcher

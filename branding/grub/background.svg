@@ -26,7 +26,7 @@
   <!-- Center glow -->
   <circle cx="960" cy="440" r="300" fill="#FFB300" opacity="0.03"/>
   <circle cx="960" cy="440" r="150" fill="#FFB300" opacity="0.05"/>
-  <!-- Solus logo representation -->
+  <!-- Synthex logo representation -->
   <circle cx="960" cy="400" r="60" fill="none" stroke="#FFB300" stroke-width="3"/>
   <circle cx="960" cy="400" r="25" fill="#FFB300"/>
   <line x1="960" y1="340" x2="960" y2="310" stroke="#FFB300" stroke-width="2.5" stroke-linecap="round"/>
@@ -36,6 +36,6 @@
   <!-- Subtle accent line -->
   <rect x="660" y="540" width="600" height="1" fill="url(#accent)"/>
   <!-- Text -->
-  <text x="960" y="570" font-family="Inter, sans-serif" font-size="36" fill="#FFFFFF" text-anchor="middle" font-weight="300">Solus Linux</text>
+  <text x="960" y="570" font-family="Inter, sans-serif" font-size="36" fill="#FFFFFF" text-anchor="middle" font-weight="300">SynthOS</text>
   <text x="960" y="600" font-family="Inter, sans-serif" font-size="14" fill="#FFB300" text-anchor="middle" letter-spacing="3">ILLUMINATE YOUR DESKTOP</text>
 </svg>

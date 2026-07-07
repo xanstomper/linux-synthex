@@ -1,12 +1,12 @@
-# Solus Linux — RPM Build Pipeline Docker Compose
-# Builds all Solus RPMs (including Rust) in a clean Fedora container
+# SynthOS — RPM Build Pipeline Docker Compose
+# Builds all Synthex RPMs (including Rust) in a clean Fedora container
 services:
   rpmbuild:
     build:
       context: ..
       dockerfile: build/Dockerfile.rpmbuild
-    image: solus/rpmbuild:latest
-    container_name: solus-rpmbuilder
+    image: synthex/rpmbuild:latest
+    container_name: synthex-rpmbuilder
     volumes:
       - ..:/build:ro
       - ../build/rpmbuild:/build/rpmbuild
@@ -23,8 +23,8 @@ services:
     build:
       context: ..
       dockerfile: build/Dockerfile.rpmbuild
-    image: solus/rpmbuild:latest
-    container_name: solus-full-builder
+    image: synthex/rpmbuild:latest
+    container_name: synthex-full-builder
     volumes:
       - ..:/build:ro
       - ../build/rpmbuild:/build/rpmbuild

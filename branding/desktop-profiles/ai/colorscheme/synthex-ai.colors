@@ -1,0 +1,32 @@
+[Desktop Entry]
+Name=Synthex Ai
+Comment=Synthex AI - Deep space with intelligent mint
+Type=ColorScheme
+Encoding=UTF-8
+
+[Scheme]
+BackgroundColor=#000000
+ForegroundColor=#EEEEEE
+SelectionBackgroundColor=#FFB300
+SelectionForegroundColor=#EEEEEE
+InactiveSelectionBackgroundColor=#1A1A1A
+InactiveSelectionForegroundColor=#AAAAAA
+WindowBackgroundColor=#111111
+WindowForegroundColor=#EEEEEE
+LinkColor=#FFB300
+VisitedLinkColor=#E5A000
+HoverColor=#FFB300
+FocusColor=#FFB300
+HoverBackgroundColor=#1A1A1A
+FocusBackgroundColor=#1A1A1A
+AlternateBackgroundColor=#0A0A0A
+AlternateForegroundColor=#AAAAAA
+ButtonBackgroundColor=#1A1A1A
+ButtonForegroundColor=#EEEEEE
+ButtonHoverColor=#111111
+ButtonFocusColor=#1A1A1A
+ViewBackgroundColor=#000000
+ViewForegroundColor=#EEEEEE
+ViewHoverColor=#0A0A0A
+ViewFocusColor=#0A0A0A
+ComplementaryColor=#FFC433

@@ -1,0 +1,25 @@
+[Unit]
+Description=Synthex Software Center Backend (Rust)
+Documentation=https://github.com/xanstomper/synthex-linux
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+ExecStart=/usr/libexec/synthex/synthex-stored
+Restart=on-failure
+RestartSec=10
+StandardOutput=journal
+StandardError=journal
+TimeoutStopSec=30
+MemoryMax=256M
+NoNewPrivileges=yes
+PrivateTmp=yes
+ProtectSystem=strict
+ProtectHome=read-only
+SystemCallArchitectures=native
+ProtectKernelTunables=yes
+ProtectControlGroups=yes
+
+[Install]
+WantedBy=multi-user.target

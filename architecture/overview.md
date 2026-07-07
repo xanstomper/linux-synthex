@@ -1,8 +1,8 @@
-# Linux Solus — Architecture Overview
+# Linux Synthex — Architecture Overview
 
 > **Document Version:** 1.0  
 > **Classification:** Architecture Reference  
-> **Project:** Linux Solus  
+> **Project:** Linux Synthex  
 > **Last Updated:** July 2026
 
 ---
@@ -30,7 +30,7 @@
 
 ### 1.1 Mission Statement
 
-Linux Solus is designed to be the **ultimate desktop operating system** — a distribution that refuses to compromise. It bridges the traditionally opposing worlds of Fedora's enterprise-grade stability, Arch Linux's bleeding-edge customizability, and gaming-first performance optimisation, all wrapped in a user experience that aspires to macOS-level polish and coherence.
+Linux Synthex is designed to be the **ultimate desktop operating system** — a distribution that refuses to compromise. It bridges the traditionally opposing worlds of Fedora's enterprise-grade stability, Arch Linux's bleeding-edge customizability, and gaming-first performance optimisation, all wrapped in a user experience that aspires to macOS-level polish and coherence.
 
 ### 1.2 Core Design Tenets
 
@@ -63,7 +63,7 @@ Linux Solus is designed to be the **ultimate desktop operating system** — a di
  ├─────────────────────────────────────────────────────────────────────┤
  │                     DESKTOP ENVIRONMENTS                            │
  │  KDE Plasma 6 (Primary)  │  Hyprland (Secondary)  │  GNOME (Tert.)  │
- │  + Solus Branding Suite  │  + Solus Dotfiles      │  + Extensions   │
+ │  + Synthex Branding Suite  │  + Synthex Dotfiles      │  + Extensions   │
  ├─────────────────────────────────────────────────────────────────────┤
  │                       DISPLAY SERVER                                 │
  │                  Wayland Compositor (KWin / Hyprland / Mutter)       │
@@ -175,9 +175,9 @@ All UKIs are built with **systemd-stub** and embed both the kernel and initramfs
 
 | Desktop | Status | Default Components |
 |---|---|---|
-| **KDE Plasma 6** | Primary (flagship) | KWin Wayland, Plasma Desktop, Dolphin, Konsole, Krunner, Discover (with Flatpak + RPM backend), Solus-customised Breeze themes. |
-| **Hyprland** | Secondary | Hyprland compositor + Solus dotfiles, waybar, rofi-wayland, dunst, swaylock-effects. |
-| **GNOME 47+** | Tertiary | Mutter Wayland, GNOME Shell, Nautilus, GNOME Console, Solus extension pack. |
+| **KDE Plasma 6** | Primary (flagship) | KWin Wayland, Plasma Desktop, Dolphin, Konsole, Krunner, Discover (with Flatpak + RPM backend), Synthex-customised Breeze themes. |
+| **Hyprland** | Secondary | Hyprland compositor + Synthex dotfiles, waybar, rofi-wayland, dunst, swaylock-effects. |
+| **GNOME 47+** | Tertiary | Mutter Wayland, GNOME Shell, Nautilus, GNOME Console, Synthex extension pack. |
 
 ### 3.5 Application Runtimes
 
@@ -194,7 +194,7 @@ All UKIs are built with **systemd-stub** and embed both the kernel and initramfs
 
 ### 4.1 Overview
 
-The Linux Solus build system is a **multi-stage, reproducible, containerised pipeline** built on top of Fedora's `fedpkg` / `mock` infrastructure, extended with Solus-specific build tooling.
+The Linux Synthex build system is a **multi-stage, reproducible, containerised pipeline** built on top of Fedora's `fedpkg` / `mock` infrastructure, extended with Synthex-specific build tooling.
 
 ```
  ┌──────────────┐    ┌──────────────┐    ┌──────────────┐    ┌──────────────┐
@@ -274,56 +274,56 @@ Every commit to the `rawhide` branch triggers a full build pipeline. The `stable
 ### 5.1 Top-Level Overview
 
 ```
-linux-solus/
+linux-synthex/
 ├── architecture/          # Architecture documentation (this document)
-├── branding/              # Solus logos, wallpapers, sounds, Plymouth themes
+├── branding/              # Synthex logos, wallpapers, sounds, Plymouth themes
 ├── build/                 # Build system config (mock configs, Koji configs, signing)
 ├── config/                # System configuration profiles (kernel, sysctl, DNF)
 ├── desktop-environments/  # DE-specific customisations
-│   ├── plasma/            # Solus Plasma theme, KWin rules, KCM modules
-│   ├── hyprland/          # Solus Hyprland dotfiles, waybar configs
-│   └── gnome/             # Solus GNOME extensions, gsettings presets
+│   ├── plasma/            # Synthex Plasma theme, KWin rules, KCM modules
+│   ├── hyprland/          # Synthex Hyprland dotfiles, waybar configs
+│   └── gnome/             # Synthex GNOME extensions, gsettings presets
 ├── docs/                  # User-facing documentation
 ├── installer/             # Calamares modules and branding
 ├── kernel/                # Kernel packaging (spec, config, patches)
 ├── packages/              # RPM package definitions (spec files)
 │   ├── core/              # Mandatory system packages
 │   ├── extra/             # Repository-shipped packages
-│   ├── solus/             # Solus-specific tools and utilities
+│   ├── synthex/             # Synthex-specific tools and utilities
 │   └── gaming/            # Gaming stack packages
 ├── scripts/               # CI/CD scripts, release tooling, migration helpers
 ├── security/              # SELinux policies, audit rules, hardening configs
 ├── tests/                 # Integration tests, upgrade tests, security scans
-└── tools/                 # Custom tooling (solus-cli, solus-config, solus-builder)
+└── tools/                 # Custom tooling (synthex-cli, synthex-config, synthex-builder)
 ```
 
 ### 5.2 Package Repository Hierarchy
 
 ```
-solus-repo/
+synthex-repo/
 ├── fedora-rawhide/        # Upstream Fedora packages (tracked, not forked)
-├── solus-core/            # Solus-maintained core packages (kernel, toolchain, glibc)
-├── solus-desktop/         # Desktop environment packages (Plasma, Hyprland, GNOME custom)
-├── solus-gaming/          # Gaming stack (Proton, MangoHud, Gamescope, Lutris)
-├── solus-ai/              # AI/ML toolchain (ROCm, CUDA wrappers, llama.cpp, etc.)
-├── solus-multimedia/      # PipeWire, codecs, DAW tools, audio plugins
-├── solus-hardware/        # Driver packages, firmware, hardware enablement
-├── solus-universe/        # Community-maintained packages (pre-submission queue)
-└── solus-experimental/    # Preview packages for next release cycle
+├── synthex-core/            # Synthex-maintained core packages (kernel, toolchain, glibc)
+├── synthex-desktop/         # Desktop environment packages (Plasma, Hyprland, GNOME custom)
+├── synthex-gaming/          # Gaming stack (Proton, MangoHud, Gamescope, Lutris)
+├── synthex-ai/              # AI/ML toolchain (ROCm, CUDA wrappers, llama.cpp, etc.)
+├── synthex-multimedia/      # PipeWire, codecs, DAW tools, audio plugins
+├── synthex-hardware/        # Driver packages, firmware, hardware enablement
+├── synthex-universe/        # Community-maintained packages (pre-submission queue)
+└── synthex-experimental/    # Preview packages for next release cycle
 ```
 
 ### 5.3 Branching Strategy
 
 ```
 rawhide          → Fast-moving development branch (Fedora Rawhide rebase)
-solus-XY         → Stable release branches (e.g., solus-25, solus-26)
-solus-staging    → Pre-release integration branch
-solus-security   → Emergency security patch branch (fast-track to stable)
+synthex-XY         → Stable release branches (e.g., synthex-25, synthex-26)
+synthex-staging    → Pre-release integration branch
+synthex-security   → Emergency security patch branch (fast-track to stable)
 ```
 
 - **rawhide** rebases to the latest Fedora Rawhide every 2–4 weeks.
-- **solus-XY** branches are cut from rawhide at release freeze.
-- Security patches land in `solus-security` first, then merged to all active branches.
+- **synthex-XY** branches are cut from rawhide at release freeze.
+- Security patches land in `synthex-security` first, then merged to all active branches.
 
 ---
 
@@ -331,7 +331,7 @@ solus-security   → Emergency security patch branch (fast-track to stable)
 
 ### 6.1 Threat Model
 
-Linux Solus defends against the following threat categories, ranked by priority:
+Linux Synthex defends against the following threat categories, ranked by priority:
 
 | Priority | Threat | Mitigation |
 |---|---|---|
@@ -348,22 +348,22 @@ Linux Solus defends against the following threat categories, ranked by priority:
 ┌──────────────────────────────────────────────────┐
 │                SELinux Policy                     │
 │  Targeted policy (default enforcing)              │
-│  ├── solus_base.pp    — Core system types        │
-│  ├── solus_desktop.pp — Desktop app domains      │
-│  ├── solus_gaming.pp  — Gaming runtime domains   │
-│  ├── solus_flatpak.pp — Flatpak interface        │
-│  └── solus_containers.pp — Container boundaries  │
+│  ├── synthex_base.pp    — Core system types        │
+│  ├── synthex_desktop.pp — Desktop app domains      │
+│  ├── synthex_gaming.pp  — Gaming runtime domains   │
+│  ├── synthex_flatpak.pp — Flatpak interface        │
+│  └── synthex_containers.pp — Container boundaries  │
 ├──────────────────────────────────────────────────┤
 │  Booleans (selected examples):                    │
-│  solus_allow_user_exec   → allow ~/bin execution │
-│  solus_gaming_full_hw    → full GPU/input access  │
-│  solus_dev_mode          → relaxed for dev work   │
+│  synthex_allow_user_exec   → allow ~/bin execution │
+│  synthex_gaming_full_hw    → full GPU/input access  │
+│  synthex_dev_mode          → relaxed for dev work   │
 └──────────────────────────────────────────────────┘
 ```
 
 - Enforced in **enforcing mode** by default. Permissive mode generates audit logs but is not shipped as a default.
 - `auditd` + `setroubleshoot` provide actionable SELinux denial messages to users.
-- `solus-dev-mode` boolean exists but logs a warning to `/var/log/secure` when active.
+- `synthex-dev-mode` boolean exists but logs a warning to `/var/log/secure` when active.
 
 ### 6.3 Cryptography and Signing
 
@@ -378,7 +378,7 @@ Linux Solus defends against the following threat categories, ranked by priority:
 
 ### 6.4 Kernel Hardening
 
-All Solus kernels are built with:
+All Synthex kernels are built with:
 
 - `CONFIG_SECURITY_SELINUX=y`
 - `CONFIG_SECURITY_LOCKDOWN_LSM=y` (integrity mode)
@@ -399,7 +399,7 @@ All Solus kernels are built with:
 By default, `kernel.unprivileged_userns_clone = 0`. This prevents a large class of container-escape and privilege-escalation attacks. Users who need unprivileged user namespaces (e.g., for Podman rootless mode) opt in via a sysctl drop-in:
 
 ```bash
-# /etc/sysctl.d/90-solus-user-ns.conf
+# /etc/sysctl.d/90-synthex-user-ns.conf
 kernel.unprivileged_userns_clone = 1
 ```
 
@@ -409,25 +409,25 @@ kernel.unprivileged_userns_clone = 1
 
 ### 7.1 KDE Plasma 6 — Flagship Desktop
 
-Plasma 6 is the primary, best-supported desktop environment. Solus ships a deeply customised Plasma experience.
+Plasma 6 is the primary, best-supported desktop environment. Synthex ships a deeply customised Plasma experience.
 
-#### 7.1.1 Solus Plasma Theme Suite
+#### 7.1.1 Synthex Plasma Theme Suite
 
 | Component | Customisation |
 |---|---|
-| **Plasma Theme** | `solus-breeze` — based on Breeze but with Solus colour palette (deep teal, warm grey accents, Solus gradient accents) |
-| **Colour Scheme** | `SolusDark` and `SolusLight` — WCAG AA-compliant contrast ratios |
-| **Icon Theme** | `solus-icons` — Tela-circle base with Solus-specific app icons (Solus Welcome, Solus Store, Solus Settings) |
-| **Cursor Theme** | `solus-cursors` — Bibata Modern derivative, Solus-branded |
-| **KWin Window Decorations** | `solus-decoration` — minimal titlebars with integrated app menu button |
-| **SDDM Theme** | `solus-sddm` — clean, blurred-background login with Solus branding |
-| **Plymouth Theme** | `solus-plymouth` — animated Solus logo with spinner and disk encryption prompt |
+| **Plasma Theme** | `synthex-breeze` — based on Breeze but with Synthex colour palette (deep teal, warm grey accents, Synthex gradient accents) |
+| **Colour Scheme** | `SynthexDark` and `SynthexLight` — WCAG AA-compliant contrast ratios |
+| **Icon Theme** | `synthex-icons` — Tela-circle base with Synthex-specific app icons (Synthex Welcome, Synthex Store, Synthex Settings) |
+| **Cursor Theme** | `synthex-cursors` — Bibata Modern derivative, Synthex-branded |
+| **KWin Window Decorations** | `synthex-decoration` — minimal titlebars with integrated app menu button |
+| **SDDM Theme** | `synthex-sddm` — clean, blurred-background login with Synthex branding |
+| **Plymouth Theme** | `synthex-plymouth` — animated Synthex logo with spinner and disk encryption prompt |
 
 #### 7.1.2 Default Plasma Configuration
 
 | Setting | Default | Rationale |
 |---|---|---|
-| **Panel Layout** | Bottom single panel (macOS-inspired) | Fitts's law optimisation, consistent with Solus vision |
+| **Panel Layout** | Bottom single panel (macOS-inspired) | Fitts's law optimisation, consistent with Synthex vision |
 | **Global Menu** | Enabled (appmenu-gtk-module + applet) | Maximises vertical screen real estate |
 | **Virtual Desktops** | 4 (2×2 grid) | Discoverable workspace model for new users |
 | **Window Tiling** | KWin tiling script enabled | Better-than-basic tiling without going full WM |
@@ -437,7 +437,7 @@ Plasma 6 is the primary, best-supported desktop environment. Solus ships a deepl
 | **Baloo (File Indexing)** | Enabled, limited to `/home` | Search performance without indexing compiler caches |
 | **Night Color** | Automatic (geo-IP location) | Blue light reduction, default enabled |
 
-#### 7.1.3 KWin Rules (Solus Preset)
+#### 7.1.3 KWin Rules (Synthex Preset)
 
 - **Games / Fullscreen applications**: `Force compositor → Full screen repaint`, `Block compositing while fullscreen` = enabled
 - **Steam**: `Force → Windows with no titlebar and frames`
@@ -446,17 +446,17 @@ Plasma 6 is the primary, best-supported desktop environment. Solus ships a deepl
 
 ### 7.2 Hyprland — Tiling Secondary Desktop
 
-Hyprland is the secondary desktop, targeting power users who prefer a dynamic tiling window manager. Solus ships a curated, cohesive Hyprland configuration.
+Hyprland is the secondary desktop, targeting power users who prefer a dynamic tiling window manager. Synthex ships a curated, cohesive Hyprland configuration.
 
-#### 7.2.1 Solus Hyprland Stack
+#### 7.2.1 Synthex Hyprland Stack
 
 ```
 ┌──────────────────────────────────────────┐
-│              Solus Hyprland               │
+│              Synthex Hyprland               │
 ├──────────────────────────────────────────┤
 │  Compositor:   Hyprland (git mainline)   │
-│  Bar:          waybar (solus theme)      │
-│  Launcher:     rofi-wayland (solus theme)│
+│  Bar:          waybar (synthex theme)      │
+│  Launcher:     rofi-wayland (synthex theme)│
 │  Notifications: dunst                    │
 │  Lockscreen:   swaylock-effects          │
 │  Wallpaper:    swaybg / hyprpaper        │
@@ -468,7 +468,7 @@ Hyprland is the secondary desktop, targeting power users who prefer a dynamic ti
 └──────────────────────────────────────────┘
 ```
 
-#### 7.2.2 Hyprland Keybindings (Solus Default)
+#### 7.2.2 Hyprland Keybindings (Synthex Default)
 
 | Binding | Action |
 |---|---|
@@ -489,13 +489,13 @@ Hyprland is the secondary desktop, targeting power users who prefer a dynamic ti
 
 ### 7.3 GNOME — Tertiary Desktop
 
-GNOME is shipped as a supplementary desktop with minimal customisation to respect upstream design intent. The Solus GNOME spin applies:
+GNOME is shipped as a supplementary desktop with minimal customisation to respect upstream design intent. The Synthex GNOME spin applies:
 
-- **Solus-branded wallpapers** and lock screen
+- **Synthex-branded wallpapers** and lock screen
 - **Extension pack** (auto-installed): AppIndicator, Blur My Shell, GSConnect, Vitals, Dash to Dock (opt-in)
 - **GSettings overlay**: Default dark mode, medium-sized text, pointer location on Ctrl
 - **Console** (GNOME Console) as default terminal
-- **Nautilus** with Solus sidebar bookmarks (Downloads, Documents, Projects, Games, Flatpak apps)
+- **Nautilus** with Synthex sidebar bookmarks (Downloads, Documents, Projects, Games, Flatpak apps)
 
 ---
 
@@ -503,7 +503,7 @@ GNOME is shipped as a supplementary desktop with minimal customisation to respec
 
 ### 8.1 CPU Scheduler: BORE + EEVDF
 
-The Solus kernel ships the **BORE (Burst-Oriented Response Enhancer)** scheduler patchset on top of the upstream **EEVDF (Earliest Eligible Virtual Deadline First)** scheduler.
+The Synthex kernel ships the **BORE (Burst-Oriented Response Enhancer)** scheduler patchset on top of the upstream **EEVDF (Earliest Eligible Virtual Deadline First)** scheduler.
 
 **How it works:**
 
@@ -572,7 +572,7 @@ The default values are tuned for a **low-latency desktop workload mix** — game
 
 ### 9.1 Overview
 
-Linux Solus is engineered as a **first-class gaming distribution**. The gaming stack is not an afterthought bolted onto the desktop — it is deeply integrated into the kernel scheduler, graphics pipeline, and package management.
+Linux Synthex is engineered as a **first-class gaming distribution**. The gaming stack is not an afterthought bolted onto the desktop — it is deeply integrated into the kernel scheduler, graphics pipeline, and package management.
 
 ### 9.2 Gaming Stack Layers
 
@@ -601,9 +601,9 @@ Linux Solus is engineered as a **first-class gaming distribution**. The gaming s
 
 ### 9.3 Gamemode Integration
 
-The Solus gaming stack is built around **Feral Interactive's Gamemode**, extended with Solus-specific optimisations:
+The Synthex gaming stack is built around **Feral Interactive's Gamemode**, extended with Synthex-specific optimisations:
 
-| Optimisation | Gamemode Request | Solus Default (idle) | Solus Gamemode Active |
+| Optimisation | Gamemode Request | Synthex Default (idle) | Synthex Gamemode Active |
 |---|---|---|---|
 | CPU governor | `performance` | `schedutil` | `performance` |
 | I/O scheduler | `none`/`bfq` per device | `mq-deadline` (NVMe) | `none` |
@@ -623,15 +623,15 @@ All optimisations are **reverted atomically** when the game exits and Gamemode d
 | Component | Source | Update Cadence |
 |---|---|---|
 | **Valve Proton** | Fedora RPM (Wine upstream) | 2–4 weeks |
-| **Proton GE** | Solus Gaming repository | ~1 week after GE release |
-| **VKD3D-Proton** | Solus Gaming repository | Monthly (upstream tag) |
-| **DXVK** | Solus Gaming repository | Monthly (upstream tag) |
-| **Wine GE** | Solus Gaming repository | ~1 week after GE release |
+| **Proton GE** | Synthex Gaming repository | ~1 week after GE release |
+| **VKD3D-Proton** | Synthex Gaming repository | Monthly (upstream tag) |
+| **DXVK** | Synthex Gaming repository | Monthly (upstream tag) |
+| **Wine GE** | Synthex Gaming repository | ~1 week after GE release |
 | **Wine (vanilla)** | Fedora RPM | As Fedora updates |
 
 ### 9.5 Gamescope Integration
 
-Gamescope (Valve's micro-compositor) is fully integrated into the Solus gaming stack:
+Gamescope (Valve's micro-compositor) is fully integrated into the Synthex gaming stack:
 
 - **Steam Integration**: Gamescope is the default compositor for Steam games when "Use Gamescope" is toggled.
 - **Non-Steam Games**: Lutris and Heroic Games Launcher are pre-configured to detect and use Gamescope.
@@ -642,18 +642,18 @@ Gamescope (Valve's micro-compositor) is fully integrated into the Solus gaming s
 
 | Configuration | Mechanism | Notes |
 |---|---|---|
-| **iGPU + dGPU (PRIME)** | `DRI_PRIME=1` via Lutris/Heroic profile | Automatically configured by Solus GPU detection script on first boot |
+| **iGPU + dGPU (PRIME)** | `DRI_PRIME=1` via Lutris/Heroic profile | Automatically configured by Synthex GPU detection script on first boot |
 | **NVIDIA Optimus** | nvidia-open + modesetting | Wayland native; no Bumblebee required |
 | **Multi-dGPU desktop** | vkmultigpu | Experimental Vulkan device groups for SLI-like frame distribution |
 
 ### 9.7 Anti-Cheat Compatibility
 
-Solus ships compatibility utilities for kernel-level anti-cheat systems:
+Synthex ships compatibility utilities for kernel-level anti-cheat systems:
 
 - **EAC (Easy Anti-Cheat)** — Proton EAC runtime installed by default
 - **BattlEye** — Proton BattlEye runtime installed by default
 - **Ricochet (CoD)** — kernel module loaded on-demand; black-box tested per release
-- **Vanguard (Valorant)** — Not supported. The Solus philosophy is to support open gaming ecosystems; kernel-level rootkits are antithetical to the security model.
+- **Vanguard (Valorant)** — Not supported. The Synthex philosophy is to support open gaming ecosystems; kernel-level rootkits are antithetical to the security model.
 
 ---
 
@@ -661,7 +661,7 @@ Solus ships compatibility utilities for kernel-level anti-cheat systems:
 
 ### 10.1 Overview
 
-Linux Solus is designed as a **local-first AI workstation**. The AI integration architecture prioritises user privacy, local inference, and hardware acceleration over cloud-dependent services. Every AI feature in Solus can function entirely offline.
+Linux Synthex is designed as a **local-first AI workstation**. The AI integration architecture prioritises user privacy, local inference, and hardware acceleration over cloud-dependent services. Every AI feature in Synthex can function entirely offline.
 
 ### 10.2 AI Stack
 
@@ -688,7 +688,7 @@ Linux Solus is designed as a **local-first AI workstation**. The AI integration 
 
 ### 10.3 The "Hermes" System Assistant
 
-Solus ships a local, privacy-preserving AI assistant called **Hermes** (not to be confused with the agent framework):
+Synthex ships a local, privacy-preserving AI assistant called **Hermes** (not to be confused with the agent framework):
 
 | Feature | Implementation |
 |---|---|
@@ -701,27 +701,27 @@ Solus ships a local, privacy-preserving AI assistant called **Hermes** (not to b
 | **Reranker** | BGE-reranker-v2-m3 — for improving retrieval quality |
 | **Hardware** | ROCm / CUDA / Vulkan / Metal / BLAS (CPU fallback) |
 
-**Privacy guarantee**: Hermes makes **zero network requests** for inference. All inference runs on local hardware. Model downloads occur once through the Solus AI package manager; subsequent inference is air-gapped.
+**Privacy guarantee**: Hermes makes **zero network requests** for inference. All inference runs on local hardware. Model downloads occur once through the Synthex AI package manager; subsequent inference is air-gapped.
 
 ### 10.4 AI Package Management
 
-AI models are distributed through a dedicated `solus-ai` repository:
+AI models are distributed through a dedicated `synthex-ai` repository:
 
 ```bash
-sudo dnf5 install solus-ai-models-llama-3.2-3b
-sudo dnf5 install solus-ai-models-hermes-3-8b
-sudo dnf5 install solus-ai-models-bge-small-en-v15
-sudo dnf5 install solus-ai-models-whisper-base-en
+sudo dnf5 install synthex-ai-models-llama-3.2-3b
+sudo dnf5 install synthex-ai-models-hermes-3-8b
+sudo dnf5 install synthex-ai-models-bge-small-en-v15
+sudo dnf5 install synthex-ai-models-whisper-base-en
 ```
 
-Each model is packaged as a `.rpm` that places the GGUF file into `/usr/share/solus-ai/models/`. Model RPMs are verified with the same GPG trust chain as system packages.
+Each model is packaged as a `.rpm` that places the GGUF file into `/usr/share/synthex-ai/models/`. Model RPMs are verified with the same GPG trust chain as system packages.
 
 ### 10.5 AI Hardware Detection
 
-On first boot (or when a GPU driver is updated), the `solus-ai-detect` service runs:
+On first boot (or when a GPU driver is updated), the `synthex-ai-detect` service runs:
 
 ```bash
-# Pseudocode for /usr/lib/systemd/system/solus-ai-detect.service
+# Pseudocode for /usr/lib/systemd/system/synthex-ai-detect.service
 Check /sys/class/drm/ for AMD GPU → install rocm-hip-runtime + rocblas
 Check /sys/class/drm/ for NVIDIA GPU → install cuda-toolkit + nvidia-cuda-container
 Check /sys/devices/cpu/ for Intel Arc → install intel-opencl-icd + level-zero
@@ -736,7 +736,7 @@ Default: CPU fallback (OpenBLAS / oneDNN)
 | **Natural Language Search** | Krunner plugin for semantic file search via BGE embeddings |
 | **Smart Notification Summaries** | Optional: Hermes summarises notification clusters when away from keyboard |
 | **Voice Dictation** | System-wide speech-to-text via Whisper.cpp; toggleable with `Ctrl+\`` |
-| **AI Shell** | `solus-ai shell` — interactive AI shell for command generation and execution |
+| **AI Shell** | `synthex-ai shell` — interactive AI shell for command generation and execution |
 | **Adaptive Power Profiles** | Hermes monitors running tasks and suggests power profile changes |
 
 ---
@@ -745,13 +745,13 @@ Default: CPU fallback (OpenBLAS / oneDNN)
 
 ### 11.1 Repository Architecture
 
-Linux Solus maintains a **three-tier repository** structure:
+Linux Synthex maintains a **three-tier repository** structure:
 
 | Tier | Name | Contents | Update Frequency | Quality Gate |
 |---|---|---|---|---|
-| 1 | `solus-core` | Kernel, toolchain, glibc, systemd, SELinux policy, bootloader | Every 2–4 weeks (rawhide rebase) + security hotfixes | Maintainer review + CI + automatic testing |
-| 2 | `solus-desktop` | Desktop environments, core applications, drivers | Continuous (rolling) | Peer review + CI |
-| 3 | `solus-extra` | Extra applications, development tools, libraries | Continuous (rolling) | CI only (+ 24h beta) |
+| 1 | `synthex-core` | Kernel, toolchain, glibc, systemd, SELinux policy, bootloader | Every 2–4 weeks (rawhide rebase) + security hotfixes | Maintainer review + CI + automatic testing |
+| 2 | `synthex-desktop` | Desktop environments, core applications, drivers | Continuous (rolling) | Peer review + CI |
+| 3 | `synthex-extra` | Extra applications, development tools, libraries | Continuous (rolling) | CI only (+ 24h beta) |
 
 ### 11.2 RPM Signing and Distribution
 
@@ -771,7 +771,7 @@ dnf5 update        ←─  User's machine
 
 ### 11.3 Flatpak Integration
 
-Flatpak is a **first-class citizen** in Solus, not an add-on:
+Flatpak is a **first-class citizen** in Synthex, not an add-on:
 
 - **Discover** (KDE Plasma) ships with the Flatpak backend enabled by default.
 - **Flathub** is pre-configured as the default remote.
@@ -780,35 +780,35 @@ Flatpak is a **first-class citizen** in Solus, not an add-on:
 
 ### 11.4 ISO Installation
 
-ISO images are built using **lorax** (Fedora's image builder) + Solus configuration overlay:
+ISO images are built using **lorax** (Fedora's image builder) + Synthex configuration overlay:
 
 ```bash
 # Conceptual ISO build command:
 livemedia-creator --make-iso \
-    --iso-name Solus-Plasma-2025.1-x86_64.iso \
-    --ks solus-plasma-live.ks \
+    --iso-name Synthex-Plasma-2025.1-x86_64.iso \
+    --ks synthex-plasma-live.ks \
     --releasever 40
 ```
 
 ISOs are shipped for each desktop spin:
 
-- `Solus-Plasma-<version>-<arch>.iso` (flagship)
-- `Solus-Hyprland-<version>-<arch>.iso`
-- `Solus-GNOME-<version>-<arch>.iso`
-- `Solus-Minimal-<version>-<arch>.iso` (no DE, for advanced users / containers)
+- `Synthex-Plasma-<version>-<arch>.iso` (flagship)
+- `Synthex-Hyprland-<version>-<arch>.iso`
+- `Synthex-GNOME-<version>-<arch>.iso`
+- `Synthex-Minimal-<version>-<arch>.iso` (no DE, for advanced users / containers)
 
 ### 11.5 Calamares Installer
 
-The Calamares installer is customised with Solus-specific modules:
+The Calamares installer is customised with Synthex-specific modules:
 
-| Module | Solus Customisation |
+| Module | Synthex Customisation |
 |---|---|
-| **`welcome`** | Solus branding, forum/discord links, release notes |
+| **`welcome`** | Synthex branding, forum/discord links, release notes |
 | **`partition`** | Default BTRFS subvolume layout; LUKS2 checkbox for FDE; option to use bcachefs |
 | **`users`** | Default: user in `wheel` group; optional auto-login |
 | **`summary`** | Interactive BTRFS diagram showing subvolume layout |
 | **`bootloader`** | systemd-boot only; Secure Boot setup (MOK enrollment if needed) |
-| **`postinstall`** | solus-firstboot service (hardware detection, GPU driver selection, AI detect) |
+| **`postinstall`** | synthex-firstboot service (hardware detection, GPU driver selection, AI detect) |
 
 ---
 
@@ -816,7 +816,7 @@ The Calamares installer is customised with Solus-specific modules:
 
 ### 12.1 Philosophy
 
-Linux Solus uses a **rolling-forward hybrid model**:
+Linux Synthex uses a **rolling-forward hybrid model**:
 
 - **Core system packages** (kernel, glibc, systemd, Mesa) follow Fedora Rawhide but with a **2–4 week stabilisation delay**.
 - **Desktop packages** (Plasma, KDE Gear, GNOME) are updated on upstream release cycles (typically every 3–4 months).
@@ -826,26 +826,26 @@ Linux Solus uses a **rolling-forward hybrid model**:
 ### 12.2 DNF5 Configuration
 
 ```ini
-# /etc/dnf5/solus.d/solus-core.conf
+# /etc/dnf5/synthex.d/synthex-core.conf
 [main]
 gpgcheck=True
-repo=Solus Core
-baseurl=https://repo.soluslinux.org/core/$releasever/$basearch/
+repo=Synthex Core
+baseurl=https://repo.synthexlinux.org/core/$releasever/$basearch/
 
-# /etc/dnf5/solus.d/solus-desktop.conf
+# /etc/dnf5/synthex.d/synthex-desktop.conf
 [main]
 gpgcheck=True
-repo=Solus Desktop
-baseurl=https://repo.soluslinux.org/desktop/$releasever/$basearch/
+repo=Synthex Desktop
+baseurl=https://repo.synthexlinux.org/desktop/$releasever/$basearch/
 
-# /etc/dnf5/solus.d/solus-gaming.conf
+# /etc/dnf5/synthex.d/synthex-gaming.conf
 [main]
 gpgcheck=True
-repo=Solus Gaming
-baseurl=https://repo.soluslinux.org/gaming/$releasever/$basearch/
+repo=Synthex Gaming
+baseurl=https://repo.synthexlinux.org/gaming/$releasever/$basearch/
 ```
 
-`$releasever` is determined by the `solus-release` package (e.g., `40`, `41`) and enables controlled rebasing.
+`$releasever` is determined by the `synthex-release` package (e.g., `40`, `41`) and enables controlled rebasing.
 
 ### 12.3 `dnf5` System Upgrade (`dnf5 distro-sync`)
 
@@ -853,11 +853,11 @@ When a Fedora base rebase occurs (e.g., Fedora 40 → 41):
 
 ```bash
 # Automated rebase workflow:
-sudo dnf5 install solus-release-41
+sudo dnf5 install synthex-release-41
 sudo dnf5 distro-sync --releasever=41
 ```
 
-This upgrades all RPM packages to the new release's versions while preserving Solus-specific packages through the `solus-core` repository's version overrides.
+This upgrades all RPM packages to the new release's versions while preserving Synthex-specific packages through the `synthex-core` repository's version overrides.
 
 ### 12.4 Atomic Update Safety
 
@@ -880,7 +880,7 @@ download_updates = yes
 [emitter]
 emit_via = motd
 [email]
-email_from = root@solus-desktop
+email_from = root@synthex-desktop
 email_to = user
 ```
 
@@ -941,7 +941,7 @@ sudo btrfs subvolume show /
 
 ### 13.2 systemd-boot Snapshot Menu
 
-Solus installs **systemd-boot snapshot hooks** (`snapper-bootctl` or equivalent) that:
+Synthex installs **systemd-boot snapshot hooks** (`snapper-bootctl` or equivalent) that:
 
 1. On each snapper snapshot creation, generate a **UKI entry** for that snapshot.
 2. systemd-boot presents a "Snapshots" submenu at boot.
@@ -953,17 +953,17 @@ This eliminates the need for GRUB + BTRFS snapshots integration — systemd-boot
 
 | Tool | Integration |
 |---|---|
-| **restic** | Pre-installed. Solus-backup service runs weekly to S3/B2/rest-server |
-| **borgbackup** | Available in solus-extra. Solus provides a `borgmatic` config template |
-| **Timeshift** | GUI frontend for snapper-like functionality, available in solus-desktop |
+| **restic** | Pre-installed. Synthex-backup service runs weekly to S3/B2/rest-server |
+| **borgbackup** | Available in synthex-extra. Synthex provides a `borgmatic` config template |
+| **Timeshift** | GUI frontend for snapper-like functionality, available in synthex-desktop |
 
 ### 13.4 Recovery ISO
 
-A **Solus Recovery ISO** is available for emergency situations:
+A **Synthex Recovery ISO** is available for emergency situations:
 
-- Bootable from USB (built with `mkarchiso`-like Solus tooling)
+- Bootable from USB (built with `mkarchiso`-like Synthex tooling)
 - Contains a rescue shell, BTRFS tools, snapper, `chroot` helper
-- Automatically detects and mounts existing Solus installations
+- Automatically detects and mounts existing Synthex installations
 - One-click rollback to any snapper snapshot
 - Rebuilds initramfs and UKI if boot partition is corrupted
 - Runs `dnf5 reinstall` on critical packages
@@ -977,9 +977,9 @@ A **Solus Recovery ISO** is available for emergency situations:
 | Release Type | Cadence | Description |
 |---|---|---|
 | **Rawhide (development)** | Continuous | Daily builds, Fedora Rawhide rebase every 2–4 weeks. NOT for production use. |
-| **Solus-N (stable)** | ~6 months | e.g., Solus-25 (2025.1), Solus-25 (2025.2). Named after year + sequence. |
-| **Solus-LTS** | ~24 months | Long-term support spin with kernel LTS (6.6.y). Minimal DE update, security-only patches. |
-| **Security hotfix** | As needed | Emergency .z release (e.g., Solus-25.0.1). Fast-tracked within 24 hours. |
+| **Synthex-N (stable)** | ~6 months | e.g., Synthex-25 (2025.1), Synthex-25 (2025.2). Named after year + sequence. |
+| **Synthex-LTS** | ~24 months | Long-term support spin with kernel LTS (6.6.y). Minimal DE update, security-only patches. |
+| **Security hotfix** | As needed | Emergency .z release (e.g., Synthex-25.0.1). Fast-tracked within 24 hours. |
 
 ### 14.2 Release Lifecycle
 
@@ -999,9 +999,9 @@ Phase 6: End-of-Life (EOL) — archive repository
 
 | Release | Fedora Base | Kernel | KDE Plasma | Support Window |
 |---|---|---|---|---|
-| Solus-25.1 | Fedora 40 | 6.8–6.12 | 6.1 | Apr 2025 – Oct 2026 |
-| Solus-25.2 | Fedora 41 | 6.11–6.14 | 6.2 | Oct 2025 – Apr 2027 |
-| Solus-26.1 | Fedora 42 | 6.14+ | 6.3 (planned) | Apr 2026 – Oct 2027 |
+| Synthex-25.1 | Fedora 40 | 6.8–6.12 | 6.1 | Apr 2025 – Oct 2026 |
+| Synthex-25.2 | Fedora 41 | 6.11–6.14 | 6.2 | Oct 2025 – Apr 2027 |
+| Synthex-26.1 | Fedora 42 | 6.14+ | 6.3 (planned) | Apr 2026 – Oct 2027 |
 
 ### 14.3 Release Automation
 
@@ -1009,13 +1009,13 @@ Release creation is semi-automated with human-in-the-loop gates:
 
 ```bash
 # 1. Branch from rawhide
-git checkout -b solus-26.1 rawhide
+git checkout -b synthex-26.1 rawhide
 
 # 2. Update release version across all packages
-./scripts/bump-release.py solus-26.1
+./scripts/bump-release.py synthex-26.1
 
 # 3. Run full CI build (blocking)
-./ci/pipeline.py --release solus-26.1
+./ci/pipeline.py --release synthex-26.1
 
 # 4. Generate ISO images
 ./build/mkiso.sh --flavor plasma --version 26.1
@@ -1047,7 +1047,7 @@ git checkout -b solus-26.1 rawhide
 
 | Role | Responsibility | Path |
 |---|---|---|
-| **Package Maintainer** | Maintains 1+ packages in solus-* repositories | Proven packager + 3 months contribution |
+| **Package Maintainer** | Maintains 1+ packages in synthex-* repositories | Proven packager + 3 months contribution |
 | **QA Tester** | Runs pre-release test scenarios | Active on Matrix + bug tracker |
 | **Documentation Writer** | Maintains arch, user, and API docs | Documentation PR history |
 | **Release Manager** | Owns the release checklist, signs ISOs | Elected by core team, trusted + keyholder |
@@ -1070,15 +1070,15 @@ Rolling core + snapshotted releases | Freshness without instability; snapshots p
 
 ## Appendix B: Core Package Manifest (Baseline)
 
-A minimal Solus Core installation comprises approximately 450 packages. Key components:
+A minimal Synthex Core installation comprises approximately 450 packages. Key components:
 
 | Area | Packages |
 |---|---|
 | **Boot** | systemd-boot, dracut, sbctl, pesign |
 | **Init** | systemd, systemd-resolved, systemd-oomd, systemd-homed |
-| **Kernel** | kernel-solus, kernel-modules-extra, linux-firmware |
+| **Kernel** | kernel-synthex, kernel-modules-extra, linux-firmware |
 | **Toolchain** | clang, lld, compiler-rt, gcc, glibc, binutils, rustc |
-| **Security** | selinux-policy-solus, selinux-policy-targeted, auditd, fapolicyd |
+| **Security** | selinux-policy-synthex, selinux-policy-targeted, auditd, fapolicyd |
 | **Networking** | NetworkManager, systemd-resolved, firewalld, nftables |
 | **Storage** | btrfs-progs, snapper, lvm2, cryptsetup, udisks2 |
 | **Audio** | pipewire, wireplumber, pipewire-pulseaudio, alsa-ucm-conf |
@@ -1086,7 +1086,7 @@ A minimal Solus Core installation comprises approximately 450 packages. Key comp
 | **GPU** | mesa-{radeon,amd,intel}, nvidia-open (kmod), vulkan-loader |
 | **DE** | plasma-desktop, plasma-wayland-session, kwin, sddm |
 | **Package Mgmt** | dnf5, dnf5-automatic, flatpak, rpm-ostree (optional) |
-| **AI** | solus-hermes, solus-ai-runtime-rocm, solus-ai-runtime-llamacpp |
+| **AI** | synthex-hermes, synthex-ai-runtime-rocm, synthex-ai-runtime-llamacpp |
 
 ## Appendix C: Hardware Requirements
 
@@ -1102,4 +1102,4 @@ A minimal Solus Core installation comprises approximately 450 packages. Key comp
 
 ---
 
-*This document is the authoritative architecture reference for the Linux Solus project and should be consulted before making significant architectural decisions. Questions, corrections, and proposals should be filed against the `architecture/` directory in the project repository.*
+*This document is the authoritative architecture reference for the Linux Synthex project and should be consulted before making significant architectural decisions. Questions, corrections, and proposals should be filed against the `architecture/` directory in the project repository.*

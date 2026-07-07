@@ -1,7 +1,7 @@
 [Unit]
-Description=Ollama Service — Solus AI Optimized
+Description=Ollama Service — Synthex AI Optimized
 Documentation=https://github.com/ollama/ollama
-Documentation=https://docs.solus-project.org/ai/
+Documentation=https://docs.synthex-project.org/ai/
 Wants=network-online.target
 After=network-online.target
 

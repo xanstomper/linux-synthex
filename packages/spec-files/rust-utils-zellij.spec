@@ -1,4 +1,4 @@
-# Solus Linux RPM Spec — zellij
+# SynthOS RPM Spec — zellij
 # Terminal multiplexer (tmux replacement) written in Rust
 # Origin: Fedora, Arch Linux
 %global zellij_version 0.41.1
@@ -53,6 +53,6 @@ install -m 0644 docs/man/man1/zellij.1 %{buildroot}%{_mandir}/man1/ 2>/dev/null 
 %{_datadir}/zsh/site-functions/_zellij
 
 %changelog
-* Mon Jul 07 2026 Solus Rust Team <rust@solus-project.org> - 0.41.1-1
-- Initial Solus package
+* Mon Jul 07 2026 Synthex Rust Team <rust@synthex-project.org> - 0.41.1-1
+- Initial Synthex package
 - Rust-based terminal multiplexer

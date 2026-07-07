@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Solus Linux - Reproducible ISO Build Script
+# SynthOS - Reproducible ISO Build Script
 # Uses livecd-creator (lorax) in a clean container environment
 # Supports Plasma, Hyprland, and GNOME editions
 #
@@ -108,9 +108,9 @@ check_dependencies() {
 
 get_kickstart_path() {
     case "$EDITION" in
-        plasma|kde)   echo "$PROJECT_ROOT/build/kickstart/solus-plasma.ks" ;;
-        hyprland)     echo "$PROJECT_ROOT/build/kickstart/solus-hyprland.ks" ;;
-        gnome)        echo "$PROJECT_ROOT/build/kickstart/solus-gnome.ks" ;;
+        plasma|kde)   echo "$PROJECT_ROOT/build/kickstart/synthex-plasma.ks" ;;
+        hyprland)     echo "$PROJECT_ROOT/build/kickstart/synthex-hyprland.ks" ;;
+        gnome)        echo "$PROJECT_ROOT/build/kickstart/synthex-gnome.ks" ;;
         *)            log_error "Unknown edition: $EDITION"; usage ;;
     esac
 }
@@ -122,7 +122,7 @@ get_iso_name() {
         hyprland)     edition_label="Hyprland" ;;
         gnome)        edition_label="GNOME" ;;
     esac
-    echo "Solus-${edition_label}-${VERSION}-${ARCH}.iso"
+    echo "Synthex-${edition_label}-${VERSION}-${ARCH}.iso"
 }
 
 get_iso_label() {
@@ -132,7 +132,7 @@ get_iso_label() {
         hyprland)     edition_short="HYPRLAND" ;;
         gnome)        edition_short="GNOME" ;;
     esac
-    echo "SOLUS_${edition_short}_${VERSION//./_}"
+    echo "SYNTHEX_${edition_short}_${VERSION//./_}"
 }
 
 # =============================================================================
@@ -152,7 +152,7 @@ build_iso() {
         exit 1
     fi
 
-    log_step "Building Solus ${EDITION^} ISO (${VERSION})"
+    log_step "Building Synthex ${EDITION^} ISO (${VERSION})"
     log_info "  Kickstart: $kickstart"
     log_info "  Output:    $OUTPUT_DIR/$iso_name"
     log_info "  Label:     $iso_label"
@@ -167,8 +167,8 @@ build_iso() {
         --verbose \
         --config="$kickstart" \
         --releasever="$RELEASEVER" \
-        --title="Solus Linux ${EDITION^}" \
-        --product="Solus" \
+        --title="SynthOS ${EDITION^}" \
+        --product="Synthex" \
         --volid="$iso_label" \
         $cache_args \
         --tmp="$BUILD_DIR/tmp" \
@@ -212,8 +212,8 @@ sign_iso() {
 Key-Type: RSA
 Key-Length: 4096
 Key-Usage: sign
-Name-Real: Solus Build Bot
-Name-Email: build@getsol.us
+Name-Real: Synthex Build Bot
+Name-Email: build@getsynthex.org
 Expire-Date: 0
 %commit
 EOGPG
@@ -255,7 +255,7 @@ generate_checksums() {
 
     log_step "Generating SHA256 checksums"
 
-    local checksum_file="$OUTPUT_DIR/Solus-${EDITION^}-${VERSION}-SHA256SUMS"
+    local checksum_file="$OUTPUT_DIR/Synthex-${EDITION^}-${VERSION}-SHA256SUMS"
     cd "$OUTPUT_DIR"
 
     # Clear existing checksum file
@@ -295,11 +295,11 @@ generate_torrent() {
 
     log_step "Generating BitTorrent metadata"
 
-    local torrent_file="$OUTPUT_DIR/Solus-${EDITION^}-${VERSION}-${ARCH}.torrent"
-    local announce_url="https://tracker.getsol.us/announce"
+    local torrent_file="$OUTPUT_DIR/Synthex-${EDITION^}-${VERSION}-${ARCH}.torrent"
+    local announce_url="https://tracker.getsynthex.org/announce"
 
     transmission-create \
-        --comment="Solus Linux ${EDITION^} ${VERSION} ${ARCH}" \
+        --comment="SynthOS ${EDITION^} ${VERSION} ${ARCH}" \
         --tracker="$announce_url" \
         --private \
         --outfile="$torrent_file" \
@@ -310,7 +310,7 @@ generate_torrent() {
         # Generate magnet link
         local info_hash
         info_hash=$(transmission-show "$torrent_file" 2>/dev/null | grep "^  Hash:" | awk '{print $2}')
-        echo "magnet:?xt=urn:btih:${info_hash}&dn=Solus-${EDITION^}-${VERSION}-${ARCH}" \
+        echo "magnet:?xt=urn:btih:${info_hash}&dn=Synthex-${EDITION^}-${VERSION}-${ARCH}" \
             > "${torrent_file}.magnet"
         log_info "Magnet link: $(cat ${torrent_file}.magnet)"
     fi
@@ -319,12 +319,12 @@ generate_torrent() {
 create_build_manifest() {
     log_step "Creating build manifest"
 
-    local manifest_file="$OUTPUT_DIR/Solus-${EDITION^}-${VERSION}-manifest.txt"
+    local manifest_file="$OUTPUT_DIR/Synthex-${EDITION^}-${VERSION}-manifest.txt"
     local iso_name
     iso_name="$(get_iso_name)"
 
     {
-        echo "Solus Linux Build Manifest"
+        echo "SynthOS Build Manifest"
         echo "========================="
         echo "Edition:     ${EDITION^}"
         echo "Version:     ${VERSION}"
@@ -356,11 +356,11 @@ push_artifacts() {
     log_step "Pushing artifacts to release server"
 
     local remote_user="${REMOTE_USER:-builder}"
-    local remote_host="${REMOTE_HOST:-releases.getsol.us}"
-    local remote_path="${REMOTE_PATH:-/var/www/releases/solus}"
+    local remote_host="${REMOTE_HOST:-releases.getsynthex.org}"
+    local remote_path="${REMOTE_PATH:-/var/www/releases/synthex}"
 
     rsync -avzP \
-        --include="Solus-${EDITION^}-${VERSION}-*" \
+        --include="Synthex-${EDITION^}-${VERSION}-*" \
         --exclude="*" \
         "$OUTPUT_DIR/" \
         "${remote_user}@${remote_host}:${remote_path}/"
@@ -428,7 +428,7 @@ main() {
         fi
 
         # Build the container image
-        local container_tag="solus-builder:${VERSION}"
+        local container_tag="synthex-builder:${VERSION}"
         docker build \
             --tag "$container_tag" \
             --build-arg "EDITION=$EDITION" \
@@ -453,7 +453,7 @@ main() {
     fi
 
     # Native build pipeline
-    log_step "=== Solus Linux ISO Build Pipeline ==="
+    log_step "=== SynthOS ISO Build Pipeline ==="
     log_info "Edition:   ${EDITION^}"
     log_info "Version:   ${VERSION}"
     log_info "Output:    ${OUTPUT_DIR}"
@@ -496,12 +496,12 @@ main() {
     echo "============================================"
     echo " ISO:         $(get_iso_name)"
     echo " Size:        $(ls -lh "$OUTPUT_DIR/$(get_iso_name)" 2>/dev/null | awk '{print $5}')"
-    echo " SHA256:      ${OUTPUT_DIR}/Solus-${EDITION^}-${VERSION}-SHA256SUMS"
+    echo " SHA256:      ${OUTPUT_DIR}/Synthex-${EDITION^}-${VERSION}-SHA256SUMS"
     if [ -f "$OUTPUT_DIR/$(get_iso_name).sig" ]; then
         echo " Signature:   ${OUTPUT_DIR}/$(get_iso_name).sig"
     fi
-    if [ -f "$OUTPUT_DIR/Solus-${EDITION^}-${VERSION}-${ARCH}.torrent" ]; then
-        echo " Torrent:     ${OUTPUT_DIR}/Solus-${EDITION^}-${VERSION}-${ARCH}.torrent"
+    if [ -f "$OUTPUT_DIR/Synthex-${EDITION^}-${VERSION}-${ARCH}.torrent" ]; then
+        echo " Torrent:     ${OUTPUT_DIR}/Synthex-${EDITION^}-${VERSION}-${ARCH}.torrent"
     fi
     echo "============================================"
 }

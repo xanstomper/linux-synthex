@@ -1,0 +1,94 @@
+#!/usr/bin/env python3
+"""Synthex Welcome — first-run welcome application."""
+import os
+import sys
+import subprocess
+import gi
+
+gi.require_version("Gtk", "4.0")
+gi.require_version("Adw", "1")
+from gi.repository import Gtk, Adw, Gio, GLib
+
+APP_ID = "org.synthex.Welcome"
+APP_VERSION = "2026.1"
+
+
+class WelcomeWindow(Adw.Application):
+    def __init__(self):
+        super().__init__(application_id=APP_ID)
+        self.connect("activate", self.on_activate)
+
+    def on_activate(self, app):
+        win = Adw.ApplicationWindow(application=app)
+        win.set_title("Welcome to Synthex")
+        win.set_default_size(700, 500)
+
+        # Header bar
+        header = Adw.HeaderBar()
+        header.add_css_class("flat")
+
+        # Main content
+        main_box = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=12)
+        main_box.set_margin_start(24)
+        main_box.set_margin_end(24)
+        main_box.set_margin_top(24)
+        main_box.set_margin_bottom(24)
+
+        # Welcome label
+        title = Gtk.Label(label="Welcome to Synthex Linux")
+        title.add_css_class("title")
+        title.set_margin_bottom(6)
+        main_box.append(title)
+
+        subtitle = Gtk.Label(label="Let's get your system ready.")
+        subtitle.add_css_class("dim-label")
+        subtitle.set_margin_bottom(18)
+        main_box.append(subtitle)
+
+        # Action buttons
+        actions = [
+            ("Install Drivers", "synthex-control-center --drivers"),
+            ("Install Codecs", "synthex-codec-installer"),
+            ("Gaming Setup", "ujust gaming-setup"),
+            ("Install NVIDIA", "synthex-nvidia-installer"),
+            ("Performance Tuning", "ujust tune-performance"),
+            ("Install Gaming Bundle", "ujust install-bundle-gaming"),
+            ("Install Creator Bundle", "ujust install-bundle-creator"),
+            ("Install Developer Bundle", "ujust install-bundle-developer"),
+            ("Open Control Center", "synthex-control-center"),
+            ("Open Software Center", "synthex-software-center"),
+        ]
+
+        for label, cmd in actions:
+            btn = Gtk.Button(label=label)
+            btn.set_margin_bottom(8)
+            btn.connect("clicked", lambda w, c=cmd: self.run_cmd(c))
+            main_box.append(btn)
+
+        # Scroll
+        scrolled = Gtk.ScrolledWindow()
+        scrolled.set_child(main_box)
+        scrolled.set_vexpand(True)
+
+        # Clamp
+        clamp = Adw.Clamp(maximum_size=600)
+        clamp.set_child(scrolled)
+
+        # Layout
+        outer = Gtk.Box(orientation=Gtk.Orientation.VERTICAL)
+        outer.append(header)
+        outer.append(clamp)
+
+        win.set_content(outer)
+        win.present()
+
+    def run_cmd(self, cmd):
+        try:
+            subprocess.Popen(cmd, shell=True)
+        except Exception:
+            pass
+
+
+if __name__ == "__main__":
+    app = WelcomeWindow()
+    app.run(sys.argv)

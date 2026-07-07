@@ -1,0 +1,25 @@
+#!/usr/bin/env bash
+# synthex-studio — QML application launcher
+# Launches Synthex Studio with qmlscene or native binary
+set -euo pipefail
+
+HERE="$(cd "$(dirname "$0")" && pwd)"
+QML_MAIN="$HERE/ui/Main.qml"
+
+# Try native binary first
+if command -v synthex-studio-bin &>/dev/null; then
+    exec synthex-studio-bin "$@"
+fi
+
+if command -v qmlscene &>/dev/null; then
+    exec qmlscene "$QML_MAIN" "$@"
+fi
+
+if command -v qml6 &>/dev/null; then
+    exec qml6 "$QML_MAIN" "$@"
+fi
+
+echo "Synthex Studio"
+echo "QML runtime not found. Install qt6-qtdeclarative or compile the native binary."
+echo "Source: $QML_MAIN"
+exit 1

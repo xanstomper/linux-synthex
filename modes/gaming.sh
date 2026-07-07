@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Solus Gaming Mode
+# Synthex Gaming Mode
 # Optimizes system for maximum gaming performance
 
 set -euo pipefail
@@ -37,7 +37,7 @@ tuned-adm profile throughput-performance 2>/dev/null || true
 
 # Apply gaming layout
 echo "🎨 Applying gaming layout..."
-solus-layout set gaming 2>/dev/null || true
+synthex-layout set gaming 2>/dev/null || true
 
 # Notify
 notify-send -i games "Gaming Mode" "System optimized for gaming performance" 2>/dev/null || echo "✅ Gaming Mode active"

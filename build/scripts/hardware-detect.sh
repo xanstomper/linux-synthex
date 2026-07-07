@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Solus Linux - Hardware Detection and Optimization Script
+# SynthOS - Hardware Detection and Optimization Script
 # Detects system hardware and applies optimal configurations
 # Called during installation (post-install) and on first boot
 #
@@ -15,9 +15,9 @@ set -euo pipefail
 # Configuration
 # =============================================================================
 
-LOG_FILE="/var/log/solus-hardware-detect.log"
-REPORT_FILE="/etc/solus/hardware-report.json"
-PROFILE_DIR="/etc/solus/hardware-profiles"
+LOG_FILE="/var/log/synthex-hardware-detect.log"
+REPORT_FILE="/etc/synthex/hardware-report.json"
+PROFILE_DIR="/etc/synthex/hardware-profiles"
 QUICK_MODE=false
 REPORT_ONLY=false
 APPLY_FILE=""
@@ -617,7 +617,7 @@ PYREPORT
         log_warn "Python3 not available for JSON report generation"
         # Fallback: generate plain text report
         {
-            echo "Solus Linux Hardware Report"
+            echo "SynthOS Hardware Report"
             echo "=========================="
             echo "Generated: $(date -u)"
             echo "Hostname:  $hostname"
@@ -704,7 +704,7 @@ main() {
 
     echo ""
     echo "================================================"
-    echo " Solus Hardware Detection & Optimization"
+    echo " Synthex Hardware Detection & Optimization"
     echo " Started: $(date -u '+%Y-%m-%d %H:%M:%S UTC')"
     echo " Mode:    $([ "$QUICK_MODE" = true ] && echo 'quick' || echo 'full')"
     echo "================================================"

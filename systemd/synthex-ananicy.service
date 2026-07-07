@@ -1,0 +1,29 @@
+[Unit]
+Description=Synthex Ananicy — Auto-Nice Daemon (CachyOS-style)
+Documentation=https://docs.synthex-project.org/ananicy
+After=multi-user.target
+
+[Service]
+Type=forking
+ExecStart=/usr/bin/synthex-ananicy start
+ExecStop=/usr/bin/synthex-ananicy stop
+ExecReload=/usr/bin/synthex-ananicy restart
+PIDFile=/run/synthex-ananicy.pid
+RemainAfterExit=yes
+
+# Resource limits
+MemoryMax=64M
+CPUQuota=20%
+
+# Security hardening
+ProtectSystem=full
+ProtectHome=read-only
+PrivateTmp=yes
+NoNewPrivileges=yes
+SystemCallArchitectures=native
+ProtectKernelTunables=yes
+ProtectControlGroups=yes
+CapabilityBoundingSet=CAP_SYS_NICE
+
+[Install]
+WantedBy=multi-user.target

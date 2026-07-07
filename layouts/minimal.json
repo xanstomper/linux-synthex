@@ -14,7 +14,7 @@
     "latency_mode": "low",
     "animation_speed": 3
   },
-  "wallpaper": "/usr/share/wallpapers/solus/minimal.png",
+  "wallpaper": "/usr/share/wallpapers/synthex/minimal.png",
   "services": {
     "gamemode": false,
     "tracker_services": false,

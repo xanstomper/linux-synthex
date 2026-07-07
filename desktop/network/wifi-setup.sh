@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
-# Solus WiFi Auto-Connect Setup
+# Synthex WiFi Auto-Connect Setup
 # Detects and configures WiFi on first boot
-# Runs as part of solus-firstboot.service
+# Runs as part of synthex-firstboot.service
 
 set -euo pipefail
 
@@ -60,7 +60,7 @@ auto_connect() {
 }
 
 main() {
-    log "Solus WiFi Setup"
+    log "Synthex WiFi Setup"
     
     detect_wifi || true
     auto_connect || true

@@ -1,8 +1,8 @@
-# Solus Gaming Control Center — Specification Document
+# Synthex Gaming Control Center — Specification Document
 
 ## Overview
 
-The **Solus Gaming Control Center** is a native GUI application for managing all aspects of the gaming experience on Solus Linux. It provides a unified interface for driver management, performance tuning, game library management, and system monitoring — eliminating the need to manually edit config files or use multiple CLI tools.
+The **Synthex Gaming Control Center** is a native GUI application for managing all aspects of the gaming experience on SynthOS. It provides a unified interface for driver management, performance tuning, game library management, and system monitoring — eliminating the need to manually edit config files or use multiple CLI tools.
 
 ---
 
@@ -16,7 +16,7 @@ The **Solus Gaming Control Center** is a native GUI application for managing all
 | GUI Toolkit | **GTK4 + libadwaita** | Native GNOME/Budgie integration, responsive design, HIG-compliant |
 | Build System | **Meson + Cargo** | Meson for the overall project, Cargo for Rust sub-components |
 | IPC | **D-Bus (zbus)** | System bus for daemon communication, session bus for UI ↔ daemon |
-| Backend Service | **systemd user service** | `solus-gaming-daemon` runs as a user service, activated on demand |
+| Backend Service | **systemd user service** | `synthex-gaming-daemon` runs as a user service, activated on demand |
 | Privileged Ops | **polkit** | For operations requiring root (driver install, sysctl, CPU governor) |
 | Notifications | **libnotify** | Desktop notifications for profile changes, HDR toggle, etc. |
 
@@ -39,7 +39,7 @@ The **Solus Gaming Control Center** is a native GUI application for managing all
                           │ D-Bus (session bus)
 ┌─────────────────────────┼──────────────────────────────┐
 │              ┌──────────┴───────────────┐              │
-│              │  solus-gaming-daemon      │              │
+│              │  synthex-gaming-daemon      │              │
 │              │  (systemd --user service) │              │
 │  ┌───────────┴───────────┐              │              │
 │  │ Profile Manager       │              │              │
@@ -71,28 +71,28 @@ The **Solus Gaming Control Center** is a native GUI application for managing all
 ```
 /usr/
 ├── bin/
-│   └── solus-gaming-center          # GUI launcher
+│   └── synthex-gaming-center          # GUI launcher
 ├── libexec/
-│   ├── solus-gaming-daemon           # Background daemon
-│   └── solus-gaming-polkit-helper    # Privileged helper
+│   ├── synthex-gaming-daemon           # Background daemon
+│   └── synthex-gaming-polkit-helper    # Privileged helper
 ├── share/
-│   ├── solus-gaming-center/
+│   ├── synthex-gaming-center/
 │   │   ├── ui/                       # GTK UI definitions (Blueprints)
 │   │   ├── icons/                    # App icons
 │   │   ├── schemas/                  # GSettings schemas
 │   │   └── style/                    # CSS styling
 │   ├── applications/
-│   │   └── solus-gaming-center.desktop
+│   │   └── synthex-gaming-center.desktop
 │   ├── polkit-1/
 │   │   └── actions/
-│   │       └── com.solus.gaming.policy
+│   │       └── com.synthex.gaming.policy
 │   └── dbus-1/
 │       └── services/
-│           └── com.solus.GamingDaemon.service
+│           └── com.synthex.GamingDaemon.service
 └── lib/systemd/user/
-    └── solus-gaming-daemon.service
+    └── synthex-gaming-daemon.service
 
-~/.config/solus-gaming-center/
+~/.config/synthex-gaming-center/
 ├── config.toml                       # User preferences
 ├── games/                            # Per-game profiles
 │   ├── 730.conf                      # CS2
@@ -119,7 +119,7 @@ The Dashboard is the default view when opening the Gaming Control Center.
 
 ```
 ┌──────────────────────────────────────────────────────────┐
-│ 🎮 Solus Gaming Control Center                    _ □ X │
+│ 🎮 Synthex Gaming Control Center                    _ □ X │
 ├──────────┬───────────────────────────────────────────────┤
 │          │ ┌─ Performance Profile ────────────────────┐ │
 │ Dashboard│ │ ● Balanced ○ Performance ○ Turbo        │ │
@@ -162,7 +162,7 @@ Scans and manages game installations across all launchers.
 | Steam | `~/.steam/root/steamapps/*.acf` | Native Steam only (not Flatpak) |
 | Lutris | `~/.config/lutris/games/*.yml` | Reads game configs and runners |
 | Heroic | `~/.config/heroic/games-config/*.json` | Epic, GOG, Amazon |
-| Custom | `~/.config/solus-gaming-center/games/*.conf` | Manual entries |
+| Custom | `~/.config/synthex-gaming-center/games/*.conf` | Manual entries |
 
 #### Game Profile Editor
 
@@ -345,10 +345,10 @@ Built-in benchmarking utility.
 
 ## 3. D-Bus API
 
-### 3.1 Daemon Interface (`com.solus.GamingDaemon`)
+### 3.1 Daemon Interface (`com.synthex.GamingDaemon`)
 
 ```
-interface com.solus.GamingDaemon {
+interface com.synthex.GamingDaemon {
     // Profile management
     method GetCurrentProfile() → (s profile_name)
     method SetProfile(s profile_name) → (b success)
@@ -389,9 +389,9 @@ interface com.solus.GamingDaemon {
 ### 3.2 Polkit Actions
 
 ```xml
-<!-- /usr/share/polkit-1/actions/com.solus.gaming.policy -->
+<!-- /usr/share/polkit-1/actions/com.synthex.gaming.policy -->
 <policyconfig>
-  <action id="com.solus.gaming.set-cpu-governor">
+  <action id="com.synthex.gaming.set-cpu-governor">
     <description>Change CPU governor</description>
     <message>Authentication is required to change the CPU governor for gaming.</message>
     <defaults>
@@ -401,7 +401,7 @@ interface com.solus.GamingDaemon {
     </defaults>
   </action>
   
-  <action id="com.solus.gaming.install-drivers">
+  <action id="com.synthex.gaming.install-drivers">
     <description>Install or switch GPU drivers</description>
     <message>Authentication is required to install or switch GPU drivers.</message>
     <defaults>
@@ -411,7 +411,7 @@ interface com.solus.GamingDaemon {
     </defaults>
   </action>
   
-  <action id="com.solus.gaming.set-gpu-clocks">
+  <action id="com.synthex.gaming.set-gpu-clocks">
     <description>Adjust GPU clock speeds</description>
     <message>Authentication is required to adjust GPU clock speeds.</message>
     <defaults>
@@ -464,7 +464,7 @@ AdwApplicationWindow
 ### 4.3 Theme Support
 
 - **Adwaita** (light/dark) — Default, system theme
-- **Custom CSS** — Overrides in `~/.config/solus-gaming-center/style.css`
+- **Custom CSS** — Overrides in `~/.config/synthex-gaming-center/style.css`
 - **Gaming accent color** — Configurable accent color (default: green `#2ecc71`)
 - **Transparency** — Optional translucent window effect
 
@@ -506,7 +506,7 @@ prewarm_enabled = true
 
 ### 5.2 Game Profile Format
 
-Each game is stored as a TOML file in `~/.config/solus-gaming-center/games/<appid>.conf`.
+Each game is stored as a TOML file in `~/.config/synthex-gaming-center/games/<appid>.conf`.
 
 ```toml
 [game]
@@ -648,8 +648,8 @@ split_lock_mitigate = false
 - `gamemode`
 - `mangohud`
 - `gamescope`
-- `gpu-driver-manager` (solus-gpu-drivers package)
-- `steam-optimizer` (solus-steam-optimizer package)
+- `gpu-driver-manager` (synthex-gpu-drivers package)
+- `steam-optimizer` (synthex-steam-optimizer package)
 
 ---
 
@@ -684,7 +684,7 @@ split_lock_mitigate = false
 ### Dashboard Layout
 ```
 ┌──────────────────────────────────────────────────────────────────┐
-│ 🎮 Solus Gaming Control Center                            _ □ X │
+│ 🎮 Synthex Gaming Control Center                            _ □ X │
 ├────────────┬─────────────────────────────────────────────────────┤
 │  Dashboard │  Performance Profile                                │
 │  Game Lib  │  ● Balanced  ○ Performance  ○ Turbo  ○ Power Saver │

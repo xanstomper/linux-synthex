@@ -1,0 +1,24 @@
+[Unit]
+Description=Synthex Control Center
+Documentation=https://synthex-linux.org/docs/control-center
+After=graphical-session.target
+PartOf=graphical-session.target
+
+[Service]
+Type=dbus
+BusName=org.synthex.ControlCenter
+ExecStart=/usr/bin/synthex-control-center
+Restart=on-failure
+RestartSec=5
+Environment=DISPLAY=:0
+Environment=WAYLAND_DISPLAY=wayland-0
+Environment=QT_QPA_PLATFORM=wayland
+
+
+# Security hardening
+ProtectSystem=full
+PrivateTmp=yes
+NoNewPrivileges=yes
+
+[Install]
+WantedBy=graphical.target

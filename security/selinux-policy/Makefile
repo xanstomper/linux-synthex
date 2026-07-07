@@ -1,8 +1,8 @@
-# Solus SELinux Policy Module Makefile
+# Synthex SELinux Policy Module Makefile
 # Build: make -f /usr/share/selinux/devel/Makefile
-# Install: semodule -i solus-policy.pp
+# Install: semodule -i synthex-policy.pp
 
-TARGET=solus-policy
+TARGET=synthex-policy
 
 all: $(TARGET).pp
 
@@ -11,7 +11,7 @@ $(TARGET).pp: $(TARGET).te $(TARGET).fc $(TARGET).if
 
 install: $(TARGET).pp
 	semodule -i $(TARGET).pp
-	restorecon -Rv /usr/bin/solus* /etc/solus/
+	restorecon -Rv /usr/bin/synthex* /etc/synthex/
 
 clean:
 	rm -f *.pp *.tg *.tmp

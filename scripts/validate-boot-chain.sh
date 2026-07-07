@@ -1,5 +1,5 @@
 #!/bin/bash
-# Solus Boot Chain Validation Script
+# Synthex Boot Chain Validation Script
 # Verifies the entire boot chain is functional
 # Run after installation or kernel update
 
@@ -33,7 +33,7 @@ warn() {
 
 echo ""
 echo -e "${AMBER}══════════════════════════════════════════════${NC}"
-echo -e "${AMBER}  🔍 Solus Boot Chain Validation${NC}"
+echo -e "${AMBER}  🔍 Synthex Boot Chain Validation${NC}"
 echo -e "${AMBER}══════════════════════════════════════════════${NC}"
 echo ""
 
@@ -77,7 +77,7 @@ echo "──────────────────────"
 # Check GRUB
 if [ -f /boot/grub2/grub.cfg ]; then
     check "GRUB config exists" 0
-    check "GRUB config has Solus entries" $(grep -c "Solus" /boot/grub2/grub.cfg 2>/dev/null || echo 0)
+    check "GRUB config has Synthex entries" $(grep -c "Synthex" /boot/grub2/grub.cfg 2>/dev/null || echo 0)
     check "GRUB config has recovery entries" $(grep -ic "recovery" /boot/grub2/grub.cfg 2>/dev/null || echo 0)
 else
     FAIL=$((FAIL + 1))
@@ -91,7 +91,7 @@ if [ -f /boot/loader/loader.conf ]; then
 fi
 
 # GRUB installation
-if [ -f /boot/efi/EFI/solus/grubx64.efi ] || [ -f /boot/efi/EFI/BOOT/BOOTX64.EFI ]; then
+if [ -f /boot/efi/EFI/synthex/grubx64.efi ] || [ -f /boot/efi/EFI/BOOT/BOOTX64.EFI ]; then
     check "GRUB EFI binary installed" 0
 else
     warn "GRUB EFI binary not found (may be systemd-boot)"
@@ -162,9 +162,9 @@ fi
 echo -e "\n${BOLD}7. Recovery System${NC}"
 echo "──────────────────────"
 
-check "solus-recovery script exists" $(test -f /usr/bin/solus-recovery && echo 0 || echo 1)
-check "Recovery initramfs hook installed" $(ls /usr/lib/dracut/modules.d/*solus* 2>/dev/null | wc -l || echo 0)
-check "Recovery systemd service installed" $(systemctl list-unit-files solus-recovery* 2>/dev/null | grep -c "solus-recovery" || echo 0)
+check "synthex-recovery script exists" $(test -f /usr/bin/synthex-recovery && echo 0 || echo 1)
+check "Recovery initramfs hook installed" $(ls /usr/lib/dracut/modules.d/*synthex* 2>/dev/null | wc -l || echo 0)
+check "Recovery systemd service installed" $(systemctl list-unit-files synthex-recovery* 2>/dev/null | grep -c "synthex-recovery" || echo 0)
 check "GRUB recovery entries configured" $(grep -c "Recovery" /boot/grub2/grub.cfg 2>/dev/null || echo 0)
 
 # ─── 8. First Boot System ─────────────────────────────────────────
@@ -172,11 +172,11 @@ check "GRUB recovery entries configured" $(grep -c "Recovery" /boot/grub2/grub.c
 echo -e "\n${BOLD}8. First Boot System${NC}"
 echo "──────────────────────"
 
-check "solus-firstboot.service installed" $(systemctl list-unit-files solus-firstboot* 2>/dev/null | grep -c "solus-firstboot" || echo 0)
-check "solus-oobe.service installed" $(systemctl list-unit-files solus-oobe* 2>/dev/null | grep -c "solus-oobe" || echo 0)
+check "synthex-firstboot.service installed" $(systemctl list-unit-files synthex-firstboot* 2>/dev/null | grep -c "synthex-firstboot" || echo 0)
+check "synthex-oobe.service installed" $(systemctl list-unit-files synthex-oobe* 2>/dev/null | grep -c "synthex-oobe" || echo 0)
 
-if [ -f /var/lib/solus/firstboot-complete ]; then
-    echo -e "  ${GREEN}✅${NC} First boot already completed: $(cat /var/lib/solus/firstboot-complete)"
+if [ -f /var/lib/synthex/firstboot-complete ]; then
+    echo -e "  ${GREEN}✅${NC} First boot already completed: $(cat /var/lib/synthex/firstboot-complete)"
 fi
 
 # ─── Summary ───────────────────────────────────────────────────────

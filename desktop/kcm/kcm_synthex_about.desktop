@@ -1,0 +1,14 @@
+[Desktop Entry]
+Type=Service
+Name=Synthex About
+Comment=About SynthOS — version, kernel, system info
+Icon=help-about
+Exec=/usr/bin/synthex-control-center --page about
+X-KDE-ServiceTypes=KCModule
+X-KDE-ParentApp=kcm_shell
+X-KDE-ParentComponents=SolusAbout
+X-KDE-Library=kcm_shell
+X-KDE-FactoryName=synthex-about
+X-KDE-ParentWidget=true
+Categories=Qt;KDE;System;Settings;
+OnlyShowIn=KDE;

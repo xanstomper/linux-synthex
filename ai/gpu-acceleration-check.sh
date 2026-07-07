@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Solus AI GPU Check — verify GPU acceleration for AI workloads."""
+"""Synthex AI GPU Check — verify GPU acceleration for AI workloads."""
 import os, sys, subprocess, json
 
 def check_nvidia():
@@ -49,7 +49,7 @@ def check_ollama():
     return {"available": False}
 
 def main():
-    print("🤖 Solus AI GPU Acceleration Check")
+    print("🤖 Synthex AI GPU Acceleration Check")
     print("═" * 45)
 
     nvidia = check_nvidia()
@@ -78,7 +78,7 @@ def main():
     print(f"\n   Ollama available: {ollama['available']}")
     print("   Vulkan available: Yes" if vulkan["available"] else "   Vulkan for GPU compute: Install mesa-vulkan-drivers")
     print()
-    print("   Install: solus ai setup-webui   (Open WebUI + Ollama)")
+    print("   Install: synthex ai setup-webui   (Open WebUI + Ollama)")
 
 if __name__ == "__main__":
     main()

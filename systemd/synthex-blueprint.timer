@@ -1,0 +1,11 @@
+[Unit]
+Description=Synthex Blueprint Daily Backup Timer
+Documentation=https://docs.synthex-project.org/blueprint
+
+[Timer]
+OnCalendar=daily
+Persistent=true
+RandomizedDelaySec=1h
+
+[Install]
+WantedBy=timers.target

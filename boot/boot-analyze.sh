@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Solus Boot Analyzer — systemd-analyze blame + critical-chain + trend report
+# Synthex Boot Analyzer — systemd-analyze blame + critical-chain + trend report
 # Usage: boot-analyze.sh [threshold_seconds]
 
 set -euo pipefail
@@ -11,12 +11,12 @@ BOLD='\033[1m'
 NC='\033[0m'
 
 THRESHOLD="${1:-1.0}"
-REPORT_DIR="/var/lib/solus/boot-reports"
-TIMES="/var/lib/solus/boot-times.json"
+REPORT_DIR="/var/lib/synthex/boot-reports"
+TIMES="/var/lib/synthex/boot-times.json"
 
 echo ""
 echo -e "${AMBER}══════════════════════════════════════════════${NC}"
-echo -e "${AMBER}  🚀 Solus Boot Analyzer${NC}"
+echo -e "${AMBER}  🚀 Synthex Boot Analyzer${NC}"
 echo -e "${AMBER}══════════════════════════════════════════════${NC}"
 echo ""
 
@@ -74,16 +74,16 @@ PY
         tail -20 "$TIMES"
     fi
 else
-    echo "  (no trend data — enable solus-boot-profile.service)"
+    echo "  (no trend data — enable synthex-boot-profile.service)"
 fi
 echo ""
 
 # 6. Save report
-if [ -w /var/lib/solus ] 2>/dev/null || [ "$(id -u)" -eq 0 ]; then
+if [ -w /var/lib/synthex ] 2>/dev/null || [ "$(id -u)" -eq 0 ]; then
     mkdir -p "$REPORT_DIR" 2>/dev/null || true
     OUT="$REPORT_DIR/boot-$(date +%Y%m%d-%H%M%S).txt"
     {
-        echo "# Solus boot report — $(date -Iseconds)"
+        echo "# Synthex boot report — $(date -Iseconds)"
         echo "kernel: $(uname -r)"
         echo "threshold: ${THRESHOLD}s"
         echo "$ANALYZE"; echo

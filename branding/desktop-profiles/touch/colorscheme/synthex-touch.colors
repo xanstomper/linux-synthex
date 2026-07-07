@@ -1,0 +1,32 @@
+[Desktop Entry]
+Name=Synthex Touch
+Comment=Synthex Touch - Clean light with cool blue
+Type=ColorScheme
+Encoding=UTF-8
+
+[Scheme]
+BackgroundColor=#F5F5F7
+ForegroundColor=#1A1A2E
+SelectionBackgroundColor=#5B9BD5
+SelectionForegroundColor=#1A1A2E
+InactiveSelectionBackgroundColor=#F0F0F2
+InactiveSelectionForegroundColor=#3A3A4E
+WindowBackgroundColor=#FFFFFF
+WindowForegroundColor=#1A1A2E
+LinkColor=#5B9BD5
+VisitedLinkColor=#4A8BC5
+HoverColor=#5B9BD5
+FocusColor=#5B9BD5
+HoverBackgroundColor=#F0F0F2
+FocusBackgroundColor=#F0F0F2
+AlternateBackgroundColor=#FFFFFF
+AlternateForegroundColor=#3A3A4E
+ButtonBackgroundColor=#F0F0F2
+ButtonForegroundColor=#1A1A2E
+ButtonHoverColor=#FFFFFF
+ButtonFocusColor=#F0F0F2
+ViewBackgroundColor=#F5F5F7
+ViewForegroundColor=#1A1A2E
+ViewHoverColor=#FFFFFF
+ViewFocusColor=#FFFFFF
+ComplementaryColor=#7AB5E8

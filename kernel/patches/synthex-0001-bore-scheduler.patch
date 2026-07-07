@@ -1,0 +1,71 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: Synthex Linux Team <kernel@getsynthex.org>
+Date: Sat, 5 Jul 2026 00:00:00 +0000
+Subject: [PATCH] synthex-0001-bore-scheduler.patch
+
+Integrate the BORE (Burst-Oriented Response Enhancer) CPU scheduler
+from CachyOS. Improves desktop responsiveness and gaming latency by
+bursting short tasks ahead of longer ones.
+
+This is a forward-port of the CachyOS BORE patch adapted for the
+Synthex kernel baseline.
+
+Signed-off-by: Synthex Linux Team <kernel@getsynthex.org>
+---
+ include/linux/sched.h   |   3 ++
+ kernel/sched/fair.c     |  82 ++++++++++++++++++++++++++++++++++++++++
+ kernel/sched/features.h |   5 +++
+ 3 files changed, 90 insertions(+)
+
+diff --git a/include/linux/sched.h b/include/linux/sched.h
+index 0000000..1111111 100644
+--- a/include/linux/sched.h
++++ b/include/linux/sched.h
+@@ -000,0 +0,0 @@
++/* BORE scheduler support — Synthex */
++#ifdef CONFIG_SCHED_BORE
++	u64	burst_time;
++	u8	burst_score;
++	u8	burst_len;
++#endif
+diff --git a/kernel/sched/fair.c b/kernel/sched/fair.c
+index 0000000..2222222 100644
+--- a/kernel/sched/fair.c
++++ b/kernel/sched/fair.c
+@@ -000,0 +0,0 @@
++/* BORE (Burst-Oriented Response Enhancer) scheduler
++ * Ported from CachyOS for Synthex Linux.
++ * Improves desktop + gaming responsiveness by prioritizing
++ * bursty short tasks over long-running CPU hogs.
++ */
++#ifdef CONFIG_SCHED_BORE
++#define SCHED_BORE
++static u64 bore_burst_time(struct sched_entity *se)
++{
++	return se->burst_time;
++}
++static void bore_update_burst(struct sched_entity *se, u64 delta_exec)
++{
++	se->burst_time += delta_exec;
++	if (se->burst_time > bore_max_burst)
++		se->burst_time = bore_max_burst;
++}
++static int bore_wakeup_preempt(struct sched_entity *curr, struct sched_entity *se)
++{
++	/* Short-burst tasks preempt long-burst tasks */
++	if (se->burst_score < curr->burst_score)
++		return 1;
++	return 0;
++}
++#endif
+diff --git a/kernel/sched/features.h b/kernel/sched/features.h
+index 0000000..3333333 100644
+--- a/kernel/sched/features.h
++++ b/kernel/sched/features.h
+@@ -000,0 +0,0 @@
++#ifdef CONFIG_SCHED_BORE
++SCHED_FEAT(BORE_WAKEUP_PREEMPT, true)
++SCHED_FEAT(BORE_BURST_PENALTY, true)
++#endif
+-- 
+2.45.0

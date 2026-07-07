@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Solus Flatpak Setup — preconfigures Flathub + installs Flatseal + Warehouse
+# Synthex Flatpak Setup — preconfigures Flathub + installs Flatseal + Warehouse
 # Idempotent: safe to re-run.
 set -euo pipefail
 

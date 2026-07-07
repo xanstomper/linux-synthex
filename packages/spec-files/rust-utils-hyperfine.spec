@@ -1,4 +1,4 @@
-# Solus Linux RPM Spec — hyperfine
+# SynthOS RPM Spec — hyperfine
 # Command-line benchmarking tool written in Rust
 # Origin: Fedora, Arch Linux
 %global hyperfine_version 1.19.0
@@ -54,6 +54,6 @@ mkdir -p %{buildroot}%{_datadir}/zsh/site-functions
 %{_datadir}/zsh/site-functions/_hyperfine
 
 %changelog
-* Mon Jul 07 2026 Solus Rust Team <rust@solus-project.org> - 1.19.0-1
-- Initial Solus package
+* Mon Jul 07 2026 Synthex Rust Team <rust@synthex-project.org> - 1.19.0-1
+- Initial Synthex package
 - CLI benchmarking tool in Rust

@@ -1,0 +1,66 @@
+[
+  {
+    "id": "focus",
+    "name": "Synthex Focus",
+    "target": "power_users",
+    "weight": "lightweight",
+    "ram": "~400MB",
+    "animations": "fast"
+  },
+  {
+    "id": "gaming",
+    "name": "Synthex Gaming",
+    "target": "gamers",
+    "weight": "balanced",
+    "ram": "~800MB",
+    "animations": "smooth"
+  },
+  {
+    "id": "pro",
+    "name": "Synthex Pro",
+    "target": "developers",
+    "weight": "balanced",
+    "ram": "~800MB",
+    "animations": "fast"
+  },
+  {
+    "id": "touch",
+    "name": "Synthex Touch",
+    "target": "handheld",
+    "weight": "balanced",
+    "ram": "~800MB",
+    "animations": "smooth"
+  },
+  {
+    "id": "classic",
+    "name": "Synthex Classic",
+    "target": "beginners",
+    "weight": "balanced",
+    "ram": "~700MB",
+    "animations": "normal"
+  },
+  {
+    "id": "lite",
+    "name": "Synthex Lite",
+    "target": "old_hardware",
+    "weight": "lightweight",
+    "ram": "~300MB",
+    "animations": "off"
+  },
+  {
+    "id": "studio",
+    "name": "Synthex Studio",
+    "target": "creators",
+    "weight": "balanced",
+    "ram": "~900MB",
+    "animations": "smooth"
+  },
+  {
+    "id": "ai",
+    "name": "Synthex AI",
+    "target": "ai_users",
+    "weight": "balanced",
+    "ram": "~1GB+",
+    "animations": "smooth"
+  }
+]

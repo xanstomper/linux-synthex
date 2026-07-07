@@ -1,0 +1,27 @@
+[Unit]
+Description=Synthex AI Daemon — Rust-powered Ollama manager + D-Bus AI API
+Documentation=https://github.com/xanstomper/synthex-linux
+After=network.target network-online.target
+Wants=network-online.target
+ConditionFileNotEmpty=|/usr/bin/ollama
+
+[Service]
+Type=simple
+ExecStart=/usr/libexec/synthex/synthex-ai-daemon daemon
+Restart=on-failure
+RestartSec=5
+StandardOutput=journal
+StandardError=journal
+TimeoutStopSec=15
+User=root
+CPUAccounting=true
+MemoryAccounting=true
+
+# Security hardening
+NoNewPrivileges=yes
+PrivateTmp=yes
+ProtectSystem=strict
+ProtectHome=read-only
+
+[Install]
+WantedBy=multi-user.target

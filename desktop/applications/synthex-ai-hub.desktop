@@ -1,0 +1,9 @@
+[Desktop Entry]
+Type=Application
+Name=Synthex AI Hub
+Comment=Manage local AI models and chat
+Exec=synthex-ai-hub
+Icon=synthex-ai-hub
+Categories=Applications;AI;Utility;
+Terminal=false
+StartupNotify=true

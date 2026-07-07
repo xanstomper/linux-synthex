@@ -1,8 +1,8 @@
-# Solus Linux Gaming Platform
+# SynthOS Gaming Platform
 
-**Zero-friction, high-performance gaming on Solus Linux.**
+**Zero-friction, high-performance gaming on SynthOS.**
 
-The Solus Gaming Platform delivers a complete, integrated gaming environment for Solus Linux — from automatic GPU driver detection to per-game optimization profiles. Install the meta-package, reboot, and play.
+The Synthex Gaming Platform delivers a complete, integrated gaming environment for SynthOS — from automatic GPU driver detection to per-game optimization profiles. Install the meta-package, reboot, and play.
 
 ---
 
@@ -12,19 +12,19 @@ The Solus Gaming Platform delivers a complete, integrated gaming environment for
 
 ```bash
 # Full gaming platform (recommended)
-sudo eopkg install solus-gaming-platform
+sudo eopkg install synthex-gaming-platform
 
 # Or individual components
-sudo eopkg install solus-gpu-drivers
-sudo eopkg install solus-gaming-control-center
-sudo eopkg install solus-gaming-tools
-sudo eopkg install solus-steam-optimizer
+sudo eopkg install synthex-gpu-drivers
+sudo eopkg install synthex-gaming-control-center
+sudo eopkg install synthex-gaming-tools
+sudo eopkg install synthex-steam-optimizer
 ```
 
 ### First Launch
 
 1. **Reboot** after driver installation (NVIDIA switching requires it)
-2. Open **Solus Gaming Control Center** from the application menu
+2. Open **Synthex Gaming Control Center** from the application menu
 3. The dashboard shows your GPU status, system health, and performance profile
 4. Click **Auto-Detect & Install** under Drivers if GPU isn't recognized
 5. Launch Steam, Lutris, or Heroic — games run with optimal settings automatically
@@ -56,21 +56,21 @@ sudo eopkg install solus-steam-optimizer
 /usr/
 ├── bin/
 │   ├── steam-wrapper                    # Gamescope/gamemode Steam launcher
-│   └── solus-gaming-center              # Gaming Control Center GUI
+│   └── synthex-gaming-center              # Gaming Control Center GUI
 ├── sbin/
 │   └── gpu-driver-manager               # GPU driver detection/installation
 ├── libexec/
-│   ├── solus-gaming-daemon              # Background daemon
-│   └── solus-gaming-polkit-helper       # Privileged operations
+│   ├── synthex-gaming-daemon              # Background daemon
+│   └── synthex-gaming-polkit-helper       # Privileged operations
 ├── share/
-│   └── solus-gaming/
+│   └── synthex-gaming/
 │       ├── steam/
 │       │   └── steam-optimizations.sh   # System tuning script
 │       ├── proton/
 │       │   └── proton-ge-build.sh       # Proton GE build from source
 │       └── ...
 ├── lib/systemd/user/
-│   └── solus-gaming-daemon.service
+│   └── synthex-gaming-daemon.service
 └── etc/
     ├── default/
     │   ├── amdgpu                       # AMD GPU configuration
@@ -84,10 +84,10 @@ sudo eopkg install solus-steam-optimizer
 
 ## Components
 
-### solus-gpu-drivers
+### synthex-gpu-drivers
 Automatic GPU detection, driver installation, and configuration. Manages modprobe options, udev rules, and initramfs integration. Supports switching between proprietary NVIDIA and Nouveau drivers.
 
-### solus-gaming-control-center
+### synthex-gaming-control-center
 Native GUI application (Rust + GTK4/libadwaita) for:
 - Dashboard with real-time system monitoring
 - Performance profile switching (Power Saver ↔ Turbo)
@@ -98,17 +98,17 @@ Native GUI application (Rust + GTK4/libadwaita) for:
 - Controller test pad
 - Benchmark runner
 
-### solus-gaming-tools
+### synthex-gaming-tools
 CLI gaming tools including Proton GE builder, MangoHUD utilities, and diagnostic scripts.
 
-### solus-steam-optimizer
+### synthex-steam-optimizer
 Steam integration scripts that apply system tuning (CPU governor, kernel parameters, network optimization, shader cache setup) while Steam is running and revert on exit.
 
 ---
 
 ## Requirements
 
-- **OS:** Solus Linux (or any rpm-based distribution with adaptations)
+- **OS:** SynthOS (or any rpm-based distribution with adaptations)
 - **Kernel:** Linux ≥6.6 (for futex2, amdgpu DC, i915 GuC/HuC)
 - **Display Server:** Wayland recommended (X11 supported with reduced features)
 - **RAM:** 8 GB minimum, 16 GB recommended
@@ -147,14 +147,14 @@ Steam integration scripts that apply system tuning (CPU governor, kernel paramet
 RPM spec files for building platform packages:
 ```
 packages/spec-files/
-├── solus-gaming-platform.spec
-├── solus-gpu-drivers.spec
-└── solus-gaming-control-center.spec
+├── synthex-gaming-platform.spec
+├── synthex-gpu-drivers.spec
+└── synthex-gaming-control-center.spec
 ```
 
 Kickstart inclusion for ISO builds:
 ```
-build/kickstart/solus-gaming-packages.ksinc
+build/kickstart/synthex-gaming-packages.ksinc
 ```
 
 ---
@@ -167,8 +167,8 @@ MIT License. See `LICENSE` for details.
 
 ## Contributing
 
-The Solus Gaming Platform is developed at [github.com/getsolus/solus-gaming](https://github.com/getsolus/solus-gaming). Issues and pull requests welcome.
+The Synthex Gaming Platform is developed at [github.com/getsynthex/synthex-gaming](https://github.com/getsynthex/synthex-gaming). Issues and pull requests welcome.
 
 ---
 
-*Made for gamers, by gamers. Solus Gaming Team.*
+*Made for gamers, by gamers. Synthex Gaming Team.*

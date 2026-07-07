@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # ============================================================================
-# Solus Linux — ISO Testing Script
+# SynthOS — ISO Testing Script
 # ============================================================================
 # Tests a built ISO by booting it in a VM (QEMU/KVM), running smoke tests,
 # package management tests, and desktop environment tests.
@@ -36,7 +36,7 @@ TEST_LOG="${LOG_DIR}/test-results-${ISO_PATTERN}.log"
 # Configuration
 # --------------------------------------------------------------------------
 # VM configuration
-VM_NAME="solus-test-${ISO_PATTERN}"
+VM_NAME="synthex-test-${ISO_PATTERN}"
 VM_RAM_MB="${VM_RAM_MB:-4096}"
 VM_VCPUS="${VM_VCPUS:-4}"
 VM_DISK_GB="${VM_DISK_GB:-20}"
@@ -198,7 +198,7 @@ run_smoke_tests() {
     # Test 2: OS release
     local os_release
     os_release=$(vm_exec "cat /etc/os-release")
-    assert_contains "${os_release}" "Solus" "OS release identifies as Solus"
+    assert_contains "${os_release}" "Synthex" "OS release identifies as Synthex"
 
     # Test 3: Running services
     local services
@@ -213,8 +213,8 @@ run_smoke_tests() {
 
     # Test 5: DNS resolution
     local dns_result
-    dns_result=$(vm_exec "nslookup solus.org 2>&1 || host solus.org 2>&1 || dig +short solus.org 2>&1" || true)
-    assert_contains "${dns_result}" "solus" "DNS resolution works"
+    dns_result=$(vm_exec "nslookup synthex.org 2>&1 || host synthex.org 2>&1 || dig +short synthex.org 2>&1" || true)
+    assert_contains "${dns_result}" "synthex" "DNS resolution works"
 
     # Test 6: Disk layout
     local disk_layout
@@ -233,7 +233,7 @@ run_package_tests() {
     # Test 2: Repository access
     local repo_list
     repo_list=$(vm_exec "dnf repolist" 2>&1)
-    assert_contains "${repo_list}" "solus" "Solus repositories are configured"
+    assert_contains "${repo_list}" "synthex" "Synthex repositories are configured"
 
     # Test 3: Install a package
     local install_result
@@ -327,7 +327,7 @@ JSON
 # --------------------------------------------------------------------------
 main() {
     echo "============================================"
-    echo "  Solus Linux — ISO Test Suite"
+    echo "  SynthOS — ISO Test Suite"
     echo "============================================"
     echo ""
     echo "ISO:       ${OUTPUT_DIR}/${ISO_FILENAME}"

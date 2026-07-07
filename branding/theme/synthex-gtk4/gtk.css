@@ -1,0 +1,191 @@
+/* Synthex Dark Theme — GTK4/libadwaita CSS override
+ * Applied via ~/.config/gtk-4.0/gtk.css
+ * Defines the Synthex visual identity: amber accent + dark navy base
+ */
+
+/* ─── Accent color ──────────────────────────────────────────────────── */
+@define-color solus_accent #e94560;
+@define-color solus_accent_hover #ff5470;
+@define-color solus_accent_active #c91e3e;
+@define-color solus_bg #1a1a2e;
+@define-color solus_bg_alt #16213e;
+@define-color solus_surface #0f3460;
+@define-color solus_text #ffffff;
+@define-color solus_text_dim #a0a0b0;
+@define-color solus_border #2a2a4e;
+@define-color solus_success #4ade80;
+@define-color solus_warning #fbbf24;
+@define-color solus_error #ef4444;
+
+/* ─── Window background ─────────────────────────────────────────────── */
+window {
+  background-color: @solus_bg;
+  color: @solus_text;
+}
+
+/* ─── Header bar ────────────────────────────────────────────────────── */
+headerbar {
+  background-color: @solus_bg_alt;
+  color: @solus_text;
+  border-bottom: 1px solid @solus_border;
+}
+
+headerbar > windowhandle {
+  padding: 6px 12px;
+}
+
+/* ─── Buttons ───────────────────────────────────────────────────────── */
+button {
+  background-color: @solus_surface;
+  color: @solus_text;
+  border: 1px solid @solus_border;
+  border-radius: 8px;
+  padding: 8px 16px;
+  transition: all 150ms ease;
+}
+
+button:hover {
+  background-color: @solus_accent;
+  border-color: @solus_accent;
+}
+
+button:active,
+button:checked {
+  background-color: @solus_accent_active;
+  border-color: @solus_accent_active;
+}
+
+button.suggested-action {
+  background-color: @solus_accent;
+  color: white;
+  border-color: @solus_accent;
+}
+
+button.suggested-action:hover {
+  background-color: @solus_accent_hover;
+}
+
+button.destructive-action {
+  background-color: @solus_error;
+  color: white;
+}
+
+/* ─── Entries (text inputs) ─────────────────────────────────────────── */
+entry {
+  background-color: @solus_bg;
+  color: @solus_text;
+  border: 1px solid @solus_border;
+  border-radius: 8px;
+  padding: 8px 12px;
+}
+
+entry:focus {
+  border-color: @solus_accent;
+  box-shadow: 0 0 0 2px alpha(@solus_accent, 0.3);
+}
+
+/* ─── Lists ─────────────────────────────────────────────────────────── */
+listview,
+list {
+  background-color: @solus_bg;
+  color: @solus_text;
+}
+
+row {
+  padding: 8px 12px;
+  border-radius: 6px;
+  margin: 2px 0;
+}
+
+row:selected {
+  background-color: alpha(@solus_accent, 0.2);
+  color: @solus_text;
+}
+
+row:hover {
+  background-color: alpha(@solus_surface, 0.5);
+}
+
+/* ─── Sidebar ───────────────────────────────────────────────────────── */
+sidebar,
+flap > box > scrolledwindow {
+  background-color: @solus_bg_alt;
+  color: @solus_text;
+}
+
+/* ─── Cards (libadwaita) ────────────────────────────────────────────── */
+.card,
+.preferencesgroup {
+  background-color: @solus_bg_alt;
+  border-radius: 12px;
+  border: 1px solid @solus_border;
+  padding: 16px;
+}
+
+/* ─── Switch ────────────────────────────────────────────────────────── */
+switch {
+  background-color: @solus_border;
+  border-radius: 999px;
+}
+
+switch:checked {
+  background-color: @solus_accent;
+}
+
+/* ─── Scale (sliders) ───────────────────────────────────────────────── */
+scale trough {
+  background-color: @solus_border;
+  border-radius: 999px;
+  min-height: 6px;
+}
+
+scale highlight {
+  background-color: @solus_accent;
+  border-radius: 999px;
+}
+
+scale slider {
+  background-color: @solus_text;
+  border-radius: 999px;
+  min-width: 16px;
+  min-height: 16px;
+}
+
+/* ─── Scrollbar ─────────────────────────────────────────────────────── */
+scrollbar {
+  background-color: transparent;
+}
+
+scrollbar slider {
+  background-color: alpha(@solus_text, 0.2);
+  border-radius: 999px;
+  min-width: 8px;
+}
+
+scrollbar slider:hover {
+  background-color: alpha(@solus_accent, 0.5);
+}
+
+/* ─── Popover ───────────────────────────────────────────────────────── */
+popover {
+  background-color: @solus_bg_alt;
+  border: 1px solid @solus_border;
+  border-radius: 12px;
+  padding: 8px;
+}
+
+/* ─── Tooltip ───────────────────────────────────────────────────────── */
+tooltip {
+  background-color: @solus_surface;
+  color: @solus_text;
+  border-radius: 6px;
+  padding: 6px 10px;
+}
+
+/* ─── Notification ──────────────────────────────────────────────────── */
+.notification {
+  background-color: @solus_bg_alt;
+  border: 1px solid @solus_border;
+  border-radius: 12px;
+  padding: 12px 16px;
+}

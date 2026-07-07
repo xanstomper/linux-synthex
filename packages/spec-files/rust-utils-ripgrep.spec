@@ -1,4 +1,4 @@
-# Solus Linux RPM Spec — ripgrep (rg)
+# SynthOS RPM Spec — ripgrep (rg)
 # Faster than grep, written in Rust, recursive by default
 # Origin: https://github.com/BurntSushi/ripgrep
 
@@ -30,7 +30,7 @@ Key features:
 - UTF-8 and binary file support
 - SIMD-accelerated regex engine
 
-This is part of the Solus Rust utility suite — modern replacements
+This is part of the Synthex Rust utility suite — modern replacements
 for classic Unix tools, compiled from Rust for safety and speed.
 
 %prep
@@ -62,7 +62,7 @@ mkdir -p %{buildroot}%{_datadir}/fish/vendor_completions.d
 %doc README.md LICENSE-MIT
 
 %changelog
-* Sun Jul 06 2026 Solus Rust Team <rust@solus-project.org> - 14.1.0-1
-- Initial Solus package of ripgrep 14.1.0
+* Sun Jul 06 2026 Synthex Rust Team <rust@synthex-project.org> - 14.1.0-1
+- Initial Synthex package of ripgrep 14.1.0
 - grep replacement — recursive, .gitignore-aware, SIMD regex
 - Shell completions: bash, zsh, fish

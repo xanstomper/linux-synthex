@@ -1,14 +1,14 @@
 #!/usr/bin/env bash
-# generate-gpg-keys.sh — Generate GPG keys for signing Solus packages
+# generate-gpg-keys.sh — Generate GPG keys for signing Synthex packages
 # Usage: ./generate-gpg-keys.sh
 set -euo pipefail
 
-KEY_NAME="Solus Linux Package Signing"
-KEY_EMAIL="release@getsol.us"
+KEY_NAME="SynthOS Package Signing"
+KEY_EMAIL="release@getsynthex.org"
 KEY_EXPIRE="2y"
-GPG_HOME="${GPG_HOME:-$HOME/.gnupg-solus}"
+GPG_HOME="${GPG_HOME:-$HOME/.gnupg-synthex}"
 
-echo "🔐 Generating GPG keys for Solus package signing..."
+echo "🔐 Generating GPG keys for Synthex package signing..."
 echo "  Key name:  $KEY_NAME"
 echo "  Key email: $KEY_EMAIL"
 echo "  GPG home:  $GPG_HOME"
@@ -40,12 +40,12 @@ echo "✅ GPG key generated: $KEY_ID"
 echo ""
 
 # Export public key
-PUBKEY_PATH="${PUBKEY_PATH:-$GPG_HOME/RPM-GPG-KEY-solus}"
+PUBKEY_PATH="${PUBKEY_PATH:-$GPG_HOME/RPM-GPG-KEY-synthex}"
 gpg --export --armor "$KEY_ID" > "$PUBKEY_PATH"
 echo "  Public key exported to: $PUBKEY_PATH"
 
 # Export private key (for build server, keep secure!)
-PRIVKEY_PATH="${PRIVKEY_PATH:-$GPG_HOME/solus-private-key.asc}"
+PRIVKEY_PATH="${PRIVKEY_PATH:-$GPG_HOME/synthex-private-key.asc}"
 gpg --export-secret-keys --armor "$KEY_ID" > "$PRIVKEY_PATH"
 chmod 600 "$PRIVKEY_PATH"
 echo "  Private key exported to: $PRIVKEY_PATH (KEEP SECURE!)"
@@ -54,7 +54,7 @@ echo "  Private key exported to: $PRIVKEY_PATH (KEEP SECURE!)"
 echo ""
 echo "  Configuring RPM macros..."
 mkdir -p "$HOME/.rpmmacros.d"
-cat > "$HOME/.rpmmacros.d/solus-gpg" << EOF
+cat > "$HOME/.rpmmacros.d/synthex-gpg" << EOF
 %_gpg_name $KEY_NAME
 %__gpg_sign_cmd %{__gpg} gpg --force-v3-sigs --batch --verbose --no-armor \\
   --no-secmem-warning -u "%{_gpg_name}" -sbo %{__signature_filename} \\

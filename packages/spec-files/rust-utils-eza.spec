@@ -1,4 +1,4 @@
-# Solus Linux RPM Spec — eza (modern ls replacement)
+# SynthOS RPM Spec — eza (modern ls replacement)
 # A modern, maintained fork of exa, written in Rust
 # Origin: https://github.com/eza-community/eza
 
@@ -33,7 +33,7 @@ Key features:
 - Colour themes (gruvbox, solarized, etc.)
 - Faster than ls for large directories
 
-Part of the Solus Rust utility suite — replaces ls, tree, and ll.
+Part of the Synthex Rust utility suite — replaces ls, tree, and ll.
 
 %prep
 %setup -q -n eza-%{version}
@@ -66,8 +66,8 @@ mkdir -p %{buildroot}%{_datadir}/fish/vendor_completions.d
 %doc README.md LICENSE
 
 %changelog
-* Sun Jul 06 2026 Solus Rust Team <rust@solus-project.org> - 0.20.4-1
-- Initial Solus package of eza 0.20.4
+* Sun Jul 06 2026 Synthex Rust Team <rust@synthex-project.org> - 0.20.4-1
+- Initial Synthex package of eza 0.20.4
 - ls replacement — colourised, Git-aware, tree view, icons
 - Shell completions: bash, zsh, fish
 - Provides 'l' alias for quick listings

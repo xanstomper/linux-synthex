@@ -1,0 +1,27 @@
+Name:           synthex-pkg
+Version:        0.1.0
+Release:        1%{?dist}
+Summary:        Package manager
+
+License:        MIT
+URL:            https://getsynthex.io
+BuildRequires:  rust, cargo
+
+%description
+Unified package manager for DNF/Flatpak/AUR.
+
+%prep
+%setup -q
+
+%build
+cargo build --release
+
+%install
+install -Dm755 target/release/synthex-pkg %{buildroot}%{_bindir}/synthex-pkg
+
+%files
+%{_bindir}/synthex-pkg
+
+%changelog
+* Mon Jul 06 2026 Synthex Team <dev@synthex.org> - 0.1.0-1
+- Initial synthex-pkg package

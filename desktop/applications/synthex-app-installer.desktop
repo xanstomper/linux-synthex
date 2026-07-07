@@ -1,0 +1,9 @@
+[Desktop Entry]
+Type=Application
+Name=Synthex App Installer
+Comment=Install 50+ popular apps easily
+Exec=synthex-apps menu
+Icon=synthex-software-center
+Terminal=true
+Categories=Utility;
+Keywords=synthex;install;apps;

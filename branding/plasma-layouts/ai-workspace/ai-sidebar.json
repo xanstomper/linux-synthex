@@ -1,0 +1,46 @@
+{
+  "sidebar": {
+    "width": 320,
+    "position": "left",
+    "sections": [
+      {
+        "id": "chat",
+        "name": "AI Chat",
+        "icon": "synthex-ai-hub",
+        "widget": "org.synthex.ai-hub",
+        "height": 0.4
+      },
+      {
+        "id": "context",
+        "name": "Context & Files",
+        "icon": "document-open",
+        "widget": "org.synthex.ai-context",
+        "height": 0.25
+      },
+      {
+        "id": "agents",
+        "name": "Agent Tasks",
+        "icon": "system-run",
+        "widget": "org.synthex.ai-agents",
+        "height": 0.2
+      },
+      {
+        "id": "models",
+        "name": "Models",
+        "icon": "applications-engineering",
+        "widget": "org.synthex.ai-models",
+        "height": 0.15
+      }
+    ],
+    "bottom_bar": {
+      "widget": "org.kde.plasma.panel",
+      "content": ["terminal", "clipboard", "notes"]
+    }
+  },
+  "shortcuts": {
+    "toggle_sidebar": "Meta+Shift+A",
+    "new_chat": "Meta+Shift+C",
+    "voice_input": "Meta+Shift+V",
+    "quick_ask": "Meta+Shift+Space"
+  }
+}

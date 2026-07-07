@@ -1,0 +1,43 @@
+{
+  "name": "Synthex Studio",
+  "tagline": "Content creator. Color-accurate. Media-centric.",
+  "theme": "synthex-latte",
+  "accent": "#D65D7A",
+  "panels": {
+    "top": {
+      "type": "panel",
+      "height": 36,
+      "opacity": 0.9,
+      "blur": true,
+      "widgets": [
+        "launcher",
+        "spacer",
+        "color-picker",
+        "media-controller",
+        "clock"
+      ]
+    },
+    "right": {
+      "type": "sidebar",
+      "width": 240,
+      "opacity": 0.95,
+      "blur": true,
+      "floating": true,
+      "widgets": [
+        "color-palette",
+        "system-monitor",
+        "media",
+        "notes"
+      ]
+    }
+  },
+  "dock": false,
+  "animations": "smooth",
+  "compositor": "opengl",
+  "menu": "kickoff",
+  "desktop": "folder",
+  "wallpaper": "synthex-latte.png",
+  "description": "Creator-focused. Color-accurate display. Right sidebar with color palette. Media controller. Warm rose accents.",
+  "performance": "balanced",
+  "target": "Designers, video editors, streamers"
+}

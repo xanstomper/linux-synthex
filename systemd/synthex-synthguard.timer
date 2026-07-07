@@ -1,0 +1,10 @@
+[Unit]
+Description=SynthGuard Security Monitor Timer
+
+[Timer]
+OnBootSec=60
+OnUnitActiveSec=300
+Persistent=yes
+
+[Install]
+WantedBy=timers.target

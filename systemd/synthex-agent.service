@@ -1,0 +1,29 @@
+[Unit]
+Description=Synthex Agent — Desktop AI Platform (DBus)
+Documentation=https://docs.synthex-project.org/agent
+After=graphical-session.target
+PartOf=graphical-session.target
+
+[Service]
+Type=dbus
+BusName=org.synthex.Agent
+ExecStart=/usr/bin/synthex-agentd
+Restart=on-failure
+RestartSec=3
+TimeoutStopSec=10
+
+# Resource limits
+MemoryMax=512M
+CPUQuota=60%
+
+# Security
+ProtectSystem=full
+ProtectHome=read-only
+PrivateTmp=yes
+NoNewPrivileges=yes
+SystemCallArchitectures=native
+ProtectKernelTunables=yes
+ProtectControlGroups=yes
+
+[Install]
+WantedBy=graphical-session.target

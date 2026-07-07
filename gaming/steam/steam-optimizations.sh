@@ -1,18 +1,18 @@
 #!/usr/bin/env bash
 # ============================================================
-# Solus Linux — Steam System Optimizations
-# /usr/share/solus-gaming/steam-optimizations.sh
+# SynthOS — Steam System Optimizations
+# /usr/share/synthex-gaming/steam-optimizations.sh
 #
 # Applies system-level tuning when Steam is running.
 # Called by systemd service or steam-wrapper.sh.
-# Part of solus-steam-optimizer package.
+# Part of synthex-steam-optimizer package.
 # ============================================================
 
 set -euo pipefail
 
 # --- Configuration ---
 OPTIMIZATIONS_FILE="/etc/default/steam-optimizations"
-STATE_DIR="/var/lib/solus-steam-optimizer"
+STATE_DIR="/var/lib/synthex-steam-optimizer"
 PIDFILE="${STATE_DIR}/steam.pid"
 
 # --- Source user config if present ---
@@ -341,7 +341,7 @@ watch_steam() {
 
 usage() {
     cat << EOF
-Solus Steam Optimizations — System tuning for Steam gaming
+Synthex Steam Optimizations — System tuning for Steam gaming
 
 USAGE:
   steam-optimizations.sh [command]

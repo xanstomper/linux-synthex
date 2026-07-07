@@ -1,5 +1,5 @@
 # ============================================================================
-# Solus Linux — Release Workflow
+# SynthOS — Release Workflow
 # ============================================================================
 # Signs artifacts, generates checksums and torrents, syncs to mirrors,
 # publishes release notes, and announces the release.
@@ -44,9 +44,9 @@ env:
   RELEASE_DIR: /tmp/release
   RELEASE_NOTES_DIR: /tmp/release-notes
   TORRENT_DIR: /tmp/torrents
-  MIRROR_ORIGIN: repo.solus.org
-  CDN_ENDPOINT: https://cdn.solus.org
-  MIRROR_RSYNC: rsync://repo.solus.org/solus
+  MIRROR_ORIGIN: repo.synthex.org
+  CDN_ENDPOINT: https://cdn.synthex.org
+  MIRROR_RSYNC: rsync://repo.synthex.org/synthex
 
 jobs:
   ############################################################################
@@ -117,7 +117,7 @@ jobs:
           # Combined checksums file
           {
             echo "=========================================="
-            echo " Solus Linux ${{ needs.prepare.outputs.version }} Checksums"
+            echo " SynthOS ${{ needs.prepare.outputs.version }} Checksums"
             echo " Generated: $(date -u)"
             echo "=========================================="
             echo ""
@@ -136,19 +136,19 @@ jobs:
       - name: Sign checksums
         run: |
           cd "${RELEASE_DIR}"
-          echo "${{ secrets.SOLUS_RELEASE_KEY_PASSPHRASE }}" | \
+          echo "${{ secrets.SYNTHEX_RELEASE_KEY_PASSPHRASE }}" | \
             gpg --batch --yes --passphrase-fd 0 \
-              --default-key "Solus Release <release@solus.org>" \
+              --default-key "Synthex Release <release@synthex.org>" \
               --detach-sign --armor SHA256SUMS
 
-          echo "${{ secrets.SOLUS_RELEASE_KEY_PASSPHRASE }}" | \
+          echo "${{ secrets.SYNTHEX_RELEASE_KEY_PASSPHRASE }}" | \
             gpg --batch --yes --passphrase-fd 0 \
-              --default-key "Solus Release <release@solus.org>" \
+              --default-key "Synthex Release <release@synthex.org>" \
               --detach-sign --armor SHA512SUMS
 
-          echo "${{ secrets.SOLUS_RELEASE_KEY_PASSPHRASE }}" | \
+          echo "${{ secrets.SYNTHEX_RELEASE_KEY_PASSPHRASE }}" | \
             gpg --batch --yes --passphrase-fd 0 \
-              --default-key "Solus Release <release@solus.org>" \
+              --default-key "Synthex Release <release@synthex.org>" \
               --detach-sign --armor CHECKSUMS
 
       - name: Upload checksum files
@@ -178,17 +178,17 @@ jobs:
           for iso in "${RELEASE_DIR}"/*.iso; do
             BASENAME=$(basename "${iso}" .iso)
             transmission-create \
-              --tracker "udp://tracker.solus.org:6969/announce" \
+              --tracker "udp://tracker.synthex.org:6969/announce" \
               --tracker "udp://tracker.opentrackr.org:1337/announce" \
-              --tracker "https://tracker.solus.org:443/announce" \
-              --comment "Solus Linux ${{ needs.prepare.outputs.version }} - ${BASENAME}" \
+              --tracker "https://tracker.synthex.org:443/announce" \
+              --comment "SynthOS ${{ needs.prepare.outputs.version }} - ${BASENAME}" \
               --outfile "${TORRENT_DIR}/${BASENAME}.torrent" \
               "${iso}"
 
             # Sign torrent
-            echo "${{ secrets.SOLUS_RELEASE_KEY_PASSPHRASE }}" | \
+            echo "${{ secrets.SYNTHEX_RELEASE_KEY_PASSPHRASE }}" | \
               gpg --batch --yes --passphrase-fd 0 \
-                --default-key "Solus Release <release@solus.org>" \
+                --default-key "Synthex Release <release@synthex.org>" \
                 --detach-sign --armor \
                 "${TORRENT_DIR}/${BASENAME}.torrent"
           done
@@ -220,20 +220,20 @@ jobs:
 
       - name: Deploy to mirror origin
         run: |
-          RELEASE_PATH="/repo/solus/releases/${{ needs.prepare.outputs.version }}"
+          RELEASE_PATH="/repo/synthex/releases/${{ needs.prepare.outputs.version }}"
           mkdir -p "${RELEASE_PATH}"
 
           # Copy all assets
           find release-assets -type f -exec cp -n {} "${RELEASE_PATH}/" \;
 
           # Create symlink for 'latest'
-          ln -sfn "${RELEASE_PATH}" "/repo/solus/releases/latest"
+          ln -sfn "${RELEASE_PATH}" "/repo/synthex/releases/latest"
 
           # Sync to origin server
           rsync -avz --delete-delay \
             -e "ssh -i /tmp/deploy-key -o StrictHostKeyChecking=no" \
-            /repo/solus/ \
-            "deploy@${MIRROR_ORIGIN}:/repo/solus/"
+            /repo/synthex/ \
+            "deploy@${MIRROR_ORIGIN}:/repo/synthex/"
 
       - name: Notify CDN to purge cache
         run: |
@@ -241,7 +241,7 @@ jobs:
           curl -X POST \
             -H "Content-Type: application/json" \
             -H "Authorization: Bearer ${{ secrets.CDN_API_KEY }}" \
-            -d '{"urls": ["https://cdn.solus.org/releases/${{ needs.prepare.outputs.version }}/"]}' \
+            -d '{"urls": ["https://cdn.synthex.org/releases/${{ needs.prepare.outputs.version }}/"]}' \
             "https://api.bunny.net/pullzone/${{ secrets.CDN_ZONE_ID }}/purge" \
             || echo "CDN purge failed (non-critical)"
 
@@ -250,7 +250,7 @@ jobs:
           # Ping mirror list to trigger sync
           curl -X POST \
             -H "Authorization: Bearer ${{ secrets.MIRROR_API_KEY }}" \
-            "https://admin.solus.org/api/mirrors/sync" \
+            "https://admin.synthex.org/api/mirrors/sync" \
             || echo "Mirror sync trigger failed (non-critical)"
 
   ############################################################################
@@ -275,7 +275,7 @@ jobs:
 
           # Generate release notes from CHANGELOG or template
           cat > "${RELEASE_NOTES_DIR}/release-notes.md" << 'RNOTES'
-          # Solus Linux ${{ needs.prepare.outputs.version }} Released
+          # SynthOS ${{ needs.prepare.outputs.version }} Released
 
           ## Downloads
 
@@ -296,7 +296,7 @@ jobs:
 
           ```bash
           # Import our GPG key
-          gpg --keyserver keyserver.ubuntu.com --recv-keys ${{ secrets.SOLUS_RELEASE_KEY_ID }}
+          gpg --keyserver keyserver.ubuntu.com --recv-keys ${{ secrets.SYNTHEX_RELEASE_KEY_ID }}
 
           # Verify checksums
           gpg --verify SHA256SUMS.asc SHA256SUMS
@@ -311,16 +311,16 @@ jobs:
 
           ## Support
 
-          - Documentation: https://docs.solus.org
-          - Forums: https://discuss.solus.org
-          - IRC: #solus on irc.libera.chat
+          - Documentation: https://docs.synthex.org
+          - Forums: https://discuss.synthex.org
+          - IRC: #synthex on irc.libera.chat
           RNOTES
 
       - name: Create GitHub Release
         uses: softprops/action-gh-release@v2
         with:
           tag_name: v${{ needs.prepare.outputs.version }}
-          name: Solus Linux ${{ needs.prepare.outputs.version }}
+          name: SynthOS ${{ needs.prepare.outputs.version }}
           body_path: ${{ env.RELEASE_NOTES_DIR }}/release-notes.md
           prerelease: ${{ inputs.prerelease }}
           files: |
@@ -349,12 +349,12 @@ jobs:
         with:
           payload: |
             {
-              "text": "Solus Linux ${{ needs.prepare.outputs.version }} has been released! 🎉",
+              "text": "SynthOS ${{ needs.prepare.outputs.version }} has been released! 🎉",
               "blocks": [{
                 "type": "section",
                 "text": {
                   "type": "mrkdwn",
-                  "text": "*Solus Linux ${{ needs.prepare.outputs.version }} Released*\n\nDownload: https://solus.org/download\nRelease Notes: https://github.com/${{ github.repository }}/releases/tag/v${{ needs.prepare.outputs.version }}"
+                  "text": "*SynthOS ${{ needs.prepare.outputs.version }} Released*\n\nDownload: https://synthex.org/download\nRelease Notes: https://github.com/${{ github.repository }}/releases/tag/v${{ needs.prepare.outputs.version }}"
                 }
               }]
             }
@@ -366,15 +366,15 @@ jobs:
         run: |
           curl -X POST \
             -H "Authorization: Bearer ${{ secrets.MASTODON_TOKEN }}" \
-            -d "status=Solus Linux ${{ needs.prepare.outputs.version }} has been released! 🎉\n\nDownload: https://solus.org/download\nRelease Notes: https://github.com/${{ github.repository }}/releases/tag/v${{ needs.prepare.outputs.version }}" \
+            -d "status=SynthOS ${{ needs.prepare.outputs.version }} has been released! 🎉\n\nDownload: https://synthex.org/download\nRelease Notes: https://github.com/${{ github.repository }}/releases/tag/v${{ needs.prepare.outputs.version }}" \
             "https://fosstodon.org/api/v1/statuses" \
             || echo "Mastodon post failed (non-critical)"
 
       - name: Send mailing list email
         run: |
-          # Send announcement to solus-announce mailing list
-          mail -s "Solus Linux ${{ needs.prepare.outputs.version }} Released" \
-            -a "From: Solus Release Team <release@solus.org>" \
-            solus-announce@lists.solus.org \
+          # Send announcement to synthex-announce mailing list
+          mail -s "SynthOS ${{ needs.prepare.outputs.version }} Released" \
+            -a "From: Synthex Release Team <release@synthex.org>" \
+            synthex-announce@lists.synthex.org \
             < "${RELEASE_NOTES_DIR}/release-notes.md" \
             || echo "Mail send failed (non-critical)"

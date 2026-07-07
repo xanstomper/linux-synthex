@@ -1,0 +1,39 @@
+[Desktop Entry]
+Type=KWin/Style
+Name=Synthex Plasma
+Name[de]=Synthex Plasma
+Name[es]=Synthex Plasma
+Name[fr]=Synthex Plasma
+Name[it]=Synthex Plasma
+Name[pt]=Synthex Plasma
+Name[ru]=Synthex Plasma
+Name[zh_CN]=Synthex Plasma
+Comment=A modern Synthex-branded KDE Plasma theme with warm amber accents
+Comment[de]=Ein modernes Synthex-branded KDE Plasma-Theme mit warmen Amber-Akzenten
+Comment[es]=Un tema moderno de KDE Plasma con la marca Synthex y acentos ámbar cálidos
+Comment[fr]=Un thème KDE Plasma moderne de la marque Synthex avec des accents ambrés chaleureux
+Comment[it]=Un tema KDE Plasma moderno con marchio Synthex e accenti ambrati caldi
+Comment[pt]=Um tema KDE Plasma moderno com a marca Synthex e acentos âmbar quentes
+Comment[ru]=Современная тема KDE Plasma с брендом Synthex и теплыми янтарными акцентами
+Comment[zh_CN]=现代 Synthex 品牌 KDE Plasma 主题，带有温暖的琥珀色强调
+
+X-KDE-PluginInfo-Version=1.0
+X-KDE-PluginInfo-Author=Linux Synthex Project
+X-KDE-PluginInfo-Email=brand@synthex-os.org
+X-KDE-PluginInfo-Website=https://synthex-os.org
+X-KDE-PluginInfo-Category=Plasma Theme
+X-KDE-PluginInfo-License=GPL-3.0+
+X-KDE-PluginInfo-EnabledByDefault=true
+
+# Synthex Plasma Theme v1.0
+# Based on the Synthex Brand Identity Guidelines
+# Colour-coded for the Synthex Plasma edition (Amber accent)
+
+# Widget Style
+X-KDE-PluginInfo-Name=synthex-plasma
+X-KDE-PluginInfo-ServiceTypes=KWin/Style
+InitialPreference=10
+
+# Plasma Theme Compatibility
+[X-KDE-Plasma]
+CompatibleVersions=6.0

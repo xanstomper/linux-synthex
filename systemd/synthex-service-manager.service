@@ -1,0 +1,13 @@
+[Unit]
+Description=Synthex Service Manager — systemd service health
+Documentation=https://docs.synthex.org
+After=network.target
+
+[Service]
+Type=oneshot
+ExecStart=/usr/bin/synthex-service --json health
+ExecStop=/usr/bin/synthex-service --json summary
+RemainAfterExit=yes
+
+[Install]
+WantedBy=synthex.target

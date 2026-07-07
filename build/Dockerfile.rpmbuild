@@ -1,9 +1,9 @@
-# Solus Linux — RPM Build Environment with Rust support
+# Synthex Linux — RPM Build Environment with Rust support
 # Based on Fedora 41 with complete toolchain for building all Rust daemons + utilities
 FROM fedora:41
 
-LABEL maintainer="Solus Linux Team <dev@solus.org>"
-LABEL description="Solus RPM build environment with rustc + cargo — builds Rust daemons and utilities into RPM packages"
+LABEL maintainer="Synthex Linux Team <dev@solus.org>"
+LABEL description="Synthex RPM build environment with rustc + cargo — builds Rust daemons and utilities into RPM packages"
 
 # Install ALL build dependencies
 RUN dnf install -y \

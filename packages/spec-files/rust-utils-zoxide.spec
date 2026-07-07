@@ -1,4 +1,4 @@
-# Solus Linux RPM Spec — zoxide
+# SynthOS RPM Spec — zoxide
 # Smarter cd command in Rust
 # Origin: Fedora, Arch Linux
 
@@ -41,6 +41,6 @@ install -D -m 0755 target/release/zoxide %{buildroot}%{_bindir}/zoxide
 %{_bindir}/zoxide
 
 %changelog
-* Mon Jul 07 2026 Solus Rust Team <rust@solus-project.org> - %{zoxide_version}-1
-- Initial Solus package — zoxide
+* Mon Jul 07 2026 Synthex Rust Team <rust@synthex-project.org> - %{zoxide_version}-1
+- Initial Synthex package — zoxide
 - Ported from Fedora packaging

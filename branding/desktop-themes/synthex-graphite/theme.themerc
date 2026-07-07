@@ -1,0 +1,13 @@
+[Theme]
+Name=Solus Graphite
+Comment=A professional dark theme with mint accents
+
+[KWin]
+BorderSize=Tiny
+
+[WM]
+FrameBorder=True
+TitleAlignment=Left
+
+[Icons]
+Theme=breeze-dark

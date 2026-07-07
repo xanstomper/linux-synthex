@@ -1,0 +1,30 @@
+{
+  "name": "Synthex Classic",
+  "tagline": "Windows-like. Familiar. Easy onboarding.",
+  "theme": "synthex-mint",
+  "accent": "#86C166",
+  "panels": {
+    "bottom": {
+      "type": "panel",
+      "height": 40,
+      "opacity": 1.0,
+      "blur": false,
+      "widgets": [
+        "kickoff",
+        "quicklaunch",
+        "tasks",
+        "tray",
+        "clock"
+      ]
+    }
+  },
+  "dock": false,
+  "animations": "normal",
+  "compositor": "opengl",
+  "menu": "kickoff-windows",
+  "desktop": "folder",
+  "wallpaper": "synthex-mint.png",
+  "description": "Windows-style transition. Bottom taskbar. Start menu. System tray. Familiar for newcomers from Windows.",
+  "performance": "balanced",
+  "target": "Windows migrants, beginners"
+}

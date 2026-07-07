@@ -1,0 +1,13 @@
+[Theme]
+Name=Solus Midnight
+Comment=OLED-optimized deep theme with amber accents
+
+[KWin]
+BorderSize=NoSides
+
+[WM]
+FrameBorder=False
+TitleAlignment=Center
+
+[Icons]
+Theme=breeze-dark

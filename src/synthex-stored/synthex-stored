@@ -1,0 +1,239 @@
+#!/usr/bin/env python3
+"""
+Synthex Software Stored — Backend daemon for Synthex Software Center.
+Provides D-Bus API for software management across Flatpak, RPM, and WebApps.
+
+Usage:
+    synthex-stored              # Run daemon
+    synthex-stored --version    # Show version
+"""
+
+import sys
+import os
+import json
+import subprocess
+import signal
+import time
+from threading import Thread
+
+VERSION = "1.0.0"
+
+
+class SoftwareStore:
+    """Backend daemon that manages software installation."""
+    
+    def __init__(self):
+        self.transaction_lock = False
+        self.cache = {}
+    
+    def search(self, query):
+        """Search across all sources."""
+        results = {"flatpak": [], "rpm": [], "webapps": []}
+        
+        # Search Flatpak
+        try:
+            fp = subprocess.run(
+                ["flatpak", "search", query],
+                capture_output=True, text=True, timeout=30
+            )
+            for line in fp.stdout.splitlines():
+                parts = line.split()
+                if len(parts) >= 2:
+                    results["flatpak"].append({
+                        "id": parts[0],
+                        "name": parts[1] if len(parts) > 1 else parts[0],
+                        "source": "flatpak"
+                    })
+        except:
+            pass
+        
+        # Search DNF
+        try:
+            dnf = subprocess.run(
+                ["dnf", "search", query],
+                capture_output=True, text=True, timeout=30
+            )
+            for line in dnf.stdout.splitlines():
+                if "." in line and ":" in line:
+                    name = line.split()[0].rsplit(".", 1)[0]
+                    summary = ":".join(line.split(":")[1:]).strip() if ":" in line else ""
+                    results["rpm"].append({
+                        "id": name,
+                        "name": name,
+                        "summary": summary,
+                        "source": "rpm"
+                    })
+        except:
+            pass
+        
+        return results
+    
+    def install_flatpak(self, app_id):
+        """Install a Flatpak application."""
+        if self.transaction_lock:
+            return {"error": "Another transaction in progress"}
+        self.transaction_lock = True
+        try:
+            subprocess.run(["flatpak", "install", "-y", "--noninteractive", app_id],
+                          check=True, timeout=300)
+            return {"success": True, "message": f"Installed {app_id}"}
+        except subprocess.CalledProcessError as e:
+            return {"error": f"Install failed: {e}"}
+        finally:
+            self.transaction_lock = False
+    
+    def install_rpm(self, package):
+        """Install an RPM package with snapshot."""
+        if self.transaction_lock:
+            return {"error": "Another transaction in progress"}
+        self.transaction_lock = True
+        try:
+            # Create pre-install snapshot
+            subprocess.run(["snapper", "-c", "root", "create", "-d", f"pre-install-{package}"],
+                          capture_output=True)
+            subprocess.run(["dnf", "install", "-y", package], check=True, timeout=300)
+            return {"success": True, "message": f"Installed {package}"}
+        except subprocess.CalledProcessError as e:
+            return {"error": f"Install failed: {e}"}
+        finally:
+            self.transaction_lock = False
+    
+    def remove_flatpak(self, app_id):
+        """Remove a Flatpak application."""
+        try:
+            subprocess.run(["flatpak", "remove", "-y", app_id], check=True, timeout=60)
+            return {"success": True, "message": f"Removed {app_id}"}
+        except subprocess.CalledProcessError as e:
+            return {"error": f"Remove failed: {e}"}
+    
+    def remove_rpm(self, package):
+        """Remove an RPM package with snapshot."""
+        try:
+            subprocess.run(["snapper", "-c", "root", "create", "-d", f"pre-remove-{package}"],
+                          capture_output=True)
+            subprocess.run(["dnf", "remove", "-y", package], check=True, timeout=120)
+            return {"success": True, "message": f"Removed {package}"}
+        except subprocess.CalledProcessError as e:
+            return {"error": f"Remove failed: {e}"}
+    
+    def check_updates(self):
+        """Check for available updates."""
+        try:
+            result = subprocess.run(["dnf", "check-update"], capture_output=True, text=True, timeout=30)
+            if result.returncode == 0:
+                return {"updates": [], "count": 0}
+            updates = []
+            for line in result.stdout.splitlines():
+                if line.strip() and not line.startswith("Last") and not line.startswith("Upgrade"):
+                    parts = line.split()
+                    if len(parts) >= 2:
+                        updates.append({"package": parts[0], "version": parts[1]})
+            return {"updates": updates[:50], "count": len(updates)}
+        except:
+            return {"error": "Failed to check updates"}
+    
+    def install_updates(self):
+        """Install all available updates."""
+        if self.transaction_lock:
+            return {"error": "Another transaction in progress"}
+        self.transaction_lock = True
+        try:
+            # Create pre-update snapshot
+            subprocess.run(["snapper", "-c", "root", "create", "-d", "pre-update"],
+                          capture_output=True)
+            subprocess.run(["dnf", "update", "-y"], check=True, timeout=600)
+            return {"success": True, "message": "Updates installed"}
+        except subprocess.CalledProcessError as e:
+            return {"error": f"Update failed: {e}"}
+        finally:
+            self.transaction_lock = False
+    
+    def get_categories(self):
+        """Get app categories."""
+        return {
+            "categories": [
+                {"id": "gaming", "name": "Gaming", "icon": "🎮", "apps": [
+                    {"id": "com.valvesoftware.Steam", "name": "Steam", "source": "flatpak"},
+                    {"id": "net.lutris.Lutris", "name": "Lutris", "source": "flatpak"},
+                    {"id": "heroic", "name": "Heroic Launcher", "source": "flatpak"}
+                ]},
+                {"id": "development", "name": "Development", "icon": "💻", "apps": [
+                    {"id": "com.visualstudio.code", "name": "VS Code", "source": "flatpak"},
+                    {"id": "rust", "name": "Rust", "source": "rpm"},
+                    {"id": "nodejs", "name": "Node.js", "source": "rpm"}
+                ]},
+                {"id": "internet", "name": "Internet", "icon": "🌐", "apps": [
+                    {"id": "org.mozilla.firefox", "name": "Firefox", "source": "flatpak"},
+                    {"id": "org.chromium.Chromium", "name": "Chromium", "source": "flatpak"}
+                ]},
+                {"id": "media", "name": "Media & Creativity", "icon": "🎨", "apps": [
+                    {"id": "org.blender.Blender", "name": "Blender", "source": "flatpak"},
+                    {"id": "org.kde.krita", "name": "Krita", "source": "flatpak"},
+                    {"id": "com.obsproject.Studio", "name": "OBS Studio", "source": "flatpak"}
+                ]}
+            ]
+        }
+
+
+def run_daemon():
+    """Run as daemon accepting commands via stdin/stdout JSON."""
+    store = SoftwareStore()
+    
+    def signal_handler(sig, frame):
+        print("\nShutting down...", file=sys.stderr)
+        sys.exit(0)
+    
+    signal.signal(signal.SIGINT, signal_handler)
+    signal.signal(signal.SIGTERM, signal_handler)
+    
+    print(f"☀️ Synthex Software Store daemon v{VERSION}", file=sys.stderr)
+    print("Listening for commands...", file=sys.stderr)
+    
+    # Simple JSON command protocol over stdin
+    for line in sys.stdin:
+        if not line.strip():
+            continue
+        try:
+            cmd = json.loads(line)
+            action = cmd.get("action", "")
+            
+            if action == "search":
+                result = store.search(cmd.get("query", ""))
+            elif action == "install":
+                if cmd.get("source") == "flatpak":
+                    result = store.install_flatpak(cmd.get("id", ""))
+                else:
+                    result = store.install_rpm(cmd.get("id", ""))
+            elif action == "remove":
+                if cmd.get("source") == "flatpak":
+                    result = store.remove_flatpak(cmd.get("id", ""))
+                else:
+                    result = store.remove_rpm(cmd.get("id", ""))
+            elif action == "check-updates":
+                result = store.check_updates()
+            elif action == "install-updates":
+                result = store.install_updates()
+            elif action == "categories":
+                result = store.get_categories()
+            elif action == "ping":
+                result = {"pong": True, "version": VERSION}
+            else:
+                result = {"error": f"Unknown action: {action}"}
+            
+            print(json.dumps(result))
+            sys.stdout.flush()
+        except json.JSONDecodeError:
+            print(json.dumps({"error": "Invalid JSON"}))
+            sys.stdout.flush()
+
+
+def main():
+    if "--version" in sys.argv:
+        print(f"Synthex Software Store v{VERSION}")
+        return
+    
+    run_daemon()
+
+
+if __name__ == "__main__":
+    main()

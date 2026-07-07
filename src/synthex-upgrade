@@ -1,0 +1,158 @@
+#!/usr/bin/env python3
+"""Synthex System Upgrade — major version upgrade tool.
+Safe Fedora release upgrade with snapshot rollback.
+
+Usage:
+    synthex-upgrade check            Check for new release
+    synthex-upgrade upgrade          Upgrade to next release
+    synthex-upgrade status           Show current upgrade status
+    synthex-upgrade rollback         Rollback failed upgrade
+"""
+import os, sys, subprocess, json, time, shutil
+
+STATE_DIR = "/var/lib/synthex/upgrade"
+STATE_FILE = os.path.join(STATE_DIR, "state.json")
+RELEASE_FILE = "/etc/fedora-release"
+
+def get_current_release():
+    if os.path.exists(RELEASE_FILE):
+        try:
+            content = open(RELEASE_FILE).read()
+            for word in content.split():
+                if word.isdigit():
+                    return int(word)
+        except: pass
+    return None
+
+def load_state():
+    if os.path.exists(STATE_FILE):
+        return json.load(open(STATE_FILE))
+    return {"state": "idle", "from": None, "to": None}
+
+def save_state(state):
+    os.makedirs(STATE_DIR, exist_ok=True)
+    with open(STATE_FILE, "w") as f: json.dump(state, f)
+
+def cmd_check():
+    current = get_current_release()
+    if not current:
+        print("❌ Could not determine current release")
+        return
+    print(f"📋 Current release: Fedora {current}")
+    next_rel = current + 1
+    print(f"📋 Next release: Fedora {next_rel}")
+
+    # Check if offline-update is possible
+    if shutil.which("dnf"):
+        r = subprocess.run(["dnf", "upgrade", "--refresh", "--assumeno"], capture_output=True, text=True, timeout=60)
+        updates = [l for l in r.stdout.splitlines() if l.strip() and not l.startswith(("Last", "Upgraded", "Complete", "Nothing"))]
+        print(f"📦 Available updates: {len(updates)}")
+    else:
+        print("⚠  No dnf available for update check")
+
+    # Check for release packages
+    r = subprocess.run(["dnf", "list", f"fedora-release@{next_rel}" if next_rel == current + 1 else f"fedora-release"], 
+                       capture_output=True, text=True, timeout=30, shell=True)
+    if r.returncode == 0:
+        print(f"✅ Fedora {next_rel} packages available")
+    else:
+        print(f"⏳ Fedora {next_rel} not yet available (may need --releasever)")
+
+def cmd_upgrade():
+    current = get_current_release()
+    if not current:
+        print("❌ Could not determine current release")
+        return
+
+    next_rel = current + 1
+    print(f"🔄 Upgrading Fedora {current} → {next_rel}")
+    print("⚠  This will modify your system. Backups recommended.")
+
+    confirm = input(f"Type 'UPGRADE' to continue with Fedora {next_rel}: ")
+    if confirm != "UPGRADE":
+        print("Aborted.")
+        return
+
+    # Create pre-upgrade snapshot
+    print("📸 Creating pre-upgrade snapshot...")
+    try:
+        subprocess.run(["snapper", "-c", "root", "create", "-d", f"pre-upgrade-{next_rel}"], capture_output=True, timeout=30)
+    except: pass
+
+    state = {"state": "upgrading", "from": current, "to": next_rel}
+    save_state(state)
+
+    # DNF upgrade sequence
+    steps = [
+        ("Updating current system", ["dnf", "upgrade", "--refresh", "-y"]),
+        ("Installing release package", ["dnf", "install", "-y", f"fedora-release@{next_rel}", "--releasever", str(next_rel)]),
+        ("Cleaning DNF cache", ["dnf", "clean", "all"]),
+        ("Upgrading to new release", ["dnf", "distro-sync", "-y", "--releasever", str(next_rel)]),
+        ("Rebuilding initramfs", ["dracut", "--force"]),
+        ("Reinstalling GRUB", ["grub2-mkconfig", "-o", "/boot/grub2/grub.cfg"]),
+    ]
+
+    for desc, cmd in steps:
+        print(f"➡ {desc}...")
+        result = subprocess.run(cmd, capture_output=True, text=True, timeout=600)
+        if result.returncode != 0:
+            print(f"❌ {desc} failed: {result.stderr[:200]}")
+            print("⚠  System may be in inconsistent state.")
+            print(f"   Rollback: snapper -c root undochange 1..0")
+            state["state"] = "failed"
+            save_state(state)
+            return
+        print(f"✅ {desc} done")
+
+    state["state"] = "complete"
+    save_state(state)
+
+    # Create post-upgrade snapshot
+    try:
+        subprocess.run(["snapper", "-c", "root", "create", "-d", f"post-upgrade-{next_rel}"], capture_output=True, timeout=30)
+    except: pass
+
+    print(f"\n🎉 Upgrade to Fedora {next_rel} complete!")
+    print("   Reboot to apply changes.")
+
+def cmd_status():
+    state = load_state()
+    current = get_current_release()
+    print(f"📋 Current: Fedora {current}")
+    print(f"📋 State: {state['state']}")
+    if state.get("from"):
+        print(f"📋 Previous: Fedora {state['from']}")
+    if state.get("to"):
+        print(f"📋 Target: Fedora {state['to']}")
+
+def cmd_rollback():
+    state = load_state()
+    if state["state"] not in ("failed", "complete"):
+        print("⚠  No upgrade to rollback")
+        return
+    print("🔄 Rolling back system upgrade...")
+    print("   This restores the pre-upgrade snapshot.")
+    confirm = input("Type 'ROLLBACK' to confirm: ")
+    if confirm != "ROLLBACK":
+        print("Aborted.")
+        return
+    try:
+        subprocess.run(["snapper", "-c", "root", "list"], capture_output=True)
+        subprocess.run(["snapper", "-c", "root", "undochange", "1..0"])
+        print("✅ Rollback complete. Reboot now.")
+    except subprocess.CalledProcessError as e:
+        print(f"❌ Rollback failed: {e}")
+
+def main():
+    if len(sys.argv) < 2:
+        print(__doc__)
+        return
+    cmd = sys.argv[1]
+    if cmd == "check": cmd_check()
+    elif cmd == "upgrade": cmd_upgrade()
+    elif cmd == "status": cmd_status()
+    elif cmd == "rollback": cmd_rollback()
+    else: print(__doc__)
+
+if __name__ == "__main__":
+    main()

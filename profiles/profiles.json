@@ -1,0 +1,155 @@
+{
+  "profiles": {
+    "focus": {
+      "name": "Focus",
+      "description": "Minimal keyboard-driven workspace for maximum productivity",
+      "icon": "⌨️",
+      "groups": ["synthex-core", "synthex-codecs"],
+      "packages": [],
+      "theme": "midnight",
+      "performance_profile": "balanced",
+      "features": {
+        "gaming": false,
+        "developer": false,
+        "creator": false,
+        "ai": false
+      },
+      "recommended_ram_gb": 4,
+      "min_ram_gb": 2,
+      "layout": "tiling"
+    },
+    "gaming": {
+      "name": "Gaming",
+      "description": "Console-like experience with Steam Big Picture and gaming optimizations",
+      "icon": "🎮",
+      "groups": ["synthex-core", "synthex-plasma", "synthex-gaming", "synthex-codecs", "synthex-nvidia"],
+      "packages": ["steam", "lutris", "mangohud", "gamescope", "gamemode", "heroic-games-launcher", "discord"],
+      "theme": "graphite",
+      "performance_profile": "gaming",
+      "features": {
+        "gaming": true,
+        "developer": false,
+        "creator": false,
+        "ai": false
+      },
+      "recommended_ram_gb": 16,
+      "min_ram_gb": 8,
+      "layout": "gaming"
+    },
+    "pro": {
+      "name": "Pro",
+      "description": "Developer cockpit with containers, IDEs, and system tools",
+      "icon": "💻",
+      "groups": ["synthex-core", "synthex-plasma", "synthex-codecs", "synthex-developer"],
+      "packages": ["git", "gcc", "gcc-c++", "make", "cmake", "rust", "cargo", "golang", "nodejs", "podman", "distrobox", "neovim"],
+      "theme": "midnight",
+      "performance_profile": "latency-performance",
+      "features": {
+        "gaming": false,
+        "developer": true,
+        "creator": false,
+        "ai": false
+      },
+      "recommended_ram_gb": 16,
+      "min_ram_gb": 8,
+      "layout": "development"
+    },
+    "classic": {
+      "name": "Classic",
+      "description": "Familiar desktop layout with bottom panel and classic menu",
+      "icon": "🖥️",
+      "groups": ["synthex-core", "synthex-plasma", "synthex-codecs"],
+      "packages": ["firefox", "libreoffice-writer", "libreoffice-calc", "thunderbird", "gwenview", "okular"],
+      "theme": "graphite",
+      "performance_profile": "balanced",
+      "features": {
+        "gaming": false,
+        "developer": false,
+        "creator": false,
+        "ai": false
+      },
+      "recommended_ram_gb": 8,
+      "min_ram_gb": 4,
+      "layout": "mint"
+    },
+    "studio": {
+      "name": "Studio",
+      "description": "Content creation suite for audio, video, and graphic design",
+      "icon": "🎨",
+      "groups": ["synthex-core", "synthex-plasma", "synthex-codecs", "synthex-creator"],
+      "packages": ["blender", "krita", "gimp", "inkscape", "kdenlive", "audacity", "obs-studio"],
+      "theme": "graphite",
+      "performance_profile": "audio-production",
+      "features": {
+        "gaming": false,
+        "developer": false,
+        "creator": true,
+        "ai": false
+      },
+      "recommended_ram_gb": 16,
+      "min_ram_gb": 8,
+      "layout": "media"
+    },
+    "ai": {
+      "name": "AI",
+      "description": "AI-first workspace with local LLM, Ollama, and voice commands",
+      "icon": "🤖",
+      "groups": ["synthex-core", "synthex-plasma", "synthex-codecs", "synthex-ai"],
+      "packages": ["ollama", "python3-pip", "python3-torch", "code-server"],
+      "theme": "midnight",
+      "performance_profile": "balanced",
+      "features": {
+        "gaming": false,
+        "developer": true,
+        "creator": false,
+        "ai": true
+      },
+      "recommended_ram_gb": 32,
+      "min_ram_gb": 16,
+      "layout": "ai"
+    },
+    "touch": {
+      "name": "Touch",
+      "description": "Handheld/tablet mode with touch-optimised interface",
+      "icon": "📱",
+      "groups": ["synthex-core", "synthex-plasma", "synthex-handheld", "synthex-codecs"],
+      "packages": ["maliit-keyboard", "gamescope", "steam"],
+      "theme": "graphite",
+      "performance_profile": "powersave",
+      "features": {
+        "gaming": true,
+        "developer": false,
+        "creator": false,
+        "ai": false
+      },
+      "recommended_ram_gb": 8,
+      "min_ram_gb": 4,
+      "layout": "gaming"
+    },
+    "lite": {
+      "name": "Lite",
+      "description": "Ultra-lightweight system for old hardware and VMs",
+      "icon": "🪶",
+      "groups": ["synthex-core"],
+      "packages": [],
+      "theme": "graphite",
+      "performance_profile": "powersave",
+      "features": {
+        "gaming": false,
+        "developer": false,
+        "creator": false,
+        "ai": false
+      },
+      "recommended_ram_gb": 2,
+      "min_ram_gb": 1,
+      "layout": "tiling"
+    }
+  },
+  "themes": {
+    "graphite": { "name": "Graphite", "description": "Dark charcoal with cyan accents", "primary": "#33ccff", "bg": "#1a1a2e" },
+    "midnight": { "name": "Midnight", "description": "Deep blue with blue accents", "primary": "#3b82f6", "bg": "#1a202c" },
+    "mint": { "name": "Mint", "description": "Fresh green with teal accents", "primary": "#38b2ac", "bg": "#1a3b32" },
+    "latte": { "name": "Latte", "description": "Warm coffee with amber accents", "primary": "#d69e6b", "bg": "#3d2e1e" },
+    "plasma": { "name": "Plasma", "description": "Vibrant glow with purple accents", "primary": "#9333ea", "bg": "#2d1b3d" }
+  }
+}

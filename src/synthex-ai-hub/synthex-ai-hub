@@ -1,0 +1,24 @@
+#!/usr/bin/env python3
+"""Synthex AI Hub — entry point wrapper.
+Routes to synthex-ai-assistant or GUI as appropriate.
+"""
+import os, sys
+
+HERE = os.path.dirname(os.path.abspath(__file__))
+ASSISTANT = os.path.join(HERE, "synthex-ai-assistant")
+
+if len(sys.argv) > 1 and sys.argv[1] in ("driver", "troubleshoot", "performance"):
+    os.execv(ASSISTANT, [ASSISTANT] + sys.argv[1:])
+
+# Default: show status or launch web UI
+if len(sys.argv) > 1 and sys.argv[1] in ("--daemon",):
+    os.execv(ASSISTANT, [ASSISTANT, "--daemon"])
+
+print("Synthex AI Hub")
+print("Usage: synthex-ai-hub <command>")
+print("")
+print("Commands:")
+print("  driver         AI driver detection & installation")
+print("  troubleshoot   AI system troubleshooting")
+print("  performance    AI performance advisor")
+print("")

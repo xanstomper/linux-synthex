@@ -1,8 +1,8 @@
-# Getting Started with Solus Linux
+# Getting Started with SynthOS
 
-> **Audience:** New users exploring Solus for the first time  
+> **Audience:** New users exploring Synthex for the first time  
 > **Last updated:** July 2026  
-> **Solus version:** 4.6 "Fortitude" — Plasma Edition
+> **Synthex version:** 4.6 "Fortitude" — Plasma Edition
 
 ---
 
@@ -41,7 +41,7 @@
 │           │   • Add widgets              │                     │
 │           │   • Folder view              │                     │
 │           │                              │                     │
-│           │   ☀ Welcome to Solus!       │                     │
+│           │   ☀ Welcome to Synthex!       │                     │
 │           └──────────────────────────────┘                     │
 │                                                                │
 │                                                                │
@@ -66,7 +66,7 @@
 
 ### 1.2 Virtual Desktops
 
-Solus Plasma defaults to 4 virtual desktops:
+Synthex Plasma defaults to 4 virtual desktops:
 
 | Desktop | Suggested Use |
 |---------|--------------|
@@ -170,7 +170,7 @@ sudo dnf5 install ulauncher        # Application launcher
 │  │  > Unit converter: 10 USD to EUR                       │  │
 │  │  > Dictionary: define "linux"                          │  │
 │  │  > System commands: shutdown, reboot, lock             │  │
-│  │  > Web search: "solus linux" (opens browser)          │  │
+│  │  > Web search: "synthex linux" (opens browser)          │  │
 │  └────────────────────────────────────────────────────────┘  │
 └────────────────────────────────────────────────────────────────┘
 ```
@@ -219,7 +219,7 @@ Click ☰ → **Settings** → **System Settings**
 Appearance → Plasma Style:
   • Breeze (default, modern)
   • Breeze Dark
-  • Solus-branded themes
+  • Synthex-branded themes
   • Click "Get New Plasma Styles" for online content
 
 Appearance → Colors:
@@ -315,7 +315,7 @@ Discover provides a unified interface for all package formats:
 |--------|--------|-------|
 | **System (DNF5/RPM)** | RPM | System packages, libraries, drivers |
 | **Flatpak** | Flatpak | Sandboxed apps, newer versions |
-| **rpm-ostree** | Image | Atomic updates (Solus Atomic only) |
+| **rpm-ostree** | Image | Atomic updates (Synthex Atomic only) |
 
 ### 4.2 DNF5 (Command Line)
 
@@ -357,7 +357,7 @@ sudo dnf5 group install "Development Tools"
 
 # Repos
 sudo dnf5 repolist
-sudo dnf5 config-manager --set-enabled solus-nonfree
+sudo dnf5 config-manager --set-enabled synthex-nonfree
 sudo dnf5 config-manager --add-repo <url>
 
 # Downloads without installing
@@ -856,7 +856,7 @@ pip install llama-index # Data framework for LLMs
 System Settings → Appearance → Plasma Style
   • Breeze (default)
   • Breeze Dark
-  • Solus-branded themes
+  • Synthex-branded themes
   • Click "Get New Plasma Styles" for thousands of community themes
 ```
 
@@ -984,7 +984,7 @@ sh -c "$(curl -fsSL https://raw.github.com/ohmyzsh/ohmyzsh/master/tools/install.
 
 ### 9.1 BTRFS Snapshots (Recommended)
 
-Solus uses BTRFS with **snapper** for system snapshots:
+Synthex uses BTRFS with **snapper** for system snapshots:
 
 ```bash
 # Install snapper
@@ -1086,7 +1086,7 @@ sudo snapper -c root mount <snapshot-number>
 sudo snapper -c root undochange <bad-snapshot>..0
 
 # Boot into snapshot (GRUB)
-# Advanced options for Solus → Boot from snapshot
+# Advanced options for Synthex → Boot from snapshot
 ```
 
 ---
@@ -1340,7 +1340,7 @@ kquitapp5 plasmashell && kstart5 plasmashell
 
 ### 12.2 Application Equivalents
 
-| Windows App | Solus Equivalent | Notes |
+| Windows App | Synthex Equivalent | Notes |
 |-------------|-----------------|-------|
 | **Microsoft Office** | LibreOffice / OnlyOffice | Excellent compatibility |
 | **Outlook** | Thunderbird / KMail | Calendar + Email |
@@ -1383,7 +1383,7 @@ sudo mount -t cifs //windows-pc/Shared /mnt/share -o user=username
 
 ### 12.4 Key Differences
 
-| Concept | Windows | Solus/KDE |
+| Concept | Windows | Synthex/KDE |
 |---------|---------|-----------|
 | **Software install** | .exe, .msi, Store | DNF5, Flatpak, Discover |
 | **File system** | NTFS | BTRFS (with transparent compression) |
@@ -1424,7 +1424,7 @@ Day 7:  Learn terminal basics and productive shortcuts
 
 ### 13.2 Application Equivalents
 
-| macOS App | Solus Equivalent | Notes |
+| macOS App | Synthex Equivalent | Notes |
 |-----------|-----------------|-------|
 | **Safari** | Firefox / Chromium | 
 | **Mail** | Thunderbird / KMail | 
@@ -1450,7 +1450,7 @@ Day 7:  Learn terminal basics and productive shortcuts
 
 ### 13.3 macOS-to-Linux Concept Mapping
 
-| macOS Concept | Solus/KDE Equivalent |
+| macOS Concept | Synthex/KDE Equivalent |
 |---------------|---------------------|
 | **Dock** | Panel (bottom) + Task Manager |
 | **Spotlight (Cmd+Space)** | KRunner (Alt+F2) |
@@ -1483,7 +1483,7 @@ macOS:
   • require_password for sudo
   • User home in /Users/username
 
-Solus/KDE:
+Synthex/KDE:
   • Menu in each window or global menu
   • Ctrl key as primary modifier
   • Panel for task switching
@@ -1517,11 +1517,11 @@ Solus/KDE:
 
 ### 13.6 Shell Migration
 
-Both macOS and Solus use Unix-like shells:
+Both macOS and Synthex use Unix-like shells:
 
 ```bash
 # macOS uses Zsh by default (since Catalina)
-# Solus uses Bash by default
+# Synthex uses Bash by default
 
 # Switch to Zsh for familiarity
 sudo dnf5 install zsh
@@ -1591,6 +1591,6 @@ killall <name>            # Kill by name
 | **Linux Command Line** | https://linuxcommand.org |
 | **Shell Scripting** | https://www.shellscript.sh |
 | **KDE Store** | https://store.kde.org |
-| **Solus Forums** | https://discuss.getsol.us |
-| **Solus Wiki** | https://wiki.getsol.us |
+| **Synthex Forums** | https://discuss.getsynthex.org |
+| **Synthex Wiki** | https://wiki.getsynthex.org |
 | **Arch Wiki** (relevant) | https://wiki.archlinux.org |

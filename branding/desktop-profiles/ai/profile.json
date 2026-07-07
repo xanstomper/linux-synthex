@@ -1,0 +1,43 @@
+{
+  "name": "Synthex AI",
+  "tagline": "AI-first desktop. Assistant everywhere. Smart workspace.",
+  "theme": "synthex-midnight",
+  "accent": "#9BBD5C",
+  "panels": {
+    "top": {
+      "type": "panel",
+      "height": 32,
+      "opacity": 0.85,
+      "blur": true,
+      "widgets": [
+        "launcher",
+        "ai-search",
+        "spacer",
+        "clock",
+        "tray"
+      ]
+    },
+    "left": {
+      "type": "sidebar",
+      "width": 320,
+      "opacity": 0.95,
+      "blur": true,
+      "floating": true,
+      "widgets": [
+        "ai-chat",
+        "ai-context",
+        "ai-agents",
+        "ai-models"
+      ]
+    }
+  },
+  "dock": true,
+  "animations": "smooth",
+  "compositor": "opengl",
+  "menu": "kickoff-search",
+  "desktop": "folder",
+  "wallpaper": "synthex-midnight.png",
+  "description": "AI-first desktop. Left sidebar with AI chat, context, agents, and model browser. Smart search. System-wide AI assistant.",
+  "performance": "balanced",
+  "target": "AI users, researchers, power users"
+}

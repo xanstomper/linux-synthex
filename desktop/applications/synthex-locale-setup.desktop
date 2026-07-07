@@ -1,0 +1,12 @@
+[Desktop Entry]
+Type=Application
+Name=Locale & Timezone
+Name[de]=Region und Zeitzone
+Comment=Configure system locale, timezone, and keyboard
+Comment[de]=Systemregion, Zeitzone und Tastatur konfigurieren
+Exec=konsole -e synthex-locale-setup status
+Icon=preferences-system-locale
+Terminal=true
+Categories=System;Settings;
+StartupNotify=true
+Keywords=locale;timezone;keyboard;language;region;

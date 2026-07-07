@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # ============================================================================
-# Solus Linux — ISO Builder Configuration
+# SynthOS — ISO Builder Configuration
 # ============================================================================
 # Central configuration for the ISO build process. Sources kickstart files,
 # repository configuration, and build parameters.
@@ -23,22 +23,22 @@ ARCHITECTURE="${ARCHITECTURE:-x86_64-v3}"
 BUILD_TYPE="${BUILD_TYPE:-nightly}"
 
 # Output directory for built ISOs
-OUTPUT_DIR="${OUTPUT_DIR:-/var/tmp/solus-iso}"
+OUTPUT_DIR="${OUTPUT_DIR:-/var/tmp/synthex-iso}"
 
 # Cache directory for package downloads
 CACHE_DIR="${CACHE_DIR:-/var/cache/livecd}"
 
 # Temporary build directory
-WORK_DIR="${WORK_DIR:-/var/tmp/solus-build}"
+WORK_DIR="${WORK_DIR:-/var/tmp/synthex-build}"
 
 # Log directory
-LOG_DIR="${LOG_DIR:-/var/log/solus-iso-builder}"
+LOG_DIR="${LOG_DIR:-/var/log/synthex-iso-builder}"
 
 # --------------------------------------------------------------------------
 # Repository Configuration
 # --------------------------------------------------------------------------
-# Base URL for Solus package repositories
-REPO_BASE="${REPO_BASE:-https://repo.solus.org}"
+# Base URL for Synthex package repositories
+REPO_BASE="${REPO_BASE:-https://repo.synthex.org}"
 
 # Additional repositories for build-time dependencies
 BUILD_REPOS=(
@@ -52,7 +52,7 @@ LOCAL_REPO="${LOCAL_REPO:-}"
 # Container / Build Environment
 # --------------------------------------------------------------------------
 # Container image for the ISO builder
-BUILDER_IMAGE="${BUILDER_IMAGE:-ghcr.io/solus-linux/iso-builder:latest}"
+BUILDER_IMAGE="${BUILDER_IMAGE:-ghcr.io/synthex-linux/iso-builder:latest}"
 
 # Container runtime (podman or docker)
 CONTAINER_RUNTIME="${CONTAINER_RUNTIME:-podman}"
@@ -76,7 +76,7 @@ BOOTLOADER="${BOOTLOADER:-grub}"
 # ISO Naming
 # --------------------------------------------------------------------------
 # ISO filename pattern
-ISO_PATTERN="solus-linux-${RELEASE_VERSION}-${ISO_VARIANT}-${ARCHITECTURE}"
+ISO_PATTERN="synthex-linux-${RELEASE_VERSION}-${ISO_VARIANT}-${ARCHITECTURE}"
 
 # Full ISO filename
 ISO_FILENAME="${ISO_PATTERN}.iso"
@@ -85,7 +85,7 @@ ISO_FILENAME="${ISO_PATTERN}.iso"
 # Signing Configuration
 # --------------------------------------------------------------------------
 # GPG key to use for signing (ID or email)
-SIGNING_KEY="${SIGNING_KEY:-Solus ISO <iso@solus.org>}"
+SIGNING_KEY="${SIGNING_KEY:-Synthex ISO <iso@synthex.org>}"
 
 # Signing key storage (hsm, file, agent)
 SIGNING_KEY_STORAGE="${SIGNING_KEY_STORAGE:-agent}"
@@ -98,25 +98,25 @@ SIGNING_HSM_SLOT="${SIGNING_HSM_SLOT:-0}"
 # --------------------------------------------------------------------------
 # BitTorrent trackers
 TRACKERS=(
-    "udp://tracker.solus.org:6969/announce"
+    "udp://tracker.synthex.org:6969/announce"
     "udp://tracker.opentrackr.org:1337/announce"
-    "https://tracker.solus.org:443/announce"
+    "https://tracker.synthex.org:443/announce"
 )
 
 # Webseed URLs (for direct download fallback)
-WEBSEED_URL="${WEBSEED_URL:-https://cdn.solus.org/releases/${RELEASE_VERSION}/}"
+WEBSEED_URL="${WEBSEED_URL:-https://cdn.synthex.org/releases/${RELEASE_VERSION}/}"
 
 # --------------------------------------------------------------------------
 # Mirror Sync
 # --------------------------------------------------------------------------
 # Primary repository server
-MIRROR_ORIGIN="${MIRROR_ORIGIN:-repo.solus.org}"
+MIRROR_ORIGIN="${MIRROR_ORIGIN:-repo.synthex.org}"
 
 # Rsync target path on mirror
-MIRROR_PATH="${MIRROR_PATH:-/repo/solus/releases/${RELEASE_VERSION}/}"
+MIRROR_PATH="${MIRROR_PATH:-/repo/synthex/releases/${RELEASE_VERSION}/}"
 
 # SSH key for mirror deployment
-MIRROR_SSH_KEY="${MIRROR_SSH_KEY:-/etc/solus/deploy-key}"
+MIRROR_SSH_KEY="${MIRROR_SSH_KEY:-/etc/synthex/deploy-key}"
 
 # --------------------------------------------------------------------------
 # Validation
@@ -198,7 +198,7 @@ if [[ "${BASH_SOURCE[0]}" == "${0}" ]]; then
 
     echo ""
     echo "============================================"
-    echo "  Solus ISO Builder Configuration"
+    echo "  Synthex ISO Builder Configuration"
     echo "============================================"
     echo ""
     echo "Release Version:    ${RELEASE_VERSION}"

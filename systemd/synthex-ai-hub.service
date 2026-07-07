@@ -1,0 +1,24 @@
+[Unit]
+Description=Synthex AI Hub Service
+Documentation=https://synthex-linux.org/docs/ai-hub
+After=network-online.target
+
+[Service]
+Type=simple
+ExecStart=/usr/bin/synthex-ai-hub --daemon
+Restart=on-failure
+RestartSec=5
+
+# Resource limits — AI hub can spike; cap it
+MemoryMax=1G
+MemoryHigh=512M
+CPUQuota=80%
+
+# Security hardening
+ProtectSystem=full
+ProtectHome=read-only
+PrivateTmp=yes
+NoNewPrivileges=yes
+
+[Install]
+WantedBy=graphical.target

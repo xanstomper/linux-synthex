@@ -1,0 +1,67 @@
+/* Synthex Dark Theme — GTK3 CSS
+ * Applied via ~/.config/gtk-3.0/gtk.css
+ * Matches the GTK4 theme for consistent appearance
+ */
+
+@define-color solus_accent #e94560;
+@define-color solus_bg #1a1a2e;
+@define-color solus_bg_alt #16213e;
+@define-color solus_surface #0f3460;
+@define-color solus_text #ffffff;
+@define-color solus_border #2a2a4e;
+
+window {
+  background-color: @solus_bg;
+  color: @solus_text;
+}
+
+headerbar,
+.header-bar {
+  background-color: @solus_bg_alt;
+  color: @solus_text;
+  border-bottom: 1px solid @solus_border;
+}
+
+button {
+  background-color: @solus_surface;
+  color: @solus_text;
+  border: 1px solid @solus_border;
+  border-radius: 8px;
+  padding: 6px 14px;
+}
+
+button:hover {
+  background-color: @solus_accent;
+}
+
+button:active,
+button:checked {
+  background-color: darker(@solus_accent, 20%);
+}
+
+entry {
+  background-color: @solus_bg;
+  color: @solus_text;
+  border: 1px solid @solus_border;
+  border-radius: 8px;
+  padding: 6px 10px;
+}
+
+entry:focus {
+  border-color: @solus_accent;
+}
+
+.menu,
+.popup {
+  background-color: @solus_bg_alt;
+  color: @solus_text;
+}
+
+menuitem:hover {
+  background-color: @solus_accent;
+}
+
+scrolledwindow scrollbar slider {
+  background-color: alpha(@solus_text, 0.2);
+  border-radius: 999px;
+}

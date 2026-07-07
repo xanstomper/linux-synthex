@@ -1,9 +1,9 @@
-# Solus Linux Hardening Guide
+# SynthOS Hardening Guide
 
 > Version: 1.0.0
 > Last Updated: 2026-07-04
 > Classification: **INTERNAL**
-> Part of: Linux Solus Security Architecture
+> Part of: Linux Synthex Security Architecture
 
 ---
 
@@ -22,7 +22,7 @@
 
 ## 1. Overview
 
-This directory contains the system hardening configuration for Linux Solus,
+This directory contains the system hardening configuration for Linux Synthex,
 providing kernel-level, network-level, and audit-level security controls.
 
 ### Files in this Directory
@@ -38,7 +38,7 @@ providing kernel-level, network-level, and audit-level security controls.
 
 | Level | Description | Suitable For |
 |-------|-------------|-------------|
-| **Standard** | Default Solus hardening | Desktop users |
+| **Standard** | Default Synthex hardening | Desktop users |
 | **Enhanced** | Additional paranoid settings | Power users |
 | **Maximum** | All available protections | Production/high-security |
 
@@ -50,16 +50,16 @@ providing kernel-level, network-level, and audit-level security controls.
 
 ```bash
 # 1. Kernel sysctl settings
-sudo cp sysctl.conf /etc/sysctl.d/99-solus-hardening.conf
-sudo sysctl -p /etc/sysctl.d/99-solus-hardening.conf
+sudo cp sysctl.conf /etc/sysctl.d/99-synthex-hardening.conf
+sudo sysctl -p /etc/sysctl.d/99-synthex-hardening.conf
 
 # 2. Resource limits
-sudo cp limits.conf /etc/security/limits.d/99-solus-hardening.conf
+sudo cp limits.conf /etc/security/limits.d/99-synthex-hardening.conf
 # Verify PAM includes limits:
 grep "pam_limits" /etc/pam.d/common-session || echo "Add: session required pam_limits.so"
 
 # 3. Audit rules
-sudo cp auditd.rules /etc/audit/rules.d/99-solus-hardening.rules
+sudo cp auditd.rules /etc/audit/rules.d/99-synthex-hardening.rules
 sudo augenrules --check
 sudo systemctl restart auditd
 sudo auditctl -l | grep -c "solus_"  # Should show many rules
@@ -94,7 +94,7 @@ ulimit -c -n -u -s
 
 ### 3.1 `sysctl.conf` — Kernel Hardening
 
-**Location**: `/etc/sysctl.d/99-solus-hardening.conf`
+**Location**: `/etc/sysctl.d/99-synthex-hardening.conf`
 **Service**: `systemd-sysctl` (applied at boot)
 
 This file configures kernel parameters across these domains:
@@ -127,7 +127,7 @@ This file configures kernel parameters across these domains:
 
 ### 3.2 `limits.conf` — Resource Limits
 
-**Location**: `/etc/security/limits.d/99-solus-hardening.conf`
+**Location**: `/etc/security/limits.d/99-synthex-hardening.conf`
 **PAM Module**: `pam_limits.so`
 
 This file restricts per-user resource consumption:
@@ -157,7 +157,7 @@ jenkins         soft    nproc           4096
 
 ### 3.3 `auditd.rules` — Audit Rules
 
-**Location**: `/etc/audit/rules.d/99-solus-hardening.rules`
+**Location**: `/etc/audit/rules.d/99-synthex-hardening.rules`
 **Service**: `auditd`
 
 This file defines what security events are logged. Key monitoring areas:
@@ -217,7 +217,7 @@ user.max_user_namespaces = 10000  # Relaxed for containers
 
 ### 4.2 Enhanced Hardening (Power Users)
 
-Add to `/etc/sysctl.d/99-solus-hardening.conf`:
+Add to `/etc/sysctl.d/99-synthex-hardening.conf`:
 
 ```
 # Stricter kernel protection
@@ -236,7 +236,7 @@ net.ipv6.conf.all.disable_ipv6 = 1
 
 ### 4.3 Maximum Hardening (High Security)
 
-Add to `/etc/sysctl.d/99-solus-hardening.conf`:
+Add to `/etc/sysctl.d/99-synthex-hardening.conf`:
 
 ```
 # Lock down kernel completely
@@ -267,15 +267,15 @@ fs.protected_regular = 2
 
 ```bash
 # Apply standard hardening
-sudo cp sysctl.conf /etc/sysctl.d/99-solus-hardening.conf
-sudo sysctl -p /etc/sysctl.d/99-solus-hardening.conf
+sudo cp sysctl.conf /etc/sysctl.d/99-synthex-hardening.conf
+sudo sysctl -p /etc/sysctl.d/99-synthex-hardening.conf
 
 # Uncomment in limits.conf for desktop:
 # - Keep core=0 for default users
 # - Keep stack_limit reasonable (4096/8192)
 
 # Apply audit rules
-sudo cp auditd.rules /etc/audit/rules.d/99-solus-hardening.rules
+sudo cp auditd.rules /etc/audit/rules.d/99-synthex-hardening.rules
 sudo systemctl restart auditd
 
 # Check for issues:
@@ -288,19 +288,19 @@ sudo systemctl restart auditd
 
 ```bash
 # Apply enhanced hardening
-sudo cp sysctl.conf /etc/sysctl.d/99-solus-hardening.conf
-sudo sysctl -p /etc/sysctl.d/99-solus-hardening.conf
+sudo cp sysctl.conf /etc/sysctl.d/99-synthex-hardening.conf
+sudo sysctl -p /etc/sysctl.d/99-synthex-hardening.conf
 
 # Enable additional server protections:
-echo "net.ipv4.conf.all.rp_filter = 1" >> /etc/sysctl.d/99-solus-hardening.conf
-echo "net.ipv4.tcp_syncookies = 1" >> /etc/sysctl.d/99-solus-hardening.conf
+echo "net.ipv4.conf.all.rp_filter = 1" >> /etc/sysctl.d/99-synthex-hardening.conf
+echo "net.ipv4.tcp_syncookies = 1" >> /etc/sysctl.d/99-synthex-hardening.conf
 
 # Stricter limits for server
-sudo cp limits.conf /etc/security/limits.d/99-solus-hardening.conf
+sudo cp limits.conf /etc/security/limits.d/99-synthex-hardening.conf
 # Uncomment higher limits for service users
 
 # Apply audit rules (keep all)
-sudo cp auditd.rules /etc/audit/rules.d/99-solus-hardening.rules
+sudo cp auditd.rules /etc/audit/rules.d/99-synthex-hardening.rules
 sudo systemctl restart auditd
 
 # Verify all services still work
@@ -311,13 +311,13 @@ systemctl status nginx mysql postfix 2>/dev/null || true
 
 ```bash
 # Apply standard hardening with relaxed settings for dev tools
-sudo cp sysctl.conf /etc/sysctl.d/99-solus-hardening.conf
-sudo sysctl -p /etc/sysctl.d/99-solus-hardening.conf
+sudo cp sysctl.conf /etc/sysctl.d/99-synthex-hardening.conf
+sudo sysctl -p /etc/sysctl.d/99-synthex-hardening.conf
 
 # Relax for development:
-echo "kernel.yama.ptrace_scope = 1" > /etc/sysctl.d/99-solus-devel.conf
-echo "user.max_user_namespaces = 100000" >> /etc/sysctl.d/99-solus-devel.conf
-sysctl -p /etc/sysctl.d/99-solus-devel.conf
+echo "kernel.yama.ptrace_scope = 1" > /etc/sysctl.d/99-synthex-devel.conf
+echo "user.max_user_namespaces = 100000" >> /etc/sysctl.d/99-synthex-devel.conf
+sysctl -p /etc/sysctl.d/99-synthex-devel.conf
 
 # Apply audit rules (reduced - developer machines generate lots of events)
 # Remove high-volume rules: -a always,exit -S execve
@@ -410,7 +410,7 @@ sudo oscap xccdf eval \
     --profile xccdf_org.ssgproject.content_profile_standard \
     --results results.xml \
     --report report.html \
-    /usr/share/xml/scap/ssg/content/ssg-solus-ds.xml
+    /usr/share/xml/scap/ssg/content/ssg-synthex-ds.xml
 ```
 
 ---
@@ -433,14 +433,14 @@ sudo oscap xccdf eval \
 
 ```bash
 # Revert sysctl to defaults
-sudo rm /etc/sysctl.d/99-solus-hardening.conf
+sudo rm /etc/sysctl.d/99-synthex-hardening.conf
 sudo sysctl --system
 
 # Revert limits
-sudo rm /etc/security/limits.d/99-solus-hardening.conf
+sudo rm /etc/security/limits.d/99-synthex-hardening.conf
 
 # Revert audit rules
-sudo rm /etc/audit/rules.d/99-solus-hardening.rules
+sudo rm /etc/audit/rules.d/99-synthex-hardening.rules
 sudo systemctl restart auditd
 ```
 
@@ -469,7 +469,7 @@ A: Yes, they address different security domains. sysctl.conf hardens the kernel,
 limits.conf restricts user resources, and auditd.rules provides detection.
 
 **Q: Will these break my system?**
-A: The Standard profile is tested on Solus desktop/server. Enhanced/Maximum
+A: The Standard profile is tested on Synthex desktop/server. Enhanced/Maximum
 profiles may break container runtimes and debugging tools.
 
 **Q: How do I customize for specific needs?**
@@ -501,7 +501,7 @@ Arch, and others. Adjust paths accordingly.
 
 ## References
 
-- [Solus Security Architecture](../../security-architecture.md)
+- [Synthex Security Architecture](../../security-architecture.md)
 - [CIS Linux Benchmark](https://www.cisecurity.org/benchmark/linux)
 - [Kernel Self-Protection Project](https://kernsec.org/wiki/index.php/Kernel_Self_Protection_Project)
 - [NIST SP 800-53](https://csrc.nist.gov/publications/detail/sp/800-53/rev-5/final)
@@ -511,6 +511,6 @@ Arch, and others. Adjust paths accordingly.
 
 ---
 
-*This document is part of the Linux Solus Security Architecture v1.0.0*
-*Copyright (c) 2026 Linux Solus Project*
+*This document is part of the Linux Synthex Security Architecture v1.0.0*
+*Copyright (c) 2026 Linux Synthex Project*
 *Licensed under CC-BY-SA 4.0 International*

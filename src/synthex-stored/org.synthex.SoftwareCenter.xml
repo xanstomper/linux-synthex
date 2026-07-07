@@ -1,0 +1,132 @@
+<!DOCTYPE node PUBLIC "-//freedesktop//DTD D-BUS Object Introspection 1.0//EN"
+ "http://www.freedesktop.org/standards/dbus/1.0/introspect.dtd">
+<node>
+  <!--
+    org.synthex.SoftwareCenter — Synthex Software Center D-Bus Interface
+
+    Managed by synthex-stored. Provides application management across
+    Flatpak, RPM, and WebApp backends with transaction safety.
+  -->
+  <interface name="org.synthex.SoftwareCenter">
+
+    <!--
+      SearchApp:
+      @query: Search string.
+      Returns: JSON array of matching apps.
+    -->
+    <method name="SearchApp">
+      <arg name="query" type="s" direction="in"/>
+      <arg name="result" type="s" direction="out"/>
+    </method>
+
+    <!--
+      InstallApp:
+      @appId: Application identifier.
+      Returns: "ok" on success, "error: <reason>" on failure.
+    -->
+    <method name="InstallApp">
+      <arg name="appId" type="s" direction="in"/>
+      <arg name="result" type="s" direction="out"/>
+    </method>
+
+    <!--
+      RemoveApp:
+      @appId: Application identifier.
+      Returns: "ok" on success, "error: <reason>" on failure.
+    -->
+    <method name="RemoveApp">
+      <arg name="appId" type="s" direction="in"/>
+      <arg name="result" type="s" direction="out"/>
+    </method>
+
+    <!--
+      GetAppInfo:
+      @appId: Application identifier.
+      Returns: JSON object with app details.
+    -->
+    <method name="GetAppInfo">
+      <arg name="appId" type="s" direction="in"/>
+      <arg name="info" type="s" direction="out"/>
+    </method>
+
+    <!--
+      InstallFlatpak:
+      @flatpakRef: Flatpak reference (e.g., "app/org.example.App/x86_64/stable").
+      Returns: "ok" on success, "error: <reason>" on failure.
+    -->
+    <method name="InstallFlatpak">
+      <arg name="flatpakRef" type="s" direction="in"/>
+      <arg name="result" type="s" direction="out"/>
+    </method>
+
+    <!--
+      InstallRPM:
+      @packageName: RPM package name.
+      Returns: "ok" on success, "error: <reason>" on failure.
+    -->
+    <method name="InstallRPM">
+      <arg name="packageName" type="s" direction="in"/>
+      <arg name="result" type="s" direction="out"/>
+    </method>
+
+    <!--
+      InstallWebApp:
+      @url: Web application URL.
+      @name: Display name for the web app.
+      Returns: "ok" on success, "error: <reason>" on failure.
+    -->
+    <method name="InstallWebApp">
+      <arg name="url" type="s" direction="in"/>
+      <arg name="name" type="s" direction="in"/>
+      <arg name="result" type="s" direction="out"/>
+    </method>
+
+    <!--
+      GetUpdates:
+      Returns: JSON array of available updates.
+    -->
+    <method name="GetUpdates">
+      <arg name="updates" type="s" direction="out"/>
+    </method>
+
+    <!--
+      InstallUpdates:
+      Installs all pending updates.
+      Returns: "ok" on success, "error: <reason>" on failure.
+    -->
+    <method name="InstallUpdates">
+      <arg name="result" type="s" direction="out"/>
+    </method>
+
+    <!--
+      GetCategories:
+      Returns: JSON array of application categories.
+    -->
+    <method name="GetCategories">
+      <arg name="categories" type="s" direction="out"/>
+    </method>
+
+    <!-- Signals -->
+
+    <signal name="InstallProgress">
+      <arg name="appId" type="s"/>
+      <arg name="percent" type="i"/>
+      <arg name="status" type="s"/>
+    </signal>
+
+    <signal name="InstallComplete">
+      <arg name="appId" type="s"/>
+      <arg name="success" type="b"/>
+      <arg name="message" type="s"/>
+    </signal>
+
+    <signal name="UpdatesAvailable">
+      <arg name="count" type="u"/>
+    </signal>
+
+    <signal name="TransactionLockChanged">
+      <arg name="locked" type="b"/>
+    </signal>
+
+  </interface>
+</node>

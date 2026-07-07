@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Solus Creator Mode
+# Synthex Creator Mode
 # Optimizes for creative workloads (Blender, OBS, Krita, DaVinci)
 
 set -euo pipefail

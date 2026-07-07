@@ -1,10 +1,10 @@
-# Linux Solus — Release Plan
+# Linux Synthex — Release Plan
 
 ---
 
 ## Versioning Scheme
 
-Linux Solus uses **Calendar Versioning** (CalVer):
+Linux Synthex uses **Calendar Versioning** (CalVer):
 
 ```
 YYYY.MM.REVISION
@@ -42,7 +42,7 @@ LTS releases use: `YYYY.MM.LTS-REVISION`
 
 ## Release Naming
 
-Linux Solus releases are named after **stars and constellations**.
+Linux Synthex releases are named after **stars and constellations**.
 
 | Version | Codename | Star |
 |---------|----------|------|
@@ -135,7 +135,7 @@ Linux Solus releases are named after **stars and constellations**.
 ### Gate 4: Package Management
 - [ ] DNF5 update works
 - [ ] Flatpak install/update works
-- [ ] Solus repository reachable
+- [ ] Synthex repository reachable
 - [ ] Package signing verified
 - [ ] Rollback via DNF history works
 
@@ -188,7 +188,7 @@ graph LR
 
 ### Staged Rollout
 
-1. **10%** — Solus team + early testers
+1. **10%** — Synthex team + early testers
 2. **25%** — Opt-in beta group
 3. **50%** — General population
 4. **100%** — All users
@@ -255,7 +255,7 @@ feature branches ──► rawhide
 |------|------|-------|
 | Build servers | $400 | 4x Hetzner AX102 |
 | CDN + storage | $200 | BunnyCDN + S3-compatible |
-| Domain + DNS | $20 | solus-linux.org |
+| Domain + DNS | $20 | synthex-linux.org |
 | CI/CD runners | $100 | GitHub Actions |
 | Signing HSM | $50 | YubiKey + Nitrokey amortized |
 | Developer stipends | $2000 | Open-source contributors |
@@ -267,7 +267,7 @@ feature branches ──► rawhide
 
 | Channel | Purpose | Launch |
 |---------|---------|--------|
-| solus-linux.org | Website + blog | Beta |
+| synthex-linux.org | Website + blog | Beta |
 | GitHub | Code, issues, discussions | Now |
 | Discord | Community chat | Alpha |
 | Matrix | Open chat | Alpha |
@@ -280,5 +280,5 @@ feature branches ──► rawhide
 ---
 
 <div align="center">
-  <i>Linux Solus — Illuminate Your Desktop</i>
+  <i>Linux Synthex — Illuminate Your Desktop</i>
 </div>

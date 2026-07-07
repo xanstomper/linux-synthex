@@ -1,4 +1,4 @@
-# Solus Linux
+# SynthOS
 
 A next-generation Fedora-based Linux distribution designed to be the definitive Linux desktop operating system. Combines the best of Fedora, Arch, Mint, Nobara, CachyOS, and Bazzite.
 
@@ -7,15 +7,15 @@ A next-generation Fedora-based Linux distribution designed to be the definitive 
 ### Build the ISO (on Fedora 41+)
 ```bash
 sudo dnf install lorax livemedia-creator pykickstart
-sudo bash scripts/build-solus.sh docker-build
-sudo bash scripts/build-solus.sh build-iso
+sudo bash scripts/build-synthex.sh docker-build
+sudo bash scripts/build-synthex.sh build-iso
 ```
 
 ### Or build with Docker (any Linux host)
 ```bash
-sudo bash scripts/build-solus.sh docker-build
-sudo bash scripts/build-solus.sh build-rootfs
-sudo bash scripts/build-solus.sh build-iso
+sudo bash scripts/build-synthex.sh docker-build
+sudo bash scripts/build-synthex.sh build-rootfs
+sudo bash scripts/build-synthex.sh build-iso
 ```
 
 ### Run integration tests
@@ -29,7 +29,7 @@ make rust-check  # cargo check — verify Rust workspace compiles cleanly
 
 ### System
 - **KDE Plasma** desktop with Mint-inspired theme
-- **Solus Mint** layout — bottom panel, window list, classic menu
+- **Synthex Mint** layout — bottom panel, window list, classic menu
 - **BTRFS** filesystem with automatic snapper snapshots
 - **SELinux** enforcing by default
 - **Firewalld** with profiles (gaming, secure, dev, home)
@@ -56,7 +56,7 @@ make rust-check  # cargo check — verify Rust workspace compiles cleanly
 - **ZRAM** compressed swap
 
 ### Security
-- **SELinux** enforcing with custom Solus policy
+- **SELinux** enforcing with custom Synthex policy
 - **Firewalld** with nftables backend
 - **Secure Boot** support (shim + GRUB)
 - **LUKS2** full disk encryption
@@ -109,39 +109,39 @@ make rust-check  # cargo check — verify Rust workspace compiles cleanly
 | `ping` | `gping` | `gping` | Latency with real-time graph |
 | `make` | `just` | `just` | Command runner (simpler make) |
 
-### Solus Native Rust Tools
+### Synthex Native Rust Tools
 | Command | Description |
 |---------|-------------|
-| `solus-integration-engine` | Upstream monitoring — tracks Arch, Nobara, Bazzite, CachyOS, KDE, Mesa, Kernel, Proton-GE |
-| `solus-snapshot` | Btrfs snapshot manager — create, list, rollback, verify, clean |
-| `solus-update-manager` | System update manager with BTRFS snapshots |
-| `solus-driver-manager` | GPU detection and driver auto-install |
-| `solus-pkg` (alias `spkg`) | Package manager with Solus repo awareness |
-| `solus-ai-daemon` | AI assistant — Ollama integration, hardware advice |
-| `solus-system-daemon` | Performance auto-tuner — CPU governor, TDP, GPU power |
-| `solus-hwdaemon` | Hardware detection daemon — D-Bus service |
-| `solus-desktopd` | Desktop layout/theme engine |
-| `solus-gpu-setupd` | GPU driver auto-installer — AMD, Intel, NVIDIA |
-| `solus-stored` | Software center backend — DNF5, Flatpak |
-| `solus-installer-detect` | Hardware detection for Calamares installer |
-| `solus-cli` | Unified system tool — info, doctor, mode, update, health |
+| `synthex-integration-engine` | Upstream monitoring — tracks Arch, Nobara, Bazzite, CachyOS, KDE, Mesa, Kernel, Proton-GE |
+| `synthex-snapshot` | Btrfs snapshot manager — create, list, rollback, verify, clean |
+| `synthex-update-manager` | System update manager with BTRFS snapshots |
+| `synthex-driver-manager` | GPU detection and driver auto-install |
+| `synthex-pkg` (alias `spkg`) | Package manager with Synthex repo awareness |
+| `synthex-ai-daemon` | AI assistant — Ollama integration, hardware advice |
+| `synthex-system-daemon` | Performance auto-tuner — CPU governor, TDP, GPU power |
+| `synthex-hwdaemon` | Hardware detection daemon — D-Bus service |
+| `synthex-desktopd` | Desktop layout/theme engine |
+| `synthex-gpu-setupd` | GPU driver auto-installer — AMD, Intel, NVIDIA |
+| `synthex-stored` | Software center backend — DNF5, Flatpak |
+| `synthex-installer-detect` | Hardware detection for Calamares installer |
+| `synthex-cli` | Unified system tool — info, doctor, mode, update, health |
 
-### Solus Tools
+### Synthex Tools
 | Command | Description |
 |---------|-------------|
-| `solus` | Unified command center (19 commands) |
-| `solus-layout` | Switch desktop layouts |
-| `solus-gaming-mode` | Gaming mode (Big Picture + performance) |
-| `solus-gpu-switch` | NVIDIA Optimus GPU switching |
-| `solus-proton` | Proton version manager |
-| `solus-firewall` | Firewall profile switcher |
-| `solus-update` | Update manager with snapshots (Rust) |
-|| `solus-driver-manager` | GPU driver auto-install (Rust) |
-|| `solus-pkg` | Package manager with repo awareness (Rust) |
-||| `solus-system-daemon` | Performance auto-tuner for VRR, HDR, CPU, TDP (Rust) |
-||| `solus-ai-daemon` | Local AI assistant via Ollama, whisper voice commands (Rust) |
-||| `solus-installer-detect` | HW auto-detection for Calamares installs (Rust) |
-||| `solus-blueprint` | Export/import system identity (.zbp) |
+| `synthex` | Unified command center (19 commands) |
+| `synthex-layout` | Switch desktop layouts |
+| `synthex-gaming-mode` | Gaming mode (Big Picture + performance) |
+| `synthex-gpu-switch` | NVIDIA Optimus GPU switching |
+| `synthex-proton` | Proton version manager |
+| `synthex-firewall` | Firewall profile switcher |
+| `synthex-update` | Update manager with snapshots (Rust) |
+|| `synthex-driver-manager` | GPU driver auto-install (Rust) |
+|| `synthex-pkg` | Package manager with repo awareness (Rust) |
+||| `synthex-system-daemon` | Performance auto-tuner for VRR, HDR, CPU, TDP (Rust) |
+||| `synthex-ai-daemon` | Local AI assistant via Ollama, whisper voice commands (Rust) |
+||| `synthex-installer-detect` | HW auto-detection for Calamares installs (Rust) |
+||| `synthex-blueprint` | Export/import system identity (.zbp) |
 
 ### COSMIC Desktop (Pop!_OS Rust Port)
 | Component | Package | Role |
@@ -190,42 +190,42 @@ make rust-check  # cargo check — verify Rust workspace compiles cleanly
 | `tealdeer` | man (tldr) | `rust-utils-tealdeer.spec` |
 | `ouch` | tar/gzip/zip | `rust-utils-ouch.spec` |
 
-`solus-ai-hub`
-| `solus-webapp` | Turn websites into native apps |
+`synthex-ai-hub`
+| `synthex-webapp` | Turn websites into native apps |
 
 ### System Services (all Rust)
 | Service | Language | Description |
 |---------|----------|-------------|
-| `solus-system-daemon` | Rust | Performance auto-tuner — CPU, TDP, GPU, gaming, VRR, HDR |
-| `solus-integration-engine` | Rust | Upstream monitoring — tracks Arch, Nobara, Bazzite, CachyOS, KDE, Mesa |
-| `solus-snapshot-manager` | Rust | Btrfs snapshot creation, rollback, verification, cleanup |
-| `solus-hwdaemon` | Rust | Hardware detection daemon — CPU, GPU, RAM, disks, network |
-| `solus-gpu-setupd` | Rust | GPU driver auto-installer — AMD, Intel, NVIDIA, Secure Boot |
-| `solus-desktopd` | Rust | Desktop layout/theme/mode engine — Mint, Windows, Gaming, macOS |
-| `solus-stored` | Rust | Software center backend — DNF, Flatpak, AppImage, AUR |
-| `solus-ai-daemon` | Rust | Local AI assistant — Ollama integration, whisper, diagnostics |
-| `solus-installer-detect` | Rust | Hardware detection for Calamares installer |
-| `solus-cli` | Rust | Unified CLI — info, doctor, mode, update, snapshot, health |
-| `solus-recovery` | Rust | Recovery framework — boot, driver, package, network repair |
-| `solus-service-manager` | Rust | Systemd service management — list, start, stop, enable, disable |
-| `solus-kernel-manager` | Rust | Kernel management — list, install, remove, switch, cleanup |
-| `solus-compat-db` | Rust | Hardware compatibility database — scan, check, report |
+| `synthex-system-daemon` | Rust | Performance auto-tuner — CPU, TDP, GPU, gaming, VRR, HDR |
+| `synthex-integration-engine` | Rust | Upstream monitoring — tracks Arch, Nobara, Bazzite, CachyOS, KDE, Mesa |
+| `synthex-snapshot-manager` | Rust | Btrfs snapshot creation, rollback, verification, cleanup |
+| `synthex-hwdaemon` | Rust | Hardware detection daemon — CPU, GPU, RAM, disks, network |
+| `synthex-gpu-setupd` | Rust | GPU driver auto-installer — AMD, Intel, NVIDIA, Secure Boot |
+| `synthex-desktopd` | Rust | Desktop layout/theme/mode engine — Mint, Windows, Gaming, macOS |
+| `synthex-stored` | Rust | Software center backend — DNF, Flatpak, AppImage, AUR |
+| `synthex-ai-daemon` | Rust | Local AI assistant — Ollama integration, whisper, diagnostics |
+| `synthex-installer-detect` | Rust | Hardware detection for Calamares installer |
+| `synthex-cli` | Rust | Unified CLI — info, doctor, mode, update, snapshot, health |
+| `synthex-recovery` | Rust | Recovery framework — boot, driver, package, network repair |
+| `synthex-service-manager` | Rust | Systemd service management — list, start, stop, enable, disable |
+| `synthex-kernel-manager` | Rust | Kernel management — list, install, remove, switch, cleanup |
+| `synthex-compat-db` | Rust | Hardware compatibility database — scan, check, report |
 
 ### GUI Applications
 | Application | Framework | Description |
 |-------------|-----------|-------------|
-| `solus-control-center` | QML/C++ | Unified control center — 13 pages (Dashboard, System, Performance, Gaming, Developer, Themes, Security, Updates, Drivers, RGB, Snapshots, Kernel, Controllers) |
-| `solus-software-center` | QML | Mint-inspired software manager with category browsing |
-| `solus-oobe` | QML | First-run wizard — profile selection, theme, bundles |
-| `solus-gaming-center` | QML | Gaming hub — Steam, Proton, MangoHUD, Gamescope |
-| `solus-studio` | QML/C++ | Theme studio with preset designer |
-| `solus-welcome` | Python | Welcome application with links and tutorials |
-| `solus-agent` | Python | AI-powered desktop agent |
+| `synthex-control-center` | QML/C++ | Unified control center — 13 pages (Dashboard, System, Performance, Gaming, Developer, Themes, Security, Updates, Drivers, RGB, Snapshots, Kernel, Controllers) |
+| `synthex-software-center` | QML | Mint-inspired software manager with category browsing |
+| `synthex-oobe` | QML | First-run wizard — profile selection, theme, bundles |
+| `synthex-gaming-center` | QML | Gaming hub — Steam, Proton, MangoHUD, Gamescope |
+| `synthex-studio` | QML/C++ | Theme studio with preset designer |
+| `synthex-welcome` | Python | Welcome application with links and tutorials |
+| `synthex-agent` | Python | AI-powered desktop agent |
 
 ## Project Structure
 
 ```
-linux-solus/
+linux-synthex/
 ├── branding/         # Logos, themes, wallpapers, icons
 ├── build/            # ISO build scripts, kickstart files
 ├── ci/               # GitHub Actions workflows (incl Rust CI)
@@ -238,8 +238,8 @@ linux-solus/
 ├── scripts/          # Docker build scripts
 ├── security/         # SELinux policy, hardening configs
 ├── src/
-│   ├── solus-rust-tools/   # Rust workspace (update-manager, driver-manager, pkg)
-│   ├── solus-*/            # C/C++/Python/QML system tools
+│   ├── synthex-rust-tools/   # Rust workspace (update-manager, driver-manager, pkg)
+│   ├── synthex-*/            # C/C++/Python/QML system tools
 │   └── ...
 ├── systemd/          # systemd service units
 └── tests/            # Integration tests and validation
@@ -247,7 +247,7 @@ linux-solus/
 
 ## Included from other distros
 
-| Distro | Features integrated into Solus |
+| Distro | Features integrated into Synthex |
 |--------|-------------------------------|
 | **Mint** | Welcome screen, update manager, bottom panel layout, green Mint-Y theme |
 | **Nobara** | Gaming kernel patches, Proton management, GPU switching, NVIDIA drivers |

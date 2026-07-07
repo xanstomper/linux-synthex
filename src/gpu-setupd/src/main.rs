@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: MIT OR Apache-2.0
 //
-// solus-gpu-setupd — GPU driver installation and configuration daemon
+// synthex-gpu-setupd — GPU driver installation and configuration daemon
 //
 // Auto-detects GPU hardware and installs appropriate drivers:
 // - AMD: amdgpu (in-kernel, mesa)
@@ -79,7 +79,7 @@ impl GpuSetupDaemon {
 
     fn detect_vendor(&self) -> Result<GpuVendor> {
         // Check hwdaemon cache first
-        if let Ok(json) = std::fs::read_to_string("/run/solus/hardware.json") {
+        if let Ok(json) = std::fs::read_to_string("/run/synthex/hardware.json") {
             if let Ok(profile) = serde_json::from_str::<serde_json::Value>(&json) {
                 if let Some(gpus) = profile["gpus"].as_array() {
                     for gpu in gpus {
@@ -140,14 +140,14 @@ impl GpuSetupDaemon {
 
         // Write AMD-specific config
         let config = "\
-# AMD GPU configuration for Solus Linux
+# AMD GPU configuration for SynthOS
 # Enables AMD FSR, Adaptive Sync, and performance mode
 RADV_PERFTEST=nggc
 RADV_FORCE_VRS=2
 AMD_VULKAN_ICD=RADV
 ";
-        let _ = std::fs::create_dir_all("/run/solus/gpu");
-        let _ = std::fs::write("/run/solus/gpu/amd.conf", config);
+        let _ = std::fs::create_dir_all("/run/synthex/gpu");
+        let _ = std::fs::write("/run/synthex/gpu/amd.conf", config);
 
         Ok(self.state.clone())
     }
@@ -209,9 +209,9 @@ AMD_VULKAN_ICD=RADV
 
         // Generate NVIDIA config
         let config = format!("\
-# NVIDIA driver configuration for Solus Linux
+# NVIDIA driver configuration for SynthOS
 # Driver: {driver}
-# Optimus: Use solus-gpu-switch to toggle modes
+# Optimus: Use synthex-gpu-switch to toggle modes
 # Secure Boot: {}
 options nvidia NVreg_UsePageAttributeTable=1
 options nvidia NVreg_InitializeSystemMemoryAllocations=0
@@ -220,8 +220,8 @@ options nvidia NVreg_EnableGpuFirmware=1
 ",
             if self.state.secure_boot_enrolled { "enrolled" } else { "not enrolled" }
         );
-        let _ = std::fs::create_dir_all("/run/solus/gpu");
-        let _ = std::fs::write("/run/solus/gpu/nvidia.conf", config);
+        let _ = std::fs::create_dir_all("/run/synthex/gpu");
+        let _ = std::fs::write("/run/synthex/gpu/nvidia.conf", config);
 
         Ok(self.state.clone())
     }
@@ -268,11 +268,11 @@ fn main() -> Result<()> {
     tracing_subscriber::fmt()
         .with_env_filter(
             tracing_subscriber::EnvFilter::try_from_default_env()
-                .unwrap_or_else(|_| "solus_gpu_setupd=info".into()),
+                .unwrap_or_else(|_| "synthex_gpu_setupd=info".into()),
         )
         .init();
 
-    info!("Solus GPU Setup Daemon starting");
+    info!("Synthex GPU Setup Daemon starting");
     let mut daemon = GpuSetupDaemon::new();
 
     match daemon.detect_and_setup() {
@@ -284,9 +284,9 @@ fn main() -> Result<()> {
                 if state.vulkan_support { " + Vulkan" } else { "" },
             );
             // Write state JSON
-            let _ = std::fs::create_dir_all("/run/solus/gpu");
+            let _ = std::fs::create_dir_all("/run/synthex/gpu");
             if let Ok(json) = serde_json::to_string_pretty(&state) {
-                let _ = std::fs::write("/run/solus/gpu/state.json", json);
+                let _ = std::fs::write("/run/synthex/gpu/state.json", json);
             }
         }
         Err(e) => {
@@ -295,7 +295,7 @@ fn main() -> Result<()> {
     }
 
     // Daemon runs until terminated (systemd service)
-    info!("solus-gpu-setupd initialized. Watching for GPU changes...");
+    info!("synthex-gpu-setupd initialized. Watching for GPU changes...");
     loop {
         std::thread::sleep(std::time::Duration::from_secs(300));
         // Re-detect every 5 min for hotplug events

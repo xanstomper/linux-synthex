@@ -1,0 +1,548 @@
+#!/usr/bin/env python3
+"""Hermes Desktop IDE — Native AI-powered code editor for Linux Mint.
+Full IDE with GtkSourceView editor, file browser, AI agent panel.
+"""
+import os, sys, json, subprocess, threading, time, html, signal
+from pathlib import Path
+
+import gi
+gi.require_version("Gtk", "3.0")
+gi.require_version("GtkSource", "4")
+gi.require_version("Pango", "1.0")
+from gi.repository import Gtk, Gio, GLib, GtkSource, Pango, Gdk, GdkPixbuf
+
+ROOT = Path(os.path.dirname(os.path.abspath(__file__)))
+DAEMON = ROOT / "daemon" / "hermesd"
+CONFIG_DIR = Path(os.path.expanduser("~/.config/synthex/ide"))
+CONFIG_DIR.mkdir(parents=True, exist_ok=True)
+
+# ═══ DBus Client ═══════════════════════════════════════════════════
+
+class HermesClient:
+    def __init__(self):
+        self.available = False
+        self._connect()
+    def _connect(self):
+        try:
+            import dbus; bus = dbus.SessionBus()
+            self.obj = bus.get_object("org.solus.Hermes", "/org/synthex/Hermes")
+            self.iface = dbus.Interface(self.obj, "org.solus.Hermes")
+            self.available = True
+        except:
+            self.available = False
+            if DAEMON.exists():
+                subprocess.Popen([str(DAEMON)], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+                time.sleep(2)
+                try:
+                    import dbus; bus = dbus.SessionBus()
+                    self.obj = bus.get_object("org.solus.Hermes", "/org/synthex/Hermes")
+                    self.iface = dbus.Interface(self.obj, "org.solus.Hermes")
+                    self.available = True
+                except: pass
+    def chat(self, query):
+        if not self.available: return {"response": "⚠️ Daemon not running"}
+        try: return json.loads(self.iface.Chat(query))
+        except Exception as e: return {"response": f"Error: {e}"}
+    def code_action(self, task, code="", path=""):
+        if not self.available: return {"response": "Daemon not running"}
+        req = json.dumps({"task": task, "code": code, "path": path})
+        try: return json.loads(self.iface.CodeAction(req))
+        except Exception as e: return {"response": f"Error: {e}"}
+
+
+# ═══ Hermes Desktop IDE ════════════════════════════════════════════
+
+class HermesIDE(Gtk.ApplicationWindow):
+    def __init__(self, app):
+        Gtk.ApplicationWindow.__init__(self, application=app)
+        self.set_title("Hermes Desktop IDE")
+        self.set_default_size(1200, 750)
+        self.set_position(Gtk.WindowPosition.CENTER)
+        
+        # Client
+        self.client = HermesClient()
+        self.current_file = None
+        self.current_language = None
+        self.project_root = Path.home() / "linux-solus"
+        
+        # Build UI
+        self._build_ui()
+        
+        # Load project
+        self._load_project()
+    
+    def _build_ui(self):
+        # ═══ CSS ═══════════════════════════════════════════════════
+        css = b"""
+        #panel { background-color: #16162A; }
+        #editor-bg { background-color: #0D1117; }
+        #sidebar { background-color: #1A1A2E; border-right: 1px solid #3A3A5E; }
+        #agent-panel { background-color: #1A1A2E; border-left: 1px solid #3A3A5E; }
+        #input-bg { background-color: #2A2A4E; color: #FFF; border: 1px solid #3A3A5E; border-radius: 6px; }
+        #btn { background-color: #222240; color: #8899AA; border: 1px solid #3A3A5E; border-radius: 4px; }
+        #btn:hover { background-color: #2A2A4E; }
+        #btn-accent { background-color: #9BBD5C; color: #FFF; border-radius: 4px; }
+        #btn-accent:hover { background-color: #A8CC6A; }
+        #label { color: #8899AA; font-size: 11px; }
+        #heading { color: #9BBD5C; font-size: 12px; font-weight: bold; padding: 4px 0; }
+        #file-row:hover { background-color: #222240; }
+        #file-row { color: #8899AA; font-size: 11px; padding: 2px 6px; }
+        #msg-user { background-color: #9BBD5C; color: #FFF; border-radius: 6px; padding: 6px; font-size: 11px; }
+        #msg-agent { background-color: #222240; color: #FFF; border-radius: 6px; padding: 6px; font-size: 11px; }
+        """
+        css_provider = Gtk.CssProvider()
+        css_provider.load_from_data(css)
+        Gtk.StyleContext.add_provider_for_screen(
+            Gdk.Screen.get_default(), css_provider,
+            Gtk.STYLE_PROVIDER_PRIORITY_APPLICATION
+        )
+
+        # ═══ Main Layout ══════════════════════════════════════════
+        main_box = Gtk.Box(orientation=Gtk.Orientation.VERTICAL)
+        self.add(main_box)
+        
+        # Menu bar
+        self._build_menu(main_box)
+        
+        # Paned: Sidebar | Editor | Agent
+        self.hpaned = Gtk.Paned(orientation=Gtk.Orientation.HORIZONTAL)
+        main_box.pack_start(self.hpaned, True, True, 0)
+        
+        # ─── Left: File Browser ──────────────────────────────────
+        self._build_file_browser()
+        
+        # ─── Center: Editor ──────────────────────────────────────
+        self._build_editor()
+        
+        # ─── Right: Agent Panel ──────────────────────────────────
+        self._build_agent_panel()
+        
+        # Status bar
+        self._build_status(main_box)
+        
+        # Keybinding: Ctrl+Enter to send to agent
+        self.connect("key-press-event", self._on_key)
+    
+    def _build_menu(self, parent):
+        menubar = Gtk.MenuBar()
+        parent.pack_start(menubar, False, False, 0)
+        
+        # File
+        file_menu = Gtk.Menu()
+        items = [
+            ("Open File", self._open_file),
+            ("Open Folder", self._open_folder),
+            None,
+            ("Save", self._save_file),
+            ("Save As", self._save_as),
+            None,
+            ("Quit", lambda w: Gtk.main_quit()),
+        ]
+        for item in items:
+            if item is None: file_menu.append(Gtk.SeparatorMenuItem())
+            else:
+                label, cb = item
+                mi = Gtk.MenuItem(label=label)
+                mi.connect("activate", cb)
+                file_menu.append(mi)
+        file_item = Gtk.MenuItem(label="File")
+        file_item.set_submenu(file_menu)
+        menubar.append(file_item)
+        
+        # Agent
+        agent_menu = Gtk.Menu()
+        agent_items = [
+            ("Ask Agent to Explain", lambda w: self._agent_task("Explain this code")),
+            ("Ask Agent to Refactor", lambda w: self._agent_task("Refactor this code to be cleaner")),
+            ("Ask Agent to Optimize", lambda w: self._agent_task("Optimize this code for performance")),
+            ("Ask Agent to Find Bugs", lambda w: self._agent_task("Find bugs in this code")),
+            ("Ask Agent to Add Tests", lambda w: self._agent_task("Add unit tests for this code")),
+            ("Ask Agent to Document", lambda w: self._agent_task("Document this code")),
+            None,
+            ("Generate Project", self._generate_project),
+        ]
+        for item in agent_items:
+            if item is None: agent_menu.append(Gtk.SeparatorMenuItem())
+            else:
+                label, cb = item
+                mi = Gtk.MenuItem(label=label)
+                mi.connect("activate", cb)
+                agent_menu.append(mi)
+        agent_item = Gtk.MenuItem(label="Agent")
+        agent_item.set_submenu(agent_menu)
+        menubar.append(agent_item)
+        
+        # View
+        view_menu = Gtk.Menu()
+        view_items = [
+            ("Toggle File Browser", lambda w: self._toggle_pane(0)),
+            ("Toggle Agent Panel", lambda w: self._toggle_pane(1)),
+        ]
+        for label, cb in view_items:
+            mi = Gtk.MenuItem(label=label); mi.connect("activate", cb); view_menu.append(mi)
+        view_item = Gtk.MenuItem(label="View")
+        view_item.set_submenu(view_menu)
+        menubar.append(view_item)
+    
+    def _build_file_browser(self):
+        scrolled = Gtk.ScrolledWindow()
+        scrolled.set_policy(Gtk.PolicyType.NEVER, Gtk.PolicyType.AUTOMATIC)
+        scrolled.set_min_content_width(220)
+        scrolled.set_name("sidebar")
+        
+        box = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=2)
+        box.set_margin_start(4); box.set_margin_end(4); box.set_margin_top(4)
+        
+        # Header
+        hdr = Gtk.Label()
+        hdr.set_markup("<span color='#9BBD5C' size='small'><b>📁 Explorer</b></span>")
+        hdr.set_xalign(0); hdr.set_margin_bottom(4)
+        box.pack_start(hdr, False, False, 0)
+        
+        self.file_store = Gtk.TreeStore(str, str, bool)  # name, path, is_dir
+        self.file_tree = Gtk.TreeView(model=self.file_store)
+        self.file_tree.set_headers_visible(False)
+        self.file_tree.set_name("sidebar")
+        
+        renderer = Gtk.CellRendererText()
+        renderer.set_property("font", "monospace 9")
+        col = Gtk.TreeViewColumn("File", renderer, text=0)
+        self.file_tree.append_column(col)
+        self.file_tree.connect("row-activated", self._on_file_activated)
+        
+        scrolled.add(self.file_tree)
+        box.pack_start(scrolled, True, True, 0)
+        
+        self.hpaned.pack1(box, resize=False, shrink=True)
+    
+    def _build_editor(self):
+        scrolled = Gtk.ScrolledWindow()
+        scrolled.set_policy(Gtk.PolicyType.AUTOMATIC, Gtk.PolicyType.AUTOMATIC)
+        scrolled.set_name("editor-bg")
+        
+        # GtkSourceView buffer
+        self.buffer = GtkSource.Buffer()
+        self.buffer.connect("changed", self._on_buffer_changed)
+        
+        self.view = GtkSource.View.new_with_buffer(self.buffer)
+        self.view.set_show_line_numbers(True)
+        self.view.set_highlight_current_line(True)
+        self.view.set_auto_indent(True)
+        self.view.set_insert_spaces_instead_of_tabs(True)
+        self.view.set_tab_width(4)
+        self.view.set_monospace(True)
+        self.view.set_name("editor-bg")
+        
+        # Style
+        style_manager = GtkSource.StyleSchemeManager.get_default()
+        scheme = style_manager.get_scheme("solarized-dark")
+        if scheme: self.buffer.set_style_scheme(scheme)
+        
+        # Language manager
+        self.lang_manager = GtkSource.LanguageManager.get_default()
+        
+        scrolled.add(self.view)
+        self.hpaned.add(scrolled)  # center pane
+    
+    def _build_agent_panel(self):
+        scrolled = Gtk.ScrolledWindow()
+        scrolled.set_policy(Gtk.PolicyType.NEVER, Gtk.PolicyType.AUTOMATIC)
+        scrolled.set_min_content_width(300)
+        scrolled.set_name("agent-panel")
+        
+        box = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=4)
+        # Fix: use set_margin_start as function calls
+        box.set_margin_start(6); box.set_margin_end(6); box.set_margin_top(6)
+        
+        # Header
+        hdr = Gtk.Label()
+        hdr.set_markup("<span color='#9BBD5C' size='small'><b>🤖 Hermes Agent</b></span>")
+        hdr.set_xalign(0); box.pack_start(hdr, False, False, 0)
+        
+        # Model indicator
+        self.model_lbl = Gtk.Label()
+        self.model_lbl.set_name("label"); self.model_lbl.set_xalign(0)
+        box.pack_start(self.model_lbl, False, False, 0)
+        
+        # Chat area
+        chat_scroll = Gtk.ScrolledWindow()
+        chat_scroll.set_policy(Gtk.PolicyType.NEVER, Gtk.PolicyType.AUTOMATIC)
+        self.chat_box = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=4)
+        chat_scroll.add(self.chat_box)
+        box.pack_start(chat_scroll, True, True, 0)
+        
+        # Input area
+        input_box = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=4)
+        self.agent_entry = Gtk.Entry()
+        self.agent_entry.set_placeholder_text("Ask Hermes to write, refactor, explain code...")
+        self.agent_entry.set_name("input-bg")
+        self.agent_entry.connect("activate", self._agent_submit)
+        input_box.pack_start(self.agent_entry, True, True, 0)
+        
+        send_btn = Gtk.Button(label="→")
+        send_btn.set_name("btn-accent")
+        send_btn.connect("clicked", self._agent_submit)
+        input_box.pack_start(send_btn, False, False, 0)
+        
+        box.pack_start(input_box, False, False, 0)
+        
+        scrolled.add(box)
+        self.hpaned.pack2(scrolled, resize=False, shrink=True)
+        
+        self._update_model()
+    
+    def _build_status(self, parent):
+        self.statusbar = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=8)
+        self.statusbar.set_name("sidebar")
+        self.statusbar.set_margin_start(6); self.statusbar.set_margin_end(6)
+        self.statusbar.set_margin_top(2); self.statusbar.set_margin_bottom(2)
+        
+        self.cursor_lbl = Gtk.Label(label="Ln 1, Col 1")
+        self.cursor_lbl.set_name("label")
+        self.statusbar.pack_start(self.cursor_lbl, False, False, 0)
+        
+        sep = Gtk.Label(label="|"); sep.set_name("label")
+        self.statusbar.pack_start(sep, False, False, 0)
+        
+        self.lang_lbl = Gtk.Label(label="Plain Text")
+        self.lang_lbl.set_name("label")
+        self.statusbar.pack_start(self.lang_lbl, False, False, 0)
+        
+        sep2 = Gtk.Label(label="|"); sep2.set_name("label")
+        self.statusbar.pack_start(sep2, False, False, 0)
+        
+        self.agent_status = Gtk.Label(label="🟢 Hermes Ready")
+        self.agent_status.set_name("label")
+        self.statusbar.pack_start(self.agent_status, False, False, 0)
+        
+        hbox_end = Gtk.Box()
+        self.statusbar.pack_end(hbox_end, True, True, 0)
+        
+        proj_lbl = Gtk.Label(label=str(self.project_root.name))
+        proj_lbl.set_name("label")
+        self.statusbar.pack_end(proj_lbl, False, False, 0)
+        
+        parent.pack_start(self.statusbar, False, False, 0)
+    
+    # ═══ Core Functions ═══════════════════════════════════════════
+    
+    def _load_project(self):
+        """Load the Synthex project file tree."""
+        self.file_store.clear()
+        if not self.project_root.exists():
+            return
+        self._populate_tree(self.project_root, None)
+        self.file_tree.expand_all()
+    
+    def _populate_tree(self, path, parent_iter):
+        try:
+            entries = sorted(path.iterdir(), key=lambda x: (not x.is_dir(), x.name.lower()))
+            for entry in entries:
+                if entry.name.startswith(".") or entry.name.startswith("__pycache__"):
+                    continue
+                is_dir = entry.is_dir()
+                display = "📁 " + entry.name if is_dir else "📄 " + entry.name
+                child = self.file_store.append(parent_iter, [display, str(entry), is_dir])
+                if is_dir and entry.name not in (".git", "node_modules", "__pycache__"):
+                    self._populate_tree(entry, child)
+        except PermissionError:
+            pass
+    
+    def _on_file_activated(self, tree, path, col):
+        model = tree.get_model()
+        iter_ = model.get_iter(path)
+        file_path = model.get_value(iter_, 1)
+        is_dir = model.get_value(iter_, 2)
+        if is_dir:
+            if tree.is_row_expanded(path):
+                tree.collapse_row(path)
+            else:
+                tree.expand_row(path, False)
+        else:
+            self._open_file_path(file_path)
+    
+    def _open_file(self, widget=None):
+        dialog = Gtk.FileChooserDialog("Open File", self, Gtk.FileChooserAction.OPEN,
+                                       (Gtk.STOCK_CANCEL, Gtk.ResponseType.CANCEL,
+                                        Gtk.STOCK_OPEN, Gtk.ResponseType.OK))
+        if dialog.run() == Gtk.ResponseType.OK:
+            self._open_file_path(dialog.get_filename())
+        dialog.destroy()
+    
+    def _open_folder(self, widget=None):
+        dialog = Gtk.FileChooserDialog("Open Folder", self, Gtk.FileChooserAction.SELECT_FOLDER,
+                                       (Gtk.STOCK_CANCEL, Gtk.ResponseType.CANCEL,
+                                        Gtk.STOCK_OPEN, Gtk.ResponseType.OK))
+        if dialog.run() == Gtk.ResponseType.OK:
+            self.project_root = Path(dialog.get_filename())
+            self._load_project()
+        dialog.destroy()
+    
+    def _open_file_path(self, path):
+        try:
+            content = open(path).read()
+            self.buffer.set_text(content)
+            self.current_file = path
+            self._detect_language(path)
+            self.set_title(f"Hermes IDE — {os.path.basename(path)}")
+        except Exception as e:
+            self._agent_msg(f"❌ Cannot open {path}: {e}")
+    
+    def _detect_language(self, path):
+        ext = os.path.splitext(path)[1]
+        lang = self.lang_manager.guess_language(path, None)
+        if lang:
+            self.buffer.set_language(lang)
+            self.lang_lbl.set_text(lang.get_name())
+        else:
+            self.lang_lbl.set_text("Plain Text")
+    
+    def _save_file(self, widget=None):
+        if self.current_file:
+            start = self.buffer.get_start_iter()
+            end = self.buffer.get_end_iter()
+            text = self.buffer.get_text(start, end, True)
+            with open(self.current_file, "w") as f: f.write(text)
+            self._agent_msg(f"✅ Saved {os.path.basename(self.current_file)}")
+        else:
+            self._save_as()
+    
+    def _save_as(self, widget=None):
+        dialog = Gtk.FileChooserDialog("Save As", self, Gtk.FileChooserAction.SAVE,
+                                       (Gtk.STOCK_CANCEL, Gtk.ResponseType.CANCEL,
+                                        Gtk.STOCK_SAVE, Gtk.ResponseType.OK))
+        if dialog.run() == Gtk.ResponseType.OK:
+            path = dialog.get_filename()
+            start = self.buffer.get_start_iter()
+            end = self.buffer.get_end_iter()
+            text = self.buffer.get_text(start, end, True)
+            with open(path, "w") as f: f.write(text)
+            self.current_file = path
+            self.set_title(f"Hermes IDE — {os.path.basename(path)}")
+        dialog.destroy()
+    
+    def _on_buffer_changed(self, buf):
+        pass  # could mark dirty
+    
+    def _get_code(self):
+        start = self.buffer.get_start_iter()
+        end = self.buffer.get_end_iter()
+        return self.buffer.get_text(start, end, True)
+    
+    # ═══ Agent Integration ════════════════════════════════════════
+    
+    def _agent_msg(self, text, is_user=False):
+        lbl = Gtk.Label()
+        escaped = html.escape(str(text))
+        if is_user:
+            lbl.set_markup(f"<b>You:</b> {escaped}")
+            lbl.set_name("msg-user")
+        else:
+            lbl.set_markup(escaped)
+            lbl.set_name("msg-agent")
+        lbl.set_line_wrap(True); lbl.set_xalign(0)
+        self.chat_box.pack_start(lbl, False, False, 0)
+        self.chat_box.show_all()
+    
+    def _agent_submit(self, widget=None):
+        text = self.agent_entry.get_text().strip()
+        if not text: return
+        self.agent_entry.set_text("")
+        self._agent_msg(text, is_user=True)
+        self._agent_msg("🤔 Thinking...")
+        self.agent_status.set_text("🟡 Thinking")
+        threading.Thread(target=self._do_agent, args=(text,), daemon=True).start()
+    
+    def _do_agent(self, text):
+        code = self._get_code()
+        path = self.current_file or "untitled"
+        # Try CodeAction first if there's code in the editor
+        if code.strip():
+            result = self.client.code_action(text, code[:3000], path)
+        else:
+            result = self.client.chat(text)
+        GLib.idle_add(self._show_agent_result, result)
+    
+    def _show_agent_result(self, result):
+        children = self.chat_box.get_children()
+        if children and "Thinking" in (children[-1].get_text() or ""):
+            self.chat_box.remove(children[-1])
+        response = result.get("response", result.get("error", "No response"))
+        self._agent_msg(response[:2000])
+        self.agent_status.set_text("🟢 Ready")
+        
+        # Extract code blocks and offer to insert
+        import re
+        code_blocks = re.findall(r'```(\w*)\n(.*?)```', response, re.DOTALL)
+        for lang, code in code_blocks:
+            if len(code) > 20:
+                btn = Gtk.Button(label=f"📋 Insert {lang or 'code'} block into editor")
+                btn.set_name("btn-accent")
+                btn.connect("clicked", lambda w, c=code: self._insert_code(c))
+                self.chat_box.pack_start(btn, False, False, 0)
+                self.chat_box.show_all()
+    
+    def _insert_code(self, code):
+        self.buffer.set_text(code.strip())
+        self._agent_msg(f"✅ Inserted {len(code)} chars into editor")
+    
+    def _agent_task(self, task):
+        self.agent_entry.set_text(task)
+        self._agent_submit()
+    
+    def _generate_project(self, widget=None):
+        """Generate a new project using Hermes."""
+        dialog = Gtk.Dialog("Generate Project", self, 0,
+                           (Gtk.STOCK_CANCEL, Gtk.ResponseType.CANCEL,
+                            Gtk.STOCK_OK, Gtk.ResponseType.OK))
+        box = dialog.get_content_area()
+        box.set_spacing(6); box.set_margin_start(10); box.set_margin_end(10); box.set_margin_top(10)
+        
+        lbl = Gtk.Label(label="What project do you want to create?")
+        box.pack_start(lbl, False, False, 0)
+        
+        entry = Gtk.Entry()
+        entry.set_placeholder_text("e.g., Python CLI tool, React web app, Rust game...")
+        box.pack_start(entry, False, False, 0)
+        
+        dialog.show_all()
+        if dialog.run() == Gtk.ResponseType.OK and entry.get_text().strip():
+            task = entry.get_text().strip()
+            dialog.destroy()
+            self._agent_msg(f"💻 Generating: {task}", is_user=True)
+            self._agent_msg("🤔 Creating project...")
+            threading.Thread(target=self._do_generate, args=(task,), daemon=True).start()
+        else:
+            dialog.destroy()
+    
+    def _do_generate(self, task):
+        code = self._get_code()
+        result = self.client.code_action(f"Generate a complete project: {task}", "", "new-project")
+        GLib.idle_add(self._show_agent_result, result)
+    
+    def _update_model(self):
+        if self.client.available:
+            try:
+                s = json.loads(self.client.iface.GetStatus())
+                self.agent_status.set_text(f"🟢 {s.get('model', 'Hermes')}")
+            except: pass
+    
+    def _on_key(self, widget, event):
+        if event.keyval == 65293 and event.state & Gdk.ModifierType.CONTROL_MASK:
+            self._agent_submit()
+            return True
+        return False
+    
+    def _toggle_pane(self, pane):
+        """Toggle sidebar/agent panel visibility."""
+        pass  # simplified
+
+
+def main():
+    app = Gtk.Application(application_id="org.solus.hermes.ide")
+    app.connect("activate", lambda a: HermesIDE(a).show_all())
+    signal.signal(signal.SIGINT, signal.SIG_DFL)
+    app.run(None)
+
+if __name__ == "__main__":
+    main()

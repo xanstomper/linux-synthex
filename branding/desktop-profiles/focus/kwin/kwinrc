@@ -1,0 +1,16 @@
+# Solus Focus — KWin Configuration
+
+[Compositing]
+Backend=xrender
+Enabled=true
+AnimationSpeed=1
+
+[Windows]
+FocusPolicy=ClickFocus
+
+[Effects]
+Blur=false
+
+[Plugins]
+blurEnabled=false
+slidingpopupsEnabled=true

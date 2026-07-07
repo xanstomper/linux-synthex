@@ -1,8 +1,8 @@
-# Solus Installation Guide
+# Synthex Installation Guide
 
-> **Audience:** New users installing Solus Linux for the first time  
+> **Audience:** New users installing SynthOS for the first time  
 > **Last updated:** July 2026  
-> **Solus version:** 4.6 "Fortitude"
+> **Synthex version:** 4.6 "Fortitude"
 
 ---
 
@@ -55,7 +55,7 @@
 |-------------|--------|-------|
 | **x86_64 (amd64)** | ✅ Primary | Full support, all editions |
 | **aarch64** | ✅ Supported | ARM 64-bit (Raspberry Pi 4/5, Apple M1+) |
-| **i686** | ❌ Discontinued | Dropped after Solus 4.4 |
+| **i686** | ❌ Discontinued | Dropped after Synthex 4.4 |
 
 ### Supported Installation Media
 - USB flash drive (8 GB+ recommended)
@@ -69,36 +69,36 @@
 
 ### Official Download
 
-Download the latest Solus ISO from the official website:
+Download the latest Synthex ISO from the official website:
 
 ```
-https://getsol.us/download/
+https://getsynthex.org/download/
 ```
 
 ### ISO Variants
 
 | Edition | Desktop | Best For |
 |---------|---------|----------|
-| **Solus Plasma** | KDE Plasma 6 | General desktop, gaming, customization |
-| **Solus GNOME** | GNOME 46+ | Modern workflow, simplicity |
-| **Solus Budgie** | Budgie | Traditional desktop, lightweight |
-| **Solus MATE** | MATE | Older hardware, familiar layout |
-| **Solus Minimal** | CLI only | Servers, containers, custom setups |
+| **Synthex Plasma** | KDE Plasma 6 | General desktop, gaming, customization |
+| **Synthex GNOME** | GNOME 46+ | Modern workflow, simplicity |
+| **Synthex Budgie** | Budgie | Traditional desktop, lightweight |
+| **Synthex MATE** | MATE | Older hardware, familiar layout |
+| **Synthex Minimal** | CLI only | Servers, containers, custom setups |
 
-> **Recommendation:** First-time users should download **Solus Plasma** for the most feature-rich experience.
+> **Recommendation:** First-time users should download **Synthex Plasma** for the most feature-rich experience.
 
 ### Direct Download Links
 ```
-https://downloads.getsol.us/iso/Solus-4.6-Plasma.iso
-https://downloads.getsol.us/iso/Solus-4.6-GNOME.iso
-https://downloads.getsol.us/iso/Solus-4.6-Budgie.iso
-https://downloads.getsol.us/iso/Solus-4.6-MATE.iso
+https://downloads.getsynthex.org/iso/Synthex-4.6-Plasma.iso
+https://downloads.getsynthex.org/iso/Synthex-4.6-GNOME.iso
+https://downloads.getsynthex.org/iso/Synthex-4.6-Budgie.iso
+https://downloads.getsynthex.org/iso/Synthex-4.6-MATE.iso
 ```
 
 ### BitTorrent
 For faster download and to reduce server load, use the torrent files:
 ```
-https://downloads.getsol.us/iso/Solus-4.6-Plasma.iso.torrent
+https://downloads.getsynthex.org/iso/Synthex-4.6-Plasma.iso.torrent
 ```
 
 ---
@@ -111,16 +111,16 @@ Always verify the ISO integrity after downloading:
 
 ```bash
 # Download the checksum file
-wget https://downloads.getsol.us/iso/Solus-4.6-Plasma.iso.sha256
+wget https://downloads.getsynthex.org/iso/Synthex-4.6-Plasma.iso.sha256
 
 # Verify the checksum
-sha256sum -c Solus-4.6-Plasma.iso.sha256
+sha256sum -c Synthex-4.6-Plasma.iso.sha256
 
 # Expected output:
-# Solus-4.6-Plasma.iso: OK
+# Synthex-4.6-Plasma.iso: OK
 
 # Manual check
-sha256sum Solus-4.6-Plasma.iso
+sha256sum Synthex-4.6-Plasma.iso
 # Compare output with the checksum file
 ```
 
@@ -130,20 +130,20 @@ For cryptographic verification, use GPG:
 
 ```bash
 # Download signature file
-wget https://downloads.getsol.us/iso/Solus-4.6-Plasma.iso.sig
+wget https://downloads.getsynthex.org/iso/Synthex-4.6-Plasma.iso.sig
 
-# Import the Solus signing key
+# Import the Synthex signing key
 gpg --keyserver keyserver.ubuntu.com --recv-keys 8C2C215F9E3D4F8E
 
 # Or download the key directly
-wget https://getsol.us/solus-keyring.gpg
-gpg --import solus-keyring.gpg
+wget https://getsynthex.org/synthex-keyring.gpg
+gpg --import synthex-keyring.gpg
 
 # Verify the signature
-gpg --verify Solus-4.6-Plasma.iso.sig Solus-4.6-Plasma.iso
+gpg --verify Synthex-4.6-Plasma.iso.sig Synthex-4.6-Plasma.iso
 
 # Expected output:
-# gpg: Good signature from "Solus Project <security@getsol.us>"
+# gpg: Good signature from "Synthex Project <security@getsynthex.org>"
 # Primary key fingerprint: 4B1E B3B0 1E3E 4C6E A815  8C2C 215F 9E3D 4F8E
 ```
 
@@ -151,10 +151,10 @@ gpg --verify Solus-4.6-Plasma.iso.sig Solus-4.6-Plasma.iso
 
 ```powershell
 # SHA256 in PowerShell
-Get-FileHash .\Solus-4.6-Plasma.iso -Algorithm SHA256
+Get-FileHash .\Synthex-4.6-Plasma.iso -Algorithm SHA256
 
 # GPG verification (using gpg4win)
-gpg --verify Solus-4.6-Plasma.iso.sig Solus-4.6-Plasma.iso
+gpg --verify Synthex-4.6-Plasma.iso.sig Synthex-4.6-Plasma.iso
 ```
 
 ---
@@ -169,7 +169,7 @@ lsblk
 # → Find your USB device, e.g., /dev/sdb
 
 # Write the ISO to USB
-sudo dd if=Solus-4.6-Plasma.iso of=/dev/sdb bs=4M status=progress oflag=sync
+sudo dd if=Synthex-4.6-Plasma.iso of=/dev/sdb bs=4M status=progress oflag=sync
 
 # The command uses:
 # - if=:  Input file (the ISO)
@@ -186,7 +186,7 @@ sudo dd if=Solus-4.6-Plasma.iso of=/dev/sdb bs=4M status=progress oflag=sync
 3. Launch Rufus (no installation needed)
 4. Configure:
    - **Device:** Select your USB drive
-   - **Boot selection:** Select the Solus ISO file
+   - **Boot selection:** Select the Synthex ISO file
    - **Partition scheme:** GPT (recommended for UEFI)
    - **Target system:** UEFI (non-CSM)
    - **File system:** FAT32 (default)
@@ -199,7 +199,7 @@ sudo dd if=Solus-4.6-Plasma.iso of=/dev/sdb bs=4M status=progress oflag=sync
 
 1. Download [Balena Etcher](https://www.balena.io/etcher/)
 2. Launch Etcher
-3. Click **Flash from file** → Select `Solus-4.6-Plasma.iso`
+3. Click **Flash from file** → Select `Synthex-4.6-Plasma.iso`
 4. Click **Select target** → Choose your USB drive
 5. Click **Flash!**
 6. Enter password if prompted
@@ -219,7 +219,7 @@ cd ventoy-1.0.97
 sudo bash Ventoy2Disk.sh -i /dev/sdb
 
 # Simply copy ISO to USB
-cp Solus-4.6-Plasma.iso /media/USB/
+cp Synthex-4.6-Plasma.iso /media/USB/
 ```
 
 **Windows:**
@@ -239,7 +239,7 @@ diskutil list
 diskutil unmountDisk /dev/disk2
 
 # Write ISO
-sudo dd if=Solus-4.6-Plasma.iso of=/dev/rdisk2 bs=4M status=progress
+sudo dd if=Synthex-4.6-Plasma.iso of=/dev/rdisk2 bs=4M status=progress
 
 # Eject when done
 sudo diskutil eject /dev/disk2
@@ -249,7 +249,7 @@ sudo diskutil eject /dev/disk2
 
 ## 5. Step-by-Step Installation (Calamares)
 
-Solus uses the **Calamares** system installer, a modern, user-friendly graphical installer.
+Synthex uses the **Calamares** system installer, a modern, user-friendly graphical installer.
 
 ### 5.1 Booting from the Install Media
 
@@ -262,17 +262,17 @@ Solus uses the **Calamares** system installer, a modern, user-friendly graphical
    - **Apple Mac:** Hold Option/Alt
    - **Custom builds:** F11 or Del
 3. Select your USB drive from the boot menu
-4. You'll see the Solus GRUB boot menu:
+4. You'll see the Synthex GRUB boot menu:
 
 ```
 ┌─────────────────────────────────────────────────────┐
 │                                                     │
-│              Solus Linux 4.6 "Fortitude"            │
+│              SynthOS 4.6 "Fortitude"            │
 │                                                     │
 │  ┌─────────────────────────────────────────────────┐│
-│  │ > Start Solus                                   ││
-│  │   Start Solus (Safe Graphics)                   ││
-│  │   Test this media & start Solus                 ││
+│  │ > Start Synthex                                   ││
+│  │   Start Synthex (Safe Graphics)                   ││
+│  │   Test this media & start Synthex                 ││
 │  │   Boot from local drive                         ││
 │  │                                                 ││
 │  │   ─────────────────────────────────────────      ││
@@ -285,27 +285,27 @@ Solus uses the **Calamares** system installer, a modern, user-friendly graphical
 └─────────────────────────────────────────────────────┘
 ```
 
-5. Select **Start Solus** (or **Safe Graphics** if you have NVIDIA hardware)
+5. Select **Start Synthex** (or **Safe Graphics** if you have NVIDIA hardware)
 
 ### 5.2 Live Desktop
 
-After booting, you'll see the Solus live desktop:
+After booting, you'll see the Synthex live desktop:
 
 ```
 ┌────────────────────────────────────────────────────────────────┐
-│  ☰  Solus Installer  │  Terminal  │  Firefox  │  12:45  🔋🔊 │
+│  ☰  Synthex Installer  │  Terminal  │  Firefox  │  12:45  🔋🔊 │
 ├────────────────────────────────────────────────────────────────┤
 │                                                                │
 │          ┌──────────────────────────────────────┐              │
 │          │                                      │              │
-│          │      Welcome to Solus Linux!         │              │
+│          │      Welcome to SynthOS!         │              │
 │          │                                      │              │
 │          │   You are running the live system.   │              │
-│          │   To install Solus permanently,      │              │
-│          │   click the "Install Solus" icon     │              │
+│          │   To install Synthex permanently,      │              │
+│          │   click the "Install Synthex" icon     │              │
 │          │   on the desktop.                    │              │
 │          │                                      │              │
-│          │   [ Install Solus ]                  │              │
+│          │   [ Install Synthex ]                  │              │
 │          │                                      │              │
 │          └──────────────────────────────────────┘              │
 │                                                                │
@@ -315,19 +315,19 @@ After booting, you'll see the Solus live desktop:
 └────────────────────────────────────────────────────────────────┘
 ```
 
-Double-click **Install Solus** to begin.
+Double-click **Install Synthex** to begin.
 
 ### 5.3 Welcome Screen
 
 ```
 ┌────────────────────────────────────────────────────────────────┐
 │  ┌──────────────────────────────────────────────────────────┐  │
-│  │                     Solus Installer                       │  │
+│  │                     Synthex Installer                       │  │
 │  │                                                          │  │
-│  │   Welcome to the Solus installation wizard!              │  │
+│  │   Welcome to the Synthex installation wizard!              │  │
 │  │                                                          │  │
 │  │   This program will guide you through setting up         │  │
-│  │   Solus Linux on your computer.                          │  │
+│  │   SynthOS on your computer.                          │  │
 │  │                                                          │  │
 │  │   [✓] Install third-party software for graphics and      │  │
 │  │       Wi-Fi hardware                                     │  │
@@ -444,7 +444,7 @@ Double-click **Install Solus** to begin.
 │  │   [ jsmith                              ]                │  │
 │  │                                                          │  │
 │  │   What is the name of this computer?                     │  │
-│  │   [ solus-pc                            ]                │  │
+│  │   [ synthex-pc                            ]                │  │
 │  │                                                          │  │
 │  │   Choose a password (strongly recommended):               │  │
 │  │   [ ********                            ]                 │  │
@@ -487,7 +487,7 @@ Double-click **Install Solus** to begin.
 │  │   │  /dev/vda1      → swap (swap)              8G    │ │  │
 │  │   │                                                    │ │  │
 │  │   │  User:         John Smith (jsmith)                 │ │  │
-│  │   │  Hostname:     solus-pc                            │ │  │
+│  │   │  Hostname:     synthex-pc                            │ │  │
 │  │   └────────────────────────────────────────────────────┘ │  │
 │  │                                                          │  │
 │  │   ⚠ Once you click Install, the partition layout        │  │
@@ -506,7 +506,7 @@ Double-click **Install Solus** to begin.
 ```
 ┌────────────────────────────────────────────────────────────────┐
 │  ┌──────────────────────────────────────────────────────────┐  │
-│  │                   Installing Solus                       │  │
+│  │                   Installing Synthex                       │  │
 │  │                                                          │  │
 │  │   ┌──────────────────────────────────────────────────┐  │  │
 │  │   │  ███████████████████████████████████░░░░░░░░░░░  │  │  │
@@ -558,7 +558,7 @@ Double-click **Install Solus** to begin.
 
 - Click **Restart Now**
 - Remove the USB drive when prompted
-- The system will boot into your new Solus installation
+- The system will boot into your new Synthex installation
 
 ---
 
@@ -841,16 +841,16 @@ sudo systemd-cryptenroll --recovery-key /dev/nvme0n1p3 --show
 
 ### 9.2 Installation
 
-1. Boot from Solus USB
+1. Boot from Synthex USB
 2. In Calamares partitioning:
    - Keep the Windows partitions intact
-   - Use the **unallocated space** for Solus
+   - Use the **unallocated space** for Synthex
    - The existing EFI partition can be shared
 3. Continue with normal installation
 
 ### 9.3 GRUB Configuration for Windows Dual-Boot
 
-Solus GRUB should auto-detect Windows. If not:
+Synthex GRUB should auto-detect Windows. If not:
 
 ```bash
 # After installation, run:
@@ -916,11 +916,11 @@ id jsmith
 
 ### 10.3 GRUB Management
 
-Solus will install its own GRUB as the primary bootloader. Other distros will be detected automatically.
+Synthex will install its own GRUB as the primary bootloader. Other distros will be detected automatically.
 
 ```bash
 # If another distro's GRUB takes over:
-# 1. Boot into Solus
+# 1. Boot into Synthex
 # 2. Regenerate GRUB config
 sudo grub2-mkconfig -o /boot/grub2/grub.cfg
 
@@ -938,8 +938,8 @@ sudo mount /dev/nvme0n1p3 /mnt
 
 # You'll see subvolumes from both distros
 ls /mnt
-# @solus-root
-# @solus-home
+# @synthex-root
+# @synthex-home
 # @ubuntu-root
 # @ubuntu-home
 # @snapshots
@@ -949,9 +949,9 @@ ls /mnt
 
 ## 11. Secure Boot Setup
 
-### 11.1 Understanding Secure Boot on Solus
+### 11.1 Understanding Secure Boot on Synthex
 
-Solus supports Secure Boot through:
+Synthex supports Secure Boot through:
 1. **Shim** - First-stage bootloader signed by Microsoft
 2. **GRUB** - Signed with Machine Owner Key (MOK)
 3. **Kernel** - Signed with MOK
@@ -968,7 +968,7 @@ If Secure Boot is enabled during installation:
 │  ┌──────────────────────────────────────────────────────────┐  │
 │  │              Secure Boot / MOK Enrollment                │  │
 │  │                                                          │  │
-│  │   Secure Boot is enabled. Solus uses Shim + MOK          │  │
+│  │   Secure Boot is enabled. Synthex uses Shim + MOK          │  │
 │  │   for compatibility.                                     │  │
 │  │                                                          │  │
 │  │   A Machine Owner Key (MOK) will be generated.          │  │
@@ -1035,7 +1035,7 @@ sudo mokutil --reset
 
 ```bash
 # Sign a custom kernel for Secure Boot
-sudo pesign -n /etc/pki/pesign -c "Solus Kernel Signing Key" \
+sudo pesign -n /etc/pki/pesign -c "Synthex Kernel Signing Key" \
   -i /boot/vmlinuz-linux -o /boot/vmlinuz-linux.signed -s
 
 # Or using sbsign
@@ -1054,10 +1054,10 @@ After installation, your system boots to GRUB:
 ```
 ┌─────────────────────────────────────────────────────┐
 │                                                     │
-│              Solus Linux 4.6 "Fortitude"            │
+│              SynthOS 4.6 "Fortitude"            │
 │                                                     │
-│  > Solus Linux (default)                            │
-│    Advanced options for Solus Linux                 │
+│  > SynthOS (default)                            │
+│    Advanced options for SynthOS                 │
 │    Windows Boot Manager (if dual-boot)              │
 │    System settings                                  │
 │    Firmware setup                                   │
@@ -1077,7 +1077,7 @@ Press Enter or wait for auto-boot.
 ```
 ┌────────────────────────────────────────────────────────────────┐
 │                                                                 │
-│                        Solus Linux                             │
+│                        SynthOS                             │
 │                                                                 │
 │   ████████████████████████████████████████████████░░░░  85%    │
 │                                                                 │
@@ -1107,7 +1107,7 @@ Press Enter or wait for auto-boot.
 │                     │  ○ Plasma (X11)                           │
 │                     └─────────────────┘                         │
 │                                                                 │
-│   Solus Linux 4.6 "Fortitude"                                   │
+│   SynthOS 4.6 "Fortitude"                                   │
 │                                                                 │
 └────────────────────────────────────────────────────────────────┘
 ```
@@ -1119,15 +1119,15 @@ Press Enter or wait for auto-boot.
 
 ### 12.4 Welcome Wizard
 
-On first login, the Solus Welcome Wizard appears:
+On first login, the Synthex Welcome Wizard appears:
 
 ```
 ┌────────────────────────────────────────────────────────────────┐
 │  ┌──────────────────────────────────────────────────────────┐  │
-│  │               Welcome to Solus Linux!                    │  │
+│  │               Welcome to SynthOS!                    │  │
 │  │                                                          │  │
 │  │   ┌──────────────────────────────────────────────────┐  │  │
-│  │   │     🎉 Thank you for choosing Solus!              │  │  │
+│  │   │     🎉 Thank you for choosing Synthex!              │  │  │
 │  │   │                                                  │  │  │
 │  │   │   Let's get your system set up.                   │  │  │
 │  │   │                                                  │  │  │
@@ -1236,8 +1236,8 @@ sudo systemctl enable --now sshd
 
 ```bash
 # Enable additional repos
-sudo dnf5 config-manager --set-enabled solus-nonfree
-sudo dnf5 config-manager --set-enabled solus-backports
+sudo dnf5 config-manager --set-enabled synthex-nonfree
+sudo dnf5 config-manager --set-enabled synthex-backports
 
 # Add Flathub for Flatpak apps
 flatpak remote-add --if-not-exists flathub \
@@ -1309,7 +1309,7 @@ Solution:
     sudo mount /dev/nvme0n1p4 /boot
     sudo mount /dev/nvme0n1p5 /mnt
     sudo grub2-install --target=x86_64-efi \
-      --efi-directory=/boot/efi --bootloader-id=Solus
+      --efi-directory=/boot/efi --bootloader-id=Synthex
     sudo grub2-mkconfig -o /boot/grub2/grub.cfg
 ```
 
@@ -1339,7 +1339,7 @@ Solution:
 
 #### USB Boot Hangs at GRUB
 ```
-Symptom: USB stick shows GRUB menu but hangs on "Start Solus"
+Symptom: USB stick shows GRUB menu but hangs on "Start Synthex"
 Solution:
   1. Re-write USB with DD mode (not ISO mode)
   2. Try a different USB port (USB 2.0 often more compatible)
@@ -1651,7 +1651,7 @@ sudo dnf5 install sonnet
 
 ```
 ☐ Verify system meets minimum requirements
-☐ Download Solus ISO
+☐ Download Synthex ISO
 ☐ Verify ISO checksum (sha256)
 ☐ Verify ISO GPG signature
 ☐ Create bootable USB

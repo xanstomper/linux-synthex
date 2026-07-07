@@ -1,0 +1,8 @@
+[Plymouth Theme]
+Name=Synthex
+Description=Synthex Linux boot splash
+ModuleName=script
+
+[script]
+ImageDir=/usr/share/plymouth/themes/synthex
+ScriptFile=/usr/share/plymouth/themes/synthex/synthex.script

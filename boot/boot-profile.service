@@ -1,11 +1,11 @@
 [Unit]
-Description=Solus Boot Profile Recorder
-Documentation=https://solus-linux.org/docs/boot
+Description=Synthex Boot Profile Recorder
+Documentation=https://synthex-linux.org/docs/boot
 After=multi-user.target
 
 [Service]
 Type=oneshot
-ExecStart=/usr/bin/python3 /usr/libexec/solus/boot-profile.py
+ExecStart=/usr/bin/python3 /usr/libexec/synthex/boot-profile.py
 RemainAfterExit=no
 SuccessExitStatus=0 1
 StandardOutput=journal

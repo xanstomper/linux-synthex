@@ -1,4 +1,4 @@
-# Solus Linux RPM Spec — tealdeer
+# SynthOS RPM Spec — tealdeer
 # TLDR client written in Rust
 # Origin: Fedora, Arch Linux
 
@@ -42,6 +42,6 @@ install -D -m 0755 target/release/tldr %{buildroot}%{_bindir}/tldr
 %{_bindir}/tldr
 
 %changelog
-* Mon Jul 07 2026 Solus Rust Team <rust@solus-project.org> - %{tealdeer_version}-1
-- Initial Solus package — tealdeer (tldr client)
+* Mon Jul 07 2026 Synthex Rust Team <rust@synthex-project.org> - %{tealdeer_version}-1
+- Initial Synthex package — tealdeer (tldr client)
 - Ported from Fedora packaging

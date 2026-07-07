@@ -1,4 +1,4 @@
-# Solus Linux RPM Spec — git-delta
+# SynthOS RPM Spec — git-delta
 # Syntax-highlighting pager for git, diff, and grep output (Rust)
 # Origin: Fedora, Arch Linux
 %global delta_version 0.18.2
@@ -49,6 +49,6 @@ install -m 0644 etc/man/delta.1 %{buildroot}%{_mandir}/man1/ 2>/dev/null || true
 %{_mandir}/man1/delta.1*
 
 %changelog
-* Mon Jul 07 2026 Solus Rust Team <rust@solus-project.org> - 0.18.2-1
-- Initial Solus package
+* Mon Jul 07 2026 Synthex Rust Team <rust@synthex-project.org> - 0.18.2-1
+- Initial Synthex package
 - Rust-based git diff pager

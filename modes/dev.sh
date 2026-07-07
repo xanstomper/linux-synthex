@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Solus Developer Mode
+# Synthex Developer Mode
 # Optimizes system for development work
 
 set -euo pipefail
@@ -34,7 +34,7 @@ tuned-adm profile desktop 2>/dev/null || true
 
 # Apply dev layout
 echo "🎨 Applying dev layout..."
-solus-layout set balanced 2>/dev/null || true
+synthex-layout set balanced 2>/dev/null || true
 
 # Notify
 notify-send -i terminal "Developer Mode" "Development environment ready" 2>/dev/null || echo "✅ Developer Mode active"

@@ -1,7 +1,7 @@
 [source.crates-io]
 replace-with = "rsproxy"
 
-# Use Fedora/RHEL proxy for faster Rust crate downloads in Solus build infrastructure
+# Use Fedora/RHEL proxy for faster Rust crate downloads in Synthex build infrastructure
 [source.rsproxy]
 registry = "https://rsproxy.cn/crates.io-index"
 

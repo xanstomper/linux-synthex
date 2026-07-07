@@ -1,4 +1,4 @@
-# Solus Linux RPM Spec — cosmic-settings
+# SynthOS RPM Spec — cosmic-settings
 # COSMIC settings application (Rust/Iced)
 # Origin: Pop!_OS (System76)
 
@@ -48,5 +48,5 @@ install -D -m 0755 target/release/cosmic-settings %{buildroot}%{_bindir}/cosmic-
 %{_bindir}/cosmic-settings
 
 %changelog
-* Mon Jul 07 2026 Solus Rust Team <rust@solus-project.org> - %{cosmicsettings_version}-1
-- Initial Solus package — COSMIC settings
+* Mon Jul 07 2026 Synthex Rust Team <rust@synthex-project.org> - %{cosmicsettings_version}-1
+- Initial Synthex package — COSMIC settings

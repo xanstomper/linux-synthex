@@ -1,0 +1,22 @@
+[Unit]
+Description=Synthex OOBE Wizard (first boot)
+Documentation=https://synthex-linux.org/docs/oobe
+After=graphical-session.target
+ConditionPathExists=!/var/lib/synthex/firstboot-complete
+ConditionVirtualization=!container
+
+[Service]
+Type=simple
+ExecStart=/usr/bin/synthex-oobe
+Restart=no
+TimeoutStartSec=60
+
+# Security hardening — needs display access and user config write
+ProtectSystem=full
+PrivateTmp=yes
+NoNewPrivileges=yes
+SystemCallArchitectures=native
+ProtectKernelTunables=yes
+ProtectControlGroups=yes
+MemoryMax=256M
+CPUQuota=50%

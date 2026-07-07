@@ -1,0 +1,9 @@
+[Desktop Entry]
+Type=Application
+Name=Synthex Wine Manager
+Comment=Manage Wine/Proton versions and prefixes
+Exec=synthex-wine
+Icon=preferences-desktop-wine
+Terminal=true
+Categories=System;
+Keywords=wine;proton;windows;

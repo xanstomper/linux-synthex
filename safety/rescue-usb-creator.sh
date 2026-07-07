@@ -1,19 +1,19 @@
 #!/usr/bin/env bash
 #===============================================================================
-# solus-rescue-usb-creator — build a bootable rescue USB from the running system
-# and restore snapshots from rescue media. Part of the Solus safety layer.
+# synthex-rescue-usb-creator — build a bootable rescue USB from the running system
+# and restore snapshots from rescue media. Part of the Synthex safety layer.
 #
 # Usage:
-#   sudo solus-rescue-usb-creator create  /dev/sdX        # write rescue USB
-#   sudo solus-rescue-usb-creator restore [/dev/sdX]      # list+restore snapshots
-#   sudo solus-rescue-usb-creator list   [/dev/sdX]       # list snapshots on USB
+#   sudo synthex-rescue-usb-creator create  /dev/sdX        # write rescue USB
+#   sudo synthex-rescue-usb-creator restore [/dev/sdX]      # list+restore snapshots
+#   sudo synthex-rescue-usb-creator list   [/dev/sdX]       # list snapshots on USB
 #===============================================================================
 set -euo pipefail
 
-STATE_DIR="/var/lib/solus"
+STATE_DIR="/var/lib/synthex"
 REScue_IMG="${STATE_DIR}/rescue.img"
 KERNEL_DIR="/boot"
-GRUB_REScue_CONF="/etc/grub.d/40_solus_rescue"
+GRUB_REScue_CONF="/etc/grub.d/40_synthex_rescue"
 
 log()  { echo -e "\033[0;32m[rescue-usb]\033[0m $*"; }
 warn() { echo -e "\033[1;33m[rescue-usb]\033[0m $*" >&2; }
@@ -48,33 +48,33 @@ create_rescue_usb() {
     initramfs="$(find_initramfs "$kver")" || die "no initramfs for $kver"
 
     log "writing rescue USB to $dev (kernel $kver)"
-    # Partition: single FAT32 partition labelled SOLUSRESCUE
+    # Partition: single FAT32 partition labelled SYNTHEXRESCUE
     parted -s "$dev" mklabel gpt mkpart primary fat32 1MiB 100% set 1 esp on
     local part="${dev}1"
     [[ -b "${dev}p1" ]] && part="${dev}p1"
-    mkfs.vfat -F 32 -n SOLUSRESCUE "$part" >/dev/null
+    mkfs.vfat -F 32 -n SYNTHEXRESCUE "$part" >/dev/null
 
     local mnt; mnt="$(mktemp -d)"
     mount "$part" "$mnt"
     trap 'umount "$mnt" 2>/dev/null || true; rmdir "$mnt" 2>/dev/null || true' EXIT
 
-    mkdir -p "$mnt/EFI/BOOT" "$mnt/solus"
-    cp "$vmlinuz" "$mnt/solus/vmlinuz"
-    cp "$initramfs" "$mnt/solus/initramfs.img"
+    mkdir -p "$mnt/EFI/BOOT" "$mnt/synthex"
+    cp "$vmlinuz" "$mnt/synthex/vmlinuz"
+    cp "$initramfs" "$mnt/synthex/initramfs.img"
 
     # Minimal systemd-boot config that boots into the recovery initramfs
     cat > "$mnt/EFI/BOOT/loader.conf" <<EOF
-title  Solus Rescue
-linux  /solus/vmlinuz
-initrd /solus/initramfs.img
-options root=LABEL=SOLUSRESCUE ro solus.recovery=1
+title  Synthex Rescue
+linux  /synthex/vmlinuz
+initrd /synthex/initramfs.img
+options root=LABEL=SYNTHEXRESCUE ro synthex.recovery=1
 EOF
     # Copy the recovery script + protected-packages so rescue is self-contained
-    cp /usr/libexec/solus/solus-recovery "$mnt/solus/" 2>/dev/null || true
-    cp /etc/solus/protected-packages.conf "$mnt/solus/" 2>/dev/null || true
+    cp /usr/libexec/synthex/synthex-recovery "$mnt/synthex/" 2>/dev/null || true
+    cp /etc/synthex/protected-packages.conf "$mnt/synthex/" 2>/dev/null || true
 
     sync
-    log "rescue USB created on $dev — boot from it and run solus-recovery"
+    log "rescue USB created on $dev — boot from it and run synthex-recovery"
 }
 
 # ── list ────────────────────────────────────────────────────────────────────
@@ -91,9 +91,9 @@ list_snapshots_usb() {
         snapper -c root list 2>/dev/null || true
     fi
     # Snapshots copied onto USB (if any)
-    if [[ -d "$mnt/solus/snapshots" ]]; then
+    if [[ -d "$mnt/synthex/snapshots" ]]; then
         log "snapshots on USB:"
-        ls -1 "$mnt/solus/snapshots" 2>/dev/null || true
+        ls -1 "$mnt/synthex/snapshots" 2>/dev/null || true
     fi
 }
 
@@ -122,7 +122,7 @@ main() {
         restore) shift; restore_snapshot_usb "${1:-}" ;;
         -h|--help|help)
             cat <<EOF
-solus-rescue-usb-creator — Solus rescue media tool
+synthex-rescue-usb-creator — Synthex rescue media tool
 
   create  /dev/sdX   Write a bootable rescue USB to /dev/sdX
   list    [/dev/sdX] List snapshots (local or on a rescue USB)

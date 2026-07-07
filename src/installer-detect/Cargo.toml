@@ -1,10 +1,10 @@
 [package]
-name = "solus-installer-detect"
+name = "synthex-installer-detect"
 version.workspace = true
 edition.workspace = true
 license.workspace = true
 authors.workspace = true
-description = "Solus Installer Hardware Detector — auto-detects GPU, form factor, disks, and generates Calamares configuration recommendations"
+description = "Synthex Installer Hardware Detector — auto-detects GPU, form factor, disks, and generates Calamares configuration recommendations"
 
 [dependencies]
 serde.workspace = true

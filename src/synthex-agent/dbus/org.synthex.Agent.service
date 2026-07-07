@@ -1,0 +1,4 @@
+[D-BUS Service]
+Name=org.synthex.Agent
+Exec=/usr/bin/synthex-agentd
+SystemdService=synthex-agent.service

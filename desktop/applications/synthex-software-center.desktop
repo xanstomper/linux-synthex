@@ -1,0 +1,9 @@
+[Desktop Entry]
+Type=Application
+Name=Synthex Software Center
+Comment=Install and manage applications
+Exec=synthex-software-center
+Icon=synthex-software-center
+Categories=Applications;System;
+Terminal=false
+StartupNotify=true

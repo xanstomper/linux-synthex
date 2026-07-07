@@ -1,4 +1,4 @@
-# Solus Linux RPM Spec — just
+# SynthOS RPM Spec — just
 # Command runner (make alternative) written in Rust
 # Origin: Fedora, Arch Linux
 %global just_version 1.39.0
@@ -61,6 +61,6 @@ mkdir -p %{buildroot}%{_datadir}/fish/vendor_completions.d
 %{_datadir}/fish/vendor_completions.d/just.fish
 
 %changelog
-* Mon Jul 07 2026 Solus Rust Team <rust@solus-project.org> - 1.39.0-1
-- Initial Solus package
+* Mon Jul 07 2026 Synthex Rust Team <rust@synthex-project.org> - 1.39.0-1
+- Initial Synthex package
 - Command runner in Rust (make alternative)

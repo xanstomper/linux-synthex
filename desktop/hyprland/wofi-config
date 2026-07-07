@@ -1,6 +1,6 @@
 # ╔══════════════════════════════════════════════════════════════╗
-# ║  Solus Hyprland — Wofi Application Launcher Configuration   ║
-# ║  Design: "Solus Dynamic Tiling" — Clean, minimal            ║
+# ║  Synthex Hyprland — Wofi Application Launcher Configuration   ║
+# ║  Design: "Synthex Dynamic Tiling" — Clean, minimal            ║
 # ║  Version: 1.0.0                                             ║
 # ╚══════════════════════════════════════════════════════════════╝
 # Installed to: /etc/wofi/config
@@ -68,7 +68,7 @@ drun_categories=true
 
 # ─── Power Menu Mode ─────────────────────────────────────────────────────
 # Custom powermenu script
-# Define actions in script at /usr/share/solus/hyprland/scripts/powermenu.sh
+# Define actions in script at /usr/share/synthex/hyprland/scripts/powermenu.sh
 # Or create a custom mode entry
 
 # ─── Performance ─────────────────────────────────────────────────────────

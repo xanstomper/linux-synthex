@@ -1,9 +1,0 @@
-[Desktop Entry]
-Type=Application
-Name=Solus Gaming Center
-Comment=Manage games, Proton, and performance
-Exec=solus-gaming-center
-Icon=solus-gaming-center
-Categories=Applications;Games;
-Terminal=false
-StartupNotify=true

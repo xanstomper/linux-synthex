@@ -1,0 +1,118 @@
+#!/usr/bin/env python3
+"""
+Synthex Firewall Profiles — switch between security profiles
+Usage:
+    synthex-firewall profile          — Show current profile
+    synthex-firewall profile gaming   — Gaming profile (low latency, open ports)
+    synthex-firewall profile secure   — Secure profile (strict)
+    synthex-firewall profile dev      — Developer profile (open SSH, Docker)
+    synthex-firewall profile home     — Home profile (balanced, default)
+"""
+import os, sys, subprocess, json
+
+FIREWALLD_ACTIVE = "/usr/sbin/firewalld"
+PROFILES = {
+    "gaming": {
+        "name": "Gaming",
+        "zones": ["public"],
+        "services": ["steam", "steam-streaming"],
+        "ports": ["27036/udp", "27036/tcp", "27037/udp", "4380/udp"],
+        "description": "Open ports for Steam, game streaming, low latency"
+    },
+    "secure": {
+        "name": "Secure",
+        "zones": ["drop"],
+        "services": ["dhcpv6-client", "ssh"],
+        "ports": [],
+        "description": "Maximum security — block all non-essential traffic"
+    },
+    "dev": {
+        "name": "Developer",
+        "zones": ["public"],
+        "services": ["ssh", "http", "https", "docker", "git"],
+        "ports": ["3000/tcp", "5000/tcp", "8080/tcp", "5432/tcp"],
+        "description": "Open ports for development (SSH, web, containers, DB)"
+    },
+    "home": {
+        "name": "Home",
+        "zones": ["home"],
+        "services": ["ssh", "dhcpv6-client", "mdns", "samba-client"],
+        "ports": [],
+        "description": "Home network profile — balanced security"
+    }
+}
+
+def log(msg): print(f"[firewall] {msg}")
+
+def firewalld_running():
+    try:
+        r = subprocess.run(["firewall-cmd", "--state"], capture_output=True, text=True, timeout=5)
+        return "running" in r.stdout
+    except: return False
+
+def current_profile():
+    try:
+        r = subprocess.run(["firewall-cmd", "--get-default-zone"], capture_output=True, text=True, timeout=5)
+        zone = r.stdout.strip()
+        for name, p in PROFILES.items():
+            if zone in p["zones"]:
+                return name
+        return zone
+    except: return "unknown"
+
+def apply_profile(name):
+    if name not in PROFILES:
+        print(f"Unknown profile: {name}")
+        print(f"Available: {', '.join(PROFILES.keys())}")
+        return
+    
+    profile = PROFILES[name]
+    log(f"Applying {profile['name']} firewall profile...")
+    
+    if not firewalld_running():
+        log("firewalld not running. Starting...")
+        subprocess.run(["systemctl", "start", "firewalld"], capture_output=True, timeout=15)
+    
+    zone = profile["zones"][0]
+    
+    # Set default zone
+    subprocess.run(["firewall-cmd", "--set-default-zone", zone], capture_output=True, timeout=10)
+    
+    # Add services
+    for svc in profile["services"]:
+        subprocess.run(["firewall-cmd", "--permanent", "--add-service", svc], capture_output=True, timeout=10)
+    
+    # Add ports
+    for port in profile["ports"]:
+        subprocess.run(["firewall-cmd", "--permanent", "--add-port", port], capture_output=True, timeout=10)
+    
+    # Remove gaming ports if switching away
+    if name != "gaming":
+        for port in PROFILES["gaming"]["ports"]:
+            subprocess.run(["firewall-cmd", "--permanent", "--remove-port", port], capture_output=True, timeout=5)
+    
+    # Reload
+    subprocess.run(["firewall-cmd", "--reload"], capture_output=True, timeout=10)
+    
+    log(f"✅ {profile['name']} profile active")
+    log(f"   Zone: {zone}")
+    log(f"   Services: {', '.join(profile['services']) if profile['services'] else 'none'}")
+
+def show():
+    profile = current_profile()
+    running = firewalld_running()
+    print(f"Firewalld: {'🟢 Running' if running else '🔴 Stopped'}")
+    print(f"Current profile: {PROFILES.get(profile, {}).get('name', profile)}")
+    print("\nAvailable profiles:")
+    for name, p in PROFILES.items():
+        marker = "→" if name == profile else " "
+        print(f"  {marker} {p['name']:10} — {p['description']}")
+
+if __name__ == "__main__":
+    if len(sys.argv) > 2 and sys.argv[1] == "profile" and sys.argv[2] in PROFILES:
+        if os.geteuid() != 0:
+            print("Firewall changes require root. Re-run with sudo.")
+            sys.exit(1)
+        apply_profile(sys.argv[2])
+    else:
+        show()

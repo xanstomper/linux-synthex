@@ -1,12 +1,12 @@
 [package]
-name = "solus-snapshot-manager"
+name = "synthex-snapshot-manager"
 version.workspace = true
 edition.workspace = true
 license.workspace = true
-description = "Solus Linux Btrfs snapshot manager — automatic snapshots, rollback, recovery"
+description = "SynthOS Btrfs snapshot manager — automatic snapshots, rollback, recovery"
 
 [[bin]]
-name = "solus-snapshot"
+name = "synthex-snapshot"
 path = "src/main.rs"
 
 [dependencies]

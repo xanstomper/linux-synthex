@@ -1,4 +1,4 @@
-# Linux Solus Security Architecture
+# Linux Synthex Security Architecture
 
 > Version: 1.0.0
 > Status: DRAFT
@@ -9,7 +9,7 @@
 ## Table of Contents
 
 1. [Defense-in-Depth Model](#1-defense-in-depth-model)
-2. [SELinux Policy Overview for Solus](#2-selinux-policy-overview-for-solus)
+2. [SELinux Policy Overview for Synthex](#2-selinux-policy-overview-for-synthex)
 3. [Hardened Kernel Configs](#3-hardened-kernel-configs)
 4. [Secure Boot Chain](#4-secure-boot-chain)
 5. [TPM2 Integration for Measured Boot + LUKS](#5-tpm2-integration-for-measured-boot--luks)
@@ -29,7 +29,7 @@
 
 ## 1. Defense-in-Depth Model
 
-Solus employs a layered security architecture with overlapping controls across seven domains:
+Synthex employs a layered security architecture with overlapping controls across seven domains:
 
 ```
 ┌─────────────────────────────────────────────────────────┐
@@ -80,11 +80,11 @@ Each layer assumes the layer below it has been compromised. Controls are designe
 
 ---
 
-## 2. SELinux Policy Overview for Solus
+## 2. SELinux Policy Overview for Synthex
 
 ### 2.1 Policy Architecture
 
-Solus uses SELinux in **targeted** mode with a custom policy module for Solus-specific applications:
+Synthex uses SELinux in **targeted** mode with a custom policy module for Synthex-specific applications:
 
 ```
 Policy Store: /etc/selinux/targeted/
@@ -96,35 +96,35 @@ Policy Version: 33 (Fedora-based policy base)
 
 | Domain | Label | Description |
 |--------|-------|-------------|
-| `solus_software_center_t` | `system_u:system_r:solus_software_center_t:s0` | Solus Software Center |
-| `solus_update_t` | `system_u:system_r:solus_update_t:s0` | Solus Update Manager |
-| `solus_settings_t` | `system_u:system_r:solus_settings_t:s0` | Solus Settings Daemon |
-| `solus_session_t` | `system_u:system_r:solus_session_t:s0` | Budgie Desktop Session |
-| `solus_flatpak_helper_t` | `system_u:system_r:solus_flatpak_helper_t:s0` | Flatpak Integration |
-| `solus_backup_t` | `system_u:system_r:solus_backup_t:s0` | Backup Tool |
-| `solus_firewall_t` | `system_u:system_r:solus_firewall_t:s0` | Firewall Manager |
+| `synthex_software_center_t` | `system_u:system_r:synthex_software_center_t:s0` | Synthex Software Center |
+| `synthex_update_t` | `system_u:system_r:synthex_update_t:s0` | Synthex Update Manager |
+| `synthex_settings_t` | `system_u:system_r:synthex_settings_t:s0` | Synthex Settings Daemon |
+| `synthex_session_t` | `system_u:system_r:synthex_session_t:s0` | Budgie Desktop Session |
+| `synthex_flatpak_helper_t` | `system_u:system_r:synthex_flatpak_helper_t:s0` | Flatpak Integration |
+| `synthex_backup_t` | `system_u:system_r:synthex_backup_t:s0` | Backup Tool |
+| `synthex_firewall_t` | `system_u:system_r:synthex_firewall_t:s0` | Firewall Manager |
 
 ### 2.3 Policy Modules
 
 | Module | Description | Dependencies |
 |--------|-------------|--------------|
-| `solus_base` | Core types, attributes, and interfaces | `kernel`, `system` |
-| `solus_software` | Software Center domain transitions | `solus_base`, `dbus` |
-| `solus_session` | Desktop session domains and Xorg/Wayland | `solus_base`, `xserver`, `wayland` |
-| `solus_hardware` | Hardware control (backlight, rfkill, etc.) | `solus_base`, `devices` |
-| `solus_network` | NetworkManager integration | `solus_base`, `networkmanager` |
-| `solus_updates` | Update and repository management | `solus_base`, `rpm`, `dnf` |
+| `synthex_base` | Core types, attributes, and interfaces | `kernel`, `system` |
+| `synthex_software` | Software Center domain transitions | `synthex_base`, `dbus` |
+| `synthex_session` | Desktop session domains and Xorg/Wayland | `synthex_base`, `xserver`, `wayland` |
+| `synthex_hardware` | Hardware control (backlight, rfkill, etc.) | `synthex_base`, `devices` |
+| `synthex_network` | NetworkManager integration | `synthex_base`, `networkmanager` |
+| `synthex_updates` | Update and repository management | `synthex_base`, `rpm`, `dnf` |
 
 ### 2.4 Compile and Load
 
 ```bash
 # Build policy module
-make -f /usr/share/selinux/devel/Makefile solus-policy.pp
-semodule -i solus-policy.pp
+make -f /usr/share/selinux/devel/Makefile synthex-policy.pp
+semodule -i synthex-policy.pp
 
 # Verify
-semodule -l | grep solus
-seinfo -tsolus_software_center_t
+semodule -l | grep synthex
+seinfo -tsynthex_software_center_t
 ```
 
 ---
@@ -231,17 +231,17 @@ UEFI (Hardware Root of Trust)
 mokutil --sb-state
 
 # Enroll Machine Owner Key
-sudo mokutil --import /etc/pki/uefi/RPM-GPG-KEY-solus.der
+sudo mokutil --import /etc/pki/uefi/RPM-GPG-KEY-synthex.der
 
 # Sign kernel
 sbsign --key /etc/pki/uefi/private.key \
        --cert /etc/pki/uefi/public.crt \
-       --output /boot/vmlinuz-*-solus.signed \
-       /boot/vmlinuz-*-solus
+       --output /boot/vmlinuz-*-synthex.signed \
+       /boot/vmlinuz-*-synthex
 
 # Sign GRUB
-pesign -n /etc/pki/uefi -i /boot/efi/EFI/solus/grubx64.efi \
-       -o /boot/efi/EFI/solus/grubx64.efi.signed -s
+pesign -n /etc/pki/uefi -i /boot/efi/EFI/synthex/grubx64.efi \
+       -o /boot/efi/EFI/synthex/grubx64.efi.signed -s
 ```
 
 ### 4.3 GRUB Hardening
@@ -440,7 +440,7 @@ sudo cp out/libhardened_malloc.so /usr/lib/
 | Strong | `-fstack-protector-strong` | Functions with any local array or alloca |
 | Full | `-fstack-protector-all` | Every function |
 
-**Solus default: `-fstack-protector-strong`** for all packages.
+**Synthex default: `-fstack-protector-strong`** for all packages.
 
 ### 8.2 Control Flow Integrity (CFI)
 
@@ -449,8 +449,8 @@ sudo cp out/libhardened_malloc.so /usr/lib/
 CONFIG_CFI_CLANG=y
 CONFIG_CFI_CLANG_SHADOW=y
 
-# Per-package CFI in Solus build system
-# /etc/solus-build.conf
+# Per-package CFI in Synthex build system
+# /etc/synthex-build.conf
 CFLAGS+=" -fsanitize=cfi -fvisibility=default"
 CXXFLAGS+=" -fsanitize=cfi -fvisibility=default"
 LDFLAGS+=" -fsanitize=cfi"
@@ -501,7 +501,7 @@ kvm.nx_huge_pages=force
 | `integrity` | Kexec/kdbg/kprobe restricted, /dev/mem restricted | Production |
 | `enforcement` | All integrity restrictions + module signing enforced | **Paranoid** |
 
-**Solus default: `lockdown=integrity`** on secure-boot systems.
+**Synthex default: `lockdown=integrity`** on secure-boot systems.
 
 ### 9.2 What Lockdown Restricts
 
@@ -610,21 +610,21 @@ sudo firewall-cmd --permanent --direct --add-rule ipv4 filter INPUT 0 \
 
 ## 11. Automatic Security Updates Configuration
 
-### 11.1 Solus Update Architecture
+### 11.1 Synthex Update Architecture
 
 ```
 ┌──────────────────────────────────────────────────────────┐
 │                   Auto-Update Pipeline                     │
 │                                                            │
-│   Timer: solus-update.timer (daily)                        │
-│     └── solus-update.service                               │
+│   Timer: synthex-update.timer (daily)                        │
+│     └── synthex-update.service                               │
 │           ├── eopkg upgrade (repo metadata + packages)     │
 │           ├── flatpak update                               │
 │           ├── snap refresh (if installed)                  │
 │           ├── fwupdmgr update (firmware)                   │
 │           └── needrestart -k (check running kernels)       │
 │                                                            │
-│   Stabilization: staged rollout via solus-patches repo     │
+│   Stabilization: staged rollout via synthex-patches repo     │
 │     └── Critical/security: immediate push                  │
 │     └── Standard: 24h soak                                │
 │     └── Optional: 7 day soak                              │
@@ -634,7 +634,7 @@ sudo firewall-cmd --permanent --direct --add-rule ipv4 filter INPUT 0 \
 ### 11.2 Configuration Files
 
 ```ini
-# /etc/solus/auto-update.conf
+# /etc/synthex/auto-update.conf
 [Update]
 Enabled=true
 Interval=daily
@@ -655,14 +655,14 @@ OptionalUpdates=7d
 ### 11.3 systemd Timer
 
 ```ini
-# /etc/systemd/system/solus-update.service
+# /etc/systemd/system/synthex-update.service
 [Unit]
-Description=Solus Automatic Security Update
+Description=Synthex Automatic Security Update
 Documentation=man:eopkg(8)
 
 [Service]
 Type=oneshot
-ExecStart=/usr/libexec/solus/auto-update.sh
+ExecStart=/usr/libexec/synthex/auto-update.sh
 Nice=19
 IOSchedulingClass=2
 IOSchedulingPriority=7
@@ -671,9 +671,9 @@ ProtectHome=yes
 ```
 
 ```ini
-# /etc/systemd/system/solus-update.timer
+# /etc/systemd/system/synthex-update.timer
 [Unit]
-Description=Daily Solus Automatic Update Timer
+Description=Daily Synthex Automatic Update Timer
 
 [Timer]
 OnCalendar=daily
@@ -688,11 +688,11 @@ WantedBy=timers.target
 
 ```bash
 #!/usr/bin/bash
-# /usr/libexec/solus/auto-update.sh
+# /usr/libexec/synthex/auto-update.sh
 
 set -euo pipefail
 
-LOG=/var/log/solus-auto-update.log
+LOG=/var/log/synthex-auto-update.log
 exec >> "$LOG" 2>&1
 echo "=== Auto-update started $(date) ==="
 
@@ -724,7 +724,7 @@ fi
 # Check if reboot needed
 if needs-restarting -k &>/dev/null; then
     echo "Kernel update detected, scheduling reboot"
-    /usr/libexec/solus/schedule-reboot.sh
+    /usr/libexec/synthex/schedule-reboot.sh
 fi
 
 # Post-update snapshot
@@ -763,7 +763,7 @@ echo "=== Auto-update completed $(date) ==="
 └──────────────────────────────────────────────────────────┘
 ```
 
-### 12.2 Solus Permissions Manager
+### 12.2 Synthex Permissions Manager
 
 ```bash
 # Install Flatpak permission management tool
@@ -820,7 +820,7 @@ Devices=dri
 ### 13.1 Chromium/Chrome Hardening
 
 ```bash
-# /etc/chromium/policies/managed/solus-security.json
+# /etc/chromium/policies/managed/synthex-security.json
 {
   "BlockExternalExtensions": true,
   "DeveloperToolsAvailability": 2,
@@ -959,7 +959,7 @@ firefox \
 
 ### 14.1 Architecture
 
-Solus uses SELinux as the primary LSM but provides an AppArmor compatibility layer
+Synthex uses SELinux as the primary LSM but provides an AppArmor compatibility layer
 for applications and container runtimes that generate AppArmor profiles:
 
 ```
@@ -969,7 +969,7 @@ for applications and container runtimes that generate AppArmor profiles:
 │  lockdown → integrity → bpf → audit → selinux → smack    │
 │  → tomoyo → apparmor → yama → loadpin → safesetid       │
 │                                                          │
-│  Solus ships both SELinux and AppArmor but SELinux is    │
+│  Synthex ships both SELinux and AppArmor but SELinux is    │
 │  the primary MAC. AppArmor profiles are converted via    │
 │  aa2selinux(8) at package install time.                  │
 └─────────────────────────────────────────────────────────┘
@@ -993,7 +993,7 @@ sudo aa2selinux --profile /etc/apparmor.d/usr.bin.container \
 # /etc/docker/daemon.json
 {
   "selinux-enabled": true,
-  "labels": ["distribution=solus"],
+  "labels": ["distribution=synthex"],
   "userns-remap": "default",
   "live-restore": true
 }
@@ -1040,14 +1040,14 @@ DISCOVERY → TRIAGE → PATCH → TEST → RELEASE → VERIFY → POSTMORTEM
 
 | Channel | Purpose | Audience |
 |---------|---------|----------|
-| solus-security-announce | CVE advisories | Public |
-| solus-security-discuss | Technical discussion | Developers |
-| solus-security-internal | Pre-disclosure coordination | Solus Team |
+| synthex-security-announce | CVE advisories | Public |
+| synthex-security-discuss | Technical discussion | Developers |
+| synthex-security-internal | Pre-disclosure coordination | Synthex Team |
 | Bug Tracker | Bug bounty submissions | Public |
 
 ### 15.4 Disclosure Policy
 
-Solus follows **Coordinated Disclosure (90-day rule)**:
+Synthex follows **Coordinated Disclosure (90-day rule)**:
 
 1. **Day 0**: Vulnerability reported
 2. **Day 0-7**: Triage, severity assessment, CVE assignment
@@ -1064,12 +1064,12 @@ Expedited timeline (< 24h) for actively exploited zero-days.
 
 ### 16.1 Overview
 
-The Solus Security Dashboard is a GTK4/libadwaita application providing
+The Synthex Security Dashboard is a GTK4/libadwaita application providing
 a unified interface for security status monitoring and management.
 
-**Package**: `solus-security-dashboard`
-**Location**: `/usr/bin/solus-security-dashboard`
-**DBus Name**: `org.solus.SecurityDashboard`
+**Package**: `synthex-security-dashboard`
+**Location**: `/usr/bin/synthex-security-dashboard`
+**DBus Name**: `org.synthex.SecurityDashboard`
 
 ### 16.2 Features
 
@@ -1085,14 +1085,14 @@ a unified interface for security status monitoring and management.
 | **Browser Security** | Browser hardening checklist | P1 |
 | **Audit Log** | Real-time security event viewer | P1 |
 | **Hardening Score** | CIS benchmark compliance percentage | P1 |
-| **Vulnerability Feed** | RSS feed of Solus CVE advisories | P2 |
+| **Vulnerability Feed** | RSS feed of Synthex CVE advisories | P2 |
 | **TPM Health** | TPM 2.0 device status and PCR validation | P2 |
 
 ### 16.3 UI Layout
 
 ```
 ┌────────────────────────────────────────────────────────────┐
-│ 🔒 Solus Security Dashboard                        _ □ X  │
+│ 🔒 Synthex Security Dashboard                        _ □ X  │
 ├──────────┬─────────────────────────────────────────────────┤
 │          │  Overall Security Score                         │
 │  NAV     │   ┌───────────────────────────────────────────┐ │
@@ -1125,7 +1125,7 @@ a unified interface for security status monitoring and management.
 │  ┌──────────┐ ┌──────────┐ ┌──────────┐ ┌──────────────┐  │
 │  │ auditd    │ │ D-Bus    │ │ Sysfs    │ │ firewalld    │  │
 │  │ /var/log/ │ │ org.     │ │ /sys/    │ │ D-Bus API   │  │
-│  │ audit/    │ │ solus.*  │ │ kernel/  │ │              │  │
+│  │ audit/    │ │ synthex.*  │ │ kernel/  │ │              │  │
 │  └──────────┘ └──────────┘ └──────────┘ └──────────────┘  │
 │  ┌──────────┐ ┌──────────┐ ┌──────────┐ ┌──────────────┐  │
 │  │ polkit   │ │ systemd  │ │ TPM2     │ │ security     │  │
@@ -1137,11 +1137,11 @@ a unified interface for security status monitoring and management.
 ### 16.5 Data Collection (Gatherer Service)
 
 ```python
-# /usr/libexec/solus/security-gatherer.py
+# /usr/libexec/synthex/security-gatherer.py
 # Background service collecting security telemetry
 
 #!/usr/bin/env python3
-"""Security data gatherer for the Solus Security Dashboard."""
+"""Security data gatherer for the Synthex Security Dashboard."""
 
 import os
 import json
@@ -1150,7 +1150,7 @@ import dbus
 import dbus.service
 
 # D-Bus interface for the gatherer service
-SECURITY_GATHERER_IFACE = "org.solus.SecurityGatherer1"
+SECURITY_GATHERER_IFACE = "org.synthex.SecurityGatherer1"
 
 
 class SecurityGatherer(dbus.service.Object):
@@ -1299,7 +1299,7 @@ class SecurityGatherer(dbus.service.Object):
     def _check_browser():
         """Check if browser security policies are applied."""
         score = 0
-        chromium_policy = "/etc/chromium/policies/managed/solus-security.json"
+        chromium_policy = "/etc/chromium/policies/managed/synthex-security.json"
         firefox_policy = "/etc/firefox/syspolicy.json"
         if os.path.exists(chromium_policy):
             score += 5
@@ -1311,20 +1311,20 @@ class SecurityGatherer(dbus.service.Object):
 ### 16.6 Filesystem Layout
 
 ```
-/usr/bin/solus-security-dashboard
-/usr/libexec/solus/security-gatherer.py
-/usr/libexec/solus/security-gatherer.service
-/usr/libexec/solus/security-gatherer.timer
-/usr/share/solus/security-dashboard/ui/main-window.ui
-/usr/share/solus/security-dashboard/ui/overview-page.ui
-/usr/share/solus/security-dashboard/ui/updates-page.ui
-/usr/share/solus/security-dashboard/ui/firewall-page.ui
-/usr/share/solus/security-dashboard/ui/selinux-page.ui
-/usr/share/solus/security-dashboard/ui/audit-page.ui
-/usr/share/solus/security-dashboard/resources/style.css
-/usr/share/polkit-1/actions/org.solus.security-dashboard.policy
-/usr/share/dbus-1/system-services/org.solus.SecurityDashboard.service
-/usr/share/applications/org.solus.SecurityDashboard.desktop
+/usr/bin/synthex-security-dashboard
+/usr/libexec/synthex/security-gatherer.py
+/usr/libexec/synthex/security-gatherer.service
+/usr/libexec/synthex/security-gatherer.timer
+/usr/share/synthex/security-dashboard/ui/main-window.ui
+/usr/share/synthex/security-dashboard/ui/overview-page.ui
+/usr/share/synthex/security-dashboard/ui/updates-page.ui
+/usr/share/synthex/security-dashboard/ui/firewall-page.ui
+/usr/share/synthex/security-dashboard/ui/selinux-page.ui
+/usr/share/synthex/security-dashboard/ui/audit-page.ui
+/usr/share/synthex/security-dashboard/resources/style.css
+/usr/share/polkit-1/actions/org.synthex.security-dashboard.policy
+/usr/share/dbus-1/system-services/org.synthex.SecurityDashboard.service
+/usr/share/applications/org.synthex.SecurityDashboard.desktop
 ```
 
 ### 16.7 PolicyKit Actions
@@ -1335,7 +1335,7 @@ class SecurityGatherer(dbus.service.Object):
   "-//freedesktop//DTD PolicyKit Policy Configuration 1.0//EN"
   "http://www.freedesktop.org/standards/PolicyKit/1/policyconfig.dtd">
 <policyconfig>
-  <action id="org.solus.security-dashboard.view">
+  <action id="org.synthex.security-dashboard.view">
     <description>View security dashboard</description>
     <message>Authentication is required to view security settings</message>
     <defaults>
@@ -1344,7 +1344,7 @@ class SecurityGatherer(dbus.service.Object):
       <allow_active>yes</allow_active>
     </defaults>
   </action>
-  <action id="org.solus.security-dashboard.manage">
+  <action id="org.synthex.security-dashboard.manage">
     <description>Modify security settings</description>
     <message>Authentication is required to modify security settings</message>
     <defaults>
@@ -1381,6 +1381,6 @@ class SecurityGatherer(dbus.service.Object):
 
 ## Appendix C: License
 
-This architecture document is part of the Linux Solus Hardening Framework.
-Copyright (c) 2026 Linux Solus Project.
+This architecture document is part of the Linux Synthex Hardening Framework.
+Copyright (c) 2026 Linux Synthex Project.
 Licensed under CC-BY-SA 4.0 International.

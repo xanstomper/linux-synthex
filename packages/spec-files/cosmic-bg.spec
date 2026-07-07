@@ -1,4 +1,4 @@
-# Solus Linux RPM Spec — cosmic-bg
+# SynthOS RPM Spec — cosmic-bg
 # COSMIC background/wallpaper daemon (Rust/Iced)
 # Origin: Pop!_OS (System76)
 
@@ -38,5 +38,5 @@ install -D -m 0755 target/release/cosmic-bg %{buildroot}%{_bindir}/cosmic-bg
 %{_bindir}/cosmic-bg
 
 %changelog
-* Mon Jul 07 2026 Solus Rust Team <rust@solus-project.org> - %{cosmicbg_version}-1
-- Initial Solus package — COSMIC background daemon
+* Mon Jul 07 2026 Synthex Rust Team <rust@synthex-project.org> - %{cosmicbg_version}-1
+- Initial Synthex package — COSMIC background daemon

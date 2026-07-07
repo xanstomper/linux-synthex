@@ -1,4 +1,4 @@
-# Solus Linux RPM Spec — procs
+# SynthOS RPM Spec — procs
 # Modern replacement for ps (process list) written in Rust
 # Origin: Fedora, Arch Linux, FreeBSD
 %global procs_version 0.14.9
@@ -49,6 +49,6 @@ mkdir -p %{buildroot}%{_datadir}/fish/vendor_completions.d
 %{_datadir}/fish/vendor_completions.d/procs.fish
 
 %changelog
-* Mon Jul 07 2026 Solus Rust Team <rust@solus-project.org> - 0.14.9-1
-- Initial Solus package
+* Mon Jul 07 2026 Synthex Rust Team <rust@synthex-project.org> - 0.14.9-1
+- Initial Synthex package
 - Modern ps replacement in Rust

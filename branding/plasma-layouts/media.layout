@@ -1,0 +1,8 @@
+# Synthex Workspace: Media
+# Clean layout for content consumption
+
+id=media
+name=Media
+wallpaper=synthex-frost.png
+panels=dock
+description=Clean layout for content consumption

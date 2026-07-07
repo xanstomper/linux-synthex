@@ -1,0 +1,23 @@
+{
+  "minimum": {
+    "cpu": "Dual-core 2GHz",
+    "ram": "2GB (4GB recommended)",
+    "disk": "20GB (40GB recommended)",
+    "gpu": "Any GPU with Vulkan support",
+    "profile": "synthex-lite"
+  },
+  "recommended": {
+    "cpu": "Quad-core 3GHz+",
+    "ram": "8GB (16GB for gaming)",
+    "disk": "64GB SSD",
+    "gpu": "NVIDIA GTX 1060 / AMD RX 580 / Intel Arc",
+    "profile": "synthex-balanced"
+  },
+  "gaming": {
+    "cpu": "6-core 3.5GHz+",
+    "ram": "16GB (32GB for AAA)",
+    "disk": "128GB NVMe SSD",
+    "gpu": "NVIDIA RTX 3060 / AMD RX 6700 XT",
+    "profile": "synthex-gaming"
+  }
+}

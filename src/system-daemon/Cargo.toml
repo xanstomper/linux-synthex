@@ -1,13 +1,13 @@
 [package]
-name = "solus-system-daemon"
+name = "synthex-system-daemon"
 version = "0.1.0"
 edition = "2024"
 license = "MIT OR Apache-2.0"
-authors = ["Solus Linux Team <dev@solus.org>"]
-description = "Solus system performance auto-tuner — VRR, HDR, CPU governor, TDP, form factor detection"
+authors = ["SynthOS Team <dev@synthex.org>"]
+description = "Synthex system performance auto-tuner — VRR, HDR, CPU governor, TDP, form factor detection"
 
 [[bin]]
-name = "solus-system-daemon"
+name = "synthex-system-daemon"
 path = "src/main.rs"
 
 [dependencies]

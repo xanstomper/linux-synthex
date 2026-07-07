@@ -1,5 +1,5 @@
 # ============================================================================
-# Solus Linux — Performance Benchmarking Workflow
+# SynthOS — Performance Benchmarking Workflow
 # ============================================================================
 # Runs performance benchmarks on ISO builds and running systems.
 # Tracks results over time and alerts on regressions.

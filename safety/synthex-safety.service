@@ -1,0 +1,18 @@
+[Unit]
+Description=Synthex Safety — Boot Health Check
+Documentation=https://synthex-linux.org/docs/safety
+After=multi-user.target
+Wants=multi-user.target
+ConditionPathExists=/var/lib/synthex/firstboot-complete
+
+[Service]
+Type=oneshot
+ExecStart=/usr/libexec/synthex/synthex-safety-check
+RemainAfterExit=no
+StandardOutput=journal
+StandardError=journal
+# Health check is advisory — never block boot on its result.
+SuccessExitStatus=0 1 2
+
+[Install]
+WantedBy=multi-user.target

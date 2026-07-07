@@ -1,10 +1,10 @@
 ###############################################################################
-# /etc/audit/rules.d/99-solus-hardening.rules
-# Audit daemon rules for Linux Solus Security Architecture
+# /etc/audit/rules.d/99-synthex-hardening.rules
+# Audit daemon rules for Linux Synthex Security Architecture
 #
 # This file is applied by auditd at startup.
 # Rules are read from /etc/audit/rules.d/ in lexicographic order.
-# Name: 99-solus-hardening.rules (applied last, overrides defaults)
+# Name: 99-synthex-hardening.rules (applied last, overrides defaults)
 #
 # Auditd configuration (in /etc/audit/auditd.conf):
 #   log_file = /var/log/audit/audit.log
@@ -41,7 +41,7 @@
 #
 # -w path     : watch file/directory
 # -p          : permission filter (r=read, w=write, x=execute, a=attribute)
-# -k keyname  : free-form key for log filtering ("solus_*" keys for Solus)
+# -k keyname  : free-form key for log filtering ("solus_*" keys for Synthex)
 # -a action   : append to list (always, never, task, exit, user)
 # -S syscall  : system call to audit
 # -F field    : field match filter
@@ -197,7 +197,7 @@
 -w /usr/libexec/ -p wa -k solus_libraries
 
 # Monitor kernel image and initramfs
--w /boot/ -p wa -k solus_boot
+-w /boot/ -p wa -k synthex_boot
 
 # Monitor SELinux policy files
 -w /etc/selinux/ -p wa -k solus_selinux
@@ -257,29 +257,29 @@
 # 11. SOLUS-SPECIFIC APPLICATION MONITORING
 #==============================================================================
 
-# Monitor Solus package manager (eopkg)
+# Monitor Synthex package manager (eopkg)
 -w /usr/bin/eopkg -p x -k solus_package_mgmt
 -w /etc/eopkg/ -p wa -k solus_package_mgmt
 
-# Monitor Solus Repository configuration
--w /etc/solus/ -p wa -k solus_repo
--w /var/lib/solus/ -p wa -k solus_repo
+# Monitor Synthex Repository configuration
+-w /etc/synthex/ -p wa -k solus_repo
+-w /var/lib/synthex/ -p wa -k solus_repo
 
-# Monitor Solus update system
--w /usr/libexec/solus/ -p wa -k solus_updates
+# Monitor Synthex update system
+-w /usr/libexec/synthex/ -p wa -k solus_updates
 
 # Monitor Flatpak operations (sandboxed application management)
 -w /usr/bin/flatpak -p x -k solus_flatpak
 -w /var/lib/flatpak/ -p wa -k solus_flatpak
 
 # Monitor Software Center
--w /usr/bin/solus-software-center -p x -k solus_software
+-w /usr/bin/synthex-software-center -p x -k solus_software
 
 # Monitor Security Dashboard
--w /usr/bin/solus-security-dashboard -p x -k solus_security_dashboard
+-w /usr/bin/synthex-security-dashboard -p x -k solus_security_dashboard
 
 # Monitor backup tool
--w /usr/bin/solus-backup -p x -k solus_backup
+-w /usr/bin/synthex-backup -p x -k solus_backup
 
 #==============================================================================
 # 12. TPM2 AND HSM OPERATIONS
@@ -319,7 +319,7 @@
 #
 # To reload audit rules without restarting auditd:
 #   sudo augenrules --check
-#   sudo auditctl -R /etc/audit/rules.d/99-solus-hardening.rules
+#   sudo auditctl -R /etc/audit/rules.d/99-synthex-hardening.rules
 #
 # To see all loaded rules:
 #   sudo auditctl -l

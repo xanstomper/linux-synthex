@@ -1,4 +1,4 @@
-# Solus Linux RPM Spec — dua-cli
+# SynthOS RPM Spec — dua-cli
 # Disk usage analyzer (du replacement) written in Rust
 # Origin: Fedora, Arch Linux
 %global dua_version 2.30.0
@@ -52,6 +52,6 @@ mkdir -p %{buildroot}%{_datadir}/bash-completion/completions
 %{_mandir}/man1/dua.1*
 
 %changelog
-* Mon Jul 07 2026 Solus Rust Team <rust@solus-project.org> - 2.30.0-1
-- Initial Solus package
+* Mon Jul 07 2026 Synthex Rust Team <rust@synthex-project.org> - 2.30.0-1
+- Initial Synthex package
 - Disk usage analyzer in Rust

@@ -1,0 +1,9 @@
+[Desktop Entry]
+Type=Application
+Name=Synthex Studio
+Comment=Customize themes, layouts, and desktop appearance
+Exec=synthex-studio
+Icon=synthex-studio
+Categories=Applications;Settings;Desktop;
+Terminal=false
+StartupNotify=true

@@ -1,0 +1,9 @@
+[Desktop Entry]
+Type=Application
+Name=Synthex Terminal Workspace
+Comment=Open tmux-powered terminal workspaces
+Exec=synthex-term workspace dev
+Icon=utilities-terminal
+Terminal=true
+Categories=System;TerminalEmulator;
+Keywords=terminal;tmux;workspace;

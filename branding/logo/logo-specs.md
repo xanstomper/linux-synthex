@@ -1,13 +1,13 @@
-# Solus Logo — Specifications & Usage Guide
+# Synthex Logo — Specifications & Usage Guide
 
 > Version 1.0 | July 2026  
-> Part of the Linux Solus Brand Identity Guidelines
+> Part of the Linux Synthex Brand Identity Guidelines
 
 ---
 
 ## 1. Logo Architecture
 
-The Solus brand mark consists of three distinct elements:
+The Synthex brand mark consists of three distinct elements:
 
 ```
 ┌─────────────────────────────────────────────────┐
@@ -15,7 +15,7 @@ The Solus brand mark consists of three distinct elements:
 │        Stylised sun/gear/hexagon hybrid          │
 ├─────────────────────────────────────────────────┤
 │                   Wordmark                       │
-│     "Solus" — custom lettering, Inter-based      │
+│     "Synthex" — custom lettering, Inter-based      │
 ├─────────────────────────────────────────────────┤
 │                   Lockup                         │
 │     Icon Mark + Wordmark in fixed relationship    │
@@ -28,8 +28,8 @@ The Solus brand mark consists of three distinct elements:
 
 | File              | Description                     | Dimensions | Use Case                  |
 |-------------------|---------------------------------|------------|---------------------------|
-| `solus-logo.svg`  | Full lockup (icon + wordmark)   | 256×64     | Website header, docs      |
-| `solus-icon.svg`  | Icon mark only                  | 128×128    | Favicon, app icon, avatar |
+| `synthex-logo.svg`  | Full lockup (icon + wordmark)   | 256×64     | Website header, docs      |
+| `synthex-icon.svg`  | Icon mark only                  | 128×128    | Favicon, app icon, avatar |
 
 ---
 
@@ -71,10 +71,10 @@ The icon mark is constructed on a **24×24 unit grid** with a **32×32 artboard*
 
 | Element        | Fill/Stroke       | Hex       |
 |----------------|-------------------|-----------|
-| Sun rays       | Solus Amber       | `#FFB300` |
-| Gear ring      | Solus Amber       | `#FFB300` |
-| Gear teeth     | Solus Amber (dark)| `#E6A000` |
-| Inner hexagon  | Solus Deep Blue   | `#1565C0` |
+| Sun rays       | Synthex Amber       | `#FFB300` |
+| Gear ring      | Synthex Amber       | `#FFB300` |
+| Gear teeth     | Synthex Amber (dark)| `#E6A000` |
+| Inner hexagon  | Synthex Deep Blue   | `#1565C0` |
 | Centre circle  | Transparent (cutout)| —        |
 | Wordmark       | White              | `#FFFFFF` |
 
@@ -91,7 +91,7 @@ The icon mark is constructed on a **24×24 unit grid** with a **32×32 artboard*
 ## 4. Wordmark Specifications
 
 ### 4.1 Typography
-The wordmark "Solus" uses **Inter Bold** with custom letter-spacing adjustments:
+The wordmark "Synthex" uses **Inter Bold** with custom letter-spacing adjustments:
 
 | Character | Tracking  | Notes                        |
 |-----------|-----------|------------------------------|
@@ -104,7 +104,7 @@ The wordmark "Solus" uses **Inter Bold** with custom letter-spacing adjustments:
 ### 4.2 Wordmark Colour
 - **Full colour**: White (`#FFFFFF`) — always on brand backgrounds
 - **Dark background**: White (`#FFFFFF`)
-- **Light background**: Solus Deep Blue (`#1565C0`)
+- **Light background**: Synthex Deep Blue (`#1565C0`)
 
 ---
 
@@ -113,7 +113,7 @@ The wordmark "Solus" uses **Inter Bold** with custom letter-spacing adjustments:
 The lockup places the icon mark to the left of the wordmark with fixed spacing:
 
 ```
-[Icon Mark]  [spacer: 8u]  [Wordmark: "Solus"]
+[Icon Mark]  [spacer: 8u]  [Wordmark: "Synthex"]
 ```
 
 - **Alignment**: Vertical centre alignment between icon and wordmark
@@ -139,7 +139,7 @@ Minimum clear space = **the height of the uppercase "S"** in the wordmark on all
 ┌─────────────────────────────────────────────┐
 │                 Clear Space                  │
 │    ┌─────────────────────────────────┐       │
-│    │         SOLUS LOGO              │       │
+│    │         SYNTHEX LOGO              │       │
 │    └─────────────────────────────────┘       │
 │                 Clear Space                  │
 └─────────────────────────────────────────────┘
@@ -201,14 +201,14 @@ All logo source files are maintained in this directory:
 
 ```
 logo/
-├── solus-logo.svg          # Full lockup (horizontal)
-├── solus-logo-stacked.svg  # Stacked lockup
-├── solus-icon.svg          # Icon mark only
-├── solus-icon-mono-light.svg  # Monochrome (light)
-├── solus-icon-mono-dark.svg   # Monochrome (dark)
+├── synthex-logo.svg          # Full lockup (horizontal)
+├── synthex-logo-stacked.svg  # Stacked lockup
+├── synthex-icon.svg          # Icon mark only
+├── synthex-icon-mono-light.svg  # Monochrome (light)
+├── synthex-icon-mono-dark.svg   # Monochrome (dark)
 └── logo-specs.md           # This document
 ```
 
 ---
 
-*© 2026 Linux Solus Project. Solus and the Solus logo are trademarks of the Linux Solus Project.*
+*© 2026 Linux Synthex Project. Synthex and the Synthex logo are trademarks of the Linux Synthex Project.*

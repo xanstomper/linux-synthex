@@ -1,0 +1,21 @@
+Name:           synthex-power-profiles
+Version:        0.1.0
+Release:        1%{?dist}
+Summary:        Power profiles
+
+License:        MIT
+URL:            https://getsynthex.io
+Requires:       python3
+
+%description
+CPU power profile switching.
+
+%install
+install -Dm755 src/synthex-power-profiles %{buildroot}%{_bindir}/synthex-power-profiles
+
+%files
+%{_bindir}/synthex-power-profiles
+
+%changelog
+* Mon Jul 06 2026 Synthex Team <dev@synthex.org> - 0.1.0-1
+- Initial synthex-power-profiles package

@@ -1,8 +1,0 @@
-# Calamares Solus Profile Module Configuration
----
-name: solusprofile
-type: job
-interface: python
-load: main.py
-timeout: 30
-emergency: false

@@ -1,4 +1,4 @@
-# Linux Solus — Brand Identity Guidelines
+# Linux Synthex — Brand Identity Guidelines
 
 > Version 1.0 | July 2026  
 > "Illuminate Your Desktop"
@@ -8,36 +8,36 @@
 ## 1. Brand Overview
 
 ### 1.1 Brand Name
-**Solus**  
+**Synthex**  
 Latin for *"alone/only"* — recontextualised to represent **"Solar"**: radiant, powerful, self-contained.  
-The name evokes the sun as a self-luminous, self-sustaining source of energy — exactly what Solus aims to be for the desktop Linux ecosystem.
+The name evokes the sun as a self-luminous, self-sustaining source of energy — exactly what Synthex aims to be for the desktop Linux ecosystem.
 
 ### 1.2 Tagline
 **"Illuminate Your Desktop"**  
-Short, confident, and evocative. The tagline speaks to both the visual radiance of the brand and the clarity Solus brings to the user experience.
+Short, confident, and evocative. The tagline speaks to both the visual radiance of the brand and the clarity Synthex brings to the user experience.
 
 ### 1.3 Brand Promise
-*Solus delivers a refined, self-contained Linux desktop experience that is powerful enough for professionals, beautiful enough for creatives, and approachable enough for everyone.*
+*Synthex delivers a refined, self-contained Linux desktop experience that is powerful enough for professionals, beautiful enough for creatives, and approachable enough for everyone.*
 
 ---
 
 ## 2. Brand Architecture
 
 ```
-Linux Solus (Umbrella)
-├── Solus Plasma    — Flagship desktop (KDE Plasma) — full-featured, polished
-├── Solus Hyprland  — Power-user edition (Hyprland WM) — tiling, minimal, fast
-└── Solus GNOME     — Minimalist edition (GNOME) — clean, modern, accessible
+Linux Synthex (Umbrella)
+├── Synthex Plasma    — Flagship desktop (KDE Plasma) — full-featured, polished
+├── Synthex Hyprland  — Power-user edition (Hyprland WM) — tiling, minimal, fast
+└── Synthex GNOME     — Minimalist edition (GNOME) — clean, modern, accessible
 ```
 
-Each edition shares the core Solus brand equity while expressing its own personality through the accent colour system (see §3.2).
+Each edition shares the core Synthex brand equity while expressing its own personality through the accent colour system (see §3.2).
 
 | Edition     | Primary Accent    | Hex       | Personality              |
 |-------------|-------------------|-----------|--------------------------|
-| Solus       | Amber (default)   | `#FFB300` | Warm, energetic, premium |
-| Solus Plasma| Amber             | `#FFB300` | Polished, capable         |
-| Solus Hyprland| Deep Purple     | `#6A1B9A` | Power, sophistication     |
-| Solus GNOME | Teal              | `#00897B` | Clean, calm, accessible   |
+| Synthex       | Amber (default)   | `#FFB300` | Warm, energetic, premium |
+| Synthex Plasma| Amber             | `#FFB300` | Polished, capable         |
+| Synthex Hyprland| Deep Purple     | `#6A1B9A` | Power, sophistication     |
+| Synthex GNOME | Teal              | `#00897B` | Clean, calm, accessible   |
 
 ---
 
@@ -47,13 +47,13 @@ Each edition shares the core Solus brand equity while expressing its own persona
 
 | Token            | Hex       | Preview   | Usage                        |
 |------------------|-----------|-----------|------------------------------|
-| Solus Amber      | `#FFB300` | 🟡 Amber | Primary brand colour, CTAs, highlights |
-| Solus Deep Blue  | `#1565C0` | 🔵 Blue  | Trust element, links, secondary UI  |
-| Solus Deep Purple| `#6A1B9A` | 🟣 Purple| Accent gradient partner, Hyprland   |
-| Solus Teal       | `#00897B` | 🌊 Teal  | GNOME edition accent                |
+| Synthex Amber      | `#FFB300` | 🟡 Amber | Primary brand colour, CTAs, highlights |
+| Synthex Deep Blue  | `#1565C0` | 🔵 Blue  | Trust element, links, secondary UI  |
+| Synthex Deep Purple| `#6A1B9A` | 🟣 Purple| Accent gradient partner, Hyprland   |
+| Synthex Teal       | `#00897B` | 🌊 Teal  | GNOME edition accent                |
 
 ### 3.2 Accent Gradient
-The signature Solus gradient used in hero sections, loading screens, and premium surfaces:
+The signature Synthex gradient used in hero sections, loading screens, and premium surfaces:
 
 ```
 Amber (#FFB300) → Deep Purple (#6A1B9A)
@@ -161,11 +161,11 @@ Three logo variants exist:
 | Variant     | Description                           | Primary Use            |
 |-------------|---------------------------------------|------------------------|
 | Icon Mark   | Stylised sun/gear/hexagon hybrid      | Favicon, app icon, avatar |
-| Wordmark    | "Solus" in custom wordmark typography | Headers, banners       |
+| Wordmark    | "Synthex" in custom wordmark typography | Headers, banners       |
 | Lockup      | Icon + Wordmark combined              | Official brand representation |
 
 ### 5.2 Icon Mark Design
-The Solus icon is a **stylised sun transitioning into a hexagonal gear** — representing the warmth of the open-source community (sun) combined with the precision of engineering (gear).
+The Synthex icon is a **stylised sun transitioning into a hexagonal gear** — representing the warmth of the open-source community (sun) combined with the precision of engineering (gear).
 
 - **Geometry**: Built on a 24×24 unit grid, centred in a 32×32 artboard.
 - **Sun rays**: 8 primary rays radiating outward from the core.
@@ -187,7 +187,7 @@ No other elements (text, graphics, edges) may intrude into this space.
 - ❌ Do not change the logo colours outside the approved palette
 - ❌ Do not place the logo on busy backgrounds without sufficient contrast
 - ❌ Do not rotate the icon mark independently of the wordmark
-- ❌ Do not replace "Solus" type with a different font
+- ❌ Do not replace "Synthex" type with a different font
 - ❌ Do not add outlines, shadows, or effects not in the original artwork
 - ❌ Do not rearrange elements of the lockup
 
@@ -208,7 +208,7 @@ No other elements (text, graphics, edges) may intrude into this space.
 | Highlight           | Top-left corner white gleam    |
 
 ### 6.1 Application Icons
-All first-party Solus applications (Solus Store, Solus Settings, Solus Welcome) must follow the glassmorphism 3D style with the edition-appropriate accent colour.
+All first-party Synthex applications (Synthex Store, Synthex Settings, Synthex Welcome) must follow the glassmorphism 3D style with the edition-appropriate accent colour.
 
 ---
 
@@ -219,13 +219,13 @@ All first-party Solus applications (Solus Store, Solus Settings, Solus Welcome) 
 - **Lighting**: Key light from upper left (warm), fill light from lower right (cool purple)
 - **Background**: Deep dark blue-to-black gradient (see §3.3)
 - **Post-processing**: Clean, minimal retouching; subtle glow effects
-- **Devices**: Always show Solus desktop running in context (laptop, desktop, tablet)
+- **Devices**: Always show Synthex desktop running in context (laptop, desktop, tablet)
 
 ### 7.2 Abstract / Hero Imagery
-- Use the Solus gradient (Amber → Purple) as a primary background treatment
+- Use the Synthex gradient (Amber → Purple) as a primary background treatment
 - Overlay geometric patterns derived from the hexagon/gear logo geometry
 - Incorporate subtle noise/grain texture for depth
-- Never use stock photography without heavy colour grading toward the Solus palette
+- Never use stock photography without heavy colour grading toward the Synthex palette
 
 ---
 
@@ -237,7 +237,7 @@ All first-party Solus applications (Solus Store, Solus Settings, Solus Welcome) 
 | Confident     | We know what we're building and why.          |
 | Warm          | Community-first, approachable, inclusive.     |
 | Professional  | Polished documentation, clean communication.  |
-| Capable       | Solus handles real work — we show, not tell.  |
+| Capable       | Synthex handles real work — we show, not tell.  |
 
 ### 8.2 Tone by Context
 
@@ -250,7 +250,7 @@ All first-party Solus applications (Solus Store, Solus Settings, Solus Welcome) 
 | Social Media  | Short, punchy, visually-led                  |
 
 ### 8.3 Language Guidelines
-- Use active voice: *"Solus delivers…"* not *"…is delivered by Solus"*
+- Use active voice: *"Synthex delivers…"* not *"…is delivered by Synthex"*
 - Prefer contractions: *"don't"*, *"you'll"*, *"it's"* — feels approachable
 - Avoid superlatives: *"best"*, *"perfect"*, *"ultimate"* — let the work speak
 - Use inclusive language: *"everyone"*, *"you"*, *"we"* — not *"guys"*, *"power users"* as default
@@ -266,21 +266,21 @@ All first-party Solus applications (Solus Store, Solus Settings, Solus Welcome) 
 - Download buttons: Amber (#FFB300) with Inter Semi-Bold
 
 ### 9.2 Desktop (OS)
-- **GRUB**: Dark background with Solus logo and amber accents
-- **Plymouth**: Boot splash with animated Solus icon and gradient
-- **SDDM/KDM**: Login screen with Solus branding and edition colour
-- **Plasma Theme**: Solus colour scheme, custom window decorations
+- **GRUB**: Dark background with Synthex logo and amber accents
+- **Plymouth**: Boot splash with animated Synthex icon and gradient
+- **SDDM/KDM**: Login screen with Synthex branding and edition colour
+- **Plasma Theme**: Synthex colour scheme, custom window decorations
 - **Wallpapers**: Dark gradient-based with subtle brand patterns
 
 ### 9.3 Social Media
-- Profile pictures: Solus icon mark on dark circle
-- Banner: Solus lockup on gradient hero with tagline
+- Profile pictures: Synthex icon mark on dark circle
+- Banner: Synthex lockup on gradient hero with tagline
 - Post style: Dark cards with amber CTAs, Inter typeface
 
 ### 9.4 Merchandise
 - T-shirts: Front = icon mark (small, left chest), Back = lockup (large, centred)
 - Stickers: Icon mark only, die-cut, amber on dark or white
-- Laptop skins: Dark with Solus gradient strip
+- Laptop skins: Dark with Synthex gradient strip
 
 ---
 
@@ -293,10 +293,10 @@ All external-facing materials must be reviewed against these guidelines before p
 This document follows semantic versioning. Updates that change brand colours, logo geometry, or typography are major version bumps.
 
 ### 10.3 Questions
-For brand usage questions, contact: **brand@solus-os.org**
+For brand usage questions, contact: **brand@synthex-os.org**
 
 ---
 
-*© 2026 Linux Solus Project. All rights reserved.*  
-*"Solus" and the Solus logo are trademarks of the Linux Solus Project.*  
-*"Illuminate Your Desktop" is a tagline of the Linux Solus Project.*
+*© 2026 Linux Synthex Project. All rights reserved.*  
+*"Synthex" and the Synthex logo are trademarks of the Linux Synthex Project.*  
+*"Illuminate Your Desktop" is a tagline of the Linux Synthex Project.*

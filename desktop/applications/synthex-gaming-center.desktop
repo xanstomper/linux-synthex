@@ -1,0 +1,9 @@
+[Desktop Entry]
+Type=Application
+Name=Synthex Gaming Center
+Comment=Manage games, Proton, and performance
+Exec=synthex-gaming-center
+Icon=synthex-gaming-center
+Categories=Applications;Games;
+Terminal=false
+StartupNotify=true

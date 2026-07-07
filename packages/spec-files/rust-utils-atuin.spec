@@ -1,4 +1,4 @@
-# Solus Linux RPM Spec — atuin
+# SynthOS RPM Spec — atuin
 # Shell history with sync (Rust)
 # Origin: Fedora, Arch Linux
 
@@ -43,6 +43,6 @@ install -D -m 0755 target/release/atuin %{buildroot}%{_bindir}/atuin
 %{_bindir}/atuin
 
 %changelog
-* Mon Jul 07 2026 Solus Rust Team <rust@solus-project.org> - %{atuin_version}-1
-- Initial Solus package — atuin
+* Mon Jul 07 2026 Synthex Rust Team <rust@synthex-project.org> - %{atuin_version}-1
+- Initial Synthex package — atuin
 - Ported from Fedora and Arch Linux packaging

@@ -1,0 +1,23 @@
+[Unit]
+Description=SynthOS Platform
+Documentation=https://docs.synthex-project.org
+Requires=dbus.service
+After=dbus.service network-online.target
+
+# Core infrastructure
+Wants=synthex-desktopd.service synthex-stored.service synthex-hwdaemon.service
+Wants=synthex-gpu-setupd.service synthex-workspace.service
+Wants=synthex-marketplace.service synthex-webappd.service
+Wants=synthex-recovery.service synthex-oobe.service
+Wants=synthex-blueprint.service synthex-blueprint.timer
+Wants=synthex-ananicy.service
+
+# AI
+Wants=synthex-ai-hub.service
+Wants=synthex-agent.service
+
+# Graphical (only on desktop installs)
+Wants=synthex-control-center.service synthex-studiocd.service
+
+[Install]
+WantedBy=multi-user.target

@@ -1,12 +1,12 @@
 #!/usr/bin/env bash
 # ============================================================
-# Solus Linux — Proton GE Build Script
-# /usr/share/solus-gaming/proton-ge-build.sh
+# SynthOS — Proton GE Build Script
+# /usr/share/synthex-gaming/proton-ge-build.sh
 #
 # Builds Custom Proton (Proton GE) from source with
-# optimizations for the Solus platform.
+# optimizations for the Synthex platform.
 #
-# Part of solus-gaming-tools package.
+# Part of synthex-gaming-tools package.
 # ============================================================
 
 set -euo pipefail
@@ -380,7 +380,7 @@ clean_work() {
 
 usage() {
     cat << EOF
-Solus Proton GE Builder — Build custom Proton (GloriousEggroll) from source
+Synthex Proton GE Builder — Build custom Proton (GloriousEggroll) from source
 
 USAGE:
   proton-ge-build.sh [command]

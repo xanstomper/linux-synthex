@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: MIT OR Apache-2.0
-// SPDX-FileCopyrightText: 2026 Solus Linux Team <dev@solus.org>
+// SPDX-FileCopyrightText: 2026 SynthOS Team <dev@synthex.org>
 //
-// solus-hwdaemon — Hardware detection daemon for Solus Linux
+// synthex-hwdaemon — Hardware detection daemon for SynthOS
 //
 // Detects system hardware (CPU, GPU, RAM, disks, network) and exposes
 // results via D-Bus for use by the control center and other tools.
@@ -251,11 +251,11 @@ async fn main() -> Result<()> {
     tracing_subscriber::fmt()
         .with_env_filter(
             tracing_subscriber::EnvFilter::try_from_default_env()
-                .unwrap_or_else(|_| "solus_hwdaemon=info".into()),
+                .unwrap_or_else(|_| "synthex_hwdaemon=info".into()),
         )
         .init();
 
-    info!("Solus Hardware Daemon starting");
+    info!("Synthex Hardware Daemon starting");
 
     // Quick hardware detection on startup
     match HardwareProfile::detect() {
@@ -268,7 +268,7 @@ async fn main() -> Result<()> {
             );
             // Export JSON for other tools
             if let Ok(json) = profile.to_json() {
-                let hwdb_path = "/run/solus/hardware.json";
+                let hwdb_path = "/run/synthex/hardware.json";
                 if let Some(parent) = std::path::Path::new(hwdb_path).parent() {
                     let _ = std::fs::create_dir_all(parent);
                 }

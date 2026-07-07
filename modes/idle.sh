@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Solus Idle Mode — minimize background activity for lowest footprint
+# Synthex Idle Mode — minimize background activity for lowest footprint
 # Use when stepping away: quiet fans, no indexers, powersave clocks.
 
 set -euo pipefail

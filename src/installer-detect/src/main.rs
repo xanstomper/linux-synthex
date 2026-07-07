@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: MIT OR Apache-2.0
 //
-// solus-installer-detect — Solus Linux hardware auto-detection for Calamares
+// synthex-installer-detect — SynthOS hardware auto-detection for Calamares
 //
 // Detects system hardware and generates JSON configuration recommendations
 // that Calamares shell scripts consume during installation. This replaces
@@ -191,7 +191,7 @@ impl DetectionReport {
         // Virtualization detection via DMI or CPU flags
         let virtualized = Self::check_virtualized();
 
-        let hostname = sysinfo::System::host_name().unwrap_or_else(|| "solus-pc".to_string());
+        let hostname = sysinfo::System::host_name().unwrap_or_else(|| "synthex-pc".to_string());
 
         Ok(SystemInfo {
             cpu_model,
@@ -797,7 +797,7 @@ impl DetectionReport {
 // ─── Main ──────────────────────────────────────────────────────────────
 
 fn main() -> Result<()> {
-    eprintln!("🔍 Solus Hardware Detector v0.1.0");
+    eprintln!("🔍 Synthex Hardware Detector v0.1.0");
     eprintln!("{}", "═".repeat(50));
 
     let report = DetectionReport::detect()?;

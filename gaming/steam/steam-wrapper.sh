@@ -1,19 +1,19 @@
 #!/usr/bin/env bash
 # ============================================================
-# Solus Linux — Steam Launcher Wrapper
+# SynthOS — Steam Launcher Wrapper
 # /usr/bin/steam-wrapper
 #
 # Wraps Steam (or a Steam game) with Gamescope and/or
 # Gamemode, applies per-game environment variables, and
 # provides HDR/FSR support.
 #
-# Part of solus-steam-optimizer package.
+# Part of synthex-steam-optimizer package.
 # ============================================================
 
 set -euo pipefail
 
 # --- Default configuration ---
-CONFIG_DIR="${XDG_CONFIG_HOME:-$HOME/.config}/solus-gaming-center"
+CONFIG_DIR="${XDG_CONFIG_HOME:-$HOME/.config}/synthex-gaming-center"
 GAME_PROFILES="${CONFIG_DIR}/games"
 DEFAULT_CONFIG="${CONFIG_DIR}/steam-wrapper.conf"
 
@@ -287,7 +287,7 @@ launch_steam() {
 
 usage() {
     cat << EOF
-Solus Steam Wrapper — Launch Steam (or games) with optimized settings
+Synthex Steam Wrapper — Launch Steam (or games) with optimized settings
 
 USAGE:
   steam-wrapper [options] [-- steam-args...]
@@ -308,8 +308,8 @@ OPTIONS:
 
 CONFIGURATION:
   System-wide:  /etc/default/steam-wrapper
-  User config:  ~/.config/solus-gaming-center/steam-wrapper.conf
-  Game configs: ~/.config/solus-gaming-center/games/<appid>.conf
+  User config:  ~/.config/synthex-gaming-center/steam-wrapper.conf
+  Game configs: ~/.config/synthex-gaming-center/games/<appid>.conf
 
 EXAMPLES:
   steam-wrapper                                           # Launch Steam

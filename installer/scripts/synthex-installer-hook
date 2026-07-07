@@ -1,0 +1,87 @@
+#!/usr/bin/env bash
+# synthex-installer-hook — Hardware detection hook for Calamares
+# Runs before the installer shows UI to pre-detect hardware.
+# Writes detection data to Calamares global storage.
+set -euo pipefail
+
+LOG="/var/log/synthex-installer-hook.log"
+echo "=== Synthex Installer Hook $(date) ===" | tee "$LOG"
+
+# ── GPU Detection ─────────────────────────────────────────────────────
+GPU_VENDOR="unknown"
+GPU_MODEL=""
+
+if lspci -nn 2>/dev/null | grep -qi nvidia; then
+    GPU_VENDOR="nvidia"
+    GPU_MODEL=$(lspci -nn 2>/dev/null | grep -i nvidia | head -1 | cut -d: -f3-)
+elif lspci -nn 2>/dev/null | grep -qiE 'amd|ati'; then
+    GPU_VENDOR="amd"
+    GPU_MODEL=$(lspci -nn 2>/dev/null | grep -iE 'amd|ati' | head -1 | cut -d: -f3-)
+elif lspci -nn 2>/dev/null | grep -qi intel; then
+    GPU_VENDOR="intel"
+    GPU_MODEL=$(lspci -nn 2>/dev/null | grep -i 'vga\|3d' | head -1 | cut -d: -f3-)
+fi
+echo "GPU: $GPU_VENDOR — $GPU_MODEL" | tee -a "$LOG"
+
+# ── Form Factor Detection ─────────────────────────────────────────────
+FORM_FACTOR="desktop"
+if [ -f /sys/class/dmi/id/chassis_type ]; then
+    CHASSIS=$(cat /sys/class/dmi/id/chassis_type 2>/dev/null)
+    case "$CHASSIS" in
+        8|9|10|31) FORM_FACTOR="laptop" ;;
+        3|4|5|6|7|15|16) FORM_FACTOR="desktop" ;;
+        *) FORM_FACTOR="other" ;;
+    esac
+fi
+echo "Form Factor: $FORM_FACTOR" | tee -a "$LOG"
+
+# ── RAM Detection ─────────────────────────────────────────────────────
+RAM_GB=$(awk '/MemTotal/ {printf "%d", $2/1024/1024}' /proc/meminfo)
+echo "RAM: ${RAM_GB}GB" | tee -a "$LOG"
+
+# ── Disk Detection ────────────────────────────────────────────────────
+DISK_COUNT=$(lsblk -d -n 2>/dev/null | wc -l)
+DISK_SIZE=$(lsblk -d -n -o SIZE 2>/dev/null | head -1)
+echo "Disk: ${DISK_COUNT} disks, primary: ${DISK_SIZE}" | tee -a "$LOG"
+
+# ── Profile Recommendation ────────────────────────────────────────────
+RECOMMENDED_PROFILE="classic"
+if [ "$FORM_FACTOR" = "laptop" ]; then
+    RECOMMENDED_PROFILE="classic"
+    # If gaming GPU detected, recommend gaming
+    if [ "$GPU_VENDOR" = "nvidia" ] && [ "$RAM_GB" -ge 8 ]; then
+        RECOMMENDED_PROFILE="gaming"
+    fi
+elif [ "$FORM_FACTOR" = "desktop" ]; then
+    if [ "$GPU_VENDOR" = "nvidia" ] && [ "$RAM_GB" -ge 8 ]; then
+        RECOMMENDED_PROFILE="gaming"
+    elif [ "$RAM_GB" -ge 16 ]; then
+        RECOMMENDED_PROFILE="pro"
+    fi
+fi
+# If very low RAM, recommend lite
+if [ "$RAM_GB" -lt 4 ]; then
+    RECOMMENDED_PROFILE="lite"
+fi
+echo "Recommended profile: $RECOMMENDED_PROFILE" | tee -a "$LOG"
+
+# ── Write Calamares global storage ────────────────────────────────────
+GLOBAL_STORAGE="/var/lib/calamares/modules/synthexprofile"
+mkdir -p "$GLOBAL_STORAGE" 2>/dev/null || true
+
+cat > "$GLOBAL_STORAGE/hw-detection.json" << JSONEOF
+{
+  "gpu": {
+    "vendor": "$GPU_VENDOR",
+    "model": "$GPU_MODEL"
+  },
+  "form_factor": "$FORM_FACTOR",
+  "ram_gb": $RAM_GB,
+  "disk_count": $DISK_COUNT,
+  "recommended_profile": "$RECOMMENDED_PROFILE"
+}
+JSONEOF
+
+echo "Detection results saved to $GLOBAL_STORAGE/hw-detection.json" | tee -a "$LOG"
+echo "=== Hook complete ===" | tee -a "$LOG"
+exit 0

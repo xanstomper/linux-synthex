@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 #===============================================================================
-# Solus AI — Model Sources Manager
-# Download, verify, and manage local LLM models for Solus Linux
+# Synthex AI — Model Sources Manager
+# Download, verify, and manage local LLM models for SynthOS
 #
 # Usage:
 #   ./model-sources.sh install <model-id> [quant]
@@ -25,12 +25,12 @@ set -euo pipefail
 # Configuration
 # ──────────────────────────────────────────────────────────────────────────────
 
-SOLUS_AI_HOME="${SOLUS_AI_HOME:-$HOME/.solus/ai}"
-MODELS_DIR="${SOLUS_AI_MODELS_DIR:-$SOLUS_AI_HOME/models}"
-CACHE_DIR="${SOLUS_AI_CACHE_DIR:-$SOLUS_AI_HOME/cache}"
-CONFIG_DIR="${SOLUS_AI_CONFIG_DIR:-$HOME/.config/solus-ai-hub}"
+SYNTHEX_AI_HOME="${SYNTHEX_AI_HOME:-$HOME/.synthex/ai}"
+MODELS_DIR="${SYNTHEX_AI_MODELS_DIR:-$SYNTHEX_AI_HOME/models}"
+CACHE_DIR="${SYNTHEX_AI_CACHE_DIR:-$SYNTHEX_AI_HOME/cache}"
+CONFIG_DIR="${SYNTHEX_AI_CONFIG_DIR:-$HOME/.config/synthex-ai-hub}"
 LIBRARY_JSON="${CONFIG_DIR}/modellibrary.json"
-LOG_FILE="${SOLUS_AI_HOME}/logs/model-manager.log"
+LOG_FILE="${SYNTHEX_AI_HOME}/logs/model-manager.log"
 DB_FILE="${CONFIG_DIR}/aihub.db"
 
 # Default fallback URLs (when library is not available)
@@ -103,8 +103,8 @@ check_disk_space() {
 load_library() {
     if [[ -f "${LIBRARY_JSON}" ]]; then
         cat "${LIBRARY_JSON}"
-    elif [[ -f "/usr/share/solus-ai-hub/modellibrary.json" ]]; then
-        cat "/usr/share/solus-ai-hub/modellibrary.json"
+    elif [[ -f "/usr/share/synthex-ai-hub/modellibrary.json" ]]; then
+        cat "/usr/share/synthex-ai-hub/modellibrary.json"
     else
         warning "Model library not found at ${LIBRARY_JSON}"
         echo "{}"
@@ -415,7 +415,7 @@ prune_models() {
 # ──────────────────────────────────────────────────────────────────────────────
 
 show_status() {
-    echo -e "${BLUE}Solus AI Model Manager — Status${NC}"
+    echo -e "${BLUE}Synthex AI Model Manager — Status${NC}"
     echo "═══════════════════════════════════════════════"
 
     # Storage
@@ -545,7 +545,7 @@ quick_install() {
 
 usage() {
     cat << USAGE
-Solus AI Model Manager — Download, manage, and prune local LLMs
+Synthex AI Model Manager — Download, manage, and prune local LLMs
 
 Usage:
   $(basename "$0") install <model-id> [quant]    Install a model (via Ollama)
@@ -565,8 +565,8 @@ Quick Install Categories:
   large          Llama 3.1 70B, Mixtral 8x7B, Qwen 2.5 32B
 
 Environment Variables:
-  SOLUS_AI_HOME       Base directory (~/.solus/ai)
-  SOLUS_AI_MODELS_DIR Model storage directory
+  SYNTHEX_AI_HOME       Base directory (~/.synthex/ai)
+  SYNTHEX_AI_MODELS_DIR Model storage directory
   OLLAMA_API          Ollama API endpoint (http://127.0.0.1:11434)
 
 Examples:

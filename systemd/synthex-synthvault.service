@@ -1,0 +1,18 @@
+[Unit]
+Description=SynthVault Secure Storage Manager
+After=cryptsetup.target
+
+[Service]
+Type=oneshot
+ExecStart=/usr/bin/synthvault lockdown
+RemainAfterExit=no
+
+User=root
+ProtectSystem=strict
+PrivateTmp=yes
+ReadWritePaths=/var/log/synthvault /etc/synthvault
+CapabilityBoundingSet=CAP_SYS_ADMIN CAP_DAC_READ_SEARCH
+SystemCallArchitectures=native
+
+[Install]
+WantedBy=multi-user.target

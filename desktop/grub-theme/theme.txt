@@ -1,10 +1,10 @@
-# Solus GRUB Theme
+# Synthex GRUB Theme
 
 # Global settings
 grub_background_color=#0B0F1A
 
 # Global title and text styling
-title-text: "☀️ Solus Linux"
+title-text: "☀️ SynthOS"
 desktop-color: "#0B0F1A"
 top-bar: true
 top-bar-text-color: "#8899AA"
@@ -44,5 +44,5 @@ submenu_color_highlight=#0B0F1A
 + bitmap {
     left = 50%-200
     top = 60%-150
-    file = /boot/grub/solus-logo.png
+    file = /boot/grub/synthex-logo.png
 }

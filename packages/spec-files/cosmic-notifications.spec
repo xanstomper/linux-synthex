@@ -1,4 +1,4 @@
-# Solus Linux RPM Spec — cosmic-notifications
+# SynthOS RPM Spec — cosmic-notifications
 # COSMIC notification daemon (Rust/Iced)
 # Origin: Pop!_OS (System76)
 
@@ -42,5 +42,5 @@ install -D -m 0755 target/release/cosmic-notifications %{buildroot}%{_bindir}/co
 %{_bindir}/cosmic-notifications
 
 %changelog
-* Mon Jul 07 2026 Solus Rust Team <rust@solus-project.org> - %{cosmicnotif_version}-1
-- Initial Solus package — COSMIC notification daemon
+* Mon Jul 07 2026 Synthex Rust Team <rust@synthex-project.org> - %{cosmicnotif_version}-1
+- Initial Synthex package — COSMIC notification daemon

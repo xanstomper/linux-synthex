@@ -1,2 +1,0 @@
-# Solus AI Hub dependencies
-requests>=2.28.0

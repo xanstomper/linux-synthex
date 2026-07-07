@@ -2,7 +2,7 @@
 Type=Application
 Name=Hermes Agent (Daemon)
 Comment=Hermes background AI service — required for Super+Space
-Exec=solus-hermes --daemon
+Exec=synthex-hermes --daemon
 Icon=hermes
 Terminal=false
 Categories=Utility;System;

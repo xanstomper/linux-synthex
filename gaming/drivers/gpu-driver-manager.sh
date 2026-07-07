@@ -1,12 +1,12 @@
 #!/usr/bin/env bash
 # ============================================================
-# Solus Linux — GPU Driver Manager
+# SynthOS — GPU Driver Manager
 # /usr/sbin/gpu-driver-manager
 #
 # Detects GPU hardware, installs appropriate drivers, applies
 # configuration, and manages driver switching (open vs proprietary).
 #
-# Part of solus-gpu-drivers package
+# Part of synthex-gpu-drivers package
 # ============================================================
 
 set -euo pipefail
@@ -460,7 +460,7 @@ auto_install() {
 
 usage() {
     cat << EOF
-Solus GPU Driver Manager — Detect, install, and switch GPU drivers
+Synthex GPU Driver Manager — Detect, install, and switch GPU drivers
 
 USAGE:
   gpu-driver-manager [command]

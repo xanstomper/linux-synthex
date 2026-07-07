@@ -1,0 +1,13 @@
+[Theme]
+Name=Solus Frost
+Comment=A clean light theme with blue accents
+
+[KWin]
+BorderSize=Normal
+
+[WM]
+FrameBorder=True
+TitleAlignment=Left
+
+[Icons]
+Theme=breeze

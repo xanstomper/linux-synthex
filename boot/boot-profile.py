@@ -1,9 +1,9 @@
 #!/usr/bin/env python3
-"""Record systemd boot times to /var/lib/solus/boot-times.json for trending."""
+"""Record systemd boot times to /var/lib/synthex/boot-times.json for trending."""
 import json, os, subprocess, datetime
 
-P = "/var/lib/solus/boot-times.json"
-os.makedirs("/var/lib/solus", exist_ok=True)
+P = "/var/lib/synthex/boot-times.json"
+os.makedirs("/var/lib/synthex", exist_ok=True)
 
 history = []
 if os.path.exists(P):

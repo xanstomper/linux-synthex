@@ -1,0 +1,38 @@
+{
+  "editions": {
+    "plasma": {
+      "name": "Synthex Plasma",
+      "desktop": "kde-plasma-desktop",
+      "groups": ["synthex-core", "synthex-gaming", "synthex-codecs"]
+    },
+    "gnome": {
+      "name": "Synthex GNOME",
+      "desktop": "gnome-desktop",
+      "groups": ["synthex-core", "synthex-gaming", "synthex-codecs"]
+    },
+    "hyprland": {
+      "name": "Synthex Hyprland",
+      "desktop": "hyprland",
+      "groups": ["synthex-core", "synthex-codecs"]
+    },
+    "minimal": {
+      "name": "Synthex Minimal",
+      "desktop": "",
+      "groups": ["synthex-core"]
+    }
+  },
+  "profiles": {
+    "gaming": {
+      "groups": ["synthex-gaming", "synthex-handheld", "synthex-nvidia"]
+    },
+    "developer": {
+      "groups": ["synthex-developer"]
+    },
+    "creator": {
+      "packages": ["blender", "krita", "gimp", "kdenlive", "obs-studio"]
+    },
+    "minimal": {
+      "groups": []
+    }
+  }
+}

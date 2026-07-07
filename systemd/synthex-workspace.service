@@ -1,0 +1,22 @@
+[Unit]
+Description=Synthex Workspace Engine — System Mode Switcher
+Documentation=https://docs.synthex-project.org/workspace
+After=multi-user.target
+
+[Service]
+Type=oneshot
+ExecStart=/usr/bin/synthex-workspace set balanced
+RemainAfterExit=yes
+StandardOutput=journal
+StandardError=journal
+
+# Security hardening — needs sysctl access for mode switching
+ProtectSystem=full
+ProtectHome=read-only
+PrivateTmp=yes
+NoNewPrivileges=yes
+SystemCallArchitectures=native
+ProtectKernelTunables=yes
+ProtectControlGroups=yes
+MemoryMax=128M
+CPUQuota=30%

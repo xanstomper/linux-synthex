@@ -1,0 +1,8 @@
+# Synthex Workspace: Gaming
+# Minimal UI for gaming — auto-enables GameMode
+
+id=gaming
+name=Gaming
+wallpaper=synthex-midnight.png
+panels=dock
+description=Minimal UI for gaming — auto-enables GameMode

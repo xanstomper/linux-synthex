@@ -1,4 +1,4 @@
-# Solus Linux RPM Spec — gping
+# SynthOS RPM Spec — gping
 # Ping with graph — graphical ping tool written in Rust
 # Origin: Fedora, Arch Linux
 %global gping_version 1.18.0
@@ -44,6 +44,6 @@ mkdir -p %{buildroot}%{_datadir}/bash-completion/completions
 %{_bindir}/gping
 
 %changelog
-* Mon Jul 07 2026 Solus Rust Team <rust@solus-project.org> - 1.18.0-1
-- Initial Solus package
+* Mon Jul 07 2026 Synthex Rust Team <rust@synthex-project.org> - 1.18.0-1
+- Initial Synthex package
 - Graphical ping tool in Rust

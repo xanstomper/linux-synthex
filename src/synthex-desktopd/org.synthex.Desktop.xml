@@ -1,0 +1,115 @@
+<!DOCTYPE node PUBLIC "-//freedesktop//DTD D-BUS Object Introspection 1.0//EN"
+ "http://www.freedesktop.org/standards/dbus/1.0/introspect.dtd">
+<node>
+  <!--
+    org.synthex.Desktop — Synthex Desktop Customization D-Bus Interface
+
+    Managed by synthex-desktopd. Provides layout switching, theme application,
+    performance profile switching, and snapshot/rollback capabilities.
+  -->
+  <interface name="org.synthex.Desktop">
+
+    <!--
+      SetLayout:
+      @name: Layout name (gaming, minimal, macos, windows, dev, balanced)
+      Returns: "ok" on success, "error: <reason>" on failure.
+    -->
+    <method name="SetLayout">
+      <arg name="name" type="s" direction="in"/>
+      <arg name="result" type="s" direction="out"/>
+    </method>
+
+    <!--
+      SetTheme:
+      @name: Theme name (e.g., "default", "dark", "light")
+      Returns: "ok" on success, "error: <reason>" on failure.
+    -->
+    <method name="SetTheme">
+      <arg name="name" type="s" direction="in"/>
+      <arg name="result" type="s" direction="out"/>
+    </method>
+
+    <!--
+      SetMode:
+      @mode: Performance mode (gaming, dev, battery, balanced)
+      Returns: "ok" on success, "error: <reason>" on failure.
+    -->
+    <method name="SetMode">
+      <arg name="mode" type="s" direction="in"/>
+      <arg name="result" type="s" direction="out"/>
+    </method>
+
+    <!--
+      GetCurrentLayout:
+      Returns the name of the currently active layout.
+    -->
+    <method name="GetCurrentLayout">
+      <arg name="layout" type="s" direction="out"/>
+    </method>
+
+    <!--
+      GetCurrentTheme:
+      Returns the name of the currently active theme.
+    -->
+    <method name="GetCurrentTheme">
+      <arg name="theme" type="s" direction="out"/>
+    </method>
+
+    <!--
+      GetCurrentMode:
+      Returns the name of the currently active mode.
+    -->
+    <method name="GetCurrentMode">
+      <arg name="mode" type="s" direction="out"/>
+    </method>
+
+    <!--
+      SetPerformanceProfile:
+      @profileName: Combined profile "mode-theme-layout" string.
+      Returns: "ok" on success, "error: <reason>" on failure.
+    -->
+    <method name="SetPerformanceProfile">
+      <arg name="profileName" type="s" direction="in"/>
+      <arg name="result" type="s" direction="out"/>
+    </method>
+
+    <!--
+      CreateSnapshot:
+      Captures current layout/theme/mode state to disk.
+      Returns: Snapshot ID as string.
+    -->
+    <method name="CreateSnapshot">
+      <arg name="snapshotId" type="s" direction="out"/>
+    </method>
+
+    <!--
+      RollbackToSnapshot:
+      @snapshotId: Numeric snapshot ID to restore.
+      Returns: "ok" on success, "error: <reason>" on failure.
+    -->
+    <method name="RollbackToSnapshot">
+      <arg name="snapshotId" type="u" direction="in"/>
+      <arg name="result" type="s" direction="out"/>
+    </method>
+
+    <!-- Signals -->
+
+    <signal name="ModeChanged">
+      <arg name="mode" type="s"/>
+    </signal>
+
+    <signal name="LayoutChanged">
+      <arg name="layout" type="s"/>
+    </signal>
+
+    <signal name="ThemeChanged">
+      <arg name="theme" type="s"/>
+    </signal>
+
+    <signal name="SnapshotCreated">
+      <arg name="id" type="u"/>
+      <arg name="description" type="s"/>
+    </signal>
+
+  </interface>
+</node>

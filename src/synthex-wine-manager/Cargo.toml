@@ -1,0 +1,9 @@
+[package]
+name = "synthex-wine-manager"
+version = "0.1.0"
+edition = "2021"
+description = "Wine/Proton manager — like WinBoat + Bottles"
+
+[dependencies]
+anyhow = { workspace = true }
+clap = { workspace = true }

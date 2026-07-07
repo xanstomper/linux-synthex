@@ -1,8 +1,8 @@
-# Contributing to Solus Linux
+# Contributing to SynthOS
 
 > **Audience:** Developers, designers, translators, and community members  
 > **Last updated:** July 2026  
-> **Repository:** https://github.com/solus-project
+> **Repository:** https://github.com/synthex-project
 
 ---
 
@@ -28,7 +28,7 @@
 
 ### 1.1 Our Pledge
 
-As a member of the Solus community, we are committed to creating a welcoming, inclusive, and harassment-free experience for everyone, regardless of age, body size, disability, ethnicity, gender identity and expression, level of experience, nationality, personal appearance, race, religion, or sexual identity and orientation.
+As a member of the Synthex community, we are committed to creating a welcoming, inclusive, and harassment-free experience for everyone, regardless of age, body size, disability, ethnicity, gender identity and expression, level of experience, nationality, personal appearance, race, religion, or sexual identity and orientation.
 
 ### 1.2 Our Standards
 
@@ -52,7 +52,7 @@ As a member of the Solus community, we are committed to creating a welcoming, in
 
 Project maintainers are responsible for clarifying the standards of acceptable behavior and are expected to take appropriate and fair corrective action in response to any instances of unacceptable behavior.
 
-Instances of abusive, harassing, or otherwise unacceptable behavior may be reported by contacting the project team at **conduct@getsol.us**. All complaints will be reviewed and investigated and will result in a response that is deemed necessary and appropriate to the circumstances.
+Instances of abusive, harassing, or otherwise unacceptable behavior may be reported by contacting the project team at **conduct@getsynthex.org**. All complaints will be reviewed and investigated and will result in a response that is deemed necessary and appropriate to the circumstances.
 
 ### 1.4 Scope
 
@@ -76,20 +76,20 @@ Community leaders will follow these Community Impact Guidelines in determining t
 ### 2.1 First Steps
 
 1. **Join the community:**
-   - [Solus Forums](https://discuss.getsol.us)
-   - [Solus Matrix Chat](https://matrix.to/#/#solus:matrix.org)
-   - [Solus Discord](https://discord.gg/solus)
-   - [Solus IRC](ircs://irc.libera.chat:6697/#solus)
+   - [Synthex Forums](https://discuss.getsynthex.org)
+   - [Synthex Matrix Chat](https://matrix.to/#/#synthex:matrix.org)
+   - [Synthex Discord](https://discord.gg/synthex)
+   - [Synthex IRC](ircs://irc.libera.chat:6697/#synthex)
 
 2. **Find something to work on:**
    - Look for issues tagged `help-wanted` or `good-first-issue` on GitHub
-   - Check the [Solus Issue Tracker](https://github.com/solus-project/issues)
-   - Join the #solus-dev channel and ask for guidance
-   - Review the [Roadmap](https://wiki.getsol.us/Roadmap)
+   - Check the [Synthex Issue Tracker](https://github.com/synthex-project/issues)
+   - Join the #synthex-dev channel and ask for guidance
+   - Review the [Roadmap](https://wiki.getsynthex.org/Roadmap)
 
 3. **Understand the project structure:**
-   - Solus packages (RPM spec files)
-   - Solus tools and infrastructure
+   - Synthex packages (RPM spec files)
+   - Synthex tools and infrastructure
    - Desktop integration and theming
    - Documentation and translations
    - Quality assurance and testing
@@ -137,20 +137,20 @@ sudo dnf5 install python3-sphinx python3-sphinx-rtd-theme doxygen
 
 ```bash
 # Create workspace
-mkdir -p ~/solus-dev
-cd ~/solus-dev
+mkdir -p ~/synthex-dev
+cd ~/synthex-dev
 
 # Clone main repositories
-git clone https://github.com/solus-project/packages.git
-git clone https://github.com/solus-project/solus-sc.git
-git clone https://github.com/solus-project/solus-settings.git
-git clone https://github.com/solus-project/artwork.git
-git clone https://github.com/solus-project/solus-website.git
-git clone https://github.com/solus-project/docs.git
+git clone https://github.com/synthex-project/packages.git
+git clone https://github.com/synthex-project/synthex-sc.git
+git clone https://github.com/synthex-project/synthex-settings.git
+git clone https://github.com/synthex-project/artwork.git
+git clone https://github.com/synthex-project/synthex-website.git
+git clone https://github.com/synthex-project/docs.git
 
 # Clone package-specific repos (if working on a specific package)
-git clone https://github.com/solus-project/linux.git
-git clone https://github.com/solus-project/mesa.git
+git clone https://github.com/synthex-project/linux.git
+git clone https://github.com/synthex-project/mesa.git
 # ... etc.
 ```
 
@@ -164,7 +164,7 @@ git config --global pull.rebase true
 git config --global fetch.prune true
 
 # Fork the repo on GitHub and add your fork as remote
-cd ~/solus-dev/packages
+cd ~/synthex-dev/packages
 git remote add fork git@github.com:YOUR_USERNAME/packages.git
 ```
 
@@ -172,7 +172,7 @@ git remote add fork git@github.com:YOUR_USERNAME/packages.git
 
 ```bash
 # Install pre-commit hooks (found in .pre-commit-config.yaml)
-cd ~/solus-dev/packages
+cd ~/synthex-dev/packages
 pre-commit install
 
 # This will automatically run checks before each commit:
@@ -209,14 +209,14 @@ sudo dnf5 install kate
 
 | Repository | Description | Language/Tools |
 |------------|-------------|----------------|
-| [packages](https://github.com/solus-project/packages) | RPM spec files for all Solus packages | RPM spec, shell |
-| [solus-sc](https://github.com/solus-project/solus-sc) | Solus Software Center | Python, Qt6 |
-| [solus-settings](https://github.com/solus-project/solus-settings) | System configuration defaults | INI, XML, shell |
-| [artwork](https://github.com/solus-project/artwork) | Branding, themes, wallpapers | SVG, QML, CSS |
-| [linux](https://github.com/solus-project/linux) | Solus Linux kernel config | Kernel config, patches |
-| [docs](https://github.com/solus-project/docs) | Documentation | Markdown, reStructuredText |
-| [solus-website](https://github.com/solus-project/website) | getsol.us website | Hugo, Markdown |
-| [solus-installer](https://github.com/solus-project/calamares) | Calamares installer config | YAML, Python |
+| [packages](https://github.com/synthex-project/packages) | RPM spec files for all Synthex packages | RPM spec, shell |
+| [synthex-sc](https://github.com/synthex-project/synthex-sc) | Synthex Software Center | Python, Qt6 |
+| [synthex-settings](https://github.com/synthex-project/synthex-settings) | System configuration defaults | INI, XML, shell |
+| [artwork](https://github.com/synthex-project/artwork) | Branding, themes, wallpapers | SVG, QML, CSS |
+| [linux](https://github.com/synthex-project/linux) | SynthOS kernel config | Kernel config, patches |
+| [docs](https://github.com/synthex-project/docs) | Documentation | Markdown, reStructuredText |
+| [synthex-website](https://github.com/synthex-project/website) | getsynthex.org website | Hugo, Markdown |
+| [synthex-installer](https://github.com/synthex-project/calamares) | Calamares installer config | YAML, Python |
 
 ### 4.2 Repository Structure (packages)
 
@@ -228,7 +228,7 @@ packages/
 │   │       ├── firefox.spec     # RPM spec file
 │   │       ├── sources          # Source tarball URLs
 │   │       ├── patches/         # Distribution patches
-│   │       │   ├── firefox-solus-defaults.patch
+│   │       │   ├── firefox-synthex-defaults.patch
 │   │       │   └── firefox-wayland-default.patch
 │   │       └── tests/           # Package-level tests
 │   │           └── smoke-test.sh
@@ -238,7 +238,7 @@ packages/
 │   │   └── linux/
 │   └── .../
 ├── groups/                      # Package groups
-│   ├── base-solus.conf
+│   ├── base-synthex.conf
 │   ├── desktop-plasma.conf
 │   └── development.conf
 ├── Makefile                     # Build orchestration
@@ -267,7 +267,7 @@ packages/
 - **Documentation**: Every public API/function needs a docstring
 - **Error handling**: Always check return values and handle errors gracefully
 
-### 5.2 Python (for solus-sc and tools)
+### 5.2 Python (for synthex-sc and tools)
 
 ```python
 """
@@ -314,7 +314,7 @@ class PackageManager:
 # Module-level functions in snake_case
 def get_cache_dir() -> str:
     """Return the cache directory path."""
-    return os.path.expanduser("~/.cache/solus-sc")
+    return os.path.expanduser("~/.cache/synthex-sc")
 ```
 
 **Python style:**
@@ -336,7 +336,7 @@ set -euo pipefail
 
 # Constants
 readonly SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-readonly CONFIG_FILE="${HOME}/.config/solus-tool.conf"
+readonly CONFIG_FILE="${HOME}/.config/synthex-tool.conf"
 
 # Functions
 usage() {
@@ -349,7 +349,7 @@ Options:
     -o, --output    Output directory
 
 Description:
-    This script does something useful for Solus.
+    This script does something useful for Synthex.
 EOF
     exit 1
 }
@@ -404,10 +404,10 @@ License:    MPL-2.0
 URL:        https://www.mozilla.org/firefox/
 Source0:    https://archive.mozilla.org/pub/firefox/releases/%{version}/source/firefox-%{version}.source.tar.xz
 Source1:    firefox.desktop
-Source2:    firefox-solus-branding
+Source2:    firefox-synthex-branding
 
 Patch0:     firefox-wayland-default.patch
-Patch1:     firefox-solus-search.patch
+Patch1:     firefox-synthex-search.patch
 
 BuildRequires:  gcc-c++
 BuildRequires:  rust >= 1.70
@@ -458,7 +458,7 @@ install -Dm0644 %{SOURCE1} %{buildroot}%{_datadir}/applications/%{name}.desktop
 %{_mandir}/man1/firefox.1*
 
 %changelog
-* Mon Jun 23 2026 Developer Name <dev@getsol.us> - 128.0.3-1
+* Mon Jun 23 2026 Developer Name <dev@getsynthex.org> - 128.0.3-1
 - Update to 128.0.3
 - Security fixes
 ```
@@ -488,7 +488,7 @@ Signed-off-by: Your Name <email@example.com>
 |--------|-----------|
 | `firefox:` | Firefox package changes |
 | `kernel:` | Kernel package/config changes |
-| `solus-sc:` | Software Center |
+| `synthex-sc:` | Software Center |
 | `docs:` | Documentation |
 | `artwork:` | Themes and branding |
 | `ci:` | Build system / CI changes |
@@ -513,13 +513,13 @@ Upstream Release → Spec Update → Local Build → Test → PR → Review → 
 
 1. **Check if package already exists:**
    ```bash
-   ls ~/solus-dev/packages/packages/*/<package-name>
+   ls ~/synthex-dev/packages/packages/*/<package-name>
    # Or search the repository
    ```
 
 2. **Create package directory:**
    ```bash
-   cd ~/solus-dev/packages
+   cd ~/synthex-dev/packages
    mkdir -p packages/<first-letter>/<package-name>
    ```
 
@@ -555,7 +555,7 @@ Upstream Release → Spec Update → Local Build → Test → PR → Review → 
 
 ```bash
 # 1. Clone or update packages repo
-cd ~/solus-dev/packages
+cd ~/synthex-dev/packages
 git checkout master
 git pull upstream master
 
@@ -614,7 +614,7 @@ cd plasma-styles/my-theme/
 cat > metadata.desktop <<EOF
 [Desktop Entry]
 Name=My Theme
-Comment=A custom Solus theme
+Comment=A custom Synthex theme
 X-KDE-PluginInfo-Version=1.0
 X-KDE-PluginInfo-Name=my-theme
 X-KDE-PluginInfo-Category=Plasma Theme
@@ -627,14 +627,14 @@ EOF
 
 ### 7.3 Theme Design Guidelines
 
-- **Follow Solus brand colors** (accent, complementary)
+- **Follow Synthex brand colors** (accent, complementary)
 - **Support dark and light variants**
 - **Test on both Wayland and X11**
 - **Support HiDPI** (provide SVG elements where possible)
 - **Maintain readability** — high contrast for text
 - **Match panel transparency** (default: translucent)
 
-### 7.4 Solus Brand Colors
+### 7.4 Synthex Brand Colors
 
 ```
 Primary:    #5294E2   (Blue - accent)
@@ -668,9 +668,9 @@ Surface Light:    #FFFFFF
 
 | Repository | Content | Format |
 |------------|---------|--------|
-| [docs](https://github.com/solus-project/docs) | User guides, admin guides | Markdown |
-| [wiki](https://wiki.getsol.us) | Wiki content (via Git) | MediaWiki |
-| [website](https://github.com/solus-project/website) | getsol.us website | Hugo/Markdown |
+| [docs](https://github.com/synthex-project/docs) | User guides, admin guides | Markdown |
+| [wiki](https://wiki.getsynthex.org) | Wiki content (via Git) | MediaWiki |
+| [website](https://github.com/synthex-project/website) | getsynthex.org website | Hugo/Markdown |
 | API docs | In-source docstrings | reStructuredText / Doxygen |
 
 ### 8.2 Documentation Style Guide
@@ -721,7 +721,7 @@ sudo dnf5 install package
 ```python
 # Python code
 def hello():
-    print("Hello, Solus!")
+    print("Hello, Synthex!")
 ```
 
 ```yaml
@@ -772,10 +772,10 @@ key: value
 
 ### 9.1 Translation Platforms
 
-Solus uses **Weblate** for community translations:
+Synthex uses **Weblate** for community translations:
 
 ```
-https://translate.getsol.us
+https://translate.getsynthex.org
 ```
 
 ### 9.2 Getting Started with Translations
@@ -787,22 +787,22 @@ https://translate.getsol.us
 
 ### 9.3 Translating Software
 
-For Solus applications (solus-sc, etc.):
+For Synthex applications (synthex-sc, etc.):
 
 ```bash
 # .ts files (Qt Linguist format)
-# Located in: solus-sc/translations/
+# Located in: synthex-sc/translations/
 # Tools needed:
 sudo dnf5 install qt6-linguist
 
 # Update translation files
-lupdate solus-sc.pro
+lupdate synthex-sc.pro
 
 # Edit translations
-linguist translations/solus-sc_de.ts
+linguist translations/synthex-sc_de.ts
 
 # Release translations
-lrelease translations/solus-sc_de.ts
+lrelease translations/synthex-sc_de.ts
 ```
 
 ### 9.4 Translation Guidelines
@@ -843,10 +843,10 @@ lrelease translations/solus-sc_de.ts
 # Every package PR must build successfully:
 
 # 1. Mock build (isolated chroot)
-mock -r solus-x86_64 --rebuild <package>.src.rpm
+mock -r synthex-x86_64 --rebuild <package>.src.rpm
 
 # 2. Local build
-make -C ~/solus-dev/packages <package-name>
+make -C ~/synthex-dev/packages <package-name>
 
 # 3. rpmlint validation
 rpmlint <package>.rpm
@@ -877,7 +877,7 @@ cd packages/<first-letter>/<package-name>
 make test
 
 # Run integration tests (if applicable)
-cd ~/solus-dev/solus-sc
+cd ~/synthex-dev/synthex-sc
 python3 -m pytest tests/
 ```
 
@@ -910,7 +910,7 @@ Fork → Branch → Commit → Push → PR → Review → CI → Merge → Deplo
 # Then clone your fork:
 git clone git@github.com:YOUR_USERNAME/packages.git
 cd packages
-git remote add upstream https://github.com/solus-project/packages.git
+git remote add upstream https://github.com/synthex-project/packages.git
 ```
 
 #### 2. Create a Feature Branch
@@ -1089,7 +1089,7 @@ Reviewers check for:
 ┌────────────────────────────────────────────────────────────────┐
 │                    Community Structure                          │
 │                                                                │
-│   Solus Project Lead                                           │
+│   Synthex Project Lead                                           │
 │       │                                                        │
 │   ├── Release Manager                                          │
 │   │       │                                                    │
@@ -1156,20 +1156,20 @@ Reviewers check for:
 
 | Channel | Purpose | URL |
 |---------|---------|-----|
-| **Matrix** | Real-time dev chat | `#solus:matrix.org` |
-| **Discord** | Community chat | `https://discord.gg/solus` |
-| **IRC** | Legacy chat | `#solus` on Libera.Chat |
-| **Forum** | Discussion, support | `https://discuss.getsol.us` |
-| **GitHub** | Code, issues, PRs | `https://github.com/solus-project` |
-| **Wiki** | Documentation | `https://wiki.getsol.us` |
-| **Weblate** | Translations | `https://translate.getsol.us` |
-| **Mail** | Security reports | `security@getsol.us` |
+| **Matrix** | Real-time dev chat | `#synthex:matrix.org` |
+| **Discord** | Community chat | `https://discord.gg/synthex` |
+| **IRC** | Legacy chat | `#synthex` on Libera.Chat |
+| **Forum** | Discussion, support | `https://discuss.getsynthex.org` |
+| **GitHub** | Code, issues, PRs | `https://github.com/synthex-project` |
+| **Wiki** | Documentation | `https://wiki.getsynthex.org` |
+| **Weblate** | Translations | `https://translate.getsynthex.org` |
+| **Mail** | Security reports | `security@getsynthex.org` |
 
 ### 13.5 Recognition
 
 Contributors are recognized through:
 - **GitHub** — listed as contributors to repositories
-- **Solus Website** — contributors page
+- **Synthex Website** — contributors page
 - **Release notes** — named in release announcements
 - **Badges** — contributor badges on forum
 - **Maintainer status** — elevated access and responsibility

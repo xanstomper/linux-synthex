@@ -1,0 +1,29 @@
+[Unit]
+Description=Synthex System Performance Auto-Tuner (Rust)
+Documentation=https://github.com/xanstomper/synthex-linux
+After=sysinit.target local-fs.target
+Before=display-manager.service
+
+[Service]
+Type=simple
+ExecStart=/usr/libexec/synthex/synthex-system-daemon
+Restart=on-failure
+RestartSec=5
+StandardOutput=journal
+StandardError=journal
+TimeoutStopSec=10
+# Runs as root for sysfs access (CPU governor, GPU DPM, TDP)
+User=root
+Nice=0
+CPUAccounting=true
+MemoryAccounting=true
+MemoryMax=128M
+NoNewPrivileges=yes
+PrivateTmp=yes
+ProtectSystem=full
+SystemCallArchitectures=native
+ProtectKernelTunables=yes
+ProtectControlGroups=yes
+
+[Install]
+WantedBy=multi-user.target

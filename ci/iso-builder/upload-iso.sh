@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # ============================================================================
-# Solus Linux — ISO Upload & Mirror Sync Script
+# SynthOS — ISO Upload & Mirror Sync Script
 # ============================================================================
 # Uploads built ISO images to the primary repository server and triggers
 # mirror synchronization across the CDN and regional mirrors.
@@ -128,7 +128,7 @@ sign_artifact() {
     case "${SIGNING_KEY_STORAGE}" in
         hsm)
             # Sign using HSM (YubiHSM2 / Nitrokey)
-            gpg --homedir /etc/solus/gpg \
+            gpg --homedir /etc/synthex/gpg \
                 --default-key "${SIGNING_KEY}" \
                 --detach-sign --armor \
                 --digest-algo SHA512 \
@@ -136,7 +136,7 @@ sign_artifact() {
             ;;
         file)
             # Sign using key file (CI environment)
-            local key_file="${SIGNING_KEY_FILE:-/etc/solus/signing-key.asc}"
+            local key_file="${SIGNING_KEY_FILE:-/etc/synthex/signing-key.asc}"
             if [[ ! -f "${key_file}" ]]; then
                 log_error "Signing key file not found: ${key_file}"
                 return 1
@@ -176,7 +176,7 @@ generate_checksum_files() {
     # Generate combined checksum file
     {
         echo "=========================================="
-        echo " Solus Linux ${RELEASE_VERSION} - ${ISO_VARIANT}"
+        echo " SynthOS ${RELEASE_VERSION} - ${ISO_VARIANT}"
         echo " Architecture: ${ARCHITECTURE}"
         echo " Generated: $(date -u)"
         echo "=========================================="
@@ -229,7 +229,7 @@ generate_torrent() {
 
     transmission-create \
         "${tracker_args[@]}" \
-        --comment "Solus Linux ${RELEASE_VERSION} (${ISO_VARIANT}, ${ARCHITECTURE})" \
+        --comment "SynthOS ${RELEASE_VERSION} (${ISO_VARIANT}, ${ARCHITECTURE})" \
         --outfile "${torrent_path}" \
         "${iso_path}"
 
@@ -283,8 +283,8 @@ purge_cdn_cache() {
     fi
 
     local cdn_urls=(
-        "https://cdn.solus.org/releases/${RELEASE_VERSION}/"
-        "https://cdn.solus.org/releases/latest/"
+        "https://cdn.synthex.org/releases/${RELEASE_VERSION}/"
+        "https://cdn.synthex.org/releases/latest/"
     )
 
     for url in "${cdn_urls[@]}"; do
@@ -311,7 +311,7 @@ trigger_mirror_sync() {
 
     curl -s -X POST \
         -H "Authorization: Bearer ${MIRROR_API_KEY}" \
-        "https://admin.solus.org/api/mirrors/sync" \
+        "https://admin.synthex.org/api/mirrors/sync" \
         && log_info "Mirror sync triggered successfully." \
         || log_warn "Mirror sync trigger failed."
 }
@@ -321,7 +321,7 @@ trigger_mirror_sync() {
 # --------------------------------------------------------------------------
 main() {
     echo "============================================"
-    echo "  Solus Linux — ISO Upload & Mirror Sync"
+    echo "  SynthOS — ISO Upload & Mirror Sync"
     echo "============================================"
     echo ""
     echo "Version:     ${RELEASE_VERSION}"
@@ -345,15 +345,15 @@ main() {
     echo "  Upload Complete!"
     echo "============================================"
     echo ""
-    echo "ISO URL:  https://cdn.solus.org/releases/${RELEASE_VERSION}/${ISO_FILENAME}"
-    echo "Torrent:  https://cdn.solus.org/releases/${RELEASE_VERSION}/${ISO_PATTERN}.torrent"
+    echo "ISO URL:  https://cdn.synthex.org/releases/${RELEASE_VERSION}/${ISO_FILENAME}"
+    echo "Torrent:  https://cdn.synthex.org/releases/${RELEASE_VERSION}/${ISO_PATTERN}.torrent"
     echo ""
 
     # Generate a quick verification snippet
     cat << VERIFY
 To verify the download:
-  wget https://cdn.solus.org/releases/${RELEASE_VERSION}/${ISO_FILENAME}
-  wget https://cdn.solus.org/releases/${RELEASE_VERSION}/${ISO_FILENAME}.asc
+  wget https://cdn.synthex.org/releases/${RELEASE_VERSION}/${ISO_FILENAME}
+  wget https://cdn.synthex.org/releases/${RELEASE_VERSION}/${ISO_FILENAME}.asc
   gpg --verify ${ISO_FILENAME}.asc ${ISO_FILENAME}
   sha256sum -c ${ISO_FILENAME}.sha256
 VERIFY

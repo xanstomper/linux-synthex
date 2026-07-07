@@ -1,0 +1,12 @@
+[Unit]
+Description=Synthex Recovery Framework
+After=multi-user.target
+
+[Service]
+Type=oneshot
+ExecStart=/usr/bin/synthex-recovery diagnose
+RemainAfterExit=yes
+StandardOutput=journal
+
+[Install]
+WantedBy=multi-user.target

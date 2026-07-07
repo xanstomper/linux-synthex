@@ -11,7 +11,7 @@
                 "keyboard",
                 "partition",
                 "users",
-                "solusprofile",
+                "synthexprofile",
                 "summary"
             ]
         },
@@ -21,27 +21,23 @@
                 "mount",
                 "packages",
                 "bootloader",
-                "soluspostinstall",
+                "synthexpostinstall",
                 "unpackfs",
                 "networkcfg",
                 "hwclock",
                 "services-systemd",
                 "grubcfg",
-                "plymouthcfg",
-                "initramfscfg",
                 "users",
                 "displaymanager",
-                "mkswapfile",
                 "machineid",
                 "fstab",
-                "luksbootkeyfile",
                 "removeuser",
                 "umount",
                 "finished"
             ]
         }
     ],
-    "branding": "solus",
+    "branding": "synthex",
     "prompt-install": true,
     "dont-chroot": false,
     "oem-setup": false,

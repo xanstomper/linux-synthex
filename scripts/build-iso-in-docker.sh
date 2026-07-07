@@ -1,22 +1,22 @@
 #!/usr/bin/env bash
-# Solus ISO Builder — creates bootable ISO from rootfs tarball
+# Synthex ISO Builder — creates bootable ISO from rootfs tarball
 set -euo pipefail
 
-ROOTFS_TAR="/output/solus-rootfs-*.tar.gz"
-ISO_OUTPUT="/output/solus-plasma-2026.07-x86_64.iso"
-WORK="/tmp/solus-iso-work"
-ROOTFS_EXTRACT="/tmp/solus-rootfs-extract"
+ROOTFS_TAR="/output/synthex-rootfs-*.tar.gz"
+ISO_OUTPUT="/output/synthex-plasma-2026.07-x86_64.iso"
+WORK="/tmp/synthex-iso-work"
+ROOTFS_EXTRACT="/tmp/synthex-rootfs-extract"
 
-echo "💿 Building Solus ISO..."
+echo "💿 Building Synthex ISO..."
 mkdir -p "$WORK" "$ROOTFS_EXTRACT"
 
-# Find rootfs tarball (build-solus.sh mounts OUTPUT_DIR at /output)
-TARBALL=$(ls /output/solus-rootfs-*.tar.gz 2>/dev/null | head -1)
+# Find rootfs tarball (build-synthex.sh mounts OUTPUT_DIR at /output)
+TARBALL=$(ls /output/synthex-rootfs-*.tar.gz 2>/dev/null | head -1)
 if [ -z "$TARBALL" ]; then
     echo "No rootfs tarball found in /output/"
     echo "Building rootfs first..."
-    bash /solus/scripts/build-rootfs-in-docker.sh
-    TARBALL=$(ls /output/solus-rootfs-*.tar.gz 2>/dev/null | head -1)
+    bash /synthex/scripts/build-rootfs-in-docker.sh
+    TARBALL=$(ls /output/synthex-rootfs-*.tar.gz 2>/dev/null | head -1)
 fi
 
 if [ -z "$TARBALL" ]; then
@@ -61,16 +61,16 @@ insmod gfxterm
 insmod png
 insmod gfxmenu
 
-# Solus boot entry
-menuentry "☀️ Solus Linux" {
+# Synthex boot entry
+menuentry "☀️ SynthOS" {
     set root=(cd)
-    linux /boot/vmlinuz root=live:LABEL=SOLUS rd.live.image rd.live.overlay.overlayfs=1 quiet splash
+    linux /boot/vmlinuz root=live:LABEL=SYNTHEX rd.live.image rd.live.overlay.overlayfs=1 quiet splash
     initrd /boot/initrd.img
 }
 
-menuentry "☀️ Solus Linux (Safe Mode)" {
+menuentry "☀️ SynthOS (Safe Mode)" {
     set root=(cd)
-    linux /boot/vmlinuz root=live:LABEL=SOLUS rd.live.image rd.live.overlay.overlayfs=1 nomodeset nofb
+    linux /boot/vmlinuz root=live:LABEL=SYNTHEX rd.live.image rd.live.overlay.overlayfs=1 nomodeset nofb
     initrd /boot/initrd.img
 }
 

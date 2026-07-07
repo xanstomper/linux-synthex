@@ -1,4 +1,4 @@
-# /usr/share/calamares/branding/solus/show.qml — Calamares slideshow
+# /usr/share/calamares/branding/synthex/show.qml — Calamares slideshow
 # Simple QML slideshow shown during installation
 
 import QtQuick 2.0
@@ -12,7 +12,7 @@ Rectangle {
     // Slides
     ListModel {
         id: slides
-        ListElement { title: "Welcome to Solus"; subtitle: "The gaming-focused Linux distribution"; color: "#e94560" }
+        ListElement { title: "Welcome to Synthex"; subtitle: "The gaming-focused Linux distribution"; color: "#e94560" }
         ListElement { title: "Gaming Ready"; subtitle: "Steam, Proton, Lutris, Heroic — all preconfigured"; color: "#0f3460" }
         ListElement { title: "Performance Tuned"; subtitle: "CachyOS-style kernel tuning out of the box"; color: "#16213e" }
         ListElement { title: "Bazzite Features"; subtitle: "ujust, handheld support, Steam Gaming Mode"; color: "#533483" }
@@ -43,7 +43,7 @@ Rectangle {
         anchors.top: parent.top
         anchors.topMargin: 40
         anchors.horizontalCenter: parent.horizontalCenter
-        source: "solus-logo.png"
+        source: "synthex-logo.png"
         width: 120
         height: 120
         fillMode: Image.PreserveAspectFit

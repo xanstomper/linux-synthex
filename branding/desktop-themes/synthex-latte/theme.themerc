@@ -1,0 +1,13 @@
+[Theme]
+Name=Solus Latte
+Comment=A warm latte-inspired theme with rose gold accents
+
+[KWin]
+BorderSize=Normal
+
+[WM]
+FrameBorder=True
+TitleAlignment=Left
+
+[Icons]
+Theme=breeze

@@ -1,32 +1,32 @@
-# Solus API Documentation
+# Synthex API Documentation
 
-> **Audience:** Application developers integrating with Solus-specific services  
+> **Audience:** Application developers integrating with Synthex-specific services  
 > **Last updated:** July 2026  
-> **Base URL:** `https://api.getsol.us/v1`
+> **Base URL:** `https://api.getsynthex.org/v1`
 
 ---
 
 ## Table of Contents
 
-1. [Solus AI Hub API](#1-solus-ai-hub-api)
-2. [Solus Gaming Control Center API](#2-solus-gaming-control-center-api)
-3. [Solus Security Dashboard API](#3-solus-security-dashboard-api)
-4. [Solus Software Center API](#4-solus-software-center-api)
+1. [Synthex AI Hub API](#1-synthex-ai-hub-api)
+2. [Synthex Gaming Control Center API](#2-synthex-gaming-control-center-api)
+3. [Synthex Security Dashboard API](#3-synthex-security-dashboard-api)
+4. [Synthex Software Center API](#4-synthex-software-center-api)
 5. [Customization API](#5-customization-api)
 6. [System Monitoring API](#6-system-monitoring-api)
 
 ---
 
-## 1. Solus AI Hub API
+## 1. Synthex AI Hub API
 
-The Solus AI Hub provides a unified interface for local and remote AI model inference, management, and monitoring.
+The Synthex AI Hub provides a unified interface for local and remote AI model inference, management, and monitoring.
 
 ### 1.1 Overview
 
 ```
 Base URL: http://localhost:11434  (Ollama-compatible)
            http://localhost:8080  (LocalAI-compatible)
-           https://ai.api.getsol.us/v1  (Cloud API)
+           https://ai.api.getsynthex.org/v1  (Cloud API)
 ```
 
 ### 1.2 Authentication
@@ -34,7 +34,7 @@ Base URL: http://localhost:11434  (Ollama-compatible)
 ```http
 # API Key authentication
 Authorization: Bearer <api_key>
-X-Solus-AI-Version: 1.0
+X-Synthex-AI-Version: 1.0
 ```
 
 ### 1.3 Endpoints
@@ -225,7 +225,7 @@ curl -X POST http://localhost:11434/api/tune \
 
 ---
 
-## 2. Solus Gaming Control Center API
+## 2. Synthex Gaming Control Center API
 
 The Gaming Control Center API provides interfaces for game detection, performance optimization, and platform management.
 
@@ -233,7 +233,7 @@ The Gaming Control Center API provides interfaces for game detection, performanc
 
 ```
 Base URL: http://localhost:12345/api/v1
-Socket: /var/run/solus-gcc.sock (Unix socket)
+Socket: /var/run/synthex-gcc.sock (Unix socket)
 ```
 
 ### 2.2 Authentication
@@ -241,7 +241,7 @@ Socket: /var/run/solus-gcc.sock (Unix socket)
 ```http
 # Local API uses polkit for authorization
 Authorization: Bearer <session_token>
-X-Solus-GCC-Version: 1.0
+X-Synthex-GCC-Version: 1.0
 ```
 
 ### 2.3 Endpoints
@@ -518,7 +518,7 @@ curl -X POST http://localhost:12345/api/v1/recording/start \
 
 ---
 
-## 3. Solus Security Dashboard API
+## 3. Synthex Security Dashboard API
 
 The Security Dashboard API provides system security monitoring, audit status, and vulnerability management.
 
@@ -526,14 +526,14 @@ The Security Dashboard API provides system security monitoring, audit status, an
 
 ```
 Base URL: http://localhost:9090/api/v1
-Socket: /var/run/solus-security.sock
+Socket: /var/run/synthex-security.sock
 ```
 
 ### 3.2 Authentication
 
 ```http
-X-Solus-Security-Token: <token>
-# Or via D-Bus: org.solus.SecurityDashboard
+X-Synthex-Security-Token: <token>
+# Or via D-Bus: org.synthex.SecurityDashboard
 ```
 
 ### 3.3 Endpoints
@@ -776,7 +776,7 @@ curl http://localhost:9090/api/v1/vulnerabilities?severity=high
 
 ---
 
-## 4. Solus Software Center API
+## 4. Synthex Software Center API
 
 The Software Center API provides package management operations for DNF5, Flatpak, and rpm-ostree.
 
@@ -784,7 +784,7 @@ The Software Center API provides package management operations for DNF5, Flatpak
 
 ```
 Base URL: http://localhost:8081/api/v1
-D-Bus: org.solus.SoftwareCenter
+D-Bus: org.synthex.SoftwareCenter
 ```
 
 ### 4.2 Authentication
@@ -820,7 +820,7 @@ curl "http://localhost:8081/api/v1/search?q=firefox&source=all"
       "icon": "firefox",
       "categories": ["Network", "WebBrowser"],
       "rating": 4.5,
-      "screenshots": ["https://screenshots.getsol.us/firefox/1.png"]
+      "screenshots": ["https://screenshots.getsynthex.org/firefox/1.png"]
     },
     {
       "id": "org.mozilla.firefox",
@@ -856,7 +856,7 @@ curl http://localhost:8081/api/v1/packages/dnf5/firefox
   "id": "firefox",
   "name": "Firefox",
   "version": "128.0.3",
-  "release": "1.solus",
+  "release": "1.synthex",
   "architecture": "x86_64",
   "source": "dnf5",
   "summary": "Mozilla Firefox Web Browser",
@@ -881,7 +881,7 @@ curl http://localhost:8081/api/v1/packages/dnf5/firefox
     {"date": "2026-06-10", "text": "Security fixes"}
   ],
   "screenshots": [
-    {"url": "https://screenshots.getsol.us/firefox/1.png", "caption": "Main window"}
+    {"url": "https://screenshots.getsynthex.org/firefox/1.png", "caption": "Main window"}
   ]
 }
 ```
@@ -964,20 +964,20 @@ curl http://localhost:8081/api/v1/repositories
   "repositories": {
     "dnf5": [
       {
-        "id": "solus",
-        "name": "Solus",
+        "id": "synthex",
+        "name": "Synthex",
         "enabled": true,
-        "baseurl": "https://mirrors.getsol.us/repo/4/x86_64/",
+        "baseurl": "https://mirrors.getsynthex.org/repo/4/x86_64/",
         "type": "rpm",
         "packages_count": 12500,
         "last_update": "2026-06-23T10:00:00Z",
         "gpgcheck": true
       },
       {
-        "id": "solus-nonfree",
-        "name": "Solus Non-Free",
+        "id": "synthex-nonfree",
+        "name": "Synthex Non-Free",
         "enabled": true,
-        "baseurl": "https://mirrors.getsol.us/repo/4/x86_64/nonfree/",
+        "baseurl": "https://mirrors.getsynthex.org/repo/4/x86_64/nonfree/",
         "type": "rpm",
         "packages_count": 340,
         "last_update": "2026-06-23T10:00:00Z",
@@ -1045,7 +1045,7 @@ D-Bus: org.kde.plasmashell
 
 ```http
 # Local only (Unix socket or D-Bus)
-X-Solus-Desktop-API: 1.0
+X-Synthex-Desktop-API: 1.0
 ```
 
 ### 5.3 Endpoints
@@ -1068,12 +1068,12 @@ curl http://localhost:3030/api/v1/themes
   "theme_types": {
     "plasma_style": {
       "current": "breeze",
-      "available": ["breeze", "breeze-dark", "solus-light", "solus-dark"],
+      "available": ["breeze", "breeze-dark", "synthex-light", "synthex-dark"],
       "path": "/usr/share/plasma/desktoptheme/"
     },
     "color_scheme": {
       "current": "BreezeDark",
-      "available": ["BreezeLight", "BreezeDark", "Solus", "Nordic"],
+      "available": ["BreezeLight", "BreezeDark", "Synthex", "Nordic"],
       "path": "/usr/share/color-schemes/"
     },
     "icon_theme": {
@@ -1092,8 +1092,8 @@ curl http://localhost:3030/api/v1/themes
       "path": "/usr/share/kwin/decorations/"
     },
     "wallpaper": {
-      "current": "/usr/share/wallpapers/Solus/contents/images/3840x2160.png",
-      "available": ["Solus-lake", "Solus-mountains", "Breeze"],
+      "current": "/usr/share/wallpapers/Synthex/contents/images/3840x2160.png",
+      "available": ["Synthex-lake", "Synthex-mountains", "Breeze"],
       "path": "/usr/share/wallpapers/"
     }
   }
@@ -1328,11 +1328,11 @@ curl http://localhost:9091/api/v1/system
 
 ```json
 {
-  "hostname": "solus-pc",
+  "hostname": "synthex-pc",
   "os": {
-    "name": "Solus",
+    "name": "Synthex",
     "version": "4.6",
-    "kernel": "6.8.12-1.solus",
+    "kernel": "6.8.12-1.synthex",
     "arch": "x86_64",
     "uptime_seconds": 86400
   },
@@ -1702,7 +1702,7 @@ X-RateLimit-Reset: 1624468800
 
 ```http
 X-Request-ID: <uuid>           # For tracing
-X-Solus-API-Version: 1.0       # API version
+X-Synthex-API-Version: 1.0       # API version
 Content-Type: application/json  # Request/response format
 Accept: application/json        # Response format
 ```

@@ -1,4 +1,4 @@
-# Solus Linux RPM Spec — dog
+# SynthOS RPM Spec — dog
 # Command-line DNS client (dig replacement) written in Rust
 # Origin: Fedora, Arch Linux
 %global dog_version 0.4.0
@@ -49,6 +49,6 @@ mkdir -p %{buildroot}%{_datadir}/bash-completion/completions
 %{_mandir}/man1/dog.1*
 
 %changelog
-* Mon Jul 07 2026 Solus Rust Team <rust@solus-project.org> - 0.4.0-1
-- Initial Solus package
+* Mon Jul 07 2026 Synthex Rust Team <rust@synthex-project.org> - 0.4.0-1
+- Initial Synthex package
 - DNS client in Rust (dig replacement)

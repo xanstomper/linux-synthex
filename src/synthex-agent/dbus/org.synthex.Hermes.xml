@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE node PUBLIC "-//freedesktop//D-BUS Object Introspection 1.0//EN"
+ "http://www.freedesktop.org/standards/dbus/1.0/introspect.dtd">
+<node name="/org/synthex/Hermes">
+  <interface name="org.synthex.Hermes">
+    <method name="Chat"><arg name="query" type="s" direction="in"/><arg name="result" type="s" direction="out"/></method>
+    <method name="CodeAction"><arg name="request" type="s" direction="in"/><arg name="result" type="s" direction="out"/></method>
+    <method name="QuickCommand"><arg name="category" type="s" direction="in"/><arg name="query" type="s" direction="in"/><arg name="result" type="s" direction="out"/></method>
+    <method name="ApproveAction"><arg name="tool" type="s" direction="in"/><arg name="result" type="s" direction="out"/></method>
+    <method name="GetPendingAction"><arg name="result" type="s" direction="out"/></method>
+    <method name="GetStatus"><arg name="result" type="s" direction="out"/></method>
+    <method name="SetConfig"><arg name="json" type="s" direction="in"/><arg name="result" type="s" direction="out"/></method>
+    <method name="GetConfig"><arg name="result" type="s" direction="out"/></method>
+    <method name="AddSkill"><arg name="skill" type="s" direction="in"/><arg name="result" type="s" direction="out"/></method>
+    <method name="ListSkills"><arg name="result" type="s" direction="out"/></method>
+    <signal name="StatusChanged"><arg name="status" type="s"/></signal>
+  </interface>
+</node>

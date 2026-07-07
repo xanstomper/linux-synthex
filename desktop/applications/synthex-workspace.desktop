@@ -1,0 +1,9 @@
+[Desktop Entry]
+Type=Application
+Name=Synthex Workspace Switcher
+Comment=Switch between Gaming/Dev/Creator/Battery modes
+Exec=synthex-workspace
+Icon=synthex-workspace
+Categories=Applications;System;
+Terminal=true
+StartupNotify=true

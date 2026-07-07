@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Solus Linux - Post-Installation Configuration Script
+# SynthOS - Post-Installation Configuration Script
 # Runs after Calamares finishes installing the system
 # Configures first-boot experience, hardware, drivers, themes, and onboarding
 #
@@ -13,14 +13,14 @@ set -euo pipefail
 # Configuration
 # =============================================================================
 
-LOG_FILE="/var/log/solus-post-install.log"
-STAMP_FILE="/var/lib/solus-post-install-done"
-SOLUS_LIBDIR="/usr/libexec/solus"
-SOLUS_ETCDIR="/etc/solus"
+LOG_FILE="/var/log/synthex-post-install.log"
+STAMP_FILE="/var/lib/synthex-post-install-done"
+SYNTHEX_LIBDIR="/usr/libexec/synthex"
+SYNTHEX_ETCDIR="/etc/synthex"
 
 # Edition detection
-if [ -f /etc/solus/os-release ]; then
-    EDITION=$(grep -oP 'PRETTY_NAME="Solus Linux \K\w+' /etc/solus/os-release | tr '[:upper:]' '[:lower:]' || echo "plasma")
+if [ -f /etc/synthex/os-release ]; then
+    EDITION=$(grep -oP 'PRETTY_NAME="SynthOS \K\w+' /etc/synthex/os-release | tr '[:upper:]' '[:lower:]' || echo "plasma")
 else
     EDITION="plasma"
 fi
@@ -61,14 +61,14 @@ configure_network() {
 
     # Set hostname if not already set
     if [ ! -f /etc/hostname ] || [ ! -s /etc/hostname ]; then
-        echo "solus-pc" > /etc/hostname
+        echo "synthex-pc" > /etc/hostname
     fi
 
     # Configure localhost
     cat > /etc/hosts << 'EOHOSTS'
 127.0.0.1   localhost localhost.localdomain
 ::1         localhost localhost.localdomain
-127.0.1.1   solus-pc.localdomain solus-pc
+127.0.1.1   synthex-pc.localdomain synthex-pc
 EOHOSTS
 
     log_info "Network configured: hostname=$(cat /etc/hostname)"
@@ -107,16 +107,16 @@ configure_services() {
         fi
     done
     
-    # Enable Solus-specific services
-    log_info "Enabling Solus system services..."
-    for svc in solus-desktopd solus-hwdaemon solus-gpu-setupd solus-stored solus-workspace solus-oobe solus-firstboot solus-recovery; do
+    # Enable Synthex-specific services
+    log_info "Enabling Synthex system services..."
+    for svc in synthex-desktopd synthex-hwdaemon synthex-gpu-setupd synthex-stored synthex-workspace synthex-oobe synthex-firstboot synthex-recovery; do
         if systemctl list-unit-files "$svc.service" &>/dev/null 2>&1; then
             systemctl enable "$svc.service" 2>/dev/null && log_info "  Enabled: $svc"
         fi
     done
     
-    # Enable Solus timers
-    for timer in solus-blueprint.timer; do
+    # Enable Synthex timers
+    for timer in synthex-blueprint.timer; do
         if systemctl list-unit-files "$timer" &>/dev/null 2>&1; then
             systemctl enable "$timer" 2>/dev/null && log_info "  Enabled timer: $timer"
         fi
@@ -148,7 +148,7 @@ configure_bootloader() {
 
     # Update GRUB configuration
     if command -v grub2-mkconfig &>/dev/null; then
-        # Add kernel parameters for Solus
+        # Add kernel parameters for Synthex
         if grep -q "GRUB_CMDLINE_LINUX_DEFAULT" /etc/default/grub; then
             sed -i 's/GRUB_CMDLINE_LINUX_DEFAULT=".*"/GRUB_CMDLINE_LINUX_DEFAULT="quiet rw nowatchdog nvme_core.default_ps_max_latency_us=0 amd-pstate=active intel_pstate=active cpufreq.default_governor=schedutil processor.max_freq=0"/' /etc/default/grub
         fi
@@ -159,11 +159,11 @@ configure_bootloader() {
         fi
 
         # Set GRUB theme
-        if [ -d /boot/grub2/themes/solus-grub-theme ]; then
+        if [ -d /boot/grub2/themes/synthex-grub-theme ]; then
             if grep -q "GRUB_THEME=" /etc/default/grub; then
-                sed -i 's|GRUB_THEME=.*|GRUB_THEME="/boot/grub2/themes/solus-grub-theme/theme.txt"|' /etc/default/grub
+                sed -i 's|GRUB_THEME=.*|GRUB_THEME="/boot/grub2/themes/synthex-grub-theme/theme.txt"|' /etc/default/grub
             else
-                echo 'GRUB_THEME="/boot/grub2/themes/solus-grub-theme/theme.txt"' >> /etc/default/grub
+                echo 'GRUB_THEME="/boot/grub2/themes/synthex-grub-theme/theme.txt"' >> /etc/default/grub
             fi
         fi
 
@@ -203,8 +203,8 @@ configure_hardware() {
     log_step "Configuring Hardware"
 
     # Run hardware detection script
-    if [ -x "${SOLUS_LIBDIR}/hardware-detect.sh" ]; then
-        "${SOLUS_LIBDIR}/hardware-detect.sh" || true
+    if [ -x "${SYNTHEX_LIBDIR}/hardware-detect.sh" ]; then
+        "${SYNTHEX_LIBDIR}/hardware-detect.sh" || true
     else
         log_warn "hardware-detect.sh not found, using built-in detection"
 
@@ -403,7 +403,7 @@ configure_gaming() {
 }
 
 configure_theming() {
-    log_step "Applying Solus Theming"
+    log_step "Applying Synthex Theming"
 
     # Copy skel configurations to existing user
     if [ -n "$INSTALLED_USER" ] && [ -d "/home/${INSTALLED_USER}" ]; then
@@ -430,11 +430,11 @@ configure_theming() {
     fi
 
     # Set default desktop background
-    if [ -f /usr/share/wallpapers/solus-default.jpg ]; then
+    if [ -f /usr/share/wallpapers/synthex-default.jpg ]; then
         # GNOME
         if [ "$EDITION" = "gnome" ] && command -v gsettings &>/dev/null; then
             if [ -n "$INSTALLED_USER" ]; then
-                run_as_user "$INSTALLED_USER" "gsettings set org.gnome.desktop.background picture-uri 'file:///usr/share/wallpapers/solus-default.jpg'" || true
+                run_as_user "$INSTALLED_USER" "gsettings set org.gnome.desktop.background picture-uri 'file:///usr/share/wallpapers/synthex-default.jpg'" || true
             fi
         fi
         log_info "Desktop background set"
@@ -475,34 +475,34 @@ configure_developer_environment() {
 create_welcome_message() {
     log_step "Creating Welcome Message"
 
-    cat > /etc/profile.d/solus-welcome.sh << 'EOWELCOME'
+    cat > /etc/profile.d/synthex-welcome.sh << 'EOWELCOME'
 #!/usr/bin/env bash
-# Solus Linux welcome message (shown on first login only)
+# SynthOS welcome message (shown on first login only)
 
-if [ ! -f "$HOME/.config/solus-welcome-shown" ]; then
+if [ ! -f "$HOME/.config/synthex-welcome-shown" ]; then
     echo ""
     echo "┌──────────────────────────────────────────────┐"
     echo "│                                              │"
-    echo "│   Welcome to Solus Linux!                    │"
+    echo "│   Welcome to SynthOS!                    │"
     echo "│                                              │"
-    echo "│   • Visit getsol.us/welcome to get started   │"
+    echo "│   • Visit getsynthex.org/welcome to get started   │"
     echo "│   • Check for updates in Software Center     │"
-    echo "│   • Join the community: discuss.getsol.us    │"
+    echo "│   • Join the community: discuss.getsynthex.org    │"
     echo "│                                              │"
-    echo "│   Type 'solus-help' for tips & tricks        │"
+    echo "│   Type 'synthex-help' for tips & tricks        │"
     echo "│                                              │"
     echo "└──────────────────────────────────────────────┘"
     echo ""
-    touch "$HOME/.config/solus-welcome-shown" 2>/dev/null || true
+    touch "$HOME/.config/synthex-welcome-shown" 2>/dev/null || true
 fi
 EOWELCOME
-    chmod +x /etc/profile.d/solus-welcome.sh
+    chmod +x /etc/profile.d/synthex-welcome.sh
 
-    # Create solus-help command
-    cat > /usr/local/bin/solus-help << 'EOHELP'
+    # Create synthex-help command
+    cat > /usr/local/bin/synthex-help << 'EOHELP'
 #!/usr/bin/env bash
 echo ""
-echo "Solus Linux Quick Help"
+echo "SynthOS Quick Help"
 echo "======================"
 echo ""
 echo "System Updates:  sudo dnf update --refresh"
@@ -523,12 +523,12 @@ echo "  Docker:        docker"
 echo "  Podman:        podman"
 echo ""
 echo "Help & Support:"
-echo "  Forums:        https://discuss.getsol.us"
-echo "  Docs:          https://getsol.us/docs"
-echo "  Report Bugs:   https://dev.getsol.us"
+echo "  Forums:        https://discuss.getsynthex.org"
+echo "  Docs:          https://getsynthex.org/docs"
+echo "  Report Bugs:   https://dev.getsynthex.org"
 echo ""
 EOHELP
-    chmod +x /usr/local/bin/solus-help
+    chmod +x /usr/local/bin/synthex-help
 
     log_info "Welcome message created"
 }
@@ -582,7 +582,7 @@ configure_cleanup() {
 main() {
     echo ""
     echo "================================================"
-    echo " Solus Linux Post-Install Configuration"
+    echo " SynthOS Post-Install Configuration"
     echo " Edition:  ${EDITION^}"
     echo " Started:  $(date -u '+%Y-%m-%d %H:%M:%S UTC')"
     echo "================================================"

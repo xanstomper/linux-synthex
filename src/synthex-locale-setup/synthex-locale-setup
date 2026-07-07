@@ -1,0 +1,65 @@
+#!/usr/bin/env bash
+# synthex-locale-setup — configure system locale, timezone, and keyboard layout
+# Usage: synthex-locale-setup [locale|timezone|keyboard|list-locales|list-timezones]
+set -euo pipefail
+
+AMBER='\033[38;5;214m'; GREEN='\033[0;32m'; YELLOW='\033[1;33m'; NC='\033[0m'
+
+[[ $EUID -eq 0 ]] && SUDO="" || SUDO="sudo"
+
+set_locale() {
+    local locale="${1:-}"
+    [ -z "$locale" ] && { echo "Usage: locale <locale> (e.g. en_US.UTF-8)"; echo "  Run 'list-locales' to see options"; exit 1; }
+    echo -e "${AMBER}🌍 Setting locale to $locale...${NC}"
+    $SUDO localectl set-locale "LANG=$locale"
+    echo -e "${GREEN}✅ Locale set. Log out and back in to apply.${NC}"
+}
+
+set_timezone() {
+    local tz="${1:-}"
+    [ -z "$tz" ] && { echo "Usage: timezone <zone> (e.g. America/New_York)"; echo "  Run 'list-timezones' to see options"; exit 1; }
+    echo -e "${AMBER}🕐 Setting timezone to $tz...${NC}"
+    $SUDO timedatectl set-timezone "$tz"
+    echo -e "${GREEN}✅ Timezone set to $tz${NC}"
+}
+
+set_keyboard() {
+    local layout="${1:-}"
+    [ -z "$layout" ] && { echo "Usage: keyboard <layout> (e.g. us, de, fr, jp)"; exit 1; }
+    echo -e "${AMBER}⌨️  Setting keyboard layout to $layout...${NC}"
+    $SUDO localectl set-keymap "$layout"
+    echo -e "${GREEN}✅ Keyboard layout set to $layout${NC}"
+}
+
+list_locales() {
+    echo -e "${AMBER}🌍 Available locales:${NC}"
+    localectl list-locales 2>/dev/null | head -30 || echo "  Run: sudo dnf install glibc-langpack-* for more"
+    echo ""
+    echo "Current: $(localectl status | grep 'System Locale' || echo 'not set')"
+}
+
+list_timezones() {
+    echo -e "${AMBER}🕐 Available timezones (first 30):${NC}"
+    timedatectl list-timezones 2>/dev/null | head -30
+    echo ""
+    echo "Current: $(timedatectl status | grep 'Time zone' || echo 'not set')"
+}
+
+show_status() {
+    echo -e "${AMBER}📋 Locale & Time Settings:${NC}"
+    echo ""
+    localectl status 2>/dev/null
+    echo ""
+    timedatectl status 2>/dev/null
+}
+
+CMD="${1:-status}"; shift 2>/dev/null || true
+case "$CMD" in
+    locale) set_locale "$@" ;;
+    timezone) set_timezone "$@" ;;
+    keyboard) set_keyboard "$@" ;;
+    list-locales) list_locales ;;
+    list-timezones) list_timezones ;;
+    status) show_status ;;
+    *) echo "Usage: synthex-locale-setup [locale <l>|timezone <tz>|keyboard <k>|list-locales|list-timezones|status]"; exit 1 ;;
+esac

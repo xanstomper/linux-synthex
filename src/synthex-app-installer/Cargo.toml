@@ -1,0 +1,11 @@
+[package]
+name = "synthex-app-installer"
+version = "0.1.0"
+edition = "2021"
+description = "One-command installer for 50+ popular apps"
+
+[dependencies]
+anyhow = { workspace = true }
+clap = { workspace = true }
+colored = "2"
+dialoguer = "0.11"

@@ -1,0 +1,13 @@
+[Theme]
+Name=Solus Mint
+Comment=A warm green theme inspired by Linux Mint
+
+[KWin]
+BorderSize=Normal
+
+[WM]
+FrameBorder=True
+TitleAlignment=Left
+
+[Icons]
+Theme=breeze

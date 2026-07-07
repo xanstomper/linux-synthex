@@ -1,9 +1,9 @@
 [package]
-name = "solus-hwdaemon"
+name = "synthex-hwdaemon"
 version.workspace = true
 edition.workspace = true
 license.workspace = true
-description = "Solus hardware detection daemon — detects CPU, GPU, RAM, disks, and exposes via D-Bus"
+description = "Synthex hardware detection daemon — detects CPU, GPU, RAM, disks, and exposes via D-Bus"
 
 [dependencies]
 serde.workspace = true

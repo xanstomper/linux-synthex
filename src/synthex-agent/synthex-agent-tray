@@ -1,0 +1,541 @@
+#!/usr/bin/env python3
+"""Synthex Agent — GTK3 System Tray App for Linux Mint Cinnamon.
+Native taskbar integration. Top-right panel icon. DBus IPC.
+No QML. No browser. No localhost.
+"""
+import os, sys, json, subprocess, threading, time, signal, textwrap
+from pathlib import Path
+
+import gi
+gi.require_version("Gtk", "3.0")
+gi.require_version("AppIndicator3", "0.1")
+gi.require_version("Pango", "1.0")
+from gi.repository import Gtk, Gio, GLib, AppIndicator3, Pango, Gdk, GdkPixbuf
+
+# Paths
+CONFIG_DIR = Path(os.path.expanduser("~/.config/synthex/agent"))
+CONFIG_DIR.mkdir(parents=True, exist_ok=True)
+DATA_DIR = Path(os.path.expanduser("~/.local/share/synthex/agent"))
+DATA_DIR.mkdir(parents=True, exist_ok=True)
+
+# Add project source to path
+HERE = Path(os.path.dirname(os.path.abspath(__file__)))
+PROJECT = HERE.parent.parent  # ~/linux-solus
+sys.path.insert(0, str(PROJECT / "src" / "synthex-agent" / "daemon"))
+
+# Synthex Mint colors
+COLORS = {
+    "accent": "#9BBD5C",
+    "accent_hover": "#A8CC6A",
+    "bg": "#1A1A2E",
+    "bg_card": "#222240",
+    "bg_input": "#2A2A4E",
+    "text": "#FFFFFF",
+    "text_sec": "#8899AA",
+    "text_muted": "#667788",
+    "border": "#3A3A5E",
+    "success": "#4CAF50",
+    "danger": "#E53935",
+    "surface": "#F5F5F7",  # Mint light bg
+}
+
+CSS = """
+#agent-window { background-color: #1A1A2E; }
+#search-entry { 
+    background-color: #2A2A4E; color: #FFFFFF; 
+    border: 1px solid #3A3A5E; border-radius: 10px;
+    font-size: 15px; padding: 10px 16px;
+}
+#search-entry:focus { border-color: #9BBD5C; }
+#result-label { color: #FFFFFF; font-size: 12px; padding: 6px 12px; }
+#result-label:hover { background-color: #222240; }
+#chat-user { color: #FFFFFF; font-size: 12px; }
+#chat-agent { color: #FFFFFF; font-size: 12px; }
+#header-label { color: #9BBD5C; font-size: 11px; font-weight: bold; }
+#status-label { color: #8899AA; font-size: 9px; }
+"""
+
+
+# ═══ D-Bus Client ══════════════════════════════════════════════════
+
+class AgentClient:
+    """Client for communicating with the Synthex Agent daemon via DBus."""
+    
+    def __init__(self):
+        self.available = False
+        self._connect()
+    
+    def _connect(self):
+        try:
+            import dbus
+            bus = dbus.SessionBus()
+            self.obj = bus.get_object("org.solus.Agent", "/org/synthex/Agent")
+            self.iface = dbus.Interface(self.obj, "org.solus.Agent")
+            self.available = True
+        except:
+            self.available = False
+            # Start daemon
+            self._start_daemon()
+    
+    def _start_daemon(self):
+        daemon_path = str(PROJECT / "src" / "synthex-agent" / "daemon" / "synthex-agentd")
+        if os.path.exists(daemon_path):
+            subprocess.Popen([daemon_path], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+            time.sleep(2)
+            try:
+                import dbus
+                bus = dbus.SessionBus()
+                self.obj = bus.get_object("org.solus.Agent", "/org/synthex/Agent")
+                self.iface = dbus.Interface(self.obj, "org.solus.Agent")
+                self.available = True
+            except:
+                pass
+    
+    def chat(self, query):
+        if not self.available: return {"error": "Daemon not running"}
+        try:
+            result = self.iface.Chat(query)
+            return json.loads(result)
+        except Exception as e:
+            return {"error": str(e)}
+    
+    def search(self, query):
+        if not self.available: return {"results": []}
+        try:
+            result = self.iface.Search(query)
+            return json.loads(result)
+        except Exception as e:
+            return {"error": str(e)}
+    
+    def status(self):
+        if not self.available:
+            return {"status": "disconnected", "model": "offline"}
+        try:
+            result = self.iface.GetStatus()
+            return json.loads(result)
+        except:
+            return {"status": "error"}
+
+
+# ═══ Agent Window (GTK3) ════════════════════════════════════════════
+
+class AgentWindow(Gtk.Window):
+    """Main agent panel — search bar + results. Mint-native design."""
+    
+    def __init__(self, client):
+        Gtk.Window.__init__(self, title="Synthex Agent")
+        self.client = client
+        self.mode = "search"  # "search" or "chat"
+        self.set_default_size(520, 420)
+        self.set_position(Gtk.WindowPosition.CENTER)
+        self.set_keep_above(True)
+        self.set_decorated(False)
+        self.set_resizable(False)
+        self.stick()
+        
+        # Apply CSS
+        css_provider = Gtk.CssProvider()
+        css_provider.load_from_data(CSS.encode())
+        Gtk.StyleContext.add_provider_for_screen(
+            Gdk.Screen.get_default(), css_provider,
+            Gtk.STYLE_PROVIDER_PRIORITY_APPLICATION
+        )
+        
+        self._build_ui()
+        
+        # Start daemon if needed
+        if not self.client.available:
+            self._set_status("Starting daemon...")
+            self.client._start_daemon()
+            if self.client.available:
+                self._set_status("Ready")
+    
+    def _build_ui(self):
+        self.set_name("agent-window")
+        
+        vbox = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=6)
+        vbox.set_margin_start(12)
+        vbox.set_margin_end(12)
+        vbox.set_margin_top(12)
+        vbox.set_margin_bottom(8)
+        self.add(vbox)
+        
+        # ─── Header ──────────────────────────────────────────────
+        header = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=8)
+        
+        self.status_label = Gtk.Label()
+        self.status_label.set_name("status-label")
+        self._set_status("Connecting...")
+        header.pack_start(self.status_label, True, True, 0)
+        
+        # Mode toggle
+        self.mode_btn = Gtk.ToggleButton(label="💬")
+        self.mode_btn.set_tooltip_text("Toggle Chat/Search mode")
+        self.mode_btn.set_relief(Gtk.ReliefStyle.NONE)
+        self.mode_btn.connect("toggled", self._toggle_mode)
+        self.mode_btn.set_name("mode-btn")
+        header.pack_end(self.mode_btn, False, False, 0)
+        
+        # Close button
+        close_btn = Gtk.Button(label="✕")
+        close_btn.set_relief(Gtk.ReliefStyle.NONE)
+        close_btn.connect("clicked", lambda w: self.hide())
+        close_btn.set_name("close-btn")
+        header.pack_end(close_btn, False, False, 0)
+        
+        vbox.pack_start(header, False, False, 0)
+        
+        # ─── Search Bar ───────────────────────────────────────────
+        self.search_entry = Gtk.Entry()
+        self.search_entry.set_name("search-entry")
+        self.search_entry.set_placeholder_text("🔍  Search files, apps, settings...")
+        self.search_entry.connect("activate", self._on_submit)
+        self.search_entry.connect("changed", self._on_search_changed)
+        vbox.pack_start(self.search_entry, False, False, 0)
+        
+        # ─── Results Area ─────────────────────────────────────────
+        scroll = Gtk.ScrolledWindow()
+        scroll.set_policy(Gtk.PolicyType.NEVER, Gtk.PolicyType.AUTOMATIC)
+        scroll.set_min_content_height(300)
+        
+        self.results_box = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=2)
+        self.results_box.set_name("results-box")
+        
+        scroll.add(self.results_box)
+        vbox.pack_start(scroll, True, True, 0)
+        
+        # Welcome text
+        self._show_welcome()
+        
+        # ─── Footer ──────────────────────────────────────────────
+        footer = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=8)
+        footer.set_margin_top(4)
+        
+        hint = Gtk.Label(label="⏎ Send  ·  Esc Close")
+        hint.set_name("status-label")
+        footer.pack_start(hint, False, False, 0)
+        
+        vbox.pack_start(footer, False, False, 0)
+        
+        # Keybindings
+        self.connect("key-press-event", self._on_key)
+    
+    def _set_status(self, text):
+        self.status_label.set_markup(f"<span color='#8899AA'>{text}</span>")
+    
+    def _show_welcome(self):
+        self._clear_results()
+        welcome = Gtk.Label()
+        welcome.set_markup(
+            "<span color='#9BBD5C' size='large'><b>Synthex Agent</b></span>\n"
+            "<span color='#8899AA' size='small'>Desktop AI Assistant for Linux Mint</span>\n\n"
+            "<span color='#667788' size='small'>"
+            "🔍  Search files, apps, settings\n"
+            "💬  Chat with AI assistant\n"
+            "💻  Code with Codex agent\n"
+            "📚  Knowledge base search\n"
+            "⚡  Quick system actions</span>"
+        )
+        welcome.set_padding(20, 20)
+        welcome.set_line_wrap(True)
+        self.results_box.pack_start(welcome, True, True, 0)
+        self.results_box.show_all()
+    
+    def _clear_results(self):
+        for child in self.results_box.get_children():
+            self.results_box.remove(child)
+    
+    def _toggle_mode(self, button):
+        if button.get_active():
+            self.mode = "chat"
+            self.search_entry.set_placeholder_text("💬  Ask Synthex Agent anything...")
+            button.set_label("🔍")
+        else:
+            self.mode = "search"
+            self.search_entry.set_placeholder_text("🔍  Search files, apps, settings...")
+            button.set_label("💬")
+        self._clear_results()
+    
+    def _on_search_changed(self, entry):
+        text = entry.get_text().strip()
+        if self.mode == "search" and len(text) >= 2:
+            self._do_search(text)
+        elif self.mode == "search":
+            self._clear_results()
+            if not text:
+                self._show_welcome()
+    
+    def _on_submit(self, entry):
+        text = entry.get_text().strip()
+        if not text:
+            return
+        if self.mode == "chat":
+            self._do_chat(text)
+        else:
+            self._do_search(text, submit=True)
+    
+    def _do_search(self, query, submit=False):
+        self._clear_results()
+        
+        # Show local search results
+        results = self.client.search(query)
+        
+        if "results" in results and results["results"]:
+            header = Gtk.Label()
+            header.set_markup(f"<span color='#9BBD5C' size='small'><b>📁  Search Results</b></span>")
+            header.set_xalign(0)
+            header.set_padding(4, 4)
+            self.results_box.pack_start(header, False, False, 0)
+            
+            for r in results["results"][:10]:
+                btn = Gtk.Button()
+                btn.set_name("result-label")
+                btn.set_relief(Gtk.ReliefStyle.NONE)
+                
+                name = r.get("name", "?")
+                path = r.get("path", "")
+                label = Gtk.Label()
+                label.set_markup(f"<span color='#FFFFFF'>📄  {name}</span>\n<span color='#667788' size='small'>{path}</span>")
+                label.set_xalign(0)
+                label.set_line_wrap(True)
+                btn.add(label)
+                btn.connect("clicked", lambda w, p=path: self._open_file(p))
+                self.results_box.pack_start(btn, False, False, 0)
+        
+        if not self.results_box.get_children():
+            nores = Gtk.Label()
+            nores.set_markup(f"<span color='#667788'>No results for '{query}'</span>")
+            nores.set_padding(20, 20)
+            self.results_box.pack_start(nores, True, True, 0)
+        
+        self.results_box.show_all()
+    
+    def _do_chat(self, query):
+        self._clear_results()
+        
+        # Show user message
+        user_msg = Gtk.Label()
+        user_msg.set_markup(f"<span color='#9BBD5C'><b>🧑  You:</b></span>\n<span color='#FFFFFF'>{query}</span>")
+        user_msg.set_xalign(0)
+        user_msg.set_line_wrap(True)
+        user_msg.set_padding(8, 6)
+        self.results_box.pack_start(user_msg, False, False, 0)
+        
+        # Show thinking indicator
+        think = Gtk.Label(label="🤔  Thinking...")
+        think.set_name("status-label")
+        think.set_padding(8, 4)
+        self.results_box.pack_start(think, False, False, 0)
+        self.results_box.show_all()
+        
+        # Run in thread
+        def chat_thread():
+            result = self.client.chat(query)
+            GLib.idle_add(self._show_chat_response, result, think)
+        
+        threading.Thread(target=chat_thread, daemon=True).start()
+    
+    def _show_chat_response(self, result, think_label):
+        self._clear_results()
+        
+        # Re-add user message
+        user_msg = Gtk.Label()
+        user_msg.set_markup(f"<span color='#9BBD5C'><b>🧑  You:</b></span>\n<span color='#FFFFFF'>{self.search_entry.get_text()}</span>")
+        user_msg.set_xalign(0)
+        user_msg.set_line_wrap(True)
+        user_msg.set_padding(8, 6)
+        self.results_box.pack_start(user_msg, False, False, 0)
+        
+        # Agent response
+        response = result.get("response", result.get("error", "No response"))
+        agent_msg = Gtk.Label()
+        agent_msg.set_markup(f"<span color='#9BBD5C'><b>🤖  Agent:</b></span>\n<span color='#8899AA' size='small'>{response}</span>")
+        agent_msg.set_xalign(0)
+        agent_msg.set_line_wrap(True)
+        agent_msg.set_padding(8, 6)
+        self.results_box.pack_start(agent_msg, False, False, 0)
+        
+        self.results_box.show_all()
+    
+    def _open_file(self, path):
+        subprocess.Popen(["xdg-open", path])
+    
+    def _on_key(self, widget, event):
+        if event.keyval == 65307:  # Esc
+            self.hide()
+        return False
+
+
+# ═══ System Tray App ═══════════════════════════════════════════════
+
+class SynthexAgentTray:
+    """System tray icon for Cinnamon panel. Native Mint integration."""
+    
+    def __init__(self):
+        self.client = AgentClient()
+        self.window = None
+        
+        # Create indicator
+        self.indicator = AppIndicator3.Indicator.new(
+            "synthex-agent",
+            "synthex-agent",
+            AppIndicator3.IndicatorCategory.APPLICATION_STATUS
+        )
+        self.indicator.set_status(AppIndicator3.IndicatorStatus.ACTIVE)
+        
+        # Try to set icon
+        icon_path = self._find_icon()
+        if icon_path:
+            self.indicator.set_icon_full(icon_path, "Synthex Agent")
+        else:
+            self.indicator.set_icon_full(self._create_icon(), "Synthex Agent")
+        
+        # Build menu
+        self._build_menu()
+        
+        # Start daemon in background
+        self._ensure_daemon()
+        
+        # Periodic status check
+        GLib.timeout_add_seconds(30, self._update_status)
+    
+    def _find_icon(self):
+        """Find or create the tray icon."""
+        paths = [
+            str(PROJECT / "branding" / "icons" / "synthex-agent.svg"),
+            str(PROJECT / "branding" / "icons" / "synthex-agent.png"),
+        ]
+        for p in paths:
+            if os.path.exists(p):
+                return p
+        # Create a simple PNG icon
+        icon_dir = Path(os.path.expanduser("~/.local/share/icons/hicolor/22x22/apps"))
+        icon_dir.mkdir(parents=True, exist_ok=True)
+        icon_path = str(icon_dir / "synthex-agent.png")
+        if not os.path.exists(icon_path):
+            try:
+                self._create_icon_file(icon_path)
+                return icon_path
+            except:
+                pass
+        return None
+    
+    def _create_icon(self):
+        """Create an in-memory icon."""
+        import cairo
+        surface = cairo.ImageSurface(cairo.FORMAT_ARGB32, 22, 22)
+        cr = cairo.Context(surface)
+        # Dark circle with green "S"
+        cr.set_source_rgb(0.1, 0.1, 0.18)
+        cr.arc(11, 11, 10, 0, 6.28)
+        cr.fill()
+        cr.set_source_rgb(0.61, 0.74, 0.36)
+        cr.select_font_face("Sans", cairo.FONT_SLANT_NORMAL, cairo.FONT_WEIGHT_BOLD)
+        cr.set_font_size(14)
+        cr.move_to(7, 16)
+        cr.show_text("S")
+        return surface
+    
+    def _create_icon_file(self, path):
+        """Save a simple PNG icon."""
+        import cairo
+        surface = cairo.ImageSurface(cairo.FORMAT_ARGB32, 64, 64)
+        cr = cairo.Context(surface)
+        # Dark circle
+        cr.set_source_rgb(0.1, 0.1, 0.18)
+        cr.arc(32, 32, 30, 0, 6.28)
+        cr.fill()
+        # Green border
+        cr.set_source_rgb(0.61, 0.74, 0.36)
+        cr.set_line_width(3)
+        cr.arc(32, 32, 28, 0, 6.28)
+        cr.stroke()
+        # Green "S"
+        cr.select_font_face("Sans", cairo.FONT_SLANT_NORMAL, cairo.FONT_WEIGHT_BOLD)
+        cr.set_font_size(36)
+        cr.move_to(21, 48)
+        cr.show_text("S")
+        surface.write_to_png(path)
+    
+    def _build_menu(self):
+        menu = Gtk.Menu()
+        
+        # Open
+        open_item = Gtk.MenuItem(label="💬  Open Synthex Agent")
+        open_item.connect("activate", lambda w: self._open_window())
+        menu.append(open_item)
+        
+        menu.append(Gtk.SeparatorMenuItem())
+        
+        # Quick actions
+        actions = [
+            ("🔍  Search", "solus search "),
+            ("💻  Codex IDE", "solus codex"),
+            ("📚  Knowledge Base", "solus kb ~/Documents"),
+            ("🎮  Gaming Mode", "solus gaming enable"),
+            ("🔄  System Update", "solus update"),
+        ]
+        for label, cmd in actions:
+            item = Gtk.MenuItem(label=label)
+            item.connect("activate", lambda w, c=cmd: self._run_command(c))
+            menu.append(item)
+        
+        menu.append(Gtk.SeparatorMenuItem())
+        
+        # Status
+        self.status_item = Gtk.MenuItem(label="⏳  Starting...")
+        self.status_item.set_sensitive(False)
+        menu.append(self.status_item)
+        
+        menu.append(Gtk.SeparatorMenuItem())
+        
+        # Quit
+        quit_item = Gtk.MenuItem(label="✕  Quit")
+        quit_item.connect("activate", lambda w: self._quit())
+        menu.append(quit_item)
+        
+        menu.show_all()
+        self.indicator.set_menu(menu)
+    
+    def _ensure_daemon(self):
+        self.client._connect()
+        if self.client.available:
+            self._update_status()
+    
+    def _update_status(self):
+        status = self.client.status()
+        model = status.get("model", "offline")
+        is_online = status.get("status") == "running"
+        if is_online:
+            self.status_item.set_label(f"●  {model}")
+        else:
+            self.status_item.set_label("○  Daemon offline")
+        self.status_item.set_sensitive(False)
+        return True
+    
+    def _open_window(self):
+        if self.window is None:
+            self.window = AgentWindow(self.client)
+        self.window.show_all()
+        self.window.present()
+    
+    def _run_command(self, cmd):
+        subprocess.Popen(["/bin/bash", "-c", cmd], 
+                        stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+    
+    def _quit(self):
+        Gtk.main_quit()
+    
+    def run(self):
+        Gtk.main()
+
+
+# ═══ Main ══════════════════════════════════════════════════════════
+
+def main():
+    signal.signal(signal.SIGINT, signal.SIG_DFL)
+    app = SynthexAgentTray()
+    app.run()
+
+if __name__ == "__main__":
+    main()

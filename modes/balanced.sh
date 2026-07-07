@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Solus Balanced Mode (Default)
+# Synthex Balanced Mode (Default)
 # Resets system to balanced defaults
 
 set -euo pipefail
@@ -33,7 +33,7 @@ tuned-adm profile desktop 2>/dev/null || true
 
 # Apply balanced layout
 echo "🎨 Applying balanced layout..."
-solus-layout set balanced 2>/dev/null || true
+synthex-layout set balanced 2>/dev/null || true
 
 # Notify
 notify-send -i preferences "Balanced Mode" "System set to balanced defaults" 2>/dev/null || echo "✅ Balanced Mode active"

@@ -1,0 +1,74 @@
+# SynthOS Repository Configuration
+# Install: dnf install dnf-plugins-core && dnf config-manager --add-repo https://repo.synthex.org/synthex.repo
+
+[synthex-rawhide]
+name=SynthOS Rolling (rawhide) - $basearch
+baseurl=https://repo.synthex.org/rawhide/$basearch
+metalink=https://mirrors.synthex.org/metalink?repo=rawhide&arch=$basearch
+enabled=1
+gpgcheck=1
+gpgkey=https://repo.synthex.org/synthex-release-key.asc
+repo_gpgcheck=1
+priority=1
+type=rpmmd
+autorefresh=yes
+keepcache=0
+
+[synthex-stable]
+name=SynthOS Stable - $basearch
+baseurl=https://repo.synthex.org/stable/$releasever/$basearch
+metalink=https://mirrors.synthex.org/metalink?repo=stable-$releasever&arch=$basearch
+enabled=0
+gpgcheck=1
+gpgkey=https://repo.synthex.org/synthex-release-key.asc
+repo_gpgcheck=1
+priority=5
+type=rpmmd
+autorefresh=yes
+
+[synthex-updates]
+name=SynthOS Updates - $basearch
+baseurl=https://repo.synthex.org/updates/$releasever/$basearch
+metalink=https://mirrors.synthex.org/metalink?repo=updates-$releasever&arch=$basearch
+enabled=1
+gpgcheck=1
+gpgkey=https://repo.synthex.org/synthex-release-key.asc
+repo_gpgcheck=1
+priority=5
+type=rpmmd
+autorefresh=yes
+
+[synthex-testing]
+name=SynthOS Testing - $basearch
+baseurl=https://repo.synthex.org/testing/$releasever/$basearch
+metalink=https://mirrors.synthex.org/metalink?repo=testing-$releasever&arch=$basearch
+enabled=0
+gpgcheck=1
+gpgkey=https://repo.synthex.org/synthex-release-key.asc
+repo_gpgcheck=1
+priority=10
+type=rpmmd
+autorefresh=yes
+
+[synthex-backports]
+name=SynthOS Backports - $basearch
+baseurl=https://repo.synthex.org/backports/$releasever/$basearch
+metalink=https://mirrors.synthex.org/metalink?repo=backports-$releasever&arch=$basearch
+enabled=0
+gpgcheck=1
+gpgkey=https://repo.synthex.org/synthex-release-key.asc
+repo_gpgcheck=1
+priority=15
+type=rpmmd
+autorefresh=yes
+
+[synthex-source]
+name=SynthOS Source - SRPMS
+baseurl=https://repo.synthex.org/rawhide/SRPMS
+enabled=1
+gpgcheck=1
+gpgkey=https://repo.synthex.org/synthex-release-key.asc
+repo_gpgcheck=1
+priority=99
+type=rpm-md
+autorefresh=yes

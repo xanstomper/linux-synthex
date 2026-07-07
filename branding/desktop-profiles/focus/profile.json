@@ -1,0 +1,29 @@
+{
+  "name": "Synthex Focus",
+  "tagline": "Distraction-free. Keyboard-centric. Ultra-minimal.",
+  "theme": "synthex-graphite",
+  "accent": "#9BBD5C",
+  "panels": {
+    "top": {
+      "type": "minimal",
+      "height": 28,
+      "opacity": 0.85,
+      "blur": true,
+      "widgets": [
+        "launcher",
+        "spacer",
+        "clock",
+        "tray"
+      ]
+    }
+  },
+  "dock": false,
+  "animations": "fast",
+  "compositor": "xrender",
+  "menu": "simplemenu",
+  "desktop": "folder",
+  "wallpaper": "synthex-graphite.png",
+  "description": "Ultra-minimalist. Everything auto-hides. Win+Space to search. For power users who live in the keyboard.",
+  "performance": "lightweight",
+  "target": "Power users, minimalist, keyboard-driven"
+}

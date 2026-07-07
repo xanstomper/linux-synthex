@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # ==============================================================================
-# Solus Linux Kernel Builder
-# Build script for kernel-solus with BORE scheduler and desktop optimizations
+# SynthOS Kernel Builder
+# Build script for kernel-synthex with BORE scheduler and desktop optimizations
 #
 # Usage:
 #   ./build.sh                    # Build generic x86_64 variant
@@ -80,19 +80,19 @@ done
 # ----------------------------------------------------------------------------
 case "${VARIANT}" in
     v3)
-        VARIANT_SUFFIX="-solus-v3"
+        VARIANT_SUFFIX="-synthex-v3"
         RPM_BUILD_OPTS="--with v3"
         CONFIG_ARCH="x86-64-v3"
         log_info "Building variant: ${YELLOW}x86-64-v3${NC}"
         ;;
     v4)
-        VARIANT_SUFFIX="-solus-v4"
+        VARIANT_SUFFIX="-synthex-v4"
         RPM_BUILD_OPTS="--with v4"
         CONFIG_ARCH="x86-64-v4"
         log_info "Building variant: ${YELLOW}x86-64-v4${NC}"
         ;;
     generic|*)
-        VARIANT_SUFFIX="-solus"
+        VARIANT_SUFFIX="-synthex"
         RPM_BUILD_OPTS="--without custom"
         CONFIG_ARCH="x86_64"
         log_info "Building variant: ${YELLOW}generic x86_64${NC}"
@@ -119,7 +119,7 @@ fi
 # MAIN BUILD
 # ============================================================================
 
-log_step "=== Solus Kernel Builder ==="
+log_step "=== Synthex Kernel Builder ==="
 log_info "Kernel version:  ${DEFAULT_KERNEL_VERSION}"
 log_info "Variant:         ${VARIANT}"
 log_info "Jobs:            ${CONCURRENCY}"
@@ -183,7 +183,7 @@ cd "${KERNEL_SRC_DIR}"
 # ----------------------------------------------------------------------------
 # 3. Apply patches
 # ----------------------------------------------------------------------------
-log_step "3/7: Applying Solus patches..."
+log_step "3/7: Applying Synthex patches..."
 
 apply_patch() {
     local patch_file="$1"
@@ -238,13 +238,13 @@ log_info "Applied ${PATCHES_APPLIED} patches successfully."
 # ----------------------------------------------------------------------------
 log_step "4/7: Configuring kernel..."
 
-SOLUS_CONFIG="${SCRIPT_DIR}/config-x86_64"
-if [[ ! -f "${SOLUS_CONFIG}" ]]; then
-    log_error "Solus kernel config not found at ${SOLUS_CONFIG}"
+SYNTHEX_CONFIG="${SCRIPT_DIR}/config-x86_64"
+if [[ ! -f "${SYNTHEX_CONFIG}" ]]; then
+    log_error "Synthex kernel config not found at ${SYNTHEX_CONFIG}"
     exit 1
 fi
 
-cp "${SOLUS_CONFIG}" .config
+cp "${SYNTHEX_CONFIG}" .config
 
 # Adjust config for variant
 log_info "Adjusting config for ${VARIANT} variant..."
@@ -253,20 +253,20 @@ case "${VARIANT}" in
         scripts/config --enable CONFIG_GENERIC_CPU3
         scripts/config --disable CONFIG_GENERIC_CPU2
         scripts/config --disable CONFIG_GENERIC_CPU
-        scripts/config --set-str CONFIG_LOCALVERSION "-solus-v3"
+        scripts/config --set-str CONFIG_LOCALVERSION "-synthex-v3"
         ;;
     v4)
         scripts/config --enable CONFIG_GENERIC_CPU4
         scripts/config --disable CONFIG_GENERIC_CPU3
         scripts/config --disable CONFIG_GENERIC_CPU2
         scripts/config --disable CONFIG_GENERIC_CPU
-        scripts/config --set-str CONFIG_LOCALVERSION "-solus-v4"
+        scripts/config --set-str CONFIG_LOCALVERSION "-synthex-v4"
         ;;
     generic|*)
         scripts/config --enable CONFIG_GENERIC_CPU
         scripts/config --disable CONFIG_GENERIC_CPU2
         scripts/config --disable CONFIG_GENERIC_CPU3
-        scripts/config --set-str CONFIG_LOCALVERSION "-solus"
+        scripts/config --set-str CONFIG_LOCALVERSION "-synthex"
         ;;
 esac
 
@@ -302,8 +302,8 @@ log_step "6/7: Building RPM packages..."
 mkdir -p "${RPM_TOPDIR}"/{BUILD,RPMS,SOURCES,SPECS,SRPMS}
 
 # Copy spec and sources
-cp "${SCRIPT_DIR}/solus-kernel.spec" "${RPM_TOPDIR}/SPECS/"
-cp "${SOLUS_CONFIG}" "${RPM_TOPDIR}/SOURCES/config-x86_64"
+cp "${SCRIPT_DIR}/synthex-kernel.spec" "${RPM_TOPDIR}/SPECS/"
+cp "${SYNTHEX_CONFIG}" "${RPM_TOPDIR}/SOURCES/config-x86_64"
 
 # Create source tarball of the configured source
 cd "${BUILD_DIR}"
@@ -315,7 +315,7 @@ rpmbuild \
     --define "_topdir ${RPM_TOPDIR}" \
     --define "_smp_mflags -j${CONCURRENCY}" \
     ${RPM_BUILD_OPTS} \
-    -ba "${RPM_TOPDIR}/SPECS/solus-kernel.spec" 2>&1 | tee "${BUILD_DIR}/rpmbuild.log"
+    -ba "${RPM_TOPDIR}/SPECS/synthex-kernel.spec" 2>&1 | tee "${BUILD_DIR}/rpmbuild.log"
 
 log_info "RPM packages built:"
 find "${RPM_TOPDIR}/RPMS" -name "*.rpm" -type f 2>/dev/null | sort
@@ -353,16 +353,16 @@ ls -lh "${LOCAL_REPO}/"*.rpm 2>/dev/null || echo "(no RPMs copied)"
 # ----------------------------------------------------------------------------
 echo ""
 log_info "============================================"
-log_info " Build Complete: kernel-solus ${DEFAULT_KERNEL_VERSION} (${VARIANT})"
+log_info " Build Complete: kernel-synthex ${DEFAULT_KERNEL_VERSION} (${VARIANT})"
 log_info "============================================"
 log_info " Source:    ${KERNEL_SRC_DIR}"
-log_info " Config:    ${SOLUS_CONFIG}"
+log_info " Config:    ${SYNTHEX_CONFIG}"
 log_info " RPMS:      ${RPM_TOPDIR}/RPMS/"
 log_info " Local repo: ${LOCAL_REPO}/"
 log_info " Duration:  $((BUILD_DURATION / 60))m $((BUILD_DURATION % 60))s"
 log_info " Patches:   ${PATCHES_APPLIED} applied"
 echo ""
-log_info "To install: sudo rpm -ivh ${LOCAL_REPO}/kernel-solus-*.rpm"
+log_info "To install: sudo rpm -ivh ${LOCAL_REPO}/kernel-synthex-*.rpm"
 log_info "Or add repo: sudo dnf config-manager --add-repo file://${LOCAL_REPO}"
 echo ""
 

@@ -1,0 +1,14 @@
+[package]
+name = "synthex-system-report-rs"
+version = "0.1.0"
+edition = "2021"
+description = "Synthex System Report — comprehensive diagnostics like Mint's System Report."
+
+[dependencies]
+anyhow = { workspace = true }
+clap = { workspace = true }
+serde = { workspace = true }
+serde_json = { workspace = true }
+chrono = { workspace = true }
+tracing = { workspace = true }
+tracing-subscriber = { workspace = true }

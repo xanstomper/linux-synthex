@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: MIT OR Apache-2.0
-// GPU detection module for solus-hwdaemon
+// GPU detection module for synthex-hwdaemon
 
 use anyhow::Result;
 use crate::GpuInfo;

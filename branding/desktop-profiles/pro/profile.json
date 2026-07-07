@@ -1,0 +1,42 @@
+{
+  "name": "Synthex Pro",
+  "tagline": "Developer & creator cockpit. Split-panel. Terminal-first.",
+  "theme": "synthex-graphite",
+  "accent": "#5B9BD5",
+  "panels": {
+    "left": {
+      "type": "panel",
+      "width": 48,
+      "opacity": 1.0,
+      "blur": true,
+      "widgets": [
+        "launcher",
+        "icons",
+        "spacer",
+        "terminal-launcher",
+        "tray"
+      ]
+    },
+    "bottom": {
+      "type": "panel",
+      "height": 32,
+      "opacity": 0.9,
+      "blur": true,
+      "widgets": [
+        "pager",
+        "tasks",
+        "spacer",
+        "clock"
+      ]
+    }
+  },
+  "dock": false,
+  "animations": "fast",
+  "compositor": "opengl",
+  "menu": "kickoff-search",
+  "desktop": "folder",
+  "wallpaper": "synthex-graphite.png",
+  "description": "Developer cockpit. Left app dock. Bottom status bar. Built-in terminal launcher. Git-aware file manager.",
+  "performance": "balanced",
+  "target": "Developers, creators, multitaskers"
+}

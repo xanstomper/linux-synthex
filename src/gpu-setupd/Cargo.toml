@@ -1,9 +1,9 @@
 [package]
-name = "solus-gpu-setupd"
+name = "synthex-gpu-setupd"
 version.workspace = true
 edition.workspace = true
 license.workspace = true
-description = "Solus GPU driver auto-installer and configuration daemon"
+description = "Synthex GPU driver auto-installer and configuration daemon"
 
 [dependencies]
 serde.workspace = true

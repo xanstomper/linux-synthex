@@ -18,7 +18,7 @@
     "animation_speed": 1,
     "animations": "genie"
   },
-  "wallpaper": "/usr/share/wallpapers/solus/macos-style.png",
+  "wallpaper": "/usr/share/wallpapers/synthex/macos-style.png",
   "services": {
     "gamemode": false,
     "tracker_services": true,

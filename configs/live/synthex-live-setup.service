@@ -1,0 +1,17 @@
+# /etc/systemd/system/synthex-live-setup.service — Live ISO environment setup
+# Runs on boot in the live environment to configure the live session
+
+[Unit]
+Description=Synthex Live Image Setup
+Wants=network-online.target
+After=network-online.target
+ConditionPathExists=/run/synthex-live
+
+[Service]
+Type=oneshot
+ExecStart=/usr/libexec/synthex/live-setup.sh
+RemainAfterExit=yes
+StandardOutput=journal+console
+
+[Install]
+WantedBy=graphical.target

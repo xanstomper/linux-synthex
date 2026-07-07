@@ -1,0 +1,4 @@
+---
+name: synthexpostinstall
+interface: python
+load: synthexpostinstall.py

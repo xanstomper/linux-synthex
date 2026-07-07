@@ -1,9 +1,0 @@
-[Desktop Entry]
-Type=Application
-Name=Solus Software Center
-Comment=Install and manage applications
-Exec=solus-software-center
-Icon=solus-software-center
-Categories=Applications;System;
-Terminal=false
-StartupNotify=true

@@ -1,4 +1,4 @@
-# Linux Solus — Project Roadmap
+# Linux Synthex — Project Roadmap
 
 > **Last Updated:** July 2026
 > **Status:** Pre-Alpha (Phase 0)
@@ -7,7 +7,7 @@
 
 ## Overview
 
-Linux Solus development is organized into 6 phases over approximately 18 months from project initiation to stable release.
+Linux Synthex development is organized into 6 phases over approximately 18 months from project initiation to stable release.
 
 ```
 Phase 0 ──► Phase 1 ──► Phase 2 ──► Phase 3 ──► Phase 4 ──► Phase 5
@@ -40,7 +40,7 @@ Q3 2026     Q4 2026      Q1 2027      Q2 2027     Q3 2027     Q4 2027
 - First bootable ISO can be built
 - Build pipeline is reproducible
 - Architecture docs cover all components
-- Kernel compiles with Solus config
+- Kernel compiles with Synthex config
 
 ### Estimated Timeline
 - **Weeks 1-2:** Architecture + kernel + security
@@ -57,20 +57,20 @@ Q3 2026     Q4 2026      Q1 2027      Q2 2027     Q3 2027     Q4 2027
 ### Deliverables
 
 #### Core System
-- [ ] Solus Kernel boots on real hardware (AMD, Intel, NVIDIA)
+- [ ] Synthex Kernel boots on real hardware (AMD, Intel, NVIDIA)
 - [ ] BTRFS with compression + snapshots operational
-- [ ] SELinux enforcing with Solus policy
+- [ ] SELinux enforcing with Synthex policy
 - [ ] Full disk encryption (LUKS2 + TPM2)
 - [ ] Secure Boot signed kernel + bootloader
 - [ ] Systemd-boot default with GRUB fallback
 
 #### Desktop
-- [ ] Solus Plasma edition boots to desktop
+- [ ] Synthex Plasma edition boots to desktop
 - [ ] Default theme and branding applied
 - [ ] Dark/Light mode switching
 - [ ] Accent color engine functional
 - [ ] Panel layout + default widgets
-- [ ] KWin rules for Solus apps
+- [ ] KWin rules for Synthex apps
 - [ ] SDDM themed login screen
 - [ ] Plymouth boot splash
 
@@ -92,7 +92,7 @@ Q3 2026     Q4 2026      Q1 2027      Q2 2027     Q3 2027     Q4 2027
 - [ ] Post-install first-boot setup
 
 #### Packages
-- [ ] Solus repository online (Copr)
+- [ ] Synthex repository online (Copr)
 - [ ] Kernel RPMs building
 - [ ] Meta-packages defined
 - [ ] Updates via DNF5 working
@@ -113,7 +113,7 @@ Q3 2026     Q4 2026      Q1 2027      Q2 2027     Q3 2027     Q4 2027
 ### Deliverables
 
 #### Desktop Polish
-- [ ] Solus Fluent Material design fully implemented
+- [ ] Synthex Fluent Material design fully implemented
 - [ ] KDE Plasma 6 all widgets themed
 - [ ] Notification center design
 - [ ] System Settings reorganized
@@ -143,7 +143,7 @@ Q3 2026     Q4 2026      Q1 2027      Q2 2027     Q3 2027     Q4 2027
 - [ ] Docker compatibility layer
 
 #### AI Integration
-- [ ] Solus AI Hub v1 (basic)
+- [ ] Synthex AI Hub v1 (basic)
 - [ ] Ollama preinstalled and configured
 - [ ] Model manager (download/remove)
 - [ ] GPU acceleration confirmed
@@ -189,15 +189,15 @@ Q3 2026     Q4 2026      Q1 2027      Q2 2027     Q3 2027     Q4 2027
 - [ ] Performance benchmark regression testing
 - [ ] Security scanning (OpenSCAP, OWASP)
 - [ ] Hardware compatibility matrix
-- [ ] Upgrade path testing (Fedora → Solus)
+- [ ] Upgrade path testing (Fedora → Synthex)
 - [ ] Multi-language support (20+ languages)
 - [ ] Accessibility (a11y) audit
 - [ ] Power consumption benchmarking
 
 #### GNOME Edition
-- [ ] Solus GNOME Shell theme
+- [ ] Synthex GNOME Shell theme
 - [ ] Default GNOME extensions
-- [ ] Solus accent colors
+- [ ] Synthex accent colors
 - [ ] Preconfigured workflow
 
 #### Final Polish
@@ -230,12 +230,12 @@ Q3 2026     Q4 2026      Q1 2027      Q2 2027     Q3 2027     Q4 2027
 
 ## Phase 4: Stable (Q3 2027)
 
-**Goal:** Public release — Linux Solus 1.0 "Ignition"
+**Goal:** Public release — Linux Synthex 1.0 "Ignition"
 
 ### Deliverables
 
 #### Release
-- [ ] Linux Solus 1.0 ISO (all editions)
+- [ ] Linux Synthex 1.0 ISO (all editions)
 - [ ] Release announcement
 - [ ] Press kit
 - [ ] Release notes
@@ -266,7 +266,7 @@ Q3 2026     Q4 2026      Q1 2027      Q2 2027     Q3 2027     Q4 2027
 ### Deliverables
 
 #### LTS Release
-- [ ] Linux Solus 2.0 LTS
+- [ ] Linux Synthex 2.0 LTS
 - [ ] 5-year support commitment
 - [ ] Commercial support tiers
 - [ ] Enterprise compliance certifications
@@ -274,11 +274,11 @@ Q3 2026     Q4 2026      Q1 2027      Q2 2027     Q3 2027     Q4 2027
 - [ ] Real-time kernel variant (industrial)
 
 #### Ecosystem
-- [ ] Solus Flatpak remote
-- [ ] Solus App Store
-- [ ] Solus Certified Hardware program
+- [ ] Synthex Flatpak remote
+- [ ] Synthex App Store
+- [ ] Synthex Certified Hardware program
 - [ ] OEM pre-install partnerships
-- [ ] Solus Cloud images (AWS, Azure, GCP)
+- [ ] Synthex Cloud images (AWS, Azure, GCP)
 
 ---
 
@@ -291,8 +291,8 @@ Q3 2026     Q4 2026      Q1 2027      Q2 2027     Q3 2027     Q4 2027
 | Alpha release | Q4 2026 | Community testing |
 | Beta release | Q1 2027 | Early adopters |
 | Release Candidate | Q2 2027 | Pre-production |
-| **Solus 1.0 Stable** | **Q3 2027** | **Public launch** |
-| Solus 2.0 LTS | Q4 2027+ | Enterprise |
+| **Synthex 1.0 Stable** | **Q3 2027** | **Public launch** |
+| Synthex 2.0 LTS | Q4 2027+ | Enterprise |
 
 ---
 
@@ -315,7 +315,7 @@ Q3 2026     Q4 2026      Q1 2027      Q2 2027     Q3 2027     Q4 2027
 - **Report Bugs:** GitHub Issues
 - **Join Discussion:** Discord / Matrix
 - **Test:** Run the beta ISO and submit feedback
-- **Package:** Help maintain Solus repository packages
+- **Package:** Help maintain Synthex repository packages
 - **Document:** Improve our documentation
 - **Donate:** Support infrastructure costs
 

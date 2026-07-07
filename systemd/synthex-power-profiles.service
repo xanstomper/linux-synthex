@@ -1,0 +1,28 @@
+[Unit]
+Description=Synthex Power Profiles Daemon
+Documentation=https://docs.synthex-project.org/power-profiles
+After=multi-user.target
+
+[Service]
+Type=forking
+ExecStart=/usr/bin/synthex-power-profiles daemon
+ExecStop=/bin/kill $(cat /run/synthex-power-profiles.pid)
+PIDFile=/run/synthex-power-profiles.pid
+RemainAfterExit=yes
+
+# Resource limits
+MemoryMax=32M
+CPUQuota=10%
+
+# Security — needs CPU governor writes
+ProtectSystem=full
+ProtectHome=read-only
+PrivateTmp=yes
+NoNewPrivileges=yes
+SystemCallArchitectures=native
+ProtectKernelTunables=yes
+ProtectControlGroups=yes
+CapabilityBoundingSet=CAP_SYS_ADMIN
+
+[Install]
+WantedBy=multi-user.target

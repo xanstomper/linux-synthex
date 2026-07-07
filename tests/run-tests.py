@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Solus integration tests."""
+"""Synthex integration tests."""
 import os, sys, re
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -17,10 +17,10 @@ def check(name, ok, detail=""):
 # 1. Systemd services
 print("📋 Systemd services:")
 svc_dir = os.path.join(ROOT, "systemd")
-expected_svcs = ["solus-desktopd", "solus-hwdaemon", "solus-gpu-setupd", "solus-stored",
-                 "solus-workspace", "solus-webappd", "solus-ai-hub", "solus-blueprint",
-                 "solus-recovery", "solus-firstboot", "solus-oobe", "solus-control-center",
-                 "solus-studiocd", "solus-marketplace"]
+expected_svcs = ["synthex-desktopd", "synthex-hwdaemon", "synthex-gpu-setupd", "synthex-stored",
+                 "synthex-workspace", "synthex-webappd", "synthex-ai-hub", "synthex-blueprint",
+                 "synthex-recovery", "synthex-firstboot", "synthex-oobe", "synthex-control-center",
+                 "synthex-studiocd", "synthex-marketplace"]
 for svc in expected_svcs:
     path = os.path.join(svc_dir, f"{svc}.service")
     check(svc, os.path.exists(path))
@@ -28,8 +28,8 @@ for svc in expected_svcs:
 # 2. Desktop files
 print("\n📋 Desktop launchers:")
 desktop_dir = os.path.join(ROOT, "desktop", "applications")
-expected_desktop = ["solus-control-center", "solus-software-center", "solus-gaming-center",
-                    "solus-ai-hub", "solus-studio", "solus-security-dashboard", "solus-workspace"]
+expected_desktop = ["synthex-control-center", "synthex-software-center", "synthex-gaming-center",
+                    "synthex-ai-hub", "synthex-studio", "synthex-security-dashboard", "synthex-workspace"]
 for d in expected_desktop:
     path = os.path.join(desktop_dir, f"{d}.desktop")
     exists = os.path.exists(path)
@@ -42,8 +42,8 @@ for d in expected_desktop:
 # 3. App icons
 print("\n📋 App icons:")
 icon_dir = os.path.join(ROOT, "branding", "icons")
-for icon in ["solus-control-center", "solus-ai-hub", "solus-gaming-center",
-             "solus-software-center", "solus-studio", "solus-security-dashboard", "solus-workspace"]:
+for icon in ["synthex-control-center", "synthex-ai-hub", "synthex-gaming-center",
+             "synthex-software-center", "synthex-studio", "synthex-security-dashboard", "synthex-workspace"]:
     path = os.path.join(icon_dir, f"{icon}.svg")
     check(icon, os.path.exists(path) and os.path.getsize(path) > 100)
 
@@ -62,11 +62,11 @@ for mode in ["gaming", "dev", "battery", "balanced", "creator", "streaming"]:
 # 6. Source code directories
 print("\n📋 Source code:")
 src_dir = os.path.join(ROOT, "src")
-expected_src = ["solus-desktopd", "solus-hwdaemon", "solus-gpu-setupd", "solus-stored",
-                "solus-control-center", "solus-oobe", "solus-studio", "solus-gaming-center",
-                "solus-software-center", "solus-ai-hub", "solus-blueprint", "solus-webapp-engine",
-                "solus-workspace", "solus-recovery", "solus-security-dashboard", "solus-boot",
-                "solus-installer"]
+expected_src = ["synthex-desktopd", "synthex-hwdaemon", "synthex-gpu-setupd", "synthex-stored",
+                "synthex-control-center", "synthex-oobe", "synthex-studio", "synthex-gaming-center",
+                "synthex-software-center", "synthex-ai-hub", "synthex-blueprint", "synthex-webapp-engine",
+                "synthex-workspace", "synthex-recovery", "synthex-security-dashboard", "synthex-boot",
+                "synthex-installer"]
 for s in expected_src:
     path = os.path.join(src_dir, s)
     check(s, os.path.exists(path))
@@ -74,12 +74,12 @@ for s in expected_src:
 # 6b. GUI entry point wrappers
 print("\n📋 GUI entry point wrappers:")
 gui_wrappers = [
-    ("solus-ai-hub/solus-ai-hub", "AI Hub"),
-    ("solus-gaming-center/solus-gaming-center", "Gaming Center"),
-    ("solus-software-center/solus-software-center", "Software Center"),
-    ("solus-control-center/solus-control-center", "Control Center"),
-    ("solus-studio/solus-studio", "Studio"),
-    ("solus-security-dashboard/solus-security-dashboard", "Security Dashboard"),
+    ("synthex-ai-hub/synthex-ai-hub", "AI Hub"),
+    ("synthex-gaming-center/synthex-gaming-center", "Gaming Center"),
+    ("synthex-software-center/synthex-software-center", "Software Center"),
+    ("synthex-control-center/synthex-control-center", "Control Center"),
+    ("synthex-studio/synthex-studio", "Studio"),
+    ("synthex-security-dashboard/synthex-security-dashboard", "Security Dashboard"),
 ]
 for path, name in gui_wrappers:
     full = os.path.join(src_dir, path)
@@ -88,41 +88,41 @@ for path, name in gui_wrappers:
 # 6c. System service entry point wrappers
 print("\n📋 System service entry point wrappers:")
 svc_wrappers = [
-    ("solus-oobe/solus-oobe", "OOBE"),
-    ("solus-recovery/solus-recovery", "Recovery"),
-    ("solus-blueprint/solus-blueprint", "Blueprint"),
-    ("solus-desktopd/solus-desktopd", "Desktop Daemon"),
-    ("solus-gpu-setupd/solus-gpu-setupd", "GPU Setup Daemon"),
-    ("solus-hwdaemon/solus-hwdaemon", "HW Daemon"),
-    ("solus-studio/solus-studiocd", "Studio Daemon"),
-    ("solus-webapp-engine/solus-webappd", "Web App Daemon"),
+    ("synthex-oobe/synthex-oobe", "OOBE"),
+    ("synthex-recovery/synthex-recovery", "Recovery"),
+    ("synthex-blueprint/synthex-blueprint", "Blueprint"),
+    ("synthex-desktopd/synthex-desktopd", "Desktop Daemon"),
+    ("synthex-gpu-setupd/synthex-gpu-setupd", "GPU Setup Daemon"),
+    ("synthex-hwdaemon/synthex-hwdaemon", "HW Daemon"),
+    ("synthex-studio/synthex-studiocd", "Studio Daemon"),
+    ("synthex-webapp-engine/synthex-webappd", "Web App Daemon"),
 ]
 for path, name in svc_wrappers:
     full = os.path.join(src_dir, path)
     check(f"{name} entry point", os.path.exists(full) and os.access(full, os.X_OK))
 
-# 6d. solus.py CLI — all commands compile + reference real tools
-print("\n📋 solus.py CLI command coverage:")
-solus_py = open(os.path.join(ROOT, "src", "solus.py")).read()
+# 6d. synthex.py CLI — all commands compile + reference real tools
+print("\n📋 synthex.py CLI command coverage:")
+synthex_py = open(os.path.join(ROOT, "src", "synthex.py")).read()
 expected_cmds = ["update","rollback","snapshot","mode","status","layout","theme",
     "install","remove","search","drivers","hw-info","ai","firewall","proton","gpu",
     "blueprint","backup","tray","welcome","recovery","gaming","codecs","nvidia",
     "kernel","service","logs","locale","ananicy","aur","usb","input",
     "power-profiles","upgrade","disk","report","timeshift","handheld","tour","appimage","hermes","agent","codex","kb"]
 for cmd in expected_cmds:
-    check(f"solus {cmd}", f'"{cmd}"' in solus_py or f"'{cmd}'" in solus_py)
+    check(f"synthex {cmd}", f'"{cmd}"' in synthex_py or f"'{cmd}'" in synthex_py)
 
 # 7. Security
 print("\n📋 Security:")
-check("SELinux policy", os.path.exists(os.path.join(ROOT, "security", "selinux-policy", "solus-policy.te")))
+check("SELinux policy", os.path.exists(os.path.join(ROOT, "security", "selinux-policy", "synthex-policy.te")))
 check("SELinux Makefile", os.path.exists(os.path.join(ROOT, "security", "selinux-policy", "Makefile")))
 check("sysctl hardening", os.path.exists(os.path.join(ROOT, "security", "hardening", "sysctl.conf")))
 check("auditd rules", os.path.exists(os.path.join(ROOT, "security", "hardening", "auditd.rules")))
 
 # 8. Packaging
 print("\n📋 Packaging:")
-check("DNF groups XML", os.path.exists(os.path.join(ROOT, "packages", "groups", "solus-comps.xml")))
-check("GPG signing key", os.path.exists(os.path.join(ROOT, "packages", "solus-repos", "RPM-GPG-KEY-solus")))
+check("DNF groups XML", os.path.exists(os.path.join(ROOT, "packages", "groups", "synthex-comps.xml")))
+check("GPG signing key", os.path.exists(os.path.join(ROOT, "packages", "synthex-repos", "RPM-GPG-KEY-synthex")))
 spec_count = len(os.listdir(os.path.join(ROOT, "packages", "spec-files")))
 check(f"RPM spec files ({spec_count})", spec_count >= 15)
 
@@ -135,54 +135,54 @@ check(f"GitHub Actions workflows ({workflow_count})", workflow_count >= 6)
 # 10. Safety system
 print("\n📋 Safety system:")
 safety_dir = os.path.join(ROOT, "safety")
-for f in ["protected-packages.conf", "solus-safety-check.sh", "solus-safety.service",
-          "rescue-usb-creator.sh", "dnf-solus-protect.py"]:
+for f in ["protected-packages.conf", "synthex-safety-check.sh", "synthex-safety.service",
+          "rescue-usb-creator.sh", "dnf-synthex-protect.py"]:
     check(f"safety/{f}", os.path.exists(os.path.join(safety_dir, f)))
 
 # 11. udev rules
 print("\n📋 udev rules:")
 udev_dir = os.path.join(ROOT, "udev")
-for f in ["69-solus-firmware.rules", "70-solus-controllers.rules",
-          "71-solus-rgb.rules", "72-solus-handheld.rules"]:
+for f in ["69-synthex-firmware.rules", "70-synthex-controllers.rules",
+          "71-synthex-rgb.rules", "72-synthex-handheld.rules"]:
     check(f"udev/{f}", os.path.exists(os.path.join(udev_dir, f)))
 
 # 12. Control Center pages
 print("\n📋 Control Center pages:")
-cc_pages = os.path.join(ROOT, "src", "solus-control-center", "ui", "pages")
+cc_pages = os.path.join(ROOT, "src", "synthex-control-center", "ui", "pages")
 for p in ["Drivers", "RGB", "Snapshots", "Kernel", "Controllers"]:
     check(f"{p}.qml", os.path.exists(os.path.join(cc_pages, f"{p}.qml")))
 
 # 13. OOBE bundles
 print("\n📋 OOBE bundles:")
-bundles_dir = os.path.join(ROOT, "src", "solus-oobe", "bundles")
+bundles_dir = os.path.join(ROOT, "src", "synthex-oobe", "bundles")
 for b in ["gaming", "creator", "developer", "rgb", "emulation"]:
     path = os.path.join(bundles_dir, f"{b}.sh")
     check(f"{b}.sh", os.path.exists(path) and os.access(path, os.X_OK))
-check("BundlePicker.qml", os.path.exists(os.path.join(ROOT, "src", "solus-oobe", "ui", "pages", "BundlePicker.qml")))
+check("BundlePicker.qml", os.path.exists(os.path.join(ROOT, "src", "synthex-oobe", "ui", "pages", "BundlePicker.qml")))
 
 # 14. AI assistant
 print("\n📋 AI assistant:")
-ai_dir = os.path.join(ROOT, "src", "solus-ai-hub")
-for m in ["driver_assistant.py", "troubleshooter.py", "performance_advisor.py", "solus-ai-assistant"]:
+ai_dir = os.path.join(ROOT, "src", "synthex-ai-hub")
+for m in ["driver_assistant.py", "troubleshooter.py", "performance_advisor.py", "synthex-ai-assistant"]:
     check(m, os.path.exists(os.path.join(ai_dir, m)))
 
 # 15. Windows migration tool
 print("\n📋 Windows migration:")
-check("solus-migrate-windows.py", os.path.exists(os.path.join(ROOT, "src", "solus-installer", "solus-migrate-windows.py")))
+check("synthex-migrate-windows.py", os.path.exists(os.path.join(ROOT, "src", "synthex-installer", "synthex-migrate-windows.py")))
 
 # 16. Performance configs
 print("\n📋 Performance configs:")
-check("99-solus-performance.conf", os.path.exists(os.path.join(ROOT, "security", "hardening", "99-solus-performance.conf")))
-check("zram-solus.conf", os.path.exists(os.path.join(ROOT, "security", "hardening", "zram-solus.conf")))
+check("99-synthex-performance.conf", os.path.exists(os.path.join(ROOT, "security", "hardening", "99-synthex-performance.conf")))
+check("zram-synthex.conf", os.path.exists(os.path.join(ROOT, "security", "hardening", "zram-synthex.conf")))
 
 # 17. Safety packaging spec
 print("\n📋 Safety spec:")
-check("solus-safety.spec", os.path.exists(os.path.join(ROOT, "packages", "spec-files", "solus-safety.spec")))
+check("synthex-safety.spec", os.path.exists(os.path.join(ROOT, "packages", "spec-files", "synthex-safety.spec")))
 
 # 18. Feature parity — Bazzite/CachyOS/Nobara packages present
 print("\n📋 Feature parity (Bazzite/CachyOS/Nobara):")
-gaming_spec = os.path.join(ROOT, "packages", "spec-files", "solus-gaming-platform.spec")
-ksinc = os.path.join(ROOT, "build", "kickstart", "solus-gaming-packages.ksinc")
+gaming_spec = os.path.join(ROOT, "packages", "spec-files", "synthex-gaming-platform.spec")
+ksinc = os.path.join(ROOT, "build", "kickstart", "synthex-gaming-packages.ksinc")
 for feature, needle in [
     ("Prism Launcher", "prism-launcher"),
     ("EmuDeck", "emudeck"),
@@ -205,9 +205,9 @@ for feature, needle in [
 
 # 19. Essentials (Flatpak/VPN/scanner/disk-health) + Creator (color/tablet)
 print("\n📋 Essentials + Creator specs:")
-for spec in ["solus-essentials.spec", "solus-creator-platform.spec"]:
+for spec in ["synthex-essentials.spec", "synthex-creator-platform.spec"]:
     check(spec, os.path.exists(os.path.join(ROOT, "packages", "spec-files", spec)))
-ess_spec = os.path.join(ROOT, "packages", "spec-files", "solus-essentials.spec")
+ess_spec = os.path.join(ROOT, "packages", "spec-files", "synthex-essentials.spec")
 for feature, needle in [
     ("Flatseal", "flatseal"),
     ("Warehouse", "warehouse"),
@@ -220,7 +220,7 @@ for feature, needle in [
     ("fwupd", "fwupd"),
 ]:
     check(feature, open(ess_spec).read().find(needle) >= 0)
-creator_spec = os.path.join(ROOT, "packages", "spec-files", "solus-creator-platform.spec")
+creator_spec = os.path.join(ROOT, "packages", "spec-files", "synthex-creator-platform.spec")
 for feature, needle in [
     ("OBS browser source", "browser-source"),
     ("Color management (colord)", "colord"),
@@ -232,7 +232,7 @@ for feature, needle in [
 
 # 20. Flathub preconfigured + low-latency audio
 print("\n📋 Flatpak + audio configs:")
-check("Flathub repo file", os.path.exists(os.path.join(ROOT, "packages", "spec-files", "solus-essentials.spec")) and "flathub" in open(ess_spec).read().lower())
+check("Flathub repo file", os.path.exists(os.path.join(ROOT, "packages", "spec-files", "synthex-essentials.spec")) and "flathub" in open(ess_spec).read().lower())
 check("setup-flatpak.sh", os.path.exists(os.path.join(ROOT, "scripts", "setup-flatpak.sh")))
 check("pipewire-low-latency.conf", os.path.exists(os.path.join(ROOT, "desktop", "defaults", "pipewire-low-latency.conf")))
 
@@ -245,40 +245,40 @@ for f in ["boot-analyze.sh", "boot-optimize.sh", "boot-profile.service"]:
 # 22. Resource slimming (least hoggy)
 print("\n📋 Resource slimming:")
 svc_slim_dir = os.path.join(ROOT, "services")
-for f in ["service-audit.sh", "solus-slim-services.sh", "solus-idle-tune.sh", "solus-slim.service"]:
+for f in ["service-audit.sh", "synthex-slim-services.sh", "synthex-idle-tune.sh", "synthex-slim.service"]:
     check(f"services/{f}", os.path.exists(os.path.join(svc_slim_dir, f)))
 
 # 23. Daemon memory limits
 print("\n📋 Daemon memory limits:")
-for svc in ["solus-desktopd", "solus-stored", "solus-ai-hub", "solus-hwdaemon"]:
+for svc in ["synthex-desktopd", "synthex-stored", "synthex-ai-hub", "synthex-hwdaemon"]:
     path = os.path.join(ROOT, "systemd", f"{svc}.service")
     content = open(path).read() if os.path.exists(path) else ""
     check(f"{svc} MemoryMax", "MemoryMax" in content)
 
 # 24. ISO build wiring — meta-packages in kickstart + comps + rootfs
 print("\n📋 ISO build wiring:")
-for ks in ["solus-plasma.ks", "solus-gnome.ks", "solus-hyprland.ks"]:
+for ks in ["synthex-plasma.ks", "synthex-gnome.ks", "synthex-hyprland.ks"]:
     path = os.path.join(ROOT, "build", "kickstart", ks)
     content = open(path).read() if os.path.exists(path) else ""
-    for meta in ["solus-safety", "solus-essentials", "solus-creator-platform", "solus-gaming-platform"]:
+    for meta in ["synthex-safety", "synthex-essentials", "synthex-creator-platform", "synthex-gaming-platform"]:
         check(f"{ks} includes {meta}", meta in content)
 
-comps = os.path.join(ROOT, "packages", "groups", "solus-comps.xml")
+comps = os.path.join(ROOT, "packages", "groups", "synthex-comps.xml")
 comps_content = open(comps).read() if os.path.exists(comps) else ""
-for grp in ["solus-safety", "solus-essentials", "solus-creator"]:
+for grp in ["synthex-safety", "synthex-essentials", "synthex-creator"]:
     check(f"comps.xml has {grp} group", f"<id>{grp}</id>" in comps_content)
 
 rootfs = os.path.join(ROOT, "scripts", "build-rootfs-in-docker.sh")
 rootfs_content = open(rootfs).read() if os.path.exists(rootfs) else ""
-check("rootfs installs meta-packages", "solus-safety solus-essentials" in rootfs_content)
-check("rootfs enables solus services", "solus-safety" in rootfs_content and "systemctl enable" in rootfs_content)
+check("rootfs installs meta-packages", "synthex-safety synthex-essentials" in rootfs_content)
+check("rootfs enables synthex services", "synthex-safety" in rootfs_content and "systemctl enable" in rootfs_content)
 
-# 25. Kickstart enables Solus platform services
+# 25. Kickstart enables Synthex platform services
 print("\n📋 Kickstart service enables:")
-plasma_ks = os.path.join(ROOT, "build", "kickstart", "solus-plasma.ks")
+plasma_ks = os.path.join(ROOT, "build", "kickstart", "synthex-plasma.ks")
 plasma_content = open(plasma_ks).read() if os.path.exists(plasma_ks) else ""
-for svc in ["solus-safety.service", "solus-slim.service", "solus-boot-profile.service",
-            "solus-oobe.service", "solus-control-center.service"]:
+for svc in ["synthex-safety.service", "synthex-slim.service", "synthex-boot-profile.service",
+            "synthex-oobe.service", "synthex-control-center.service"]:
     check(f"plasma.ks enables {svc}", svc in plasma_content)
 
 # 26. ISO size right-sizing — bloat removed, focused gaming-desktop scope
@@ -304,11 +304,11 @@ check("ISO uses zstd compression", "zstd" in iso_content and "compression-level=
 print("\n📋 Live ISO experience:")
 check("sddm-live.conf exists", os.path.exists(os.path.join(ROOT, "desktop", "sddm", "sddm-live.conf")))
 check("sddm-live.conf has autologin", "Autologin" in open(os.path.join(ROOT, "desktop", "sddm", "sddm-live.conf")).read() and "liveuser" in open(os.path.join(ROOT, "desktop", "sddm", "sddm-live.conf")).read())
-check("installer desktop file exists", os.path.exists(os.path.join(ROOT, "desktop", "applications", "solus-installer.desktop")))
-check("installer uses pkexec", "pkexec calamares" in open(os.path.join(ROOT, "desktop", "applications", "solus-installer.desktop")).read())
+check("installer desktop file exists", os.path.exists(os.path.join(ROOT, "desktop", "applications", "synthex-installer.desktop")))
+check("installer uses pkexec", "pkexec calamares" in open(os.path.join(ROOT, "desktop", "applications", "synthex-installer.desktop")).read())
 check("kickstart has SDDM autologin.conf", "autologin.conf" in plasma_content and "liveuser" in plasma_content)
-check("kickstart has polkit installer rule", "49-solus-live-installer.rules" in plasma_content)
-check("kickstart places installer on desktop", "solus-installer.desktop" in plasma_content and "Desktop" in plasma_content)
+check("kickstart has polkit installer rule", "49-synthex-live-installer.rules" in plasma_content)
+check("kickstart places installer on desktop", "synthex-installer.desktop" in plasma_content and "Desktop" in plasma_content)
 
 # 28. Live ISO security — passwordless sudo + firewall enabled
 print("\n📋 Live ISO security:")
@@ -317,40 +317,40 @@ check("firewalld NOT disabled in kickstart", "systemctl disable firewalld" not i
 
 # 29. Distro parity packages — Bazzite, CachyOS, Nobara, Mint feature specs
 print("\n📋 Distro parity feature specs:")
-parity_specs = ["solus-codec-pack", "solus-welcome", "solus-mint-extras",
-                "solus-bazzite-extras", "solus-cachy-tuning", "solus-nobara-fixes"]
+parity_specs = ["synthex-codec-pack", "synthex-welcome", "synthex-mint-extras",
+                "synthex-bazzite-extras", "synthex-cachy-tuning", "synthex-nobara-fixes"]
 for spec in parity_specs:
     path = os.path.join(ROOT, "packages", "spec-files", f"{spec}.spec")
     check(f"{spec}.spec exists", os.path.exists(path))
 
 # Check meta-standard pulls all parity specs
-meta_std = os.path.join(ROOT, "packages", "spec-files", "solus-meta-standard.spec")
+meta_std = os.path.join(ROOT, "packages", "spec-files", "synthex-meta-standard.spec")
 meta_std_content = open(meta_std).read() if os.path.exists(meta_std) else ""
 for spec in parity_specs:
     check(f"meta-standard requires {spec}", spec in meta_std_content)
 
 # 30. Distro parity source files — ujust, nvidia installer, codec installer, tuning
 print("\n📋 Distro parity source files:")
-check("ujust tool exists", os.path.exists(os.path.join(ROOT, "src", "solus-ujust", "ujust")))
-ujust = open(os.path.join(ROOT, "src", "solus-ujust", "ujust")).read()
+check("ujust tool exists", os.path.exists(os.path.join(ROOT, "src", "synthex-ujust", "ujust")))
+ujust = open(os.path.join(ROOT, "src", "synthex-ujust", "ujust")).read()
 for cmd in ["gaming-setup", "install-nvidia", "install-codecs", "tune-performance",
             "install-bundle-gaming", "fix-audio", "rollback", "setup-zram"]:
     check(f"ujust has '{cmd}' command", cmd in ujust)
 
-check("nvidia-installer exists", os.path.exists(os.path.join(ROOT, "src", "solus-nvidia-installer", "solus-nvidia-installer")))
-nvidia_inst = open(os.path.join(ROOT, "src", "solus-nvidia-installer", "solus-nvidia-installer")).read()
+check("nvidia-installer exists", os.path.exists(os.path.join(ROOT, "src", "synthex-nvidia-installer", "synthex-nvidia-installer")))
+nvidia_inst = open(os.path.join(ROOT, "src", "synthex-nvidia-installer", "synthex-nvidia-installer")).read()
 check("nvidia-installer detects GPU", "lspci" in nvidia_inst and "NVIDIA" in nvidia_inst)
 check("nvidia-installer builds akmod", "akmods" in nvidia_inst)
 check("nvidia-installer handles Secure Boot", "mokutil" in nvidia_inst)
 
-check("codec-installer exists", os.path.exists(os.path.join(ROOT, "src", "solus-codec-installer", "solus-codec-installer")))
-codec_inst = open(os.path.join(ROOT, "src", "solus-codec-installer", "solus-codec-installer")).read()
+check("codec-installer exists", os.path.exists(os.path.join(ROOT, "src", "synthex-codec-installer", "synthex-codec-installer")))
+codec_inst = open(os.path.join(ROOT, "src", "synthex-codec-installer", "synthex-codec-installer")).read()
 check("codec-installer installs x264", "x264" in codec_inst)
 check("codec-installer installs x265", "x265" in codec_inst)
 check("codec-installer installs dav1d", "dav1d" in codec_inst)
 
-check("cachy-tuning exists", os.path.exists(os.path.join(ROOT, "src", "solus-cachy-tuning", "apply-cachy-tuning.sh")))
-cachy_tune = open(os.path.join(ROOT, "src", "solus-cachy-tuning", "apply-cachy-tuning.sh")).read()
+check("cachy-tuning exists", os.path.exists(os.path.join(ROOT, "src", "synthex-cachy-tuning", "apply-cachy-tuning.sh")))
+cachy_tune = open(os.path.join(ROOT, "src", "synthex-cachy-tuning", "apply-cachy-tuning.sh")).read()
 check("cachy-tuning has vm.swappiness", "vm.swappiness" in cachy_tune)
 check("cachy-tuning has TCP BBR", "tcp_congestion_control" in cachy_tune and "bbr" in cachy_tune)
 check("cachy-tuning has ZRAM config", "zram-generator" in cachy_tune)
@@ -358,7 +358,7 @@ check("cachy-tuning has I/O scheduler", "scheduler" in cachy_tune)
 
 # 31. Codec pack completeness — all major codecs present
 print("\n📋 Codec pack completeness:")
-codec_spec = open(os.path.join(ROOT, "packages", "spec-files", "solus-codec-pack.spec")).read()
+codec_spec = open(os.path.join(ROOT, "packages", "spec-files", "synthex-codec-pack.spec")).read()
 for codec in ["x264", "x265", "dav1d", "openh264", "gstreamer1-plugins-ugly-free",
               "gstreamer1-plugins-bad-free-extras", "libdvdcss", "flac", "opus",
               "lame", "ffmpeg", "libva", "intel-vaapi-driver"]:
@@ -366,34 +366,34 @@ for codec in ["x264", "x265", "dav1d", "openh264", "gstreamer1-plugins-ugly-free
 
 # 32. Desktop utility tools — daily-use features
 print("\n📋 Desktop utility tools (daily-use features):")
-check("solus-desktop-tools.spec exists", os.path.exists(os.path.join(ROOT, "packages", "spec-files", "solus-desktop-tools.spec")))
-dt_spec = open(os.path.join(ROOT, "packages", "spec-files", "solus-desktop-tools.spec")).read()
+check("synthex-desktop-tools.spec exists", os.path.exists(os.path.join(ROOT, "packages", "spec-files", "synthex-desktop-tools.spec")))
+dt_spec = open(os.path.join(ROOT, "packages", "spec-files", "synthex-desktop-tools.spec")).read()
 for pkg in ["flameshot", "fcitx5", "samba", "xrdp", "blueman", "gammastep",
             "syncthing", "copyq", "keepassxc", "deja-dup", "borgbackup",
             "transmission", "gnome-calculator", "evince", "orca", "cheese",
             "gparted", "grub-customizer", "firewall-config", "gsmartcontrol"]:
     check(f"desktop-tools includes {pkg}", pkg in dt_spec)
-check("meta-standard requires solus-desktop-tools", "solus-desktop-tools" in meta_std_content)
+check("meta-standard requires synthex-desktop-tools", "synthex-desktop-tools" in meta_std_content)
 
-# 33. Solus system management tools (kernel/service/log/locale)
+# 33. Synthex system management tools (kernel/service/log/locale)
 print("\n📋 System management tools:")
-for tool in ["solus-kernel-manager", "solus-service-manager", "solus-log-viewer", "solus-locale-setup"]:
+for tool in ["synthex-kernel-manager", "synthex-service-manager", "synthex-log-viewer", "synthex-locale-setup"]:
     path = os.path.join(ROOT, "src", tool, tool)
     check(f"{tool} exists", os.path.exists(path))
 
-km = open(os.path.join(ROOT, "src", "solus-kernel-manager", "solus-kernel-manager")).read()
+km = open(os.path.join(ROOT, "src", "synthex-kernel-manager", "synthex-kernel-manager")).read()
 for cmd in ["list", "install", "switch", "remove", "info", "cleanup"]:
     check(f"kernel-manager has '{cmd}'", cmd in km)
 
-sm = open(os.path.join(ROOT, "src", "solus-service-manager", "solus-service-manager")).read()
+sm = open(os.path.join(ROOT, "src", "synthex-service-manager", "synthex-service-manager")).read()
 for cmd in ["list", "start", "stop", "restart", "enable", "disable", "status", "failed"]:
     check(f"service-manager has '{cmd}'", cmd in sm)
 
-lv = open(os.path.join(ROOT, "src", "solus-log-viewer", "solus-log-viewer")).read()
+lv = open(os.path.join(ROOT, "src", "synthex-log-viewer", "synthex-log-viewer")).read()
 for cmd in ["boot", "kernel", "errors", "warnings", "service", "follow", "search"]:
     check(f"log-viewer has '{cmd}'", cmd in lv)
 
-ls = open(os.path.join(ROOT, "src", "solus-locale-setup", "solus-locale-setup")).read()
+ls = open(os.path.join(ROOT, "src", "synthex-locale-setup", "synthex-locale-setup")).read()
 for cmd in ["locale", "timezone", "keyboard", "list-locales", "list-timezones"]:
     check(f"locale-setup has '{cmd}'", cmd in ls)
 
@@ -408,8 +408,8 @@ for module in ["welcome", "partition", "mount", "locale", "keyboard", "users",
 
 # 35. System utilities — network, fonts, recovery, monitoring, privacy
 print("\n📋 System utilities (network/fonts/recovery/monitoring):")
-su_spec_path = os.path.join(ROOT, "packages", "spec-files", "solus-system-utilities.spec")
-check("solus-system-utilities.spec exists", os.path.exists(su_spec_path))
+su_spec_path = os.path.join(ROOT, "packages", "spec-files", "synthex-system-utilities.spec")
+check("synthex-system-utilities.spec exists", os.path.exists(su_spec_path))
 su_spec = open(su_spec_path).read()
 for pkg in ["mtr", "traceroute", "tcpdump", "bind-utils", "iperf3", "nmap",
             "lm_sensors", "thermald", "psensor", "testdisk", "photorec",
@@ -419,7 +419,7 @@ for pkg in ["mtr", "traceroute", "tcpdump", "bind-utils", "iperf3", "nmap",
             "fio", "hdparm", "btrfs-progs", "e2fsprogs", "xfsprogs",
             "exfatprogs", "ntfs-3g", "usbutils", "pciutils", "lshw"]:
     check(f"system-utilities includes {pkg}", pkg in su_spec)
-check("meta-standard requires solus-system-utilities", "solus-system-utilities" in meta_std_content)
+check("meta-standard requires synthex-system-utilities", "synthex-system-utilities" in meta_std_content)
 
 # 36. Calamares module configurations (individual .conf files)
 print("\n📋 Calamares module configurations:")
@@ -445,30 +445,30 @@ check("branding has slideshow", "slideshow" in bd)
 # 38. Post-install scripts (referenced by Calamares shellprocess)
 print("\n📋 Post-install scripts:")
 for script in ["post-install.sh", "hardware-detect.sh", "apply-theme.sh"]:
-    path = os.path.join(ROOT, "src", "solus-installer", script)
+    path = os.path.join(ROOT, "src", "synthex-installer", script)
     check(f"{script} exists", os.path.exists(path))
 
-post_install = open(os.path.join(ROOT, "src", "solus-installer", "post-install.sh")).read()
+post_install = open(os.path.join(ROOT, "src", "synthex-installer", "post-install.sh")).read()
 check("post-install removes liveuser", "liveuser" in post_install and "userdel" in post_install)
 check("post-install enables services", "systemctl enable" in post_install)
 check("post-install rebuilds initramfs", "dracut" in post_install)
 check("post-install updates GRUB", "grub2-mkconfig" in post_install)
 check("post-install cleans sudoers", "10-liveuser" in post_install)
 
-hw_detect = open(os.path.join(ROOT, "src", "solus-installer", "hardware-detect.sh")).read()
+hw_detect = open(os.path.join(ROOT, "src", "synthex-installer", "hardware-detect.sh")).read()
 check("hardware-detect detects NVIDIA", "NVIDIA" in hw_detect and "lspci" in hw_detect)
 check("hardware-detect detects AMD", "AMD" in hw_detect)
 check("hardware-detect detects Intel", "Intel" in hw_detect)
-check("hardware-detect writes JSON profile", "solus-hw-profile.json" in hw_detect)
+check("hardware-detect writes JSON profile", "synthex-hw-profile.json" in hw_detect)
 check("hardware-detect auto-installs NVIDIA", "akmod-nvidia" in hw_detect)
 check("hardware-detect configures ZRAM", "zram-generator" in hw_detect)
 check("hardware-detect configures I/O scheduler", "scheduler" in hw_detect)
 check("hardware-detect detects handhelds", "steamdeck" in hw_detect and "handheld" in hw_detect)
 
-apply_theme = open(os.path.join(ROOT, "src", "solus-installer", "apply-theme.sh")).read()
+apply_theme = open(os.path.join(ROOT, "src", "synthex-installer", "apply-theme.sh")).read()
 check("apply-theme sets GRUB theme", "GRUB_THEME" in apply_theme)
 check("apply-theme sets Plymouth", "plymouth-set-default-theme" in apply_theme)
-check("apply-theme sets SDDM theme", "solus-sddm-theme" in apply_theme)
+check("apply-theme sets SDDM theme", "synthex-sddm-theme" in apply_theme)
 check("apply-theme sets GTK theme", "gtk-theme-name" in apply_theme)
 check("apply-theme sets cursor theme", "Bibata" in apply_theme)
 check("apply-theme sets font config", "fontconfig" in apply_theme)
@@ -476,7 +476,7 @@ check("apply-theme sets wallpaper", "wallpaper" in apply_theme.lower())
 
 # 39. Desktop entries for system tools
 print("\n📋 System tool desktop entries:")
-for tool in ["solus-kernel-manager", "solus-service-manager", "solus-log-viewer", "solus-locale-setup"]:
+for tool in ["synthex-kernel-manager", "synthex-service-manager", "synthex-log-viewer", "synthex-locale-setup"]:
     path = os.path.join(ROOT, "desktop", "applications", f"{tool}.desktop")
     check(f"{tool}.desktop exists", os.path.exists(path))
 
@@ -496,18 +496,18 @@ users_conf = open(os.path.join(ROOT, "installer", "modules", "users", "users.con
 for group in ["wheel", "audio", "video", "docker", "libvirt", "kvm", "input"]:
     check(f"users config includes {group} group", group in users_conf)
 
-# 42. Services config — all Solus services enabled
-print("\n📋 Services config (Solus services enabled):")
+# 42. Services config — all Synthex services enabled
+print("\n📋 Services config (Synthex services enabled):")
 svc_conf = open(os.path.join(ROOT, "installer", "modules", "services-systemd", "services-systemd.conf")).read()
 for svc in ["NetworkManager", "bluetooth", "sddm", "cups", "fwupd", "firewalld",
-            "solus-safety", "solus-oobe", "solus-control-center", "solus-hwdaemon"]:
+            "synthex-safety", "synthex-oobe", "synthex-control-center", "synthex-hwdaemon"]:
     check(f"services config enables {svc}", svc in svc_conf)
 
 # 43. New standalone tool specs — have %build, %install, %files, %changelog
 print("\n📋 Standalone tool specs (buildable RPMs):")
-tool_specs = ["solus-ujust", "solus-nvidia-installer", "solus-codec-installer",
-              "solus-kernel-manager", "solus-service-manager", "solus-log-viewer",
-              "solus-locale-setup"]
+tool_specs = ["synthex-ujust", "synthex-nvidia-installer", "synthex-codec-installer",
+              "synthex-kernel-manager", "synthex-service-manager", "synthex-log-viewer",
+              "synthex-locale-setup"]
 for spec in tool_specs:
     path = os.path.join(ROOT, "packages", "spec-files", f"{spec}.spec")
     check(f"{spec}.spec exists", os.path.exists(path))
@@ -522,9 +522,9 @@ for spec in tool_specs:
 
 # 44. Fixed specs — all 8 previously broken specs now have build sections
 print("\n📋 Fixed specs (now have %build/%install):")
-for spec in ["solus-bazzite-extras", "solus-cachy-tuning", "solus-codec-pack",
-             "solus-desktop-tools", "solus-mint-extras", "solus-nobara-fixes",
-             "solus-system-utilities", "solus-welcome"]:
+for spec in ["synthex-bazzite-extras", "synthex-cachy-tuning", "synthex-codec-pack",
+             "synthex-desktop-tools", "synthex-mint-extras", "synthex-nobara-fixes",
+             "synthex-system-utilities", "synthex-welcome"]:
     content = open(os.path.join(ROOT, "packages", "spec-files", f"{spec}.spec")).read()
     check(f"{spec} has %build", "%build" in content)
     check(f"{spec} has %install", "%install" in content)
@@ -532,25 +532,25 @@ for spec in ["solus-bazzite-extras", "solus-cachy-tuning", "solus-codec-pack",
 
 # 45. Nobara fixes — invalid Requires fixed
 print("\n📋 Nobara fixes spec fixes:")
-nb = open(os.path.join(ROOT, "packages", "spec-files", "solus-nobara-fixes.spec")).read()
+nb = open(os.path.join(ROOT, "packages", "spec-files", "synthex-nobara-fixes.spec")).read()
 check("nobara-fixes has Source0", "Source0" in nb)
 check("nobara-fixes fixed selinux req", "selinux-policy-targeted" in nb)
 check("nobara-fixes fixed prime req", "nvidia-prime" in nb)
-check("nobara-fixes no invalid solus-selinux", "solus-selinux-adjustments" not in nb)
-check("nobara-fixes no invalid solus-prime", "solus-prime" not in nb)
+check("nobara-fixes no invalid synthex-selinux", "synthex-selinux-adjustments" not in nb)
+check("nobara-fixes no invalid synthex-prime", "synthex-prime" not in nb)
 
 # 46. Cachy tuning — Source files + tuned profiles + ananicy rules
 print("\n📋 Cachy tuning spec completeness:")
-ct = open(os.path.join(ROOT, "packages", "spec-files", "solus-cachy-tuning.spec")).read()
+ct = open(os.path.join(ROOT, "packages", "spec-files", "synthex-cachy-tuning.spec")).read()
 check("cachy-tuning has Source0 (script)", "Source0:" in ct and "apply-cachy-tuning" in ct)
-check("cachy-tuning has tuned gaming profile", "solus-gaming" in ct)
+check("cachy-tuning has tuned gaming profile", "synthex-gaming" in ct)
 check("cachy-tuning has ananicy rules source", "ananicy-rules" in ct)
-check("cachy-tuning installs sysctl conf", "99-solus-cachy.conf" in ct)
+check("cachy-tuning installs sysctl conf", "99-synthex-cachy.conf" in ct)
 check("cachy-tuning has vm.swappiness", "vm.swappiness" in ct)
 
 # 47. Source files exist for all specs with Source0
 print("\n📋 Source files exist:")
-for path, desc in [("src/solus-ujust/ujust", "ujust"), ("src/solus-nvidia-installer/solus-nvidia-installer", "nvidia-inst"), ("src/solus-codec-installer/solus-codec-installer", "codec-inst"), ("src/solus-kernel-manager/solus-kernel-manager", "kernel-mgr"), ("src/solus-service-manager/solus-service-manager", "service-mgr"), ("src/solus-log-viewer/solus-log-viewer", "log-viewer"), ("src/solus-locale-setup/solus-locale-setup", "locale-setup"), ("src/solus-nobara-fixes/apply-nobara-fixes.sh", "nobara-fixes"), ("src/solus-welcome/solus-welcome", "welcome"), ("src/solus-cachy-tuning/apply-cachy-tuning.sh", "cachy-tuning"), ("src/solus-cachy-tuning/tuned-profiles/solus-gaming/tuned.conf", "gaming tuned"), ("src/solus-cachy-tuning/ananicy-rules/solus-rules.conf", "ananicy rules")]:
+for path, desc in [("src/synthex-ujust/ujust", "ujust"), ("src/synthex-nvidia-installer/synthex-nvidia-installer", "nvidia-inst"), ("src/synthex-codec-installer/synthex-codec-installer", "codec-inst"), ("src/synthex-kernel-manager/synthex-kernel-manager", "kernel-mgr"), ("src/synthex-service-manager/synthex-service-manager", "service-mgr"), ("src/synthex-log-viewer/synthex-log-viewer", "log-viewer"), ("src/synthex-locale-setup/synthex-locale-setup", "locale-setup"), ("src/synthex-nobara-fixes/apply-nobara-fixes.sh", "nobara-fixes"), ("src/synthex-welcome/synthex-welcome", "welcome"), ("src/synthex-cachy-tuning/apply-cachy-tuning.sh", "cachy-tuning"), ("src/synthex-cachy-tuning/tuned-profiles/synthex-gaming/tuned.conf", "gaming tuned"), ("src/synthex-cachy-tuning/ananicy-rules/synthex-rules.conf", "ananicy rules")]:
     check(desc, os.path.exists(os.path.join(ROOT, path)))
 
 # 48. Repo infrastructure scripts
@@ -563,63 +563,63 @@ check("build-all creates repo", "createrepo" in bld)
 check("build-all supports --sign", "--sign" in bld)
 gpg = open(os.path.join(ROOT, "scripts", "generate-gpg-keys.sh")).read()
 check("gpg-keys generates RSA 4096", "RSA" in gpg and "4096" in gpg)
-check("gpg-keys exports public key", "RPM-GPG-KEY-solus" in gpg)
-check("solus.repo exists", os.path.exists(os.path.join(ROOT, "scripts", "solus.repo")))
+check("gpg-keys exports public key", "RPM-GPG-KEY-synthex" in gpg)
+check("synthex.repo exists", os.path.exists(os.path.join(ROOT, "scripts", "synthex.repo")))
 
 # 49. Nobara fixes script + Welcome app content
 print("\n📋 Nobara fixes + welcome app:")
-nf = open(os.path.join(ROOT, "src", "solus-nobara-fixes", "apply-nobara-fixes.sh")).read()
+nf = open(os.path.join(ROOT, "src", "synthex-nobara-fixes", "apply-nobara-fixes.sh")).read()
 check("nobara-fixes adjusts SELinux", "setsebool" in nf)
 check("nobara-fixes configures PipeWire", "pipewire" in nf)
 check("nobara-fixes sets vm.max_map_count", "max_map_count" in nf)
-check("nobara-fixes installs udev rules", "70-solus-gaming.rules" in nf)
-wf = open(os.path.join(ROOT, "src", "solus-welcome", "solus-welcome")).read()
+check("nobara-fixes installs udev rules", "70-synthex-gaming.rules" in nf)
+wf = open(os.path.join(ROOT, "src", "synthex-welcome", "synthex-welcome")).read()
 check("welcome uses GTK4", "Gtk" in wf and "4.0" in wf)
 check("welcome uses libadwaita", "Adw" in wf)
-check("welcome has driver action", "solus-control-center" in wf)
-check("welcome has codec action", "solus-codec-installer" in wf)
+check("welcome has driver action", "synthex-control-center" in wf)
+check("welcome has codec action", "synthex-codec-installer" in wf)
 check("welcome has gaming action", "ujust" in wf)
 
 # 50. System configuration files — 29 critical configs
 print("\n📋 System configuration files:")
 config_files = [
-    ("configs/dracut/dracut-solus.conf", "dracut initramfs config"),
+    ("configs/dracut/dracut-synthex.conf", "dracut initramfs config"),
     ("configs/grub/grub-default", "GRUB defaults"),
-    ("configs/sddm/sddm-solus.conf", "SDDM display manager config"),
-    ("configs/plymouth/plymouthd-solus.conf", "Plymouth boot splash config"),
-    ("configs/networkmanager/nm-solus.conf", "NetworkManager config"),
-    ("configs/firewalld/solus.xml", "firewalld zone"),
+    ("configs/sddm/sddm-synthex.conf", "SDDM display manager config"),
+    ("configs/plymouth/plymouthd-synthex.conf", "Plymouth boot splash config"),
+    ("configs/networkmanager/nm-synthex.conf", "NetworkManager config"),
+    ("configs/firewalld/synthex.xml", "firewalld zone"),
     ("configs/flatpak/flathub.flatpakrepo", "Flathub flatpak repo"),
-    ("configs/flatpak/solus.flatpakrepo", "Solus flatpak repo"),
+    ("configs/flatpak/synthex.flatpakrepo", "Synthex flatpak repo"),
     ("configs/snapper/snapper-root.conf", "Snapper snapshot config"),
-    ("configs/sudoers/solus-sudoers", "sudoers config"),
-    ("configs/polkit/49-solus-nopasswd.rules", "polkit rules"),
+    ("configs/sudoers/synthex-sudoers", "sudoers config"),
+    ("configs/polkit/49-synthex-nopasswd.rules", "polkit rules"),
     ("configs/dnf/dnf-automatic.conf", "DNF automatic updates"),
-    ("configs/journald/journald-solus.conf", "journald config"),
-    ("configs/timesyncd/timesyncd-solus.conf", "timesyncd NTP config"),
-    ("configs/modprobe/solus-blacklist.conf", "modprobe blacklist"),
-    ("configs/modprobe/solus-nvidia.conf", "NVIDIA modprobe options"),
-    ("configs/modprobe/solus-audio.conf", "audio modprobe options"),
-    ("configs/modprobe/solus-thinkpad.conf", "ThinkPad modprobe options"),
+    ("configs/journald/journald-synthex.conf", "journald config"),
+    ("configs/timesyncd/timesyncd-synthex.conf", "timesyncd NTP config"),
+    ("configs/modprobe/synthex-blacklist.conf", "modprobe blacklist"),
+    ("configs/modprobe/synthex-nvidia.conf", "NVIDIA modprobe options"),
+    ("configs/modprobe/synthex-audio.conf", "audio modprobe options"),
+    ("configs/modprobe/synthex-thinkpad.conf", "ThinkPad modprobe options"),
     ("configs/crypttab/crypttab", "LUKS crypttab"),
     ("configs/locale/locale.conf", "locale config"),
     ("configs/locale/vconsole.conf", "vconsole config"),
-    ("configs/locale/solus-locale-gen", "locale generation script"),
-    ("configs/secureboot/solus-shim.conf", "Secure Boot shim config"),
+    ("configs/locale/synthex-locale-gen", "locale generation script"),
+    ("configs/secureboot/synthex-shim.conf", "Secure Boot shim config"),
     ("configs/btrfs/btrfs-scrub-timer.conf", "Btrfs scrub timer"),
-    ("configs/btrfs/solus-btrfs-balance", "Btrfs balance cron"),
-    ("configs/live/solus-live-setup.service", "live image service"),
+    ("configs/btrfs/synthex-btrfs-balance", "Btrfs balance cron"),
+    ("configs/live/synthex-live-setup.service", "live image service"),
     ("configs/live/live-setup.sh", "live setup script"),
-    ("configs/live/install-solus.desktop", "installer desktop entry"),
+    ("configs/live/install-synthex.desktop", "installer desktop entry"),
     ("configs/calamares-branding/show.qml", "Calamares slideshow"),
 ]
 for path, desc in config_files:
     check(desc, os.path.exists(os.path.join(ROOT, path)))
 
-# 51. System config spec — solus-system-config
-print("\n📋 solus-system-config spec:")
-sc_path = os.path.join(ROOT, "packages", "spec-files", "solus-system-config.spec")
-check("solus-system-config.spec exists", os.path.exists(sc_path))
+# 51. System config spec — synthex-system-config
+print("\n📋 synthex-system-config spec:")
+sc_path = os.path.join(ROOT, "packages", "spec-files", "synthex-system-config.spec")
+check("synthex-system-config.spec exists", os.path.exists(sc_path))
 sc = open(sc_path).read()
 check("system-config has 28 Source declarations", sc.count("Source") >= 28)
 check("system-config has %build", "%build" in sc)
@@ -633,23 +633,23 @@ check("system-config installs sudoers", "sudoers.d" in sc)
 check("system-config installs modprobe", "modprobe.d" in sc)
 check("system-config installs live setup", "live-setup" in sc)
 check("system-config has %changelog", "%changelog" in sc)
-check("meta-standard requires solus-system-config", "solus-system-config" in meta_std_content)
+check("meta-standard requires synthex-system-config", "synthex-system-config" in meta_std_content)
 
 # 52. Calamares branding spec
 print("\n📋 Calamares branding spec:")
-cb_path = os.path.join(ROOT, "packages", "spec-files", "solus-calamares-branding.spec")
-check("solus-calamares-branding.spec exists", os.path.exists(cb_path))
+cb_path = os.path.join(ROOT, "packages", "spec-files", "synthex-calamares-branding.spec")
+check("synthex-calamares-branding.spec exists", os.path.exists(cb_path))
 cb = open(cb_path).read()
 check("calamares-branding has Source0 (branding.desc)", "branding.desc" in cb)
 check("calamares-branding has Source1 (show.qml)", "show.qml" in cb)
 check("calamares-branding has %build", "%build" in cb)
 check("calamares-branding has %install", "%install" in cb)
-check("calamares-branding installs to branding dir", "calamares/branding/solus" in cb)
+check("calamares-branding installs to branding dir", "calamares/branding/synthex" in cb)
 check("calamares-branding has %changelog", "%changelog" in cb)
 
 # 53. Config content validation — critical settings
 print("\n📋 Config content validation:")
-dracut = open(os.path.join(ROOT, "configs/dracut/dracut-solus.conf")).read()
+dracut = open(os.path.join(ROOT, "configs/dracut/dracut-synthex.conf")).read()
 check("dracut uses zstd compression", "zstd" in dracut)
 check("dracut has hostonly mode", "hostonly" in dracut)
 check("dracut includes GPU drivers", "nvidia" in dracut and "amdgpu" in dracut)
@@ -662,51 +662,51 @@ check("grub has theme", "GRUB_THEME" in grub)
 check("grub has cryptodisk", "CRYPTODISK" in grub)
 check("grub has recovery", "RECOVERY" in grub)
 
-sddm = open(os.path.join(ROOT, "configs/sddm/sddm-solus.conf")).read()
+sddm = open(os.path.join(ROOT, "configs/sddm/sddm-synthex.conf")).read()
 check("sddm uses Wayland", "wayland" in sddm.lower())
-check("sddm has solus theme", "solus-sddm-theme" in sddm)
+check("sddm has synthex theme", "synthex-sddm-theme" in sddm)
 check("sddm has cursor theme", "CursorTheme" in sddm)
 
-fw = open(os.path.join(ROOT, "configs/firewalld/solus.xml")).read()
+fw = open(os.path.join(ROOT, "configs/firewalld/synthex.xml")).read()
 check("firewalld has SSH service", "ssh" in fw)
 check("firewalld has gaming ports", "27036" in fw)
 check("firewalld has RDP", "3389" in fw)
 check("firewalld has VNC", "5900" in fw)
 
-sudoers = open(os.path.join(ROOT, "configs/sudoers/solus-sudoers")).read()
+sudoers = open(os.path.join(ROOT, "configs/sudoers/synthex-sudoers")).read()
 check("sudoers allows wheel group", "wheel" in sudoers)
 check("sudoers has passwordless dnf", "NOPASSWD" in sudoers and "dnf" in sudoers)
 check("sudoers has sudo timeout", "timestamp_timeout" in sudoers)
 
-nvidia_mod = open(os.path.join(ROOT, "configs/modprobe/solus-nvidia.conf")).read()
+nvidia_mod = open(os.path.join(ROOT, "configs/modprobe/synthex-nvidia.conf")).read()
 check("nvidia modprobe enables modeset", "modeset=1" in nvidia_mod)
 check("nvidia modprobe has power management", "DynamicPowerManagement" in nvidia_mod)
 
 # 54. Kernel patches — BORE scheduler, gaming latency, tickless, VM tuning
 print("\n📋 Kernel patches:")
-for patch in ["solus-0001-bore-scheduler.patch", "solus-0002-gaming-latency.patch",
-              "solus-0003-tickless-gaming.patch", "solus-0004-vm-gaming-tuning.patch"]:
+for patch in ["synthex-0001-bore-scheduler.patch", "synthex-0002-gaming-latency.patch",
+              "synthex-0003-tickless-gaming.patch", "synthex-0004-vm-gaming-tuning.patch"]:
     check(f"{patch} exists", os.path.exists(os.path.join(ROOT, "kernel", "patches", patch)))
 
-bore = open(os.path.join(ROOT, "kernel", "patches", "solus-0001-bore-scheduler.patch")).read()
+bore = open(os.path.join(ROOT, "kernel", "patches", "synthex-0001-bore-scheduler.patch")).read()
 check("BORE patch has SCHED_BORE", "SCHED_BORE" in bore)
 check("BORE patch has fair.c", "fair.c" in bore)
 check("BORE patch has burst", "burst" in bore.lower())
 
-latency = open(os.path.join(ROOT, "kernel", "patches", "solus-0002-gaming-latency.patch")).read()
+latency = open(os.path.join(ROOT, "kernel", "patches", "synthex-0002-gaming-latency.patch")).read()
 check("latency patch has sched_latency_ns", "sched_latency_ns" in latency)
 check("latency patch reduces granularity", "min_granularity" in latency)
 
-tickless = open(os.path.join(ROOT, "kernel", "patches", "solus-0003-tickless-gaming.patch")).read()
+tickless = open(os.path.join(ROOT, "kernel", "patches", "synthex-0003-tickless-gaming.patch")).read()
 check("tickless patch has NO_HZ_FULL", "NO_HZ_FULL" in tickless)
 
-vm_patch = open(os.path.join(ROOT, "kernel", "patches", "solus-0004-vm-gaming-tuning.patch")).read()
+vm_patch = open(os.path.join(ROOT, "kernel", "patches", "synthex-0004-vm-gaming-tuning.patch")).read()
 check("VM patch has swappiness", "swappiness" in vm_patch)
 check("VM patch has watermark", "watermark" in vm_patch)
 
 # 55. Kernel config (defconfig)
 print("\n📋 Kernel config:")
-kconfig = open(os.path.join(ROOT, "kernel", "configs/solus-x86_64-defconfig")).read()
+kconfig = open(os.path.join(ROOT, "kernel", "configs/synthex-x86_64-defconfig")).read()
 check("kernel config has BORE", "SCHED_BORE" in kconfig)
 check("kernel config has NO_HZ_FULL", "NO_HZ_FULL" in kconfig)
 check("kernel config has HZ_1000", "HZ_1000" in kconfig)
@@ -741,19 +741,19 @@ check("gaming env has WINEFSYNC", "WINEFSYNC" in gaming_env)
 
 # 57. Theme files — GTK4, GTK3, SDDM
 print("\n📋 Theme files:")
-for f in [("branding/theme/solus-gtk4/gtk.css", "GTK4 CSS"),
-          ("branding/theme/solus-gtk3/gtk.css", "GTK3 CSS"),
-          ("branding/theme/solus-sddm-theme/Main.qml", "SDDM QML"),
-          ("branding/theme/solus-sddm-theme/metadata.desktop", "SDDM metadata"),
-          ("branding/theme/solus-sddm-theme/theme.conf", "SDDM config")]:
+for f in [("branding/theme/synthex-gtk4/gtk.css", "GTK4 CSS"),
+          ("branding/theme/synthex-gtk3/gtk.css", "GTK3 CSS"),
+          ("branding/theme/synthex-sddm-theme/Main.qml", "SDDM QML"),
+          ("branding/theme/synthex-sddm-theme/metadata.desktop", "SDDM metadata"),
+          ("branding/theme/synthex-sddm-theme/theme.conf", "SDDM config")]:
     check(f[1], os.path.exists(os.path.join(ROOT, f[0])))
 
-gtk4 = open(os.path.join(ROOT, "branding/theme/solus-gtk4/gtk.css")).read()
-check("GTK4 has accent color", "solus_accent" in gtk4)
+gtk4 = open(os.path.join(ROOT, "branding/theme/synthex-gtk4/gtk.css")).read()
+check("GTK4 has accent color", "synthex_accent" in gtk4)
 check("GTK4 has dark bg", "#1a1a2e" in gtk4)
 check("GTK4 has headerbar", "headerbar" in gtk4)
 
-sddm_qml = open(os.path.join(ROOT, "branding/theme/solus-sddm-theme/Main.qml")).read()
+sddm_qml = open(os.path.join(ROOT, "branding/theme/synthex-sddm-theme/Main.qml")).read()
 check("SDDM has login card", "loginCard" in sddm_qml)
 check("SDDM has clock", "Clock" in sddm_qml)
 check("SDDM has username", "username" in sddm_qml)
@@ -775,26 +775,26 @@ check("wlogout has shutdown", "shutdown" in wlogout)
 
 # 59. New specs
 print("\n📋 New specs (gaming-optimizations, kernel, themes):")
-for spec in ["solus-gaming-optimizations", "solus-kernel", "solus-themes"]:
+for spec in ["synthex-gaming-optimizations", "synthex-kernel", "synthex-themes"]:
     content = open(os.path.join(ROOT, "packages/spec-files", f"{spec}.spec")).read()
     check(f"{spec} has %build", "%build" in content)
     check(f"{spec} has %install", "%install" in content)
     check(f"{spec} has %changelog", "%changelog" in content)
 
-go = open(os.path.join(ROOT, "packages/spec-files/solus-gaming-optimizations.spec")).read()
+go = open(os.path.join(ROOT, "packages/spec-files/synthex-gaming-optimizations.spec")).read()
 check("gaming-opt installs limits.d", "security/limits.d" in go)
 check("gaming-opt installs sysctl.d", "sysctl.d" in go)
 
-ks = open(os.path.join(ROOT, "packages/spec-files/solus-kernel.spec")).read()
+ks = open(os.path.join(ROOT, "packages/spec-files/synthex-kernel.spec")).read()
 check("kernel spec has BORE patch", "bore-scheduler" in ks)
 check("kernel spec has defconfig", "defconfig" in ks)
 
-ts = open(os.path.join(ROOT, "packages/spec-files/solus-themes.spec")).read()
+ts = open(os.path.join(ROOT, "packages/spec-files/synthex-themes.spec")).read()
 check("themes spec has GTK4 CSS", "gtk4.css" in ts)
 check("themes spec has SDDM QML", "Main.qml" in ts)
-check("meta-standard requires solus-themes", "solus-themes" in meta_std_content)
-check("meta-standard requires solus-gaming-optimizations", "solus-gaming-optimizations" in meta_std_content)
-check("meta-standard requires solus-kernel", "solus-kernel" in meta_std_content)
+check("meta-standard requires synthex-themes", "synthex-themes" in meta_std_content)
+check("meta-standard requires synthex-gaming-optimizations", "synthex-gaming-optimizations" in meta_std_content)
+check("meta-standard requires synthex-kernel", "synthex-kernel" in meta_std_content)
 
 # 59b. Systemd service hardening
 print("\n📋 Systemd service hardening:")
@@ -811,20 +811,20 @@ for svc in sorted(os.listdir(svc_dir)):
 
 # 60. Kernel build script
 print("\n📋 Kernel build script:")
-kbs = open(os.path.join(ROOT, "scripts/build-solus-kernel.sh")).read()
+kbs = open(os.path.join(ROOT, "scripts/build-synthex-kernel.sh")).read()
 check("kernel-build applies patches", "patch" in kbs)
 check("kernel-build has patch list", "PATCHES" in kbs)
 check("kernel-build has BORE", "bore-scheduler" in kbs)
 check("kernel-build has defconfig", "defconfig" in kbs)
 check("kernel-build supports --install", "--install" in kbs)
 
-# 61. solus.target — groups all services
-print("\n📋 solus.target integration:")
-st = open(os.path.join(ROOT, "systemd/solus.target")).read()
-check("solus.target exists", os.path.exists(os.path.join(ROOT, "systemd/solus.target")))
+# 61. synthex.target — groups all services
+print("\n📋 synthex.target integration:")
+st = open(os.path.join(ROOT, "systemd/synthex.target")).read()
+check("synthex.target exists", os.path.exists(os.path.join(ROOT, "systemd/synthex.target")))
 check("target requires dbus", "Requires=dbus.service" in st)
-for want in ["solus-desktopd", "solus-stored", "solus-hwdaemon", "solus-workspace",
-             "solus-recovery", "solus-blueprint", "solus-ai-hub"]:
+for want in ["synthex-desktopd", "synthex-stored", "synthex-hwdaemon", "synthex-workspace",
+             "synthex-recovery", "synthex-blueprint", "synthex-ai-hub"]:
     check(f"target Wants {want}", want in st)
 
 # 62. Makefile build targets
@@ -867,13 +867,13 @@ for m in sorted(seq_modules):
 # 64. Distro parity features — new Nobara/CachyOS/Mint/Arch tools
 print("\n📋 Distro parity tools (Nobara/CachyOS/Mint/Arch):")
 parity_tools = [
-    ("ananicy", "src/solus-cachy-tuning/solus-ananicy", "CachyOS auto-nice"),
-    ("ananicy service", "systemd/solus-ananicy.service", "systemd"),
-    ("AUR helper", "src/solus-aur", "Arch AUR"),
-    ("USB writer", "src/solus-usb-writer", "Mint USB writer"),
-    ("zstd config", "src/solus-cachy-tuning/zstd-everything.conf", "CachyOS zstd"),
-    ("input remapper", "src/solus-input-remapper", "Nobara input mapper"),
-    ("gaming session desktop", "desktop/applications/solus-gaming-session.desktop", "Bazzite session"),
+    ("ananicy", "src/synthex-cachy-tuning/synthex-ananicy", "CachyOS auto-nice"),
+    ("ananicy service", "systemd/synthex-ananicy.service", "systemd"),
+    ("AUR helper", "src/synthex-aur", "Arch AUR"),
+    ("USB writer", "src/synthex-usb-writer", "Mint USB writer"),
+    ("zstd config", "src/synthex-cachy-tuning/zstd-everything.conf", "CachyOS zstd"),
+    ("input remapper", "src/synthex-input-remapper", "Nobara input mapper"),
+    ("gaming session desktop", "desktop/applications/synthex-gaming-session.desktop", "Bazzite session"),
 ]
 for name, path, origin in parity_tools:
     full = os.path.join(ROOT, path)
@@ -881,31 +881,31 @@ for name, path, origin in parity_tools:
     if os.path.isfile(full) and not any(full.endswith(e) for e in [".conf", ".desktop", ".service"]):
         check(f"{name} executable", os.access(full, os.X_OK))
 
-# 64. Solus Agent platform — full stack check
-print("\n📋 Solus Agent Platform:")
-solus_items = [
-    ("frontend", "src/solus-agent/solus-agent", True),
-    ("daemon", "src/solus-agent/daemon/solus-agentd", True),
-    ("QML panel", "src/solus-agent/ui/Main.qml", False),
-    ("Codex IDE", "src/solus-agent/codex/ui/Codex.qml", False),
-    ("DBus XML", "src/solus-agent/dbus/org.solus.Agent.xml", False),
-    ("DBus service", "src/solus-agent/dbus/org.solus.Agent.service", False),
-    ("app entry", "desktop/applications/solus-agent.desktop", False),
-    ("codex entry", "desktop/applications/solus-codex.desktop", False),
-    ("autostart daemon", "desktop/autostart/solus-agent-daemon.desktop", False),
-    ("systemd service", "systemd/solus-agent.service", False),
-    ("icon", "branding/icons/solus-agent.svg", False),
+# 64. Synthex Agent platform — full stack check
+print("\n📋 Synthex Agent Platform:")
+synthex_items = [
+    ("frontend", "src/synthex-agent/synthex-agent", True),
+    ("daemon", "src/synthex-agent/daemon/synthex-agentd", True),
+    ("QML panel", "src/synthex-agent/ui/Main.qml", False),
+    ("Codex IDE", "src/synthex-agent/codex/ui/Codex.qml", False),
+    ("DBus XML", "src/synthex-agent/dbus/org.synthex.Agent.xml", False),
+    ("DBus service", "src/synthex-agent/dbus/org.synthex.Agent.service", False),
+    ("app entry", "desktop/applications/synthex-agent.desktop", False),
+    ("codex entry", "desktop/applications/synthex-codex.desktop", False),
+    ("autostart daemon", "desktop/autostart/synthex-agent-daemon.desktop", False),
+    ("systemd service", "systemd/synthex-agent.service", False),
+    ("icon", "branding/icons/synthex-agent.svg", False),
 ]
-for name, path, check_exec in solus_items:
+for name, path, check_exec in synthex_items:
     full = os.path.join(ROOT, path)
-    check(f"Solus Agent {name}", os.path.exists(full))
+    check(f"Synthex Agent {name}", os.path.exists(full))
     if check_exec and os.path.exists(full):
-        check(f"Solus Agent {name} executable", os.access(full, os.X_OK))
+        check(f"Synthex Agent {name} executable", os.access(full, os.X_OK))
 
 # Agent daemon architecture checks
-d = open(os.path.join(ROOT, "src/solus-agent/daemon/solus-agentd")).read()
+d = open(os.path.join(ROOT, "src/synthex-agent/daemon/synthex-agentd")).read()
 check("DBus service object", "dbus.service.Object" in d)
-check("org.solus.Agent bus", "org.solus.Agent" in d)
+check("org.synthex.Agent bus", "org.synthex.Agent" in d)
 check("coordinator agent", "class CoordinatorAgent" in d)
 check("code agent", "class CodeAgent" in d)
 check("system agent", "class SystemAgent" in d)
@@ -917,10 +917,10 @@ check("memory system", "class MemorySystem" in d)
 check("no HTTP server", "HTTPServer" not in d and "BaseHTTPRequestHandler" not in d)
 
 # Installer + target integration
-st = open(os.path.join(ROOT, "systemd/solus.target")).read()
-check("solus.target Wants agent service", "solus-agent" in st)
+st = open(os.path.join(ROOT, "systemd/synthex.target")).read()
+check("synthex.target Wants agent service", "synthex-agent" in st)
 sc = open(os.path.join(ROOT, "installer/modules/services-systemd/services-systemd.conf")).read()
-check("installer enables agent service", "solus-agent" in sc)
+check("installer enables agent service", "synthex-agent" in sc)
 
 # Summary
 print(f"\n{'='*50}")
@@ -931,7 +931,7 @@ sys.exit(failed)
 # 29. Control center QML pages
 print("\n📋 Control center pages:")
 for p in ["Dashboard","System","Performance","Gaming","Developer","Themes","Security","Updates","Drivers","RGB","Snapshots","Kernel","Controllers"]:
-    path = os.path.join(ROOT, "src", "solus-control-center", "ui", "pages", p+".qml")
+    path = os.path.join(ROOT, "src", "synthex-control-center", "ui", "pages", p+".qml")
     ok = os.path.exists(path)
     if ok:
         c = open(path).read()
@@ -941,12 +941,12 @@ for p in ["Dashboard","System","Performance","Gaming","Developer","Themes","Secu
 # 30. Control center components
 print("\n📋 Control center components:")
 for c in ["Card","StatCard","StatusCard","ModeToggle","Sidebar"]:
-    path = os.path.join(ROOT, "src", "solus-control-center", "ui", "components", c+".qml")
+    path = os.path.join(ROOT, "src", "synthex-control-center", "ui", "components", c+".qml")
     check(f"{c}.qml", os.path.exists(path))
 
 # 31. Flatpak setup + OOBE bundles
 print("\n📋 Flatpak + OOBE bundles:")
 check("setup-flatpak.sh", os.path.exists(os.path.join(ROOT, "scripts", "setup-flatpak.sh")))
 for b in ["gaming","creator","developer","rgb","emulation"]:
-    path = os.path.join(ROOT, "src", "solus-oobe", "bundles", b+".sh")
+    path = os.path.join(ROOT, "src", "synthex-oobe", "bundles", b+".sh")
     check(f"oobe bundle {b}.sh", os.path.exists(path))

@@ -1,0 +1,18 @@
+[Desktop Entry]
+Type=Application
+Name=Install Synthex
+Name[de]=Synthex installieren
+Name[es]=Instalar Synthex
+Name[fr]=Installer Synthex
+Name[pt_BR]=Instalar Synthex
+Name[zh_CN]=安装 Synthex
+Comment=Install SynthOS to your hard drive
+Comment[de]=SynthOS auf Ihrer Festplatte installieren
+Comment[es]=Instalar SynthOS en su disco duro
+Comment[fr]=Installer SynthOS sur votre disque dur
+Exec=pkexec calamares -d
+Icon=synthex-installer
+Terminal=false
+Categories=System;Settings;
+StartupNotify=true
+Keywords=install;installer;calamares;system;os;

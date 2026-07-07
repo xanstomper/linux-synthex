@@ -1,0 +1,16 @@
+# Solus Lite — KWin Configuration
+
+[Compositing]
+Backend=xrender
+Enabled=true
+AnimationSpeed=0
+
+[Windows]
+FocusPolicy=ClickFocus
+
+[Effects]
+Blur=false
+
+[Plugins]
+blurEnabled=false
+slidingpopupsEnabled=false

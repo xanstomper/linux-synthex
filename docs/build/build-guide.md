@@ -1,8 +1,8 @@
-# Solus Build Guide
+# Synthex Build Guide
 
 > **Audience:** Developers, release engineers, ISO builders  
 > **Last updated:** July 2026  
-> **Solus version:** 4.6 "Fortitude"
+> **Synthex version:** 4.6 "Fortitude"
 
 ---
 
@@ -31,7 +31,7 @@
 | **RAM** | 8 GB | 32 GB |
 | **Storage** | 100 GB | 500 GB+ (SSD) |
 | **Network** | Broadband | Fast broadband (many sources to download) |
-| **OS** | Solus 4.6+ | Solus 4.6+ (or compatible RPM-based distro) |
+| **OS** | Synthex 4.6+ | Synthex 4.6+ (or compatible RPM-based distro) |
 
 ### 1.2 Install Build Dependencies
 
@@ -67,15 +67,15 @@ python3 -m pip install --user sphinx sphinx-rtd-theme
 
 ```bash
 # Create workspace
-mkdir -p ~/solus-build/{src,pkgs,iso,cache}
-cd ~/solus-build
+mkdir -p ~/synthex-build/{src,pkgs,iso,cache}
+cd ~/synthex-build
 
 # Clone all repositories
-git clone https://github.com/solus-project/packages.git
-git clone https://github.com/solus-project/solus-build.git
-git clone https://github.com/solus-project/linux.git
-git clone https://github.com/solus-project/artwork.git
-git clone https://github.com/solus-project/docs.git
+git clone https://github.com/synthex-project/packages.git
+git clone https://github.com/synthex-project/synthex-build.git
+git clone https://github.com/synthex-project/linux.git
+git clone https://github.com/synthex-project/artwork.git
+git clone https://github.com/synthex-project/docs.git
 
 # Configure ccache for faster rebuilds
 mkdir -p ~/.ccache
@@ -87,18 +87,18 @@ EOF
 source ~/.bashrc
 ```
 
-### 1.4 Configure Mock for Solus
+### 1.4 Configure Mock for Synthex
 
 ```bash
-# Create Solus mock configuration
+# Create Synthex mock configuration
 # (see building-packages.md for detailed setup)
 sudo mkdir -p /etc/mock/
-cat << 'EOF' | sudo tee /etc/mock/solus-x86_64.cfg
-config_opts['root'] = 'solus-x86_64'
+cat << 'EOF' | sudo tee /etc/mock/synthex-x86_64.cfg
+config_opts['root'] = 'synthex-x86_64'
 config_opts['target_arch'] = 'x86_64'
 config_opts['legal_host_arches'] = ['x86_64']
 config_opts['chroot_setup_cmd'] = 'install @buildsys-build'
-config_opts['dist'] = 'solus'
+config_opts['dist'] = 'synthex'
 config_opts['releasever'] = '4'
 # ... add repository config
 EOF
@@ -112,10 +112,10 @@ sudo usermod -aG mock $USER
 
 ```bash
 # Add to ~/.bashrc or ~/.zshrc
-export SOLUS_TOP="$HOME/solus-build"
-export SOLUS_PACKAGES="$SOLUS_TOP/packages"
-export SOLUS_BUILD="$SOLUS_TOP/solus-build"
-export SOLUS_ISO="$SOLUS_TOP/iso"
+export SYNTHEX_TOP="$HOME/synthex-build"
+export SYNTHEX_PACKAGES="$SYNTHEX_TOP/packages"
+export SYNTHEX_BUILD="$SYNTHEX_TOP/synthex-build"
+export SYNTHEX_ISO="$SYNTHEX_TOP/iso"
 export PATH="$HOME/.local/bin:$PATH"
 ```
 
@@ -125,7 +125,7 @@ export PATH="$HOME/.local/bin:$PATH"
 
 ### 2.1 Overview
 
-Building Solus from source involves:
+Building Synthex from source involves:
 1. Building all packages from RPM spec files
 2. Assembling a repository
 3. Creating installation ISO images
@@ -136,7 +136,7 @@ See [Building Packages Guide](building-packages.md) for detailed instructions.
 
 ```bash
 # Quick start:
-cd ~/solus-build/packages
+cd ~/synthex-build/packages
 
 # Build a single package
 make <package-name>
@@ -145,18 +145,18 @@ make <package-name>
 make -j$(nproc)
 
 # Build in mock (clean chroot)
-mock -r solus-x86_64 --rebuild ~/rpmbuild/SRPMS/package-1.0.0-1.src.rpm
+mock -r synthex-x86_64 --rebuild ~/rpmbuild/SRPMS/package-1.0.0-1.src.rpm
 ```
 
 ### 2.3 Building the Package Repository
 
 ```bash
 # Build all packages (takes a long time)
-cd ~/solus-build/packages
+cd ~/synthex-build/packages
 make -j$(nproc) 2>&1 | tee build.log
 
 # After build, create repository metadata
-cd ~/solus-build/pkgs
+cd ~/synthex-build/pkgs
 createrepo .
 
 # This creates repodata/ directory with metadata
@@ -171,10 +171,10 @@ ls repodata/
 
 ```bash
 # Add local repository to DNF
-sudo tee /etc/yum.repos.d/local-solus.repo <<EOF
-[local-solus]
-name=Local Solus Build
-baseurl=file:///home/$USER/solus-build/pkgs
+sudo tee /etc/yum.repos.d/local-synthex.repo <<EOF
+[local-synthex]
+name=Local Synthex Build
+baseurl=file:///home/$USER/synthex-build/pkgs
 enabled=1
 gpgcheck=0
 priority=50
@@ -191,15 +191,15 @@ sudo dnf5 install <your-package>
 ### 3.1 Kernel Sources
 
 ```bash
-# Clone the Solus kernel repository
-cd ~/solus-build
-git clone https://github.com/solus-project/linux.git
+# Clone the Synthex kernel repository
+cd ~/synthex-build
+git clone https://github.com/synthex-project/linux.git
 cd linux
 
 # Check branches
 git branch -a
-# → master (current Solus kernel)
-# → solus-6.x (version branches)
+# → master (current Synthex kernel)
+# → synthex-6.x (version branches)
 
 # View kernel configuration
 ls config/
@@ -211,10 +211,10 @@ ls config/
 
 ```bash
 # Set up build directory
-cd ~/solus-build/linux
+cd ~/synthex-build/linux
 mkdir -p build
 
-# Configure kernel (using Solus config)
+# Configure kernel (using Synthex config)
 make O=build defconfig
 cp config/kernel-x86_64.config build/.config
 make O=build olddefconfig  # Apply default settings for any new options
@@ -253,7 +253,7 @@ diff config/kernel-x86_64.config config/kernel-x86_64.custom.config | less
 
 ```bash
 # Build RPM packages from kernel
-cd ~/solus-build/linux
+cd ~/synthex-build/linux
 make O=build rpm-pkg
 
 # RPMs are in:
@@ -271,7 +271,7 @@ sudo dnf5 install ~/rpmbuild/RPMS/x86_64/kernel-<version>.x86_64.rpm
 ```bash
 # Generate signing key
 openssl req -new -x509 -newkey rsa:2048 -keyout kernel.key \
-  -out kernel.pem -days 3650 -subj "/CN=Solus Kernel/"
+  -out kernel.pem -days 3650 -subj "/CN=Synthex Kernel/"
 
 # Configure kernel to use the key
 scripts/config --file build/.config \
@@ -313,11 +313,11 @@ See [Building Packages Guide](building-packages.md) for comprehensive instructio
 
 ```bash
 # Build a package
-cd ~/solus-build/packages
+cd ~/synthex-build/packages
 make <package-name>
 
 # Build in mock
-mock -r solus-x86_64 --rebuild <package>.src.rpm
+mock -r synthex-x86_64 --rebuild <package>.src.rpm
 
 # Build and install locally
 make <package-name> && sudo dnf5 install ../RPMS/x86_64/<package>-*.rpm
@@ -330,7 +330,7 @@ make <package-name>-dep-tree
 
 ```bash
 # Build a group of packages
-cd ~/solus-build/packages
+cd ~/synthex-build/packages
 
 # Build all packages needed for desktop
 make @desktop-plasma
@@ -357,7 +357,7 @@ make clean-<package-name>
 make <package-name>
 
 # Build log
-less /var/log/solus-build/<package>.log
+less /var/log/synthex-build/<package>.log
 ```
 
 ---
@@ -366,7 +366,7 @@ less /var/log/solus-build/<package>.log
 
 ### 5.1 ISO Build System Overview
 
-Solus uses **lorax** (Live OS creation tools) + custom scripts to build ISOs:
+Synthex uses **lorax** (Live OS creation tools) + custom scripts to build ISOs:
 
 ```
 ┌────────────────────────────────────────────────────────────────┐
@@ -411,8 +411,8 @@ sudo dnf5 install pykickstart   # Kickstart parsing
 The build is controlled by a kickstart file:
 
 ```bash
-# Example: solus-plasma.ks
-cat ~/solus-build/solus-build/config/solus-plasma.ks
+# Example: synthex-plasma.ks
+cat ~/synthex-build/synthex-build/config/synthex-plasma.ks
 
 # Key sections:
 # - Keyboard/language settings
@@ -426,15 +426,15 @@ cat ~/solus-build/solus-build/config/solus-plasma.ks
 
 ```bash
 # Set up build environment
-cd ~/solus-build/solus-build
+cd ~/synthex-build/synthex-build
 
 # Build the ISO
 sudo ./build-iso.sh \
   --edition plasma \
   --version 4.6 \
   --arch x86_64 \
-  --repo file:///home/$USER/solus-build/pkgs \
-  --output ~/solus-build/iso/
+  --repo file:///home/$USER/synthex-build/pkgs \
+  --output ~/synthex-build/iso/
 
 # The script performs:
 # 1. Validates repository
@@ -445,11 +445,11 @@ sudo ./build-iso.sh \
 # 6. Generates checksums
 
 # Expected output:
-~/solus-build/iso/
-├── Solus-4.6-Plasma.iso
-├── Solus-4.6-Plasma.iso.sha256
-├── Solus-4.6-Plasma.iso.sig
-└── Solus-4.6-Plasma.iso.torrent
+~/synthex-build/iso/
+├── Synthex-4.6-Plasma.iso
+├── Synthex-4.6-Plasma.iso.sha256
+├── Synthex-4.6-Plasma.iso.sig
+└── Synthex-4.6-Plasma.iso.torrent
 ```
 
 ### 5.5 Build Options
@@ -480,11 +480,11 @@ sudo ./build-iso.sh \
 # 1. Create root filesystem
 sudo livemedia-creator \
   --make-iso \
-  --ks solus-plasma.ks \
+  --ks synthex-plasma.ks \
   --lorax-templates /usr/share/lorax/live/ \
   --no-virt \
   --resultdir /tmp/iso-build/ \
-  --project "Solus" \
+  --project "Synthex" \
   --releasever 4.6
 
 # 2. Build squashfs
@@ -493,7 +493,7 @@ sudo mksquashfs /tmp/iso-build/rootfs/ \
   -comp zstd -b 1M
 
 # 3. Create bootable ISO
-sudo mkisofs -o Solus-4.6-Plasma.iso \
+sudo mkisofs -o Synthex-4.6-Plasma.iso \
   -b isolinux/isolinux.bin \
   -c isolinux/boot.cat \
   -no-emul-boot -boot-load-size 4 -boot-info-table \
@@ -504,17 +504,17 @@ sudo mkisofs -o Solus-4.6-Plasma.iso \
   /tmp/iso-build/
 
 # 4. Make hybrid (USB bootable)
-sudo isohybrid Solus-4.6-Plasma.iso
+sudo isohybrid Synthex-4.6-Plasma.iso
 
 # 5. Add ISO checksum
-sudo implantisomd5 Solus-4.6-Plasma.iso
+sudo implantisomd5 Synthex-4.6-Plasma.iso
 ```
 
 ### 5.7 ISO Package Manifest
 
 ```bash
 # Extract package list from an existing ISO
-sudo mount -o loop Solus-4.6-Plasma.iso /mnt/iso
+sudo mount -o loop Synthex-4.6-Plasma.iso /mnt/iso
 cat /mnt/iso/Packages-*  # Package manifest
 # → Contains list of all packages in the ISO
 sudo umount /mnt/iso
@@ -528,10 +528,10 @@ sudo umount /mnt/iso
 
 ```bash
 #!/bin/bash
-# test-iso.sh - Test Solus ISO in VM
+# test-iso.sh - Test Synthex ISO in VM
 
 ISO="$1"
-VM_NAME="solus-test"
+VM_NAME="synthex-test"
 RAM=4096
 CPUS=4
 DISK_SIZE=20G
@@ -560,24 +560,24 @@ qemu-system-x86_64 \
 
 ```bash
 # 1. Verify checksum
-sha256sum -c Solus-4.6-Plasma.iso.sha256
+sha256sum -c Synthex-4.6-Plasma.iso.sha256
 
 # 2. Verify GPG signature
-gpg --verify Solus-4.6-Plasma.iso.sig Solus-4.6-Plasma.iso
+gpg --verify Synthex-4.6-Plasma.iso.sig Synthex-4.6-Plasma.iso
 
 # 3. Check ISO structure
-isoinfo -l -i Solus-4.6-Plasma.iso
+isoinfo -l -i Synthex-4.6-Plasma.iso
 
 # 4. Verify hybrid boot
-sudo isohybrid --entry-test Solus-4.6-Plasma.iso
+sudo isohybrid --entry-test Synthex-4.6-Plasma.iso
 
 # 5. Test install with virt-install
 sudo virt-install \
-  --name solus-test \
+  --name synthex-test \
   --memory 4096 \
   --vcpus 4 \
   --disk size=20 \
-  --cdrom Solus-4.6-Plasma.iso \
+  --cdrom Synthex-4.6-Plasma.iso \
   --os-variant generic
 ```
 
@@ -627,8 +627,8 @@ For comprehensive automated testing:
 
 ```bash
 # 1. Create custom kickstart
-cat > ~/solus-build/custom.ks << 'EOF'
-# Custom Solus Edition Kickstart
+cat > ~/synthex-build/custom.ks << 'EOF'
+# Custom Synthex Edition Kickstart
 
 lang en_US.UTF-8
 keyboard us
@@ -639,7 +639,7 @@ autopart --type=lvm
 clearpart --all --initlabel
 
 # Repositories
-repo --name=solus --baseurl=file:///home/$USER/solus-build/pkgs
+repo --name=synthex --baseurl=file:///home/$USER/synthex-build/pkgs
 
 # Package selection
 %packages
@@ -662,7 +662,7 @@ services --enabled=NetworkManager,firewalld,sshd
 # Post-install
 %post
 # Custom branding
-sed -i 's/Solus/MyDistro/g' /etc/os-release
+sed -i 's/Synthex/MyDistro/g' /etc/os-release
 # Add your configurations
 echo "Custom setup complete"
 %end
@@ -673,14 +673,14 @@ sudo ./build-iso.sh \
   --kickstart custom.ks \
   --edition custom \
   --version 1.0 \
-  --output ~/solus-build/iso/
+  --output ~/synthex-build/iso/
 ```
 
 ### 7.2 Custom Branding
 
 ```bash
-# Replace Solus branding with your own
-cd ~/solus-build/artwork
+# Replace Synthex branding with your own
+cd ~/synthex-build/artwork
 
 # Edit files:
 # - grub/        → Boot splash
@@ -690,19 +690,19 @@ cd ~/solus-build/artwork
 # - icons/       → Distribution icon
 
 # Rebuild artwork package
-cd ~/solus-build/packages
-make solus-artwork
+cd ~/synthex-build/packages
+make synthex-artwork
 ```
 
 ### 7.3 Custom Package Repository
 
 ```bash
 # 1. Build your packages
-cd ~/solus-build/packages
+cd ~/synthex-build/packages
 make my-custom-package
 
 # 2. Create repository
-cd ~/solus-build/pkgs
+cd ~/synthex-build/pkgs
 createrepo .
 
 # 3. Sign repository
@@ -710,7 +710,7 @@ gpg --detach-sign --armor repodata/repomd.xml
 
 # 4. Add repository to ISO kickstart
 # custom.ks:
-# repo --name=custom --baseurl=https://my-repo.example.com/solus
+# repo --name=custom --baseurl=https://my-repo.example.com/synthex
 ```
 
 ### 7.4 Pre-Configured ISO
@@ -719,15 +719,15 @@ For pre-configured installations (enterprise, education):
 
 ```bash
 # Create pre-seeded configuration
-mkdir -p ~/solus-build/live-overlay/etc
-mkdir -p ~/solus-build/live-overlay/home/liveuser
+mkdir -p ~/synthex-build/live-overlay/etc
+mkdir -p ~/synthex-build/live-overlay/home/liveuser
 
 # Add pre-configured settings
-cp my-config.conf ~/solus-build/live-overlay/etc/
+cp my-config.conf ~/synthex-build/live-overlay/etc/
 
 # Build with overlay
 sudo ./build-iso.sh \
-  --overlay ~/solus-build/live-overlay \
+  --overlay ~/synthex-build/live-overlay \
   --preset my-enterprise-config
 ```
 
@@ -761,7 +761,7 @@ code
 
 ```yaml
 # .github/workflows/build.yml
-name: Solus Build and Test
+name: Synthex Build and Test
 
 on:
   push:
@@ -773,7 +773,7 @@ jobs:
   build-packages:
     runs-on: ubuntu-latest
     container:
-      image: solusproject/build:latest
+      image: synthexproject/build:latest
     
     steps:
     - uses: actions/checkout@v4
@@ -800,7 +800,7 @@ jobs:
     needs: build-packages
     runs-on: ubuntu-latest
     container:
-      image: solusproject/iso-builder:latest
+      image: synthexproject/iso-builder:latest
     
     steps:
     - uses: actions/checkout@v4
@@ -815,7 +815,7 @@ jobs:
     - name: Test ISO
       run: |
         # Run VM-based tests
-        virt-install --cdrom Solus-4.6-*.iso ...
+        virt-install --cdrom Synthex-4.6-*.iso ...
     
     - name: Store ISO
       uses: actions/upload-artifact@v4
@@ -828,7 +828,7 @@ jobs:
 
 ```dockerfile
 # Dockerfile for build container
-FROM solus:latest
+FROM synthex:latest
 
 # Install build tools
 RUN dnf5 install -y \
@@ -924,7 +924,7 @@ jobs:
     - name: Build in mock
       run: |
         for pkg in ${{ steps.changed.outputs.packages }}; do
-          mock -r solus-x86_64 \
+          mock -r synthex-x86_64 \
             --buildsrpm \
             --spec packages/${pkg:0:1}/$pkg/$pkg.spec \
             --sources packages/${pkg:0:1}/$pkg/
@@ -972,32 +972,32 @@ sudo dnf5 install jenkins            # Alternative CI server
 
 ```bash
 # Import release signing key
-gpg --import solus-release-key.gpg
+gpg --import synthex-release-key.gpg
 
 # Sign the ISO
-gpg --detach-sign --armor Solus-4.6-Plasma.iso
+gpg --detach-sign --armor Synthex-4.6-Plasma.iso
 
 # Sign the checksum file
-gpg --clearsign Solus-4.6-Plasma.iso.sha256
+gpg --clearsign Synthex-4.6-Plasma.iso.sha256
 
 # Verify
-gpg --verify Solus-4.6-Plasma.iso.sig Solus-4.6-Plasma.iso
+gpg --verify Synthex-4.6-Plasma.iso.sig Synthex-4.6-Plasma.iso
 ```
 
 ### 9.3 Generate Checksums
 
 ```bash
 # Generate SHA256 checksums
-sha256sum Solus-4.6-Plasma.iso > Solus-4.6-Plasma.iso.sha256
+sha256sum Synthex-4.6-Plasma.iso > Synthex-4.6-Plasma.iso.sha256
 
 # Generate SHA1 (for compatibility)
-sha1sum Solus-4.6-Plasma.iso > Solus-4.6-Plasma.iso.sha1
+sha1sum Synthex-4.6-Plasma.iso > Synthex-4.6-Plasma.iso.sha1
 
 # Generate BLAKE2 (modern)
-b2sum Solus-4.6-Plasma.iso > Solus-4.6-Plasma.iso.b2
+b2sum Synthex-4.6-Plasma.iso > Synthex-4.6-Plasma.iso.b2
 
 # Verify checksums
-sha256sum -c Solus-4.6-Plasma.iso.sha256
+sha256sum -c Synthex-4.6-Plasma.iso.sha256
 ```
 
 ### 9.4 Create Torrent
@@ -1006,13 +1006,13 @@ sha256sum -c Solus-4.6-Plasma.iso.sha256
 # Create BitTorrent metadata
 sudo dnf5 install transmission-cli
 transmission-create \
-  -o Solus-4.6-Plasma.iso.torrent \
-  -t https://tracker.getsol.us/announce \
+  -o Synthex-4.6-Plasma.iso.torrent \
+  -t https://tracker.getsynthex.org/announce \
   -s 4194304 \
-  Solus-4.6-Plasma.iso
+  Synthex-4.6-Plasma.iso
 
 # Trackers:
-# - https://tracker.getsol.us/announce
+# - https://tracker.getsynthex.org/announce
 # - udp://tracker.opentrackr.org:1337
 # - https://tracker.torrent.eu.org:451
 ```
@@ -1022,18 +1022,18 @@ transmission-create \
 ```bash
 # Upload to primary mirror
 rsync -avP \
-  Solus-4.6-Plasma.iso* \
-  mirror@mirror.getsol.us:/srv/mirrors/solus/iso/
+  Synthex-4.6-Plasma.iso* \
+  mirror@mirror.getsynthex.org:/srv/mirrors/synthex/iso/
 
 # Generate mirror list
 cat > MIRRORS.txt <<EOF
 Primary:
-  https://mirrors.getsol.us/iso/
+  https://mirrors.getsynthex.org/iso/
 
 Community mirrors:
-  https://mirror.rackspace.com/solus/iso/
-  https://mirror.aarnet.edu.au/pub/solus/iso/
-  http://mirror.math.princeton.edu/pub/solus/iso/
+  https://mirror.rackspace.com/synthex/iso/
+  https://mirror.aarnet.edu.au/pub/synthex/iso/
+  http://mirror.math.princeton.edu/pub/synthex/iso/
 EOF
 ```
 
@@ -1041,17 +1041,17 @@ EOF
 
 ```bash
 # Update website
-# Edit: solus-website/content/download.md
+# Edit: synthex-website/content/download.md
 # Add new version to downloads page
 
-# Update get.solus.us redirect
+# Update get.synthex.us redirect
 # Point latest ISO link to new version
 
 # Announce on:
-# - Solus Forums (discuss.getsol.us)
-# - Solus Blog
-# - Reddit /r/SolusProject
-# - Twitter/X @SolusProject
+# - Synthex Forums (discuss.getsynthex.org)
+# - Synthex Blog
+# - Reddit /r/SynthexProject
+# - Twitter/X @SynthexProject
 # - DistroWatch
 # - Phoronix (tip them)
 ```
@@ -1064,7 +1064,7 @@ EOF
 
 | Symptom | Cause | Solution |
 |---------|-------|----------|
-| `No space left on device` | /tmp or build directory full | Clean cache: `sudo dnf5 clean all`, `rm -rf /tmp/solus-build*` |
+| `No space left on device` | /tmp or build directory full | Clean cache: `sudo dnf5 clean all`, `rm -rf /tmp/synthex-build*` |
 | `Failed to connect to repository` | Network issue or mirror down | Check `/etc/yum.repos.d/` configs, use different mirror |
 | `Missing BuildRequires` | Dependency not installed | `sudo dnf5 builddep package.spec` |
 | `Conflicting requests` | Dependency conflict | Check for circular deps or version conflicts |
@@ -1093,10 +1093,10 @@ make -n <package-name>
 
 ```bash
 # Keep chroot after failure
-mock -r solus-x86_64 --rebuild <package>.src.rpm --no-cleanup-after
+mock -r synthex-x86_64 --rebuild <package>.src.rpm --no-cleanup-after
 
 # Shell into chroot
-mock -r solus-x86_64 --shell
+mock -r synthex-x86_64 --shell
 
 # Inside chroot, inspect:
 cd /builddir/build/
@@ -1107,18 +1107,18 @@ cat root.log  # Root installation log
 cat state.log # State log
 
 # Copy files out of chroot
-mock -r solus-x86_64 --copyout /builddir/build/RPMS/ .
+mock -r synthex-x86_64 --copyout /builddir/build/RPMS/ .
 ```
 
 ### 10.4 ISO Build Debugging
 
 ```bash
 # Check ISO contents
-isoinfo -l -i Solus-4.6-Plasma.iso
+isoinfo -l -i Synthex-4.6-Plasma.iso
 
 # Extract ISO contents
 mkdir /tmp/iso-contents
-sudo mount -o loop Solus-4.6-Plasma.iso /tmp/iso-contents
+sudo mount -o loop Synthex-4.6-Plasma.iso /tmp/iso-contents
 ls -la /tmp/iso-contents/
 # → LiveOS/          (squashfs)
 # → boot/            (kernel, initrd, GRUB)
@@ -1135,7 +1135,7 @@ unsquashfs -l /tmp/iso-contents/LiveOS/squashfs.img | head -50
 
 ```bash
 # Clean build artifacts
-cd ~/solus-build
+cd ~/synthex-build
 rm -rf cache/
 rm -rf packages/BUILD/
 rm -rf packages/BUILDROOT/
@@ -1143,7 +1143,7 @@ rm -rf packages/RPMS/
 rm -rf packages/SRPMS/
 
 # Clean mock cache
-mock -r solus-x86_64 --clean
+mock -r synthex-x86_64 --clean
 
 # Clean DNF cache
 sudo dnf5 clean all
@@ -1172,8 +1172,8 @@ make status                 # Build status
 sudo lorax ...                # Root filesystem creation
 
 # Mock
-mock -r solus-x86_64 --rebuild <pkg>.src.rpm  # Clean rebuild
-mock -r solus-x86_64 --shell                    # Interactive chroot
+mock -r synthex-x86_64 --rebuild <pkg>.src.rpm  # Clean rebuild
+mock -r synthex-x86_64 --shell                    # Interactive chroot
 
 # Repository
 createrepo .                # Create repo metadata
@@ -1216,7 +1216,7 @@ sudo dnf5 install mold
 ## Appendix C: Build Outputs Reference
 
 ```
-~/solus-build/
+~/synthex-build/
 ├── packages/           # Package source repository
 │   ├── packages/       # Spec files
 │   ├── BUILD/          # Build directories
@@ -1227,7 +1227,7 @@ sudo dnf5 install mold
 ├── pkgs/               # Combined repository
 │   └── repodata/       # Repository metadata
 ├── iso/                # ISO output
-│   ├── Solus-4.6-*.iso
+│   ├── Synthex-4.6-*.iso
 │   ├── *.sha256
 │   └── *.sig
 └── cache/              # Build cache (ccache, etc.)

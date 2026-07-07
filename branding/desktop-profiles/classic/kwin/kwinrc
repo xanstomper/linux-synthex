@@ -1,0 +1,16 @@
+# Solus Classic — KWin Configuration
+
+[Compositing]
+Backend=opengl
+Enabled=true
+AnimationSpeed=2
+
+[Windows]
+FocusPolicy=ClickFocus
+
+[Effects]
+Blur=false
+
+[Plugins]
+blurEnabled=false
+slidingpopupsEnabled=true

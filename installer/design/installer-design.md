@@ -1,15 +1,15 @@
-# Solus Linux - Installer UX Design Document
+# SynthOS - Installer UX Design Document
 
 ## 1. Overview
 
-The Solus Linux installer is built on **Calamares** — a distribution-independent system installer framework. This document describes the user experience design, visual layout, installation flow, and interaction patterns for the Solus Linux installer across all three editions (Plasma, Hyprland, GNOME).
+The SynthOS installer is built on **Calamares** — a distribution-independent system installer framework. This document describes the user experience design, visual layout, installation flow, and interaction patterns for the SynthOS installer across all three editions (Plasma, Hyprland, GNOME).
 
 ### 1.1 Design Philosophy
 
 - **Progressive Disclosure**: Present simple choices first, advanced options on demand
 - **Guided Confidence**: Each step explains what's happening and why
 - **Immediate Feedback**: Visual indicators for disk operations, progress, and errors
-- **Consistent Branding**: Solus teal/cyan palette, clean typography, subtle animations
+- **Consistent Branding**: Synthex teal/cyan palette, clean typography, subtle animations
 - **Accessibility First**: High contrast, keyboard navigable, screen-reader compatible
 
 ### 1.2 Target Audience
@@ -27,7 +27,7 @@ The Solus Linux installer is built on **Calamares** — a distribution-independe
 ```
 Primary Background:    #1a1a2e   (Deep navy)
 Secondary Background:  #16213e   (Dark blue)
-Accent Primary:        #33ccff   (Solus cyan)
+Accent Primary:        #33ccff   (Synthex cyan)
 Accent Secondary:      #00ff88   (Green for success)
 Warning:               #ffcc00   (Amber)
 Error:                 #ff4444   (Red)
@@ -85,19 +85,19 @@ The left sidebar shows the installation flow with a clear hierarchy:
 **Purpose**: Language selection, readiness check
 
 **Elements**:
-- Solus logo and branding at top
+- Synthex logo and branding at top
 - Language dropdown (50+ languages)
 - System requirements checklist:
   - ✓ 2 GB+ RAM detected
   - ✓ 25 GB+ disk space available
   - ✓ Internet connection (optional)
   - ✓ AC power (laptops)
-- "Try Solus" button (optional, minimized)
-- "Install Solus" primary CTA
+- "Try Synthex" button (optional, minimized)
+- "Install Synthex" primary CTA
 
 **States**:
-- Requirements met: green checkmarks, "Install Solus" enabled
-- Requirements not met: red X with explanation, "Install Solus" disabled with tooltip
+- Requirements met: green checkmarks, "Install Synthex" enabled
+- Requirements not met: red X with explanation, "Install Synthex" disabled with tooltip
 - Loading: skeleton UI while hardware is being probed
 
 ### 3.2 Location & Timezone
@@ -144,12 +144,12 @@ The left sidebar shows the installation flow with a clear hierarchy:
 **Visual Layout**:
 ```
 ┌──────────────────────────────────────────────┐
-│  ● Erase disk and install Solus              │
+│  ● Erase disk and install Synthex              │
 │     /dev/sda  500 GB SSD                     │
 │                                              │
 │  ○ Install alongside existing OS             │
 │     [Select partition size slider]           │
-│     Windows: 200 GB | Solus: 300 GB          │
+│     Windows: 200 GB | Synthex: 300 GB          │
 │                                              │
 │  ○ Manual partitioning (advanced)            │
 │                                              │
@@ -199,7 +199,7 @@ When LUKS is selected:
 ┌──────────────────────────────────────────────────────────┐
 │ /dev/sda  500 GiB                                        │
 │ ┌──────┬──────────────┬────────────────────────────────┐ │
-│ │EFI   │  Boot        │  BTRFS (Solus)                  │ │
+│ │EFI   │  Boot        │  BTRFS (Synthex)                  │ │
 │ │512MB │  1 GiB       │  498 GiB                        │ │
 │ │fat32 │  ext4        │  /  @ /home @var @snapshots    │ │
 │ └──────┴──────────────┴────────────────────────────────┘ │
@@ -288,12 +288,12 @@ Actions to be performed:
 **Purpose**: Confirm successful installation and offer next steps
 
 **Elements**:
-- Success message with Solus logo animation
+- Success message with Synthex logo animation
 - "Installation Complete!" heading
 - Installation summary (time elapsed, size installed)
 - Post-install tips:
-  - "Visit getsol.us/welcome to get started"
-  - "Check for updates in Solus Software Center"
+  - "Visit getsynthex.org/welcome to get started"
+  - "Check for updates in Synthex Software Center"
   - "Explore pre-installed applications"
 - "Restart Now" button (primary, default)
 - "Keep Testing" button (stays in live environment)
@@ -357,10 +357,10 @@ Actions to be performed:
 
 | Asset | Size | Format | Usage |
 |-------|------|--------|-------|
-| solus-logo.png | 256x256 | PNG RGBA | Branding header |
-| solus-logo.svg | Vector | SVG | Scaling contexts |
-| solus-icon.png | 48x48 | PNG | Window icon |
-| solus-welcome.png | 800x400 | PNG | Welcome background |
+| synthex-logo.png | 256x256 | PNG RGBA | Branding header |
+| synthex-logo.svg | Vector | SVG | Scaling contexts |
+| synthex-icon.png | 48x48 | PNG | Window icon |
+| synthex-welcome.png | 800x400 | PNG | Welcome background |
 | installer-bg.png | 1920x1080 | PNG | Background/wallpaper |
 
 ### 6.2 Animation Guidelines
@@ -506,22 +506,22 @@ installer/
 │   ├── users/                     # User management module
 │   └── summary/                   # Summary module
 ├── branding/
-│   ├── solus/                     # Solus branding assets
+│   ├── synthex/                     # Synthex branding assets
 │   │   ├── images/
-│   │   │   ├── solus-logo.png
-│   │   │   ├── solus-welcome.png
+│   │   │   ├── synthex-logo.png
+│   │   │   ├── synthex-welcome.png
 │   │   │   └── installer-bg.png
 │   │   ├── slideshow.qml
 │   │   └── translations/
 │   └── CMakeLists.txt
 └── themes/
-    ├── solus-dark/                # Dark theme QSS
-    └── solus-light/               # Light theme QSS
+    ├── synthex-dark/                # Dark theme QSS
+    └── synthex-light/               # Light theme QSS
 ```
 
 ### 10.2 Related Documentation
 
 - [Calamares Wiki](https://github.com/calamares/calamares/wiki)
 - [Calamares Source](https://github.com/calamares/calamares)
-- [Solus Brand Guidelines](https://getsol.us/branding)
+- [Synthex Brand Guidelines](https://getsynthex.org/branding)
 - [BTRFS Sysadmin Guide](https://btrfs.readthedocs.io)

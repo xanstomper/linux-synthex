@@ -14,7 +14,7 @@
     "latency_mode": "low",
     "animation_speed": 1
   },
-  "wallpaper": "/usr/share/wallpapers/solus/gaming-dark.png",
+  "wallpaper": "/usr/share/wallpapers/synthex/gaming-dark.png",
   "services": {
     "gamemode": true,
     "tracker_services": false,

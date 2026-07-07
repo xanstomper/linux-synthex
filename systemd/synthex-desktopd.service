@@ -1,0 +1,26 @@
+[Unit]
+Description=Synthex Desktop Layout/Theme Engine (Rust)
+Documentation=https://github.com/xanstomper/synthex-linux
+After=graphical-session.target
+Requires=graphical-session.target
+PartOf=graphical-session.target
+
+[Service]
+Type=simple
+ExecStart=/usr/libexec/synthex/synthex-desktopd
+Restart=on-failure
+RestartSec=5
+StandardOutput=journal
+StandardError=journal
+TimeoutStopSec=10
+MemoryMax=256M
+NoNewPrivileges=yes
+PrivateTmp=yes
+ProtectSystem=strict
+ProtectHome=read-only
+SystemCallArchitectures=native
+ProtectKernelTunables=yes
+ProtectControlGroups=yes
+
+[Install]
+WantedBy=graphical-session.target

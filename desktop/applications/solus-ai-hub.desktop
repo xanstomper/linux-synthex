@@ -1,9 +1,0 @@
-[Desktop Entry]
-Type=Application
-Name=Solus AI Hub
-Comment=Manage local AI models and chat
-Exec=solus-ai-hub
-Icon=solus-ai-hub
-Categories=Applications;AI;Utility;
-Terminal=false
-StartupNotify=true

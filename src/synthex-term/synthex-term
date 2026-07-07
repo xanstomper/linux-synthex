@@ -1,0 +1,116 @@
+#!/usr/bin/env python3
+"""Synthex Terminal Workspace — split terminal with tmux workspaces.
+Opens a pre-configured tmux session with multiple panes for:
+  - Development (editor + terminal + build + git)
+  - System monitoring (htop + journal + disk)
+  - General (2-4 panes)
+
+Usage:
+  synthex-term workspace <name>   — Open a workspace
+  synthex-term sessions           — List active sessions
+  synthex-term attach <name>      — Attach to session
+"""
+import os, sys, subprocess
+
+WORKSPACES = {
+    "dev": {
+        "name": "Development",
+        "windows": [
+            {"name": "code", "layout": "even-horizontal", "panes": ["nvim .", "cargo watch -x check", "git status"]},
+            {"name": "terminal", "panes": ["btop", "htop -t"]},
+            {"name": "build", "panes": ["make -j$(nproc) 2>&1 | tail -30", "echo 'Build ready'"]},
+        ]
+    },
+    "monitor": {
+        "name": "System Monitor",
+        "windows": [
+            {"name": "system", "layout": "tiled", "panes": ["btop", "htop -t", "journalctl -f -n 50", "df -h; free -h"]},
+            {"name": "network", "panes": ["sudo nethogs", "ping 1.1.1.1"]},
+        ]
+    },
+    "general": {
+        "name": "General",
+        "windows": [
+            {"name": "main", "layout": "even-horizontal", "panes": ["echo 'Welcome to Synthex Terminal'", "btop"]},
+        ]
+    },
+    "gaming": {
+        "name": "Gaming",
+        "windows": [
+            {"name": "game", "layout": "tiled", "panes": ["mangohud", "gamemoderun steam", "nvtop"]},
+        ]
+    },
+}
+
+def open_workspace(name):
+    if name not in WORKSPACES:
+        print(f"Unknown workspace: {name}")
+        print(f"Available: {', '.join(WORKSPACES.keys())}")
+        return
+    ws = WORKSPACES[name]
+    session_name = f"synthex-{name}"
+    
+    # Check if tmux is available
+    if subprocess.run(["which", "tmux"], capture_output=True).returncode != 0:
+        print("tmux not found. Installing...")
+        subprocess.run(["sudo", "dnf", "install", "-y", "tmux"])
+    
+    # Check if session exists
+    result = subprocess.run(["tmux", "has-session", "-t", session_name], capture_output=True)
+    if result.returncode == 0:
+        print(f"Attaching to existing session: {session_name}")
+        os.execvp("tmux", ["tmux", "attach-session", "-t", session_name])
+        return
+    
+    print(f"Creating workspace: {ws['name']}...")
+    
+    for i, window in enumerate(ws["windows"]):
+        if i == 0:
+            # Create first window
+            subprocess.run(["tmux", "new-session", "-d", "-s", session_name, "-n", window["name"]])
+        else:
+            subprocess.run(["tmux", "new-window", "-t", session_name, "-n", window["name"]])
+        
+        # Split panes
+        panes = window["panes"]
+        if len(panes) > 1:
+            # Split vertically first
+            target = f"{session_name}:{i+1}.0"
+            for j in range(1, len(panes)):
+                split_cmd = ["tmux", "split-window", "-h", "-t", target] if j == 1 else ["tmux", "split-window", "-v", "-t", target]
+                subprocess.run(split_cmd)
+            
+            # Set layout if specified
+            if "layout" in window:
+                subprocess.run(["tmux", "select-layout", "-t", f"{session_name}:{i+1}", window["layout"]])
+            
+            # Send commands to each pane
+            for j, cmd in enumerate(panes):
+                pane_target = f"{session_name}:{i+1}.{j}"
+                subprocess.run(["tmux", "send-keys", "-t", pane_target, cmd, "Enter"])
+        else:
+            pane_target = f"{session_name}:{i+1}.0"
+            subprocess.run(["tmux", "send-keys", "-t", pane_target, panes[0], "Enter"])
+    
+    # Attach
+    os.execvp("tmux", ["tmux", "attach-session", "-t", session_name])
+
+def list_sessions():
+    subprocess.run(["tmux", "list-sessions"])
+
+def main():
+    if len(sys.argv) < 2:
+        print(__doc__)
+        return
+    cmd = sys.argv[1]
+    if cmd == "workspace" and len(sys.argv) >= 3:
+        open_workspace(sys.argv[2])
+    elif cmd == "sessions":
+        list_sessions()
+    elif cmd == "attach" and len(sys.argv) >= 3:
+        os.execvp("tmux", ["tmux", "attach-session", "-t", sys.argv[2]])
+    else:
+        print(__doc__)
+
+if __name__ == "__main__":
+    main()

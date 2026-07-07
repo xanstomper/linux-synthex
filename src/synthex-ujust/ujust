@@ -1,0 +1,112 @@
+#!/usr/bin/env bash
+# synthex-ujust — Bazzite's "ujust" command runner ported to Synthex
+set -euo pipefail
+AMBER='\033[38;5;214m'; GREEN='\033[0;32m'; YELLOW='\033[1;33m'
+RED='\033[0;31m'; CYAN='\033[0;36m'; BOLD='\033[1m'; NC='\033[0m'
+
+show_help() {
+    echo -e "${AMBER}══════════════════════════════════════════════${NC}"
+    echo -e "${AMBER}  ⚡ synthex-ujust — task runner${NC}"
+    echo -e "${AMBER}══════════════════════════════════════════════${NC}"
+    echo ""
+    echo -e "${BOLD}Usage:${NC} ujust <command>"
+    echo ""
+    echo -e "${BOLD}Gaming:${NC}  gaming-setup, install-nvidia, install-steam-gaming-mode, enable-game-mode, fix-controllers"
+    echo -e "${BOLD}System:${NC}   update, install-codecs, install-flatpak, setup-snapshots, rollback, setup-zram, clean-system"
+    echo -e "${BOLD}Perf:${NC}     tune-performance, enable-balanced, enable-powersave"
+    echo -e "${BOLD}Bundles:${NC}  install-bundle-{gaming,creator,developer,rgb,emulation}"
+    echo -e "${BOLD}Fixes:${NC}    fix-audio, fix-bluetooth, fix-display"
+    echo -e "${BOLD}Info:${NC}     show-hardware, setup-fish, create-rescue-usb"
+    echo -e "${AMBER}══════════════════════════════════════════════${NC}"
+}
+
+run() { echo -e "${CYAN}▸ $1${NC}"; shift; "$@" 2>&1 | head -20; echo -e "  ${GREEN}✓ done${NC}"; }
+
+cmd_gaming_setup() {
+    echo -e "${AMBER}🎮 Setting up gaming stack...${NC}"
+    run "Steam" sudo dnf install -y steam steam-devices
+    run "GameMode" sudo dnf install -y gamemode
+    run "MangoHud" sudo dnf install -y mangohud goverlay
+    run "Gamescope" sudo dnf install -y gamescope
+    run "Wine" sudo dnf install -y wine-core winetricks
+    run "DXVK/VKD3D" sudo dnf install -y dxvk vkd3d-proton
+    run "Proton mgr" sudo dnf install -y protonup-qt protontricks
+    systemctl --user enable gamemoded 2>/dev/null || true
+    echo -e "${GREEN}✅ Gaming stack ready!${NC}"
+}
+
+cmd_install_nvidia() {
+    echo -e "${AMBER}🖥️  Installing NVIDIA drivers...${NC}"
+    if command -v synthex-nvidia-installer &>/dev/null; then sudo synthex-nvidia-installer
+    else run "NVIDIA" sudo dnf install -y akmod-nvidia nvidia-settings nvidia-prime
+         sudo dracut --force 2>/dev/null || true
+         echo -e "${GREEN}✅ Reboot to activate.${NC}"; fi
+}
+
+cmd_install_codecs() {
+    echo -e "${AMBER}🎬 Installing codecs...${NC}"
+    if command -v synthex-codec-installer &>/dev/null; then sudo synthex-codec-installer
+    else run "Codecs" sudo dnf install -y ffmpeg x264 x265 dav1d openh264 \
+         gstreamer1-plugins-good gstreamer1-plugins-bad-free gstreamer1-plugins-ugly-free \
+         gstreamer1-plugin-libav lame flac opus libdvdnav libdvdread
+         echo -e "${GREEN}✅ Codecs installed.${NC}"; fi
+}
+
+cmd_update() { echo -e "${AMBER}📦 Updating...${NC}"; sudo dnf upgrade --refresh; echo -e "${GREEN}✅ Done.${NC}"; }
+cmd_install_flatpak() { echo -e "${AMBER}📦 Flatpak...${NC}"; flatpak remote-add --if-not-exists flathub https://flathub.org/repo/flathub.flatpakrepo 2>/dev/null || sudo flatpak remote-add --if-not-exists flathub https://flathub.org/repo/flathub.flatpakrepo; echo -e "${GREEN}✅ Flathub enabled.${NC}"; }
+cmd_setup_snapshots() { echo -e "${AMBER}📸 Snapshots...${NC}"; sudo snapper -c root create-config / 2>/dev/null || true; sudo systemctl enable --now snapper-timeline.timer snapper-cleanup.timer; echo -e "${GREEN}✅ Configured.${NC}"; }
+cmd_rollback() { echo -e "${AMBER}↩️  Rollback...${NC}"; command -v synthex-recovery &>/dev/null && synthex-recovery rollback || sudo snapper rollback; echo -e "${GREEN}✅ Reboot to apply.${NC}"; }
+cmd_setup_zram() { echo -e "${AMBER}💾 ZRAM...${NC}"; sudo systemctl enable --now systemd-zram-setup@zram0.service 2>/dev/null || true; echo -e "${GREEN}✅ Configured.${NC}"; }
+cmd_enable_game_mode() { echo -e "${AMBER}🎮 Gaming mode...${NC}"; [ -f /usr/libexec/synthex/modes/gaming.sh ] && sudo /usr/libexec/synthex/modes/gaming.sh || sudo cpupower frequency-set -g performance 2>/dev/null || true; echo -e "${GREEN}✅ Active.${NC}"; }
+cmd_enable_balanced() { echo -e "${AMBER}⚖️  Balanced...${NC}"; [ -f /usr/libexec/synthex/modes/balanced.sh ] && sudo /usr/libexec/synthex/modes/balanced.sh || sudo cpupower frequency-set -g schedutil 2>/dev/null || true; echo -e "${GREEN}✅ Active.${NC}"; }
+cmd_enable_powersave() { echo -e "${AMBER}🔋 Powersave...${NC}"; [ -f /usr/libexec/synthex/modes/powersave.sh ] && sudo /usr/libexec/synthex/modes/powersave.sh || sudo cpupower frequency-set -g powersave 2>/dev/null || true; echo -e "${GREEN}✅ Active.${NC}"; }
+cmd_fix_audio() { echo -e "${AMBER}🔊 Fixing audio...${NC}"; systemctl --user restart pipewire wireplumber pipewire-pulse; echo -e "${GREEN}✅ Audio restarted.${NC}"; }
+cmd_fix_controllers() { echo -e "${AMBER}🎮 Controllers...${NC}"; sudo udevadm control --reload-rules; sudo udevadm trigger; echo -e "${GREEN}✅ Fixed.${NC}"; }
+cmd_fix_bluetooth() { echo -e "${AMBER}🔵 Bluetooth...${NC}"; sudo systemctl restart bluetooth; echo -e "${GREEN}✅ Restarted.${NC}"; }
+cmd_fix_display() { echo -e "${AMBER}🖥️  Display...${NC}"; rm -f ~/.config/monitors.xml; echo -e "${GREEN}✅ Reset. Re-login.${NC}"; }
+cmd_clean_system() { echo -e "${AMBER}🧹 Cleaning...${NC}"; sudo dnf clean all; sudo dnf autoremove -y; echo 3 | sudo tee /proc/sys/vm/drop_caches >/dev/null 2>&1; echo -e "${GREEN}✅ Cleaned.${NC}"; }
+cmd_show_hardware() { echo -e "${AMBER}🖥️  Hardware...${NC}"; cat /var/run/synthex-hw-profile.json 2>/dev/null || lspci; }
+cmd_create_rescue_usb() { echo -e "${AMBER} USB Rescue USB...${NC}"; command -v synthex-rescue-usb &>/dev/null && synthex-rescue-usb || echo "Use: sudo dd if=<iso> of=/dev/sdX bs=4M status=progress"; }
+cmd_tune_performance() { echo -e "${AMBER}⚡ Tuning...${NC}"; [ -f /usr/libexec/synthex/apply-cachy-tuning.sh ] && sudo /usr/libexec/synthex/apply-cachy-tuning.sh || sudo sysctl -w vm.swappiness=10 vm.vfs_cache_pressure=50; echo -e "${GREEN}✅ Applied.${NC}"; }
+cmd_setup_fish() { echo -e "${AMBER}🐟 Fish...${NC}"; chsh -s /usr/bin/fish; echo -e "${GREEN}✅ Set. Re-login.${NC}"; }
+cmd_install_steam_gaming_mode() { echo -e "${AMBER}🎮 Steam Gaming Mode...${NC}"; sudo dnf install -y gamescope-session gamescope-session-steam steam-mode-switch 2>/dev/null || true; echo -e "${GREEN}✅ Use steam-mode-switch.${NC}"; }
+cmd_install_bundle() { local b="$1"; echo -e "${AMBER}📦 $b bundle...${NC}";
+    case "$b" in
+        gaming) sudo dnf install -y lutris bottles prismlauncher obs-studio discord 2>/dev/null || true ;;
+        creator) sudo dnf install -y kdenlive blender gimp inkscape krita 2>/dev/null || true ;;
+        developer) sudo dnf install -y code docker podman rust cargo git 2>/dev/null || true ;;
+        rgb) sudo dnf install -y openrgb piper solaar 2>/dev/null || true ;;
+        emulation) sudo dnf install -y retroarch dolphin-emu rpcs3 pcsx2 ppsspp mame 2>/dev/null || true ;;
+    esac; echo -e "${GREEN}✅ $b installed.${NC}"; }
+
+CMD="${1:-help}"; shift 2>/dev/null || true
+case "$CMD" in
+    help|--help|-h) show_help ;;
+    gaming-setup) cmd_gaming_setup ;;
+    install-nvidia) cmd_install_nvidia ;;
+    install-codecs) cmd_install_codecs ;;
+    update) cmd_update ;;
+    install-flatpak) cmd_install_flatpak ;;
+    setup-snapshots) cmd_setup_snapshots ;;
+    rollback) cmd_rollback ;;
+    setup-zram) cmd_setup_zram ;;
+    enable-game-mode) cmd_enable_game_mode ;;
+    enable-balanced) cmd_enable_balanced ;;
+    enable-powersave) cmd_enable_powersave ;;
+    install-bundle-gaming) cmd_install_bundle gaming ;;
+    install-bundle-creator) cmd_install_bundle creator ;;
+    install-bundle-developer) cmd_install_bundle developer ;;
+    install-bundle-rgb) cmd_install_bundle rgb ;;
+    install-bundle-emulation) cmd_install_bundle emulation ;;
+    fix-audio) cmd_fix_audio ;;
+    fix-controllers) cmd_fix_controllers ;;
+    fix-bluetooth) cmd_fix_bluetooth ;;
+    fix-display) cmd_fix_display ;;
+    clean-system) cmd_clean_system ;;
+    show-hardware) cmd_show_hardware ;;
+    create-rescue-usb) cmd_create_rescue_usb ;;
+    tune-performance) cmd_tune_performance ;;
+    setup-fish) cmd_setup_fish ;;
+    install-steam-gaming-mode) cmd_install_steam_gaming_mode ;;
+    *) echo -e "${RED}Unknown: $CMD${NC} — run 'ujust help'"; exit 1 ;;
+esac

@@ -1,5 +1,5 @@
 # ============================================================================
-# Solus Linux — Security Scanning Workflow
+# SynthOS — Security Scanning Workflow
 # ============================================================================
 # Scans packages, ISOs, and infrastructure for vulnerabilities.
 # Runs on schedule, on release tags, and on demand.
@@ -48,7 +48,7 @@ env:
   CVE_DB_DIR: /tmp/cve-db
   SCAN_REPORT_DIR: /tmp/scan-reports
   OSV_QUERY_URL: https://api.osv.dev/v1/query
-  GHCR_REGISTRY: ghcr.io/solus-linux
+  GHCR_REGISTRY: ghcr.io/synthex-linux
 
 jobs:
   ############################################################################
@@ -195,27 +195,27 @@ jobs:
         run: |
           mkdir -p "${SCAN_REPORT_DIR}/openscap"
 
-          # Use CIS benchmark or custom Solus profile
-          OSCAP_PROFILE="${SCAN_REPORT_DIR}/openscap/solus-profile.xml"
+          # Use CIS benchmark or custom Synthex profile
+          OSCAP_PROFILE="${SCAN_REPORT_DIR}/openscap/synthex-profile.xml"
           cat > "${OSCAP_PROFILE}" << 'XML'
           <?xml version="1.0" encoding="UTF-8"?>
-          <Profile id="solus-hardened">
-            <title>Solus Linux Hardened Profile</title>
-            <description>Baseline security policy for Solus Linux installations</description>
-            <select idrule="xccdf_org.solus.rule_ensure_gpgcheck_globally_activated" selected="true"/>
-            <select idrule="xccdf_org.solus.rule_ensure_selinux_enabled" selected="true"/>
-            <select idrule="xccdf_org.solus.rule_ensure_firewalld_enabled" selected="true"/>
-            <select idrule="xccdf_org.solus.rule_ensure_aide_installed" selected="true"/>
-            <select idrule="xccdf_org.solus.rule_ensure_sshd_configured" selected="true"/>
-            <select idrule="xccdf_org.solus.rule_ensure_password_hashing_sha512" selected="true"/>
-            <select idrule="xccdf_org.solus.rule_ensure_kernel_hardening" selected="true"/>
-            <select idrule="xccdf_org.solus.rule_ensure_filesystem_partitions" selected="true"/>
+          <Profile id="synthex-hardened">
+            <title>SynthOS Hardened Profile</title>
+            <description>Baseline security policy for SynthOS installations</description>
+            <select idrule="xccdf_org.synthex.rule_ensure_gpgcheck_globally_activated" selected="true"/>
+            <select idrule="xccdf_org.synthex.rule_ensure_selinux_enabled" selected="true"/>
+            <select idrule="xccdf_org.synthex.rule_ensure_firewalld_enabled" selected="true"/>
+            <select idrule="xccdf_org.synthex.rule_ensure_aide_installed" selected="true"/>
+            <select idrule="xccdf_org.synthex.rule_ensure_sshd_configured" selected="true"/>
+            <select idrule="xccdf_org.synthex.rule_ensure_password_hashing_sha512" selected="true"/>
+            <select idrule="xccdf_org.synthex.rule_ensure_kernel_hardening" selected="true"/>
+            <select idrule="xccdf_org.synthex.rule_ensure_filesystem_partitions" selected="true"/>
           </Profile>
           XML
 
           # Evaluate with oscap
           oscap xccdf eval \
-            --profile solus-hardened \
+            --profile synthex-hardened \
             --results "${SCAN_REPORT_DIR}/openscap/results.xml" \
             --report "${SCAN_REPORT_DIR}/openscap/report.html" \
             /usr/share/xml/scap/ssg/content/ssg-rhel9-ds.xml \
@@ -240,7 +240,7 @@ jobs:
       - name: Run OWASP Dependency-Check
         uses: dependency-check/Dependency-Check_Action@main
         with:
-          project: 'solus-linux'
+          project: 'synthex-linux'
           path: '.'
           format: 'HTML'
           args: >

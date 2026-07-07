@@ -1,0 +1,246 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE composables SYSTEM "comps.dtd">
+<composables>
+  <composable id="synthex">
+    <groups>
+
+      <!-- ═══════════════════════════════════════════════════════════════
+           synthex-core — Base system (always installed)
+           ═══════════════════════════════════════════════════════════════ -->
+      <group>
+        <id>synthex-core</id>
+        <name>Synthex Core</name>
+        <description>Base system, daemons, and CLI tools</description>
+        <default>true</default>
+        <packagelist>
+          <packagereq type="mandatory">synthex-release</packagereq>
+          <packagereq type="mandatory">synthex-base</packagereq>
+          <!-- System daemons -->
+          <packagereq type="mandatory">synthex-system-daemon</packagereq>
+          <packagereq type="mandatory">synthex-hwdaemon</packagereq>
+          <packagereq type="mandatory">synthex-desktopd</packagereq>
+          <packagereq type="mandatory">synthex-gpu-setupd</packagereq>
+          <packagereq type="mandatory">synthex-stored</packagereq>
+          <!-- CLI tools -->
+          <packagereq type="mandatory">synthex-cli</packagereq>
+          <packagereq type="mandatory">synthex-pkg</packagereq>
+          <packagereq type="mandatory">synthex-update-manager</packagereq>
+          <packagereq type="mandatory">synthex-service-manager</packagereq>
+          <packagereq type="mandatory">synthex-kernel-manager</packagereq>
+          <packagereq type="mandatory">synthex-recovery</packagereq>
+          <packagereq type="mandatory">synthex-compat-db</packagereq>
+          <packagereq type="mandatory">synthex-app-installer</packagereq>
+          <packagereq type="mandatory">synthex-snapshot-manager</packagereq>
+          <packagereq type="mandatory">synthex-system-report</packagereq>
+          <!-- Security -->
+          <packagereq type="mandatory">synthex-security-deploy</packagereq>
+          <!-- VPN -->
+          <packagereq type="default">synthex-vpn</packagereq>
+          <!-- Desktop -->
+          <packagereq type="mandatory">synthex-desktop-common</packagereq>
+          <packagereq type="mandatory">synthex-themes</packagereq>
+          <packagereq type="mandatory">synthex-calamares-branding</packagereq>
+          <packagereq type="mandatory">synthex-oobe</packagereq>
+          <!-- Core system -->
+          <packagereq type="mandatory">mesa</packagereq>
+          <packagereq type="mandatory">mesa-vulkan-drivers</packagereq>
+          <packagereq type="mandatory">pipewire</packagereq>
+          <packagereq type="mandatory">wireplumber</packagereq>
+          <packagereq type="mandatory">pavucontrol</packagereq>
+          <!-- Fonts -->
+          <packagereq type="mandatory">google-noto-sans-fonts</packagereq>
+          <packagereq type="mandatory">google-noto-color-emoji-fonts</packagereq>
+          <packagereq type="mandatory">google-noto-serif-fonts</packagereq>
+          <packagereq type="mandatory">google-noto-mono-fonts</packagereq>
+          <packagereq type="default">google-jetbrains-mono-fonts</packagereq>
+          <!-- Rust modern CLI tools -->
+          <packagereq type="default">rust-toolchain</packagereq>
+          <packagereq type="default">rust-utils-bat</packagereq>
+          <packagereq type="default">rust-utils-eza</packagereq>
+          <packagereq type="default">rust-utils-fd</packagereq>
+          <packagereq type="default">rust-utils-ripgrep</packagereq>
+          <packagereq type="default">rust-utils-starship</packagereq>
+          <packagereq type="default">rust-utils-zoxide</packagereq>
+          <packagereq type="default">rust-utils-delta</packagereq>
+          <packagereq type="default">rust-utils-dust</packagereq>
+          <packagereq type="default">rust-utils-bottom</packagereq>
+          <packagereq type="default">rust-utils-bat</packagereq>
+          <packagereq type="default">rust-utils-procs</packagereq>
+          <packagereq type="default">rust-utils-just</packagereq>
+          <packagereq type="default">rust-utils-nushell</packagereq>
+          <packagereq type="default">rust-utils-zellij</packagereq>
+          <packagereq type="default">rust-utils-tealdeer</packagereq>
+        </packagelist>
+      </group>
+
+      <!-- ═══════════════════════════════════════════════════════════════
+           synthex-plasma — KDE Plasma desktop
+           ═══════════════════════════════════════════════════════════════ -->
+      <group>
+        <id>synthex-plasma</id>
+        <name>Synthex KDE Plasma</name>
+        <description>KDE Plasma desktop environment</description>
+        <default>true</default>
+        <packagelist>
+          <packagereq type="mandatory">plasma-desktop</packagereq>
+          <packagereq type="mandatory">kwin</packagereq>
+          <packagereq type="mandatory">dolphin</packagereq>
+          <packagereq type="mandatory">konsole</packagereq>
+          <packagereq type="mandatory">sddm</packagereq>
+          <packagereq type="mandatory">plasma-nm</packagereq>
+          <packagereq type="default">spectacle</packagereq>
+          <packagereq type="default">gwenview</packagereq>
+          <packagereq type="default">okular</packagereq>
+          <packagereq type="default">ark</packagereq>
+          <packagereq type="default">kcalc</packagereq>
+          <packagereq type="default">discover</packagereq>
+          <packagereq type="default">plasma-discover</packagereq>
+          <packagereq type="default">systemsettings</packagereq>
+          <packagereq type="default">kde-config-sddm</packagereq>
+          <packagereq type="default">plasma-workspace-wallpapers</packagereq>
+        </packagelist>
+      </group>
+
+      <!-- ═══════════════════════════════════════════════════════════════
+           synthex-gaming — Gaming packages
+           ═══════════════════════════════════════════════════════════════ -->
+      <group>
+        <id>synthex-gaming</id>
+        <name>Synthex Gaming</name>
+        <description>Gaming packages — Steam, Lutris, Gamescope, MangoHUD</description>
+        <default>false</default>
+        <packagelist>
+          <packagereq type="mandatory">steam</packagereq>
+          <packagereq type="default">lutris</packagereq>
+          <packagereq type="default">gamescope</packagereq>
+          <packagereq type="default">mangohud</packagereq>
+          <packagereq type="default">gamemode</packagereq>
+          <packagereq type="default">wine</packagereq>
+          <packagereq type="optional">retroarch</packagereq>
+          <packagereq type="optional">heroic-games-launcher</packagereq>
+          <packagereq type="optional">protontricks</packagereq>
+          <packagereq type="optional">vulkan-tools</packagereq>
+        </packagelist>
+      </group>
+
+      <!-- ═══════════════════════════════════════════════════════════════
+           synthex-codecs — Multimedia codecs
+           ═══════════════════════════════════════════════════════════════ -->
+      <group>
+        <id>synthex-codecs</id>
+        <name>Synthex Codecs</name>
+        <description>Audio/video codecs and multimedia support</description>
+        <default>true</default>
+        <packagelist>
+          <packagereq type="mandatory">ffmpeg</packagereq>
+          <packagereq type="mandatory">ffmpeg-libs</packagereq>
+          <packagereq type="mandatory">ffmpegthumbnailer</packagereq>
+          <packagereq type="default">gstreamer1-plugins-base</packagereq>
+          <packagereq type="default">gstreamer1-plugins-good</packagereq>
+          <packagereq type="default">gstreamer1-plugins-bad-free</packagereq>
+          <packagereq type="default">gstreamer1-plugins-ugly-free</packagereq>
+          <packagereq type="default">gstreamer1-plugin-openh264</packagereq>
+          <packagereq type="default">gstreamer1-plugin-libav</packagereq>
+          <packagereq type="default">libdvdread</packagereq>
+          <packagereq type="default">libdvdnav</packagereq>
+          <packagereq type="default">libdvdcss</packagereq>
+        </packagelist>
+      </group>
+
+      <!-- ═══════════════════════════════════════════════════════════════
+           synthex-developer — Development tools
+           ═══════════════════════════════════════════════════════════════ -->
+      <group>
+        <id>synthex-developer</id>
+        <name>Synthex Developer</name>
+        <description>Development tools and compilers</description>
+        <default>false</default>
+        <packagelist>
+          <packagereq type="mandatory">git</packagereq>
+          <packagereq type="mandatory">make</packagereq>
+          <packagereq type="mandatory">cmake</packagereq>
+          <packagereq type="default">gcc</packagereq>
+          <packagereq type="default">gcc-c++</packagereq>
+          <packagereq type="default">clang</packagereq>
+          <packagereq type="default">python3</packagereq>
+          <packagereq type="default">python3-pip</packagereq>
+          <packagereq type="default">nodejs</packagereq>
+          <packagereq type="default">npm</packagereq>
+          <packagereq type="default">golang</packagereq>
+          <packagereq type="default">rust-toolchain</packagereq>
+          <packagereq type="optional">podman</packagereq>
+          <packagereq type="optional">docker</packagereq>
+          <packagereq type="optional">distrobox</packagereq>
+          <packagereq type="optional">neovim</packagereq>
+          <packagereq type="optional">helix</packagereq>
+        </packagelist>
+      </group>
+
+      <!-- ═══════════════════════════════════════════════════════════════
+           synthex-handheld — Handheld/Steam Deck mode
+           ═══════════════════════════════════════════════════════════════ -->
+      <group>
+        <id>synthex-handheld</id>
+        <name>Synthex Handheld</name>
+        <description>Handheld gaming mode — like Bazzite</description>
+        <default>false</default>
+        <packagelist>
+          <packagereq type="mandatory">synthex-handheld-rs</packagereq>
+          <packagereq type="default">maliit-keyboard</packagereq>
+          <packagereq type="default">gamescope</packagereq>
+          <packagereq type="default">steam</packagereq>
+          <packagereq type="optional">dolphin-emu</packagereq>
+        </packagelist>
+      </group>
+
+      <!-- ═══════════════════════════════════════════════════════════════
+           synthex-nvidia — NVIDIA driver support
+           ═══════════════════════════════════════════════════════════════ -->
+      <group>
+        <id>synthex-nvidia</id>
+        <name>Synthex NVIDIA</name>
+        <description>NVIDIA proprietary driver support</description>
+        <default>false</default>
+        <packagelist>
+          <packagereq type="mandatory">synthex-nvidia-installer</packagereq>
+        </packagelist>
+      </group>
+
+      <!-- ═══════════════════════════════════════════════════════════════
+           synthex-ai — AI/ML packages
+           ═══════════════════════════════════════════════════════════════ -->
+      <group>
+        <id>synthex-ai</id>
+        <name>Synthex AI</name>
+        <description>Local LLM and AI assistant packages</description>
+        <default>false</default>
+        <packagelist>
+          <packagereq type="mandatory">synthex-ai-daemon</packagereq>
+          <packagereq type="default">synthex-ai-hub</packagereq>
+          <packagereq type="optional">synthex-ai-platform</packagereq>
+        </packagelist>
+      </group>
+
+      <!-- ═══════════════════════════════════════════════════════════════
+           synthex-creator — Content creation
+           ═══════════════════════════════════════════════════════════════ -->
+      <group>
+        <id>synthex-creator</id>
+        <name>Synthex Creator</name>
+        <description>Content creation and design tools</description>
+        <default>false</default>
+        <packagelist>
+          <packagereq type="default">blender</packagereq>
+          <packagereq type="default">krita</packagereq>
+          <packagereq type="default">gimp</packagereq>
+          <packagereq type="default">inkscape</packagereq>
+          <packagereq type="default">kdenlive</packagereq>
+          <packagereq type="default">audacity</packagereq>
+          <packagereq type="default">obs-studio</packagereq>
+          <packagereq type="optional">synthex-studiocd</packagereq>
+        </packagelist>
+      </group>
+
+    </groups>
+  </composable>
+</composables>

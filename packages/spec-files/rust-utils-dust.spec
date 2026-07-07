@@ -1,4 +1,4 @@
-# Solus Linux RPM Spec — dust (du replacement)
+# SynthOS RPM Spec — dust (du replacement)
 # More intuitive than du, written in Rust
 # Origin: https://github.com/bootandy/dust
 
@@ -30,7 +30,7 @@ Key features:
 - Understands SI and binary units
 - Detects terminal width for responsive display
 
-Part of the Solus Rust utility suite — replaces du -sh *.
+Part of the Synthex Rust utility suite — replaces du -sh *.
 
 %prep
 %setup -q -n dust-%{version}
@@ -48,6 +48,6 @@ ln -sf dust %{buildroot}%{_bindir}/du-dust
 %doc README.md LICENSE
 
 %changelog
-* Sun Jul 06 2026 Solus Rust Team <rust@solus-project.org> - 1.1.1-1
-- Initial Solus package of dust 1.1.1
+* Sun Jul 06 2026 Synthex Rust Team <rust@synthex-project.org> - 1.1.1-1
+- Initial Synthex package of dust 1.1.1
 - du replacement — visual bar charts, sorted by size

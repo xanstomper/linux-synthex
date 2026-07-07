@@ -1,5 +1,5 @@
 #
-# Solus Linux Kernel Configuration
+# Synthex Linux Kernel Configuration
 # Architecture: x86_64
 # Optimized for: desktop, gaming, containers, Wayland
 # Scheduler: BORE + EEVDF
@@ -197,7 +197,7 @@ CONFIG_NTFS3_FS=y
 CONFIG_NTFS3_FS_POSIX_ACL=y
 
 #
-# Disabled filesystems (unused on Solus desktop — smaller kernel, less surface)
+# Disabled filesystems (unused on Synthex desktop — smaller kernel, less surface)
 #
 # CONFIG_REISERFS_FS is not set
 # CONFIG_JFFS2_FS is not set
@@ -871,5 +871,5 @@ CONFIG_RUST_DRIVER_ASIX=y
 CONFIG_RUST_DRIVER_PHY=y
 
 #
-# End of Solus kernel config
+# End of Synthex kernel config
 #

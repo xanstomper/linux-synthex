@@ -1,0 +1,11 @@
+#!/usr/bin/env bash
+# synthex-recovery — Boot failure detection and recovery tool
+set -euo pipefail
+
+HERE="$(cd "$(dirname "$0")" && pwd)"
+
+if [ "${1:-}" = "--check-boot" ]; then
+    exec bash "$HERE/synthex-recovery.sh" check
+fi
+
+exec bash "$HERE/synthex-recovery.sh" "$@"

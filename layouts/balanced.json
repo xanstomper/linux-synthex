@@ -1,6 +1,6 @@
 {
   "name": "balanced",
-  "description": "Default Solus layout — balanced performance and battery life",
+  "description": "Default Synthex layout — balanced performance and battery life",
   "panel": {
     "position": "bottom",
     "height": 40,
@@ -14,7 +14,7 @@
     "latency_mode": "normal",
     "animation_speed": 2
   },
-  "wallpaper": "/usr/share/wallpapers/solus/default-dark.png",
+  "wallpaper": "/usr/share/wallpapers/synthex/default-dark.png",
   "services": {
     "gamemode": false,
     "tracker_services": true,

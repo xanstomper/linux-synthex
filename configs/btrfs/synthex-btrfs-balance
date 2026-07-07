@@ -1,0 +1,13 @@
+# /etc/cron.daily/synthex-btrfs-balance — Daily Btrfs balance check
+# Runs a light balance to prevent filesystem metadata fragmentation
+
+#!/usr/bin/env bash
+set -euo pipefail
+
+# Only run on btrfs
+if ! findmnt -n -t btrfs / &>/dev/null; then
+    exit 0
+fi
+
+# Light balance (limit to 10% usage chunks)
+btrfs balance start -dusage=10 -musage=10 / 2>/dev/null || true

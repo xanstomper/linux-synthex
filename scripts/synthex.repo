@@ -1,0 +1,13 @@
+[synthex]
+name=SynthOS Repository
+baseurl=file:///usr/share/synthex/repo
+enabled=1
+gpgcheck=0
+skip_if_unavailable=True
+
+[synthex-updates]
+name=SynthOS Updates
+baseurl=file:///usr/share/synthex/repo
+enabled=1
+gpgcheck=0
+skip_if_unavailable=True

@@ -1,0 +1,15 @@
+{
+  "controllers": {
+    "xbox_series": { "name": "Xbox Series Controller", "vendor": "045e", "product": "0b13", "driver": "xpad", "gyro": false },
+    "ps5_dualsense": { "name": "PlayStation DualSense", "vendor": "054c", "product": "0ce6", "driver": "hid-playstation", "gyro": true },
+    "nintendo_switch_pro": { "name": "Nintendo Switch Pro", "vendor": "057e", "product": "2009", "driver": "hid-nintendo", "gyro": true },
+    "steam_deck": { "name": "Steam Deck Controls", "vendor": "28de", "product": "1205", "driver": "hid-steam", "gyro": true, "back_buttons": true },
+    "rog_ally": { "name": "ROG Ally Controls", "vendor": "0b05", "product": "1abe", "driver": "xpad", "gyro": false, "back_buttons": true },
+    "8bitdo_pro2": { "name": "8BitDo Pro 2", "vendor": "2dc8", "product": "3106", "driver": "xpad", "gyro": true, "back_buttons": true }
+  },
+  "presets": {
+    "standard": { "mapping": "xbox360", "left_stick_deadzone": 15, "right_stick_deadzone": 15, "rumble": true },
+    "nintendo": { "mapping": "switch_pro", "swap_ab": true },
+    "deck": { "mapping": "xbox360", "gyro_as": "mouse", "left_stick_deadzone": 10 }
+  }
+}

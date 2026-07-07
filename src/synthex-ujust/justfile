@@ -1,0 +1,36 @@
+# Synthex UJust - Bazzite-style justfile
+
+update:
+    synthex-update-manager update --yes
+
+snapshot desc="before-update":
+    synthex-recovery snapshot
+
+rollback name:
+    synthex-recovery rollback {{name}}
+
+diagnose:
+    synthex-recovery diagnose
+
+gaming-enable:
+    synthex-gaming-mode enable
+
+gaming-session:
+    synthex-gaming-mode session
+
+compat-scan:
+    synthex-compat scan
+
+report:
+    synthex-system-report
+
+handheld-enable:
+    synthex-handheld enable
+
+firewall-profile profile:
+    sudo synthex-firewall profile {{profile}}
+
+help:
+    just --list
+default:
+    just --list

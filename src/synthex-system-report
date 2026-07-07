@@ -1,0 +1,98 @@
+#!/usr/bin/env python3
+"""Synthex System Report — collect system info for troubleshooting.
+Like Mint's System Report.
+Usage:
+    synthex-system-report           Generate and show report
+    synthex-system-report save      Save to file
+    synthex-system-report upload    Upload for support
+"""
+import os, sys, subprocess, json, datetime, platform, socket, shutil
+
+def run(cmd, timeout=10):
+    try:
+        r = subprocess.run(cmd, capture_output=True, text=True, timeout=timeout, shell=True)
+        return r.stdout.strip()[:200] if r.returncode == 0 else "(error)"
+    except: return "(timeout)"
+
+def collect():
+    report = {}
+    report["timestamp"] = str(datetime.datetime.now())
+    report["hostname"] = socket.gethostname()
+    report["kernel"] = platform.release()
+    report["os"] = run("cat /etc/os-release | head -5")
+    report["uptime"] = run("uptime -p")
+    report["cpu"] = run("grep 'model name' /proc/cpuinfo | head -1 | cut -d: -f2")
+    report["cpu_count"] = os.cpu_count()
+    try:
+        with open("/proc/meminfo") as f:
+            for line in f:
+                if line.startswith("MemTotal"):
+                    mem_kb = int(line.split()[1])
+                    report["ram_gb"] = f"{mem_kb / 1024 / 1024:.1f} GB"
+                    break
+    except: pass
+    report["gpu"] = run("lspci | grep -E 'VGA|3D' | head -1 | cut -d: -f3-")
+    report["disk"] = run("df -h / | tail -1 | awk '{print $2, $3, $4, $5}'")
+    report["selinux"] = run("getenforce")
+    report["firewall"] = run("firewall-cmd --state")
+    report["desktop"] = run("echo $XDG_CURRENT_DESKTOP")
+    report["session"] = run("echo $XDG_SESSION_TYPE")
+    report["packages"] = run("rpm -qa | wc -l")
+    report["flatpaks"] = run("flatpak list --app | wc -l")
+    report["snaps"] = run("snap list 2>/dev/null | wc -l")
+    report["last_boot"] = run("who -b")
+    report["load"] = run("cat /proc/loadavg | cut -d' ' -f1-3")
+    report["zram"] = run("zramctl --noheadings | head -1 | awk '{print $2, $3, $4}'")
+    report["services_failed"] = run("systemctl --failed --no-legend | wc -l")
+    # Check Synthex services
+    solus_services = {}
+    for svc in ["synthex-desktopd", "synthex-stored", "synthex-hwdaemon", "synthex-workspace", "synthex-ananicy"]:
+        s = run(f"systemctl is-active {svc}")
+        solus_services[svc] = s
+    report["solus_services"] = solus_services
+    return report
+
+def format_report(report):
+    lines = []
+    lines.append("=" * 60)
+    lines.append(f"  SOLUS SYSTEM REPORT — {report['timestamp']}")
+    lines.append("=" * 60)
+    lines.append(f"  Host:    {report.get('hostname', '?')}")
+    lines.append(f"  Kernel:  {report.get('kernel', '?')}")
+    lines.append(f"  OS:      {report.get('os', '?')[:80]}")
+    lines.append(f"  Uptime:  {report.get('uptime', '?')}")
+    lines.append(f"  Desktop: {report.get('desktop', '?')} ({report.get('session', '?')})")
+    lines.append("")
+    lines.append(f"  CPU:     {report.get('cpu', '?')} ({report.get('cpu_count', '?')} cores)")
+    lines.append(f"  GPU:     {report.get('gpu', '?')}")
+    lines.append(f"  RAM:     {report.get('ram_gb', '?')}")
+    lines.append(f"  Disk:    {report.get('disk', '?')}")
+    lines.append(f"  Load:    {report.get('load', '?')}")
+    lines.append(f"  ZRAM:    {report.get('zram', '?')}")
+    lines.append("")
+    lines.append(f"  SELinux: {report.get('selinux', '?')}   Firewall: {report.get('firewall', '?')}")
+    lines.append(f"  Packages: {report.get('packages', '?')} rpm / {report.get('flatpaks', '?')} flatpak")
+    lines.append(f"  Failed services: {report.get('services_failed', '?')}")
+    lines.append("")
+    if report.get("solus_services"):
+        lines.append("  Synthex Services:")
+        for svc, status in report["solus_services"].items():
+            mark = "🟢" if status == "active" else "🔴" if status == "inactive" else "⚪"
+            lines.append(f"    {mark} {svc}: {status}")
+    lines.append("=" * 60)
+    return "\n".join(lines)
+
+def main():
+    if len(sys.argv) > 1 and sys.argv[1] == "save":
+        report = collect()
+        path = f"synthex-report-{datetime.date.today()}.txt"
+        with open(path, "w") as f:
+            f.write(format_report(report))
+        print(f"📝 Report saved to: {path}")
+        return
+
+    report = collect()
+    print(format_report(report))
+
+if __name__ == "__main__":
+    main()

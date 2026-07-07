@@ -1,4 +1,4 @@
-# Solus Linux RPM Spec — starship
+# SynthOS RPM Spec — starship
 # Cross-shell prompt customization (Rust)
 # Origin: Fedora, crates.io
 %global starship_version 1.22.1
@@ -51,6 +51,6 @@ mkdir -p %{buildroot}%{_datadir}/starship
 %{_datadir}/starship/*
 
 %changelog
-* Mon Jul 07 2026 Solus Rust Team <rust@solus-project.org> - 1.22.1-1
-- Initial Solus package
+* Mon Jul 07 2026 Synthex Rust Team <rust@synthex-project.org> - 1.22.1-1
+- Initial Synthex package
 - Rust-based cross-shell prompt

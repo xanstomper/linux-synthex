@@ -1,0 +1,5 @@
+---
+name: synthexprofile
+interface: qtpy
+load: main.py
+nolisten: false

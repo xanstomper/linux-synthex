@@ -1,0 +1,136 @@
+#!/usr/bin/env python3
+"""Synthex AUR Helper — Arch User Repository integration for Synthex.
+Provides access to AUR packages via paru or yay.
+
+Usage:
+    synthex-aur install <package>   Install AUR package
+    synthex-aur search <query>     Search AUR
+    synthex-aur info <package>     Show package info
+    synthex-aur update             Update AUR packages
+    synthex-aur setup              Install paru (recommended AUR helper)
+    synthex-aur list               List installed AUR packages
+"""
+import os, sys, subprocess, json, urllib.request, urllib.error
+
+AUR_RPC = "https://aur.archlinux.org/rpc/v2"
+AUR_HELPERS = {"paru": "paru", "yay": "yay"}
+
+def find_helper():
+    for name, bin in AUR_HELPERS.items():
+        if subprocess.run(["which", bin], capture_output=True).returncode == 0:
+            return name
+    return None
+
+def cmd_setup():
+    """Install paru AUR helper."""
+    helper = find_helper()
+    if helper:
+        print(f"✅ {helper} already installed")
+        return
+
+    print("📦 Installing paru (AUR helper)...")
+    cmds = [
+        ["sudo", "dnf", "install", "-y", "git", "base-devel", "rust", "go"],
+        ["git", "clone", "https://aur.archlinux.org/paru.git", "/tmp/paru"],
+        "cd /tmp/paru && makepkg -si --noconfirm",
+        ["rm", "-rf", "/tmp/paru"],
+    ]
+    for cmd in cmds:
+        if isinstance(cmd, list):
+            subprocess.run(cmd)
+        else:
+            subprocess.run(["bash", "-c", cmd])
+    if find_helper():
+        print("✅ paru installed successfully")
+    else:
+        print("❌ paru installation failed. Try: git clone https://aur.archlinux.org/paru.git")
+
+def cmd_install(pkg):
+    helper = find_helper()
+    if not helper:
+        print("❌ No AUR helper found. Run 'synthex-aur setup' first")
+        return
+    subprocess.run(["sudo", helper, "-S", "--noconfirm", pkg])
+
+def cmd_search(query):
+    try:
+        url = f"{AUR_RPC}/search?arg={query}&by=name-desc"
+        req = urllib.request.Request(url, headers={"User-Agent": "SynthexAUR/1.0"})
+        with urllib.request.urlopen(req, timeout=10) as resp:
+            data = json.loads(resp.read())
+        results = data.get("results", [])
+        if not results:
+            print(f"No AUR results for '{query}'")
+            return
+        print(f"📦 AUR results for '{query}' ({len(results)}):")
+        for r in results[:20]:
+            votes = r.get("NumVotes", 0)
+            pop = "⭐" if votes > 100 else ("⬆" if votes > 10 else "•")
+            print(f"  {pop} {r['Name']:30} {r.get('Description', '')[:60]}")
+            print(f"      {'':30} votes: {votes}, updated: {r.get('OutOfDate', False) and '⚠ OUTDATED' or '✓ current'}")
+    except (urllib.error.URLError, json.JSONDecodeError) as e:
+        print(f"❌ AUR search failed: {e}")
+        print("   Try 'synthex-aur setup' then use paru directly")
+
+def cmd_info(pkg):
+    try:
+        url = f"{AUR_RPC}/info?arg[]={pkg}"
+        req = urllib.request.Request(url, headers={"User-Agent": "SynthexAUR/1.0"})
+        with urllib.request.urlopen(req, timeout=10) as resp:
+            data = json.loads(resp.read())
+        r = data.get("result", {})
+        if not r:
+            print(f"No AUR package '{pkg}'")
+            return
+        print(f"📦 {r['Name']}: {r.get('Description', 'No description')}")
+        print(f"   Version:    {r.get('Version', '?')}")
+        print(f"   Votes:      {r.get('NumVotes', 0)}")
+        print(f"   Popularity: {r.get('Popularity', 0):.2f}")
+        print(f"   Maintainer: {r.get('Maintainer', 'orphan')}")
+        print(f"   Updated:    {r.get('LastModified', '?')}")
+        print(f"   License:    {r.get('License', ['?'])[0] if r.get('License') else '?'}")
+        print(f"   Out of date: {'⚠ YES' if r.get('OutOfDate') else '✓ No'}")
+        print(f"   URL: {r.get('URL', 'N/A')}")
+    except (urllib.error.URLError, json.JSONDecodeError) as e:
+        print(f"❌ AUR lookup failed: {e}")
+
+def cmd_update():
+    helper = find_helper()
+    if not helper:
+        print("❌ No AUR helper found. Run 'synthex-aur setup' first")
+        return
+    subprocess.run([helper, "-Syu"])
+
+def cmd_list():
+    if os.path.exists("/var/lib/paru/paru.db"):
+        subprocess.run(["paru", "-Qm"])
+    elif os.path.exists("/var/lib/yay/yay.db"):
+        subprocess.run(["yay", "-Qm"])
+    else:
+        subprocess.run(["pacman", "-Qm"], stderr=subprocess.DEVNULL)
+        print("(no AUR packages installed)")
+
+def main():
+    if len(sys.argv) < 2:
+        print(__doc__)
+        return
+    cmd = sys.argv[1]
+    args = sys.argv[2:]
+
+    if cmd == "setup":
+        cmd_setup()
+    elif cmd == "install" and args:
+        cmd_install(args[0])
+    elif cmd == "search" and args:
+        cmd_search(" ".join(args))
+    elif cmd == "info" and args:
+        cmd_info(args[0])
+    elif cmd == "update":
+        cmd_update()
+    elif cmd == "list":
+        cmd_list()
+    else:
+        print(__doc__)
+
+if __name__ == "__main__":
+    main()

@@ -1,17 +1,17 @@
 #!/usr/bin/env bash
-# Solus Service Audit — classify every enabled systemd unit as
+# Synthex Service Audit — classify every enabled systemd unit as
 # essential / desktop-optional / bloat and write a JSON report.
-# Usage: solus-service-audit.sh [--apply]
+# Usage: synthex-service-audit.sh [--apply]
 set -euo pipefail
 
-REPORT="/var/lib/solus/service-audit.json"
-STATE="/var/lib/solus"
+REPORT="/var/lib/synthex/service-audit.json"
+STATE="/var/lib/synthex"
 
 # Units that must NEVER be disabled
 ESSENTIAL="systemd NetworkManager dbus polkit rtkit-daemon pipewire wireplumber \
     firewalld cronie rsyslog auditd udev udisks2 upower \
-    solus-desktopd solus-hwdaemon solus-gpu-setupd solus-stored solus-workspace \
-    solus-recovery solus-firstboot solus-safety solus-oobe solus-control-center"
+    synthex-desktopd synthex-hwdaemon synthex-gpu-setupd synthex-stored synthex-workspace \
+    synthex-recovery synthex-firstboot synthex-safety synthex-oobe synthex-control-center"
 
 # Units that are optional depending on hardware/use
 OPTIONAL="bluetooth cups avahi-daemon avahi-dnsconfd ModemManager \
@@ -73,4 +73,4 @@ echo "  optional:  $(echo "$optional_json"  | tr ',' '\n' | grep -c '\"') units"
 echo "  bloat:     $(echo "$bloat_json"     | tr ',' '\n' | grep -c '\"') units"
 echo "  unknown:   $(echo "$unknown_json"   | tr ',' '\n' | grep -c '\"') units"
 echo ""
-echo "Review bloat + optional, then run solus-slim-services.sh to disable."
+echo "Review bloat + optional, then run synthex-slim-services.sh to disable."

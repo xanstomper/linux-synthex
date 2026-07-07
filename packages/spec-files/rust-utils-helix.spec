@@ -1,4 +1,4 @@
-# Solus Linux RPM Spec — helix
+# SynthOS RPM Spec — helix
 # Modal text editor in Rust
 # Origin: Fedora, Arch Linux
 
@@ -49,7 +49,7 @@ cp -r runtime/* %{buildroot}%{_datadir}/helix/runtime/
 %{_datadir}/helix/runtime/
 
 %changelog
-* Mon Jul 07 2026 Solus Rust Team <rust@solus-project.org> - %{helix_version}-1
-- Initial Solus package — helix editor
+* Mon Jul 07 2026 Synthex Rust Team <rust@synthex-project.org> - %{helix_version}-1
+- Initial Synthex package — helix editor
 - Pre-built binary from upstream (full Rust build with tree-sitter + LSP)
 - Ported from Fedora packaging

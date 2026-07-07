@@ -1,0 +1,15 @@
+{
+  "games": {
+    "Elden Ring": {"proton": "GE-Proton9-7", "notes": "Requires dinput8 fix"},
+    "Cyberpunk 2077": {"proton": "GE-Proton9-7", "env": {"VKD3D_CONFIG": "dxr"}},
+    "Baldur's Gate 3": {"proton": "GE-Proton9-7", "env": {"DXVK_ASYNC": "1"}},
+    "Counter-Strike 2": {"proton": "native", "options": "-vulkan -high"},
+    "Dota 2": {"proton": "native", "options": "-vulkan"},
+    "Minecraft": {"proton": "native", "launcher": "prism-launcher"},
+    "Starfield": {"proton": "GE-Proton9-7", "notes": "Shader comp stutters"},
+    "Destiny 2": {"proton": "Experimental", "notes": "BattlEye needs config"},
+    "Apex Legends": {"proton": "Experimental", "notes": "EAC works"},
+    "Grand Theft Auto V": {"proton": "GE-Proton8-30", "env": {"DXVK_ASYNC": "1"}}
+  },
+  "global": {"env": {"MANGOHUD": "1", "GAMEMODE": "1"}}
+}

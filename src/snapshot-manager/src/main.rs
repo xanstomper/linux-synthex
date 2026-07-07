@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: MIT OR Apache-2.0
 //
-// solus-snapshot-manager — Btrfs snapshot management for Solus Linux
+// synthex-snapshot-manager — Btrfs snapshot management for SynthOS
 //
 // Provides:
 //   - Automatic pre-update snapshots via snapper
@@ -17,8 +17,8 @@ use std::process::Command;
 use tracing::error;
 
 #[derive(Parser)]
-#[command(name = "solus-snapshot", version = "0.1.0",
-          about = "Solus Linux Btrfs snapshot manager")]
+#[command(name = "synthex-snapshot", version = "0.1.0",
+          about = "SynthOS Btrfs snapshot manager")]
 struct Cli {
     #[command(subcommand)]
     command: Commands,
@@ -287,7 +287,7 @@ fn verify_system() -> Result<()> {
         println!("  \u{2705} System verification passed");
     } else {
         println!("  \u{26a0}  {issues} issue(s) detected");
-        println!("  Run: solus-recovery to fix issues");
+        println!("  Run: synthex-recovery to fix issues");
     }
     Ok(())
 }
@@ -299,7 +299,7 @@ fn show_stats() -> Result<()> {
         .filter(|l| !l.trim().is_empty() && !l.starts_with("---") && !l.starts_with("Number"))
         .count();
 
-    println!("\n  Solus Snapshot Statistics");
+    println!("\n  Synthex Snapshot Statistics");
     println!("  {}", "\u{2500}".repeat(40));
     println!("  Total snapshots: {count}");
     println!("  Configuration:   root");
@@ -322,7 +322,7 @@ fn show_stats() -> Result<()> {
 fn main() -> Result<()> {
     tracing_subscriber::fmt()
         .with_env_filter(tracing_subscriber::EnvFilter::try_from_default_env()
-            .unwrap_or_else(|_| "solus_snapshot=info".into()))
+            .unwrap_or_else(|_| "synthex_snapshot=info".into()))
         .with_target(false).compact().init();
 
     let cli = Cli::parse();

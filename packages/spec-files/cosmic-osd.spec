@@ -1,4 +1,4 @@
-# Solus Linux RPM Spec — cosmic-osd
+# SynthOS RPM Spec — cosmic-osd
 # COSMIC on-screen display (Rust/Iced)
 # Origin: Pop!_OS (System76)
 
@@ -43,5 +43,5 @@ install -D -m 0755 target/release/cosmic-osd %{buildroot}%{_bindir}/cosmic-osd
 %{_bindir}/cosmic-osd
 
 %changelog
-* Mon Jul 07 2026 Solus Rust Team <rust@solus-project.org> - %{cosmico_version}-1
-- Initial Solus package — COSMIC on-screen display
+* Mon Jul 07 2026 Synthex Rust Team <rust@synthex-project.org> - %{cosmico_version}-1
+- Initial Synthex package — COSMIC on-screen display

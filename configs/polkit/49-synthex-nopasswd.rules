@@ -1,0 +1,42 @@
+// /etc/polkit-1/rules.d/49-synthex-nopasswd.rules
+// Synthex polkit rules — allow wheel group common operations without password
+
+polkit.addRule(function(action, subject) {
+    if (subject.isInGroup("wheel")) {
+        // Package management
+        if (action.id == "org.freedesktop.packagekit.system-update" ||
+            action.id.indexOf("org.freedesktop.packagekit") === 0) {
+            return polkit.Result.YES;
+        }
+        // Disk management (udisks2)
+        if (action.id == "org.freedesktop.udisks2.filesystem-mount-system" ||
+            action.id.indexOf("org.freedesktop.udisks2") === 0) {
+            return polkit.Result.YES;
+        }
+        // NetworkManager
+        if (action.id.indexOf("org.freedesktop.NetworkManager") === 0) {
+            return polkit.Result.YES;
+        }
+        // Firmware updates
+        if (action.id.indexOf("org.freedesktop.fwupd") === 0) {
+            return polkit.Result.YES;
+        }
+        // Calamares installer
+        if (action.id == "org.calamares.pkexec.run" ||
+            action.id.indexOf("org.calamares") === 0) {
+            return polkit.Result.YES;
+        }
+        // System services
+        if (action.id.indexOf("org.freedesktop.systemd1") === 0) {
+            return polkit.Result.YES;
+        }
+        // OpenRGB
+        if (action.id.indexOf("org.openrgb") === 0) {
+            return polkit.Result.YES;
+        }
+    }
+    // Root always gets access
+    if (subject.user == "root") {
+        return polkit.Result.YES;
+    }
+});

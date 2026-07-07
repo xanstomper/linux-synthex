@@ -1,0 +1,6 @@
+# Synthex Studio Splash Screen
+# Uses synthex-latte color scheme
+body {
+    background-color: #1A1A2E;
+    color: #D65D7A;
+}

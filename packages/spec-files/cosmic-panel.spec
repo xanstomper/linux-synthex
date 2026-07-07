@@ -1,4 +1,4 @@
-# Solus Linux RPM Spec — cosmic-panel
+# SynthOS RPM Spec — cosmic-panel
 # COSMIC desktop panel (Rust/Iced)
 # Origin: Pop!_OS (System76)
 
@@ -41,5 +41,5 @@ install -D -m 0755 target/release/cosmic-panel %{buildroot}%{_bindir}/cosmic-pan
 %{_bindir}/cosmic-panel
 
 %changelog
-* Mon Jul 07 2026 Solus Rust Team <rust@solus-project.org> - %{cosmicpanel_version}-1
-- Initial Solus package — COSMIC desktop panel
+* Mon Jul 07 2026 Synthex Rust Team <rust@synthex-project.org> - %{cosmicpanel_version}-1
+- Initial Synthex package — COSMIC desktop panel

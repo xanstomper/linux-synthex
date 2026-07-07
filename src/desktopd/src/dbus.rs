@@ -1,4 +1,4 @@
-// D-Bus interface for solus-desktopd
+// D-Bus interface for synthex-desktopd
 
 use anyhow::Result;
 use std::sync::Mutex;
@@ -18,7 +18,7 @@ impl DesktopInterface {
     }
 }
 
-#[interface(name = "org.solus.Desktop")]
+#[interface(name = "org.synthex.Desktop")]
 impl DesktopInterface {
     /// Apply a desktop layout by name
     #[zbus(name = "ApplyLayout")]
@@ -71,12 +71,12 @@ impl DesktopInterface {
 pub async fn run_service(daemon: DesktopDaemon) -> Result<()> {
     let interface = DesktopInterface::new(daemon);
     let _connection = Builder::session()?
-        .name("org.solus.Desktop")?
-        .serve_at("/org/solus/Desktop", interface)?
+        .name("org.synthex.Desktop")?
+        .serve_at("/org/synthex/Desktop", interface)?
         .build()
         .await?;
 
-    info!("solus-desktopd D-Bus service running on org.solus.Desktop");
+    info!("synthex-desktopd D-Bus service running on org.synthex.Desktop");
     std::future::pending::<()>().await;
     Ok(())
 }

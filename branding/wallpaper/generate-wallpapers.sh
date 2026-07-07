@@ -1,8 +1,8 @@
 #!/usr/bin/env bash
 #
-# generate-wallpapers.sh - Linux Solus Branded Wallpaper Generator
+# generate-wallpapers.sh - Linux Synthex Branded Wallpaper Generator
 #
-# Generates Solus-branded wallpapers using ImageMagick.
+# Generates Synthex-branded wallpapers using ImageMagick.
 # Supports multiple resolutions and editions.
 #
 # Requirements:
@@ -22,41 +22,41 @@ OUTPUT_DIR="${1:-./output}"
 EDITION="${2:-default}"
 
 # ---- Configuration ----
-SOLUS_AMBER="#FFB300"
-SOLUS_DEEP_BLUE="#1565C0"
-SOLUS_DARK_BASE="#1A1A2E"
-SOLUS_DARK_SURFACE="#16213E"
-SOLUS_DARK_ELEVATED="#0F3460"
-SOLUS_DEEP_PURPLE="#6A1B9A"
-SOLUS_TEAL="#00897B"
+SYNTHEX_AMBER="#FFB300"
+SYNTHEX_DEEP_BLUE="#1565C0"
+SYNTHEX_DARK_BASE="#1A1A2E"
+SYNTHEX_DARK_SURFACE="#16213E"
+SYNTHEX_DARK_ELEVATED="#0F3460"
+SYNTHEX_DEEP_PURPLE="#6A1B9A"
+SYNTHEX_TEAL="#00897B"
 
 # Edition colour mapping
 case "$EDITION" in
   default)
-    ACCENT="$SOLUS_AMBER"
-    SECONDARY="$SOLUS_DEEP_PURPLE"
-    LABEL="Solus"
+    ACCENT="$SYNTHEX_AMBER"
+    SECONDARY="$SYNTHEX_DEEP_PURPLE"
+    LABEL="Synthex"
     ;;
   plasma)
-    ACCENT="$SOLUS_AMBER"
-    SECONDARY="$SOLUS_DEEP_BLUE"
-    LABEL="Solus Plasma"
+    ACCENT="$SYNTHEX_AMBER"
+    SECONDARY="$SYNTHEX_DEEP_BLUE"
+    LABEL="Synthex Plasma"
     ;;
   hyprland)
-    ACCENT="$SOLUS_DEEP_PURPLE"
-    SECONDARY="$SOLUS_AMBER"
-    LABEL="Solus Hyprland"
+    ACCENT="$SYNTHEX_DEEP_PURPLE"
+    SECONDARY="$SYNTHEX_AMBER"
+    LABEL="Synthex Hyprland"
     ;;
   gnome)
-    ACCENT="$SOLUS_TEAL"
-    SECONDARY="$SOLUS_DEEP_BLUE"
-    LABEL="Solus GNOME"
+    ACCENT="$SYNTHEX_TEAL"
+    SECONDARY="$SYNTHEX_DEEP_BLUE"
+    LABEL="Synthex GNOME"
     ;;
   *)
     echo "Unknown edition: $EDITION. Using default."
-    ACCENT="$SOLUS_AMBER"
-    SECONDARY="$SOLUS_DEEP_PURPLE"
-    LABEL="Solus"
+    ACCENT="$SYNTHEX_AMBER"
+    SECONDARY="$SYNTHEX_DEEP_PURPLE"
+    LABEL="Synthex"
     ;;
 esac
 
@@ -84,7 +84,7 @@ if ! convert -list font 2>/dev/null | grep -qi "inter"; then
   FONT_LIGHT="DejaVu-Sans"
 fi
 
-echo "=== Solus Wallpaper Generator ==="
+echo "=== Synthex Wallpaper Generator ==="
 echo "Edition:    $EDITION"
 echo "Accent:     $ACCENT"
 echo "Secondary:  $SECONDARY"
@@ -94,13 +94,13 @@ echo ""
 generate_wallpaper() {
   local res="$1"
   local label="$2"
-  local filename="${OUTPUT_DIR}/solus-${EDITION}-${res}.png"
+  local filename="${OUTPUT_DIR}/synthex-${EDITION}-${res}.png"
 
   echo "Generating ${filename}..."
 
   magick -size "$res" \
     -define gradient:direction=south \
-    "gradient:${SOLUS_DARK_BASE}-${SOLUS_DARK_SURFACE}" \
+    "gradient:${SYNTHEX_DARK_BASE}-${SYNTHEX_DARK_SURFACE}" \
     \
     \( +clone \
       -fill "${ACCENT}" -draw "circle $(( ${res%%x*} / 2 )),$(( ${res##*x} / 2 )) $(( ${res%%x*} / 2 + ${res%%x*} / 6 )),$(( ${res##*x} / 2 ))" \
@@ -111,7 +111,7 @@ generate_wallpaper() {
     -compose Screen -composite \
     \
     \( +clone \
-      -fill "${SOLUS_DARK_BASE}88" -draw "rectangle 0,$(( ${res##*x} - 120 )) ${res%%x*},${res##*x}" \
+      -fill "${SYNTHEX_DARK_BASE}88" -draw "rectangle 0,$(( ${res##*x} - 120 )) ${res%%x*},${res##*x}" \
     \) \
     -compose Over -composite \
     \
@@ -145,7 +145,7 @@ for res in "${RESOLUTIONS[@]}"; do
 done
 
 # Also generate the default-dark.png symlink/copy
-cp "${OUTPUT_DIR}/solus-${EDITION}-1920x1080.png" "${OUTPUT_DIR}/default-dark.png"
+cp "${OUTPUT_DIR}/synthex-${EDITION}-1920x1080.png" "${OUTPUT_DIR}/default-dark.png"
 
 echo ""
 echo "=== Wallpaper generation complete! ==="

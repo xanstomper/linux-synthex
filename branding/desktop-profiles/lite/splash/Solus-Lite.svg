@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" width="1920" height="1080" viewBox="0 0 1920 1080">
+  <rect width="1920" height="1080" fill="#0B0F1A"/>
+  <text x="960" y="520" text-anchor="middle" font-family="Noto Sans" font-size="48" font-weight="bold" fill="#8899AA">Synthex</text>
+  <text x="960" y="580" text-anchor="middle" font-family="Noto Sans" font-size="24" fill="#8899AA88">Lite</text>
+  <circle cx="960" cy="680" r="8" fill="#8899AA" opacity="0.3">
+    <animate attributeName="opacity" values="0.3;1;0.3" dur="2s" repeatCount="indefinite"/>
+  </circle>
+</svg>

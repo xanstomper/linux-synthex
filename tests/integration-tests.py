@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Solus Integration Test Suite — validates code, configs, services, desktop files, Rust builds."""
+"""Synthex Integration Test Suite — validates code, configs, services, desktop files, Rust builds."""
 import os, sys, re, json, subprocess, glob
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -26,13 +26,13 @@ def skip(name, reason=""):
 print("\n📋 Systemd Services:")
 svc_dir = os.path.join(ROOT, "systemd")
 expected_svcs = [
-    "solus-desktopd", "solus-hwdaemon", "solus-gpu-setupd", "solus-stored",
-    "solus-workspace", "solus-webappd", "solus-ai-hub", "solus-blueprint",
-    "solus-recovery", "solus-firstboot", "solus-oobe", "solus-control-center",
-    "solus-studiocd", "solus-marketplace", "solus-system-daemon",
-    "solus-ai-daemon", "solus-integration-engine", "solus-snapshot-manager",
-    "solus-snapshot-manager.timer", "solus-gaming-mode", "solus-power-profiles",
-    "solus-ananicy", "solus-auto-tune", "solus-hermes",
+    "synthex-desktopd", "synthex-hwdaemon", "synthex-gpu-setupd", "synthex-stored",
+    "synthex-workspace", "synthex-webappd", "synthex-ai-hub", "synthex-blueprint",
+    "synthex-recovery", "synthex-firstboot", "synthex-oobe", "synthex-control-center",
+    "synthex-studiocd", "synthex-marketplace", "synthex-system-daemon",
+    "synthex-ai-daemon", "synthex-integration-engine", "synthex-snapshot-manager",
+    "synthex-snapshot-manager.timer", "synthex-gaming-mode", "synthex-power-profiles",
+    "synthex-ananicy", "synthex-auto-tune", "synthex-hermes",
 ]
 for svc in expected_svcs:
     if svc.endswith('.timer'):
@@ -65,8 +65,8 @@ print("\n📋 Desktop Launchers:")
 desktop_dir = os.path.join(ROOT, "desktop", "applications")
 if os.path.isdir(desktop_dir):
     expected_desktop = [
-        "solus-control-center", "solus-software-center", "solus-gaming-center",
-        "solus-ai-hub", "solus-studio", "solus-security-dashboard", "solus-workspace",
+        "synthex-control-center", "synthex-software-center", "synthex-gaming-center",
+        "synthex-ai-hub", "synthex-studio", "synthex-security-dashboard", "synthex-workspace",
     ]
     for d in expected_desktop:
         path = os.path.join(desktop_dir, f"{d}.desktop")
@@ -128,7 +128,7 @@ else:
 # ─── 7. Architecture documentation ──────────────────────────────
 print("\n📋 Documentation:")
 for doc in [
-    "architecture/overview.md", "docs/architecture/solus-architecture.md",
+    "architecture/overview.md", "docs/architecture/synthex-architecture.md",
     "docs/security/security-guide.md", "docs/user/getting-started.md",
     "docs/developer/contributing.md", "roadmap/roadmap.md",
     "README.md", "LICENSE",
@@ -197,6 +197,85 @@ for json_file in glob.glob(os.path.join(ROOT, "src", "**", "*.json"), recursive=
             check(os.path.relpath(json_file, ROOT), False, str(e))
 if json_errors == 0:
     check(f"All {json_count} JSON files valid", True)
+
+
+# ─── 11. Calamares Installer Modules ──────────────────────────────
+print("\n📋 Installer Modules:")
+mod_dir = os.path.join(ROOT, "installer", "modules")
+expected_modules = [
+    "welcome", "partition", "users", "bootloader", "displaymanager",
+    "dracut", "fstab", "grubcfg", "keyboard", "locale", "machineid",
+    "networkcfg", "packages", "removeuser", "services-systemd",
+    "shellprocess", "unpackfs", "synthexpostinstall", "synthexprofile",
+    "finished",
+]
+for mod in expected_modules:
+    mod_path = os.path.join(mod_dir, mod)
+    if mod in ("synthexpostinstall", "synthexprofile"):
+        conf = os.path.join(mod_path, f"{mod}.py")
+    else:
+        conf = os.path.join(mod_path, f"{mod}.conf")
+    exists = os.path.exists(conf) or os.path.exists(os.path.join(mod_path, "main.py"))
+    check(f"module/{mod}", exists)
+
+# ─── 12. Calamares Branding ───────────────────────────────────────
+print("\n📋 Calamares Branding:")
+brand_dir = os.path.join(ROOT, "branding", "calamares")
+for asset in ["branding.desc", "show.qml", "synthex-logo.png", "synthex-icon.png"]:
+    path = os.path.join(brand_dir, asset)
+    check(f"calamares/{asset}", os.path.exists(path), f"{os.path.getsize(path)}b" if os.path.exists(path) else "")
+
+# ─── 13. Post-Install Scripts ─────────────────────────────────────
+print("\n📋 Post-Install Scripts:")
+post_install_dir = os.path.join(ROOT, "installer", "scripts", "post-install")
+expected_scripts = [
+    "post-install.sh", "hardware-detect.sh", "apply-theme.sh",
+    "user-defaults.sh", "enable-repo.sh",
+]
+for script in expected_scripts:
+    path = os.path.join(post_install_dir, script)
+    exists = os.path.exists(path)
+    valid = exists and os.access(path, os.X_OK)
+    check(f"post-install/{script}", exists and valid)
+
+# ─── 14. Desktop Files ────────────────────────────────────────────
+print("\n📋 Desktop Files:")
+desktop_dir = os.path.join(ROOT, "desktop", "applications")
+new_desktops = [
+    "synthex-app-installer", "synthex-wine-manager", "synthex-terminal",
+]
+for d in new_desktops:
+    path = os.path.join(desktop_dir, f"{d}.desktop")
+    exists = os.path.exists(path)
+    valid = False
+    if exists:
+        content = open(path).read()
+        valid = "Type=Application" in content and "Exec=" in content
+    check(d, exists and valid)
+
+# ─── 15. New Rust Tools (spec files) ──────────────────────────────
+print("\n📋 New Rust Tool Specs:")
+spec_dir = os.path.join(ROOT, "packages", "spec-files")
+new_specs = ["synthex-app-installer", "synthex-wine-manager", "synthex-terminal-workspace"]
+for spec_name in new_specs:
+    path = os.path.join(spec_dir, f"{spec_name}.spec")
+    exists = os.path.exists(path)
+    valid = False
+    if exists:
+        content = open(path).read()
+        valid = "Name:" in content and "Version:" in content and "%build" in content
+    check(spec_name, exists and valid)
+
+# ─── 16. Synthex Manifest Edition Coverage ──────────────────────────
+print("\n📋 Edition Coverage:")
+manifest_path = os.path.join(ROOT, "packages", "synthex-manifest.json")
+if os.path.exists(manifest_path):
+    with open(manifest_path) as f:
+        manifest = json.load(f)
+    editions = list(manifest.get("editions", {}).keys())
+    check(f"editions: {len(editions)}", len(editions) >= 5, f"{', '.join(editions)}")
+else:
+    check("synthex-manifest.json", False)
 
 # ─── Summary ────────────────────────────────────────────────────
 print(f"\n{'='*60}")

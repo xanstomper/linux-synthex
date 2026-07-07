@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: MIT OR Apache-2.0
 //
-// solus-system-daemon — System performance auto-tuner for Solus Linux
+// synthex-system-daemon — System performance auto-tuner for SynthOS
 //
 // Auto-detects hardware capabilities and configures optimal performance:
 //   - Form factor (laptop/desktop/VM) → power profile
@@ -677,7 +677,7 @@ impl SystemState {
 }
 
 fn state_path() -> std::path::PathBuf {
-    std::path::PathBuf::from("/run/solus/system-daemon/state.json")
+    std::path::PathBuf::from("/run/synthex/system-daemon/state.json")
 }
 
 fn dirs_config() -> std::path::PathBuf {
@@ -713,7 +713,7 @@ async fn monitor_power_source(current_state: &mut SystemState) {
 
 fn print_header(state: &SystemState) {
     println!("╔══════════════════════════════════════════════╗");
-    println!("║        Solus System Daemon v0.1.0           ║");
+    println!("║        Synthex System Daemon v0.1.0           ║");
     println!("╠══════════════════════════════════════════════╣");
     println!("║  Form Factor:    {:24} ║", state.form_factor);
     println!("║  Mode:           {:24} ║", state.mode);
@@ -734,13 +734,13 @@ async fn main() -> Result<()> {
     tracing_subscriber::fmt()
         .with_env_filter(
             tracing_subscriber::EnvFilter::try_from_default_env()
-                .unwrap_or_else(|_| "solus_system_daemon=info".into()),
+                .unwrap_or_else(|_| "synthex_system_daemon=info".into()),
         )
         .with_target(false)
         .compact()
         .init();
 
-    info!("Solus System Daemon starting");
+    info!("Synthex System Daemon starting");
 
     // ── Step 1: Detect everything ──────────────────────────────────────
 

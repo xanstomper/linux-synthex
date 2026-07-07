@@ -1,5 +1,5 @@
 # ============================================================================
-# Solus Linux — ISO Testing Workflow
+# SynthOS — ISO Testing Workflow
 # ============================================================================
 # Tests ISO images in virtual machines: boot, package management,
 # desktop, service health, and network connectivity.
@@ -124,7 +124,7 @@ jobs:
           ISO="${{ matrix.iso }}"
           BASENAME=$(basename "${ISO}" .iso)
           echo "ISO name: ${BASENAME}"
-          # Parse variant from filename: solus-linux-<version>-<variant>-<arch>.iso
+          # Parse variant from filename: synthex-linux-<version>-<variant>-<arch>.iso
           VARIANT=$(echo "${BASENAME}" | awk -F'-' '{print $4}')
           echo "variant=${VARIANT}" >> "$GITHUB_ENV"
 
@@ -135,17 +135,17 @@ jobs:
 
           # Create disk image
           sudo qemu-img create -f qcow2 \
-            "${LIBVIRT_IMAGES}/solus-test.qcow2" \
+            "${LIBVIRT_IMAGES}/synthex-test.qcow2" \
             20G
 
-      - name: Install Solus in VM
+      - name: Install Synthex in VM
         run: |
           # Perform automated install using libvirt
           sudo virt-install \
-            --name solus-test \
+            --name synthex-test \
             --ram 4096 \
             --vcpus 4 \
-            --disk path="${LIBVIRT_IMAGES}/solus-test.qcow2",format=qcow2 \
+            --disk path="${LIBVIRT_IMAGES}/synthex-test.qcow2",format=qcow2 \
             --cdrom "${{ matrix.iso }}" \
             --os-variant linux2022 \
             --network default \
@@ -157,12 +157,12 @@ jobs:
       - name: Verify VM boot
         run: |
           # Check VM is running
-          sudo virsh list --all | grep solus-test
+          sudo virsh list --all | grep synthex-test
 
           # Wait for SSH to be available
           for i in $(seq 1 30); do
-            if sudo virsh domifaddr solus-test --source agent 2>/dev/null; then
-              VM_IP=$(sudo virsh domifaddr solus-test --source agent | grep -oP '\d+\.\d+\.\d+\.\d+' | head -1)
+            if sudo virsh domifaddr synthex-test --source agent 2>/dev/null; then
+              VM_IP=$(sudo virsh domifaddr synthex-test --source agent | grep -oP '\d+\.\d+\.\d+\.\d+' | head -1)
               if [[ -n "${VM_IP}" ]]; then
                 echo "VM IP: ${VM_IP}"
                 echo "vm_ip=${VM_IP}" >> "$GITHUB_ENV"
@@ -268,9 +268,9 @@ jobs:
       - name: Cleanup VM
         if: always()
         run: |
-          sudo virsh destroy solus-test 2>/dev/null || true
-          sudo virsh undefine solus-test 2>/dev/null || true
-          sudo rm -f "${LIBVIRT_IMAGES}/solus-test.qcow2"
+          sudo virsh destroy synthex-test 2>/dev/null || true
+          sudo virsh undefine synthex-test 2>/dev/null || true
+          sudo rm -f "${LIBVIRT_IMAGES}/synthex-test.qcow2"
 
   ############################################################################
   # REPORT: Aggregate test results

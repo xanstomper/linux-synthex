@@ -1,0 +1,21 @@
+Name:           synthex-tray
+Version:        0.1.0
+Release:        1%{?dist}
+Summary:        System tray
+
+License:        MIT
+URL:            https://getsynthex.io
+Requires:       python3
+
+%description
+Synthex system tray indicator.
+
+%install
+install -Dm755 src/synthex-tray %{buildroot}%{_bindir}/synthex-tray
+
+%files
+%{_bindir}/synthex-tray
+
+%changelog
+* Mon Jul 06 2026 Synthex Team <dev@synthex.org> - 0.1.0-1
+- Initial synthex-tray package

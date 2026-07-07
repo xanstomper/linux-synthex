@@ -19,7 +19,7 @@
     "shadows": true,
     "translucency": 0.0
   },
-  "wallpaper": "/usr/share/wallpapers/solus/mint-style.png",
+  "wallpaper": "/usr/share/wallpapers/synthex/mint-style.png",
   "desktop": {
     "show_icons": true,
     "icon_size": 48,
@@ -47,13 +47,13 @@
   },
   "theme": {
     "color_scheme": "SolusMint",
-    "plasma_theme": "solus-mint",
+    "plasma_theme": "synthex-mint",
     "icon_theme": "Mint-Y",
     "cursor_theme": "Bibata-Modern-Classic",
     "font": "Noto Sans,10",
     "mono_font": "JetBrains Mono,10",
     "titlebar_buttons": "right",
-    "window_decoration": "solus-mint"
+    "window_decoration": "synthex-mint"
   },
   "performance": {
     "cpu_governor": "ondemand",

@@ -1,0 +1,11 @@
+#!/usr/bin/env bash
+# synthex-gpu-setupd — GPU Detection and Driver Setup entry point
+# Tries native binary, then shell script fallback
+set -euo pipefail
+HERE="$(cd "$(dirname "$0")" && pwd)"
+
+if command -v synthex-gpu-setupd-bin &>/dev/null; then
+    exec synthex-gpu-setupd-bin "$@"
+fi
+
+exec bash "$HERE/synthex-gpu-setupd.sh" "$@"

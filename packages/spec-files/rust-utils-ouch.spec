@@ -1,4 +1,4 @@
-# Solus Linux RPM Spec — ouch
+# SynthOS RPM Spec — ouch
 # Painless compression/decompression CLI (Rust)
 # Origin: Fedora, Arch Linux
 
@@ -51,6 +51,6 @@ install -D -m 0755 target/release/ouch %{buildroot}%{_bindir}/ouch
 %{_bindir}/ouch
 
 %changelog
-* Mon Jul 07 2026 Solus Rust Team <rust@solus-project.org> - %{ouch_version}-1
-- Initial Solus package — ouch
+* Mon Jul 07 2026 Synthex Rust Team <rust@synthex-project.org> - %{ouch_version}-1
+- Initial Synthex package — ouch
 - Ported from Fedora packaging

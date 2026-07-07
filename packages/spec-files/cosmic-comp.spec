@@ -1,4 +1,4 @@
-# Solus Linux RPM Spec — cosmic-comp
+# SynthOS RPM Spec — cosmic-comp
 # Pop!_OS COSMIC compositor (Rust/Iced Wayland compositor)
 # Origin: Pop!_OS (System76), https://github.com/pop-os/cosmic-comp
 
@@ -75,6 +75,6 @@ update-desktop-database %{_datadir}/wayland-sessions 2>/dev/null || true
 %{_datadir}/wayland-sessions/cosmic.desktop
 
 %changelog
-* Mon Jul 07 2026 Solus Rust Team <rust@solus-project.org> - %{cosmic_version}-1
-- Initial Solus package — COSMIC Wayland compositor
+* Mon Jul 07 2026 Synthex Rust Team <rust@synthex-project.org> - %{cosmic_version}-1
+- Initial Synthex package — COSMIC Wayland compositor
 - Ported from Pop!_OS packaging

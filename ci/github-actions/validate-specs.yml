@@ -1,4 +1,4 @@
-# Solus Linux — RPM spec validation CI
+# SynthOS — RPM spec validation CI
 # Validates all RPM spec files for syntax correctness
 name: RPM — Validate Specs
 

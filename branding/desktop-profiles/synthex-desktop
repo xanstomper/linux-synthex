@@ -1,0 +1,79 @@
+#!/usr/bin/env python3
+"""Synthex Desktop Switcher — switch between 8 desktop profiles.
+Usage:
+  synthex-desktop list                    — List profiles
+  synthex-desktop apply <profile>         — Apply a profile
+  synthex-desktop current                 — Show current
+  synthex-desktop preview <profile>       — Show profile details
+"""
+import os, sys, subprocess, json
+
+PROFILES_DIR = "/usr/share/synthex/desktop-profiles"
+STATE_FILE = os.path.expanduser("~/.config/synthex/desktop-profile.json")
+
+PROFILES = {
+    "focus": {"name": "Synthex Focus", "tagline": "Distraction-free. Keyboard-centric. Ultra-minimal.", "theme": "synthex-graphite", "accent": "#9BBD5C", "menu": "simplemenu", "animations": "fast", "compositor": "xrender", "performance": "lightweight", "description": "Ultra-minimalist. Everything auto-hides. Win+Space to search. For power users who live in the keyboard.", "target": "Power users, minimalist, keyboard-driven"},
+    "gaming": {"name": "Synthex Gaming", "tagline": "Console-like. Big Picture. Zero distractions.", "theme": "synthex-midnight", "accent": "#FFB300", "menu": "kickoff-simple", "animations": "smooth", "compositor": "opengl", "performance": "balanced", "description": "Console-like gaming UI. Amber accents, deep blacks. Steam launcher. GameMode auto-enabled. HDR/VRR ready.", "target": "Gamers, Steam Deck-like experience"},
+    "pro": {"name": "Synthex Pro", "tagline": "Developer & creator cockpit. Split-panel. Terminal-first.", "theme": "synthex-graphite", "accent": "#5B9BD5", "menu": "kickoff-search", "animations": "fast", "compositor": "opengl", "performance": "balanced", "description": "Developer cockpit. Left app dock. Bottom status bar. Built-in terminal launcher. Git-aware file manager.", "target": "Developers, creators, multitaskers"},
+    "touch": {"name": "Synthex Touch", "tagline": "Tablet & handheld. Finger-friendly. Bold.", "theme": "synthex-frost", "accent": "#5B9BD5", "menu": "kickoff-grid", "animations": "slow", "compositor": "opengl", "performance": "balanced", "description": "Touch-optimized. Large targets. On-screen keyboard. Handheld mode for ROG Ally / Legion Go / Steam Deck.", "target": "Tablet, handheld, touch-screen users"},
+    "classic": {"name": "Synthex Classic", "tagline": "Windows-like. Familiar. Easy onboarding.", "theme": "synthex-mint", "accent": "#86C166", "menu": "kickoff-windows", "animations": "normal", "compositor": "opengl", "performance": "balanced", "description": "Windows-style transition. Bottom taskbar. Start menu. System tray. Familiar for newcomers from Windows.", "target": "Windows migrants, beginners"},
+    "lite": {"name": "Synthex Lite", "tagline": "Lightweight. Fast. Old hardware friendly.", "theme": "synthex-graphite", "accent": "#8899AA", "menu": "simplemenu", "animations": "off", "compositor": "xrender", "performance": "lightweight", "description": "Maximum performance on old hardware. No blur, no animations, no compositor effects. Everything stripped for speed.", "target": "Old hardware, VMs, low-spec systems"},
+    "studio": {"name": "Synthex Studio", "tagline": "Content creator. Color-accurate. Media-centric.", "theme": "synthex-latte", "accent": "#D65D7A", "menu": "kickoff", "animations": "smooth", "compositor": "opengl", "performance": "balanced", "description": "Creator-focused. Color-accurate display. Right sidebar with color palette. Media controller. Warm rose accents.", "target": "Designers, video editors, streamers"},
+    "ai": {"name": "Synthex AI", "tagline": "AI-first desktop. Assistant everywhere. Smart workspace.", "theme": "synthex-midnight", "accent": "#9BBD5C", "menu": "kickoff-search", "animations": "smooth", "compositor": "opengl", "performance": "balanced", "description": "AI-first desktop. Left sidebar with AI chat, context, agents, and model browser. Smart search. System-wide AI assistant.", "target": "AI users, researchers, power users"},
+}
+
+def apply(name):
+    if name not in PROFILES: print(f"Unknown: {name}"); return
+    p = PROFILES[name]
+    print(f"Applying {p['name']}...")
+    print(f"  {p['tagline']}")
+    # Apply theme
+    subprocess.run(["plasma-apply-colorscheme", p["theme"]], capture_output=True)
+    # Apply desktop theme layout
+    subprocess.run(["lookandfeeltool", "-a", "synthex-plasma-theme"], capture_output=True)
+    # Save state
+    os.makedirs(os.path.dirname(STATE_FILE), exist_ok=True)
+    with open(STATE_FILE, "w") as f: json.dump({"profile": name}, f)
+    print(f"  ✓ Theme: {p['name']}  ({p['accent']})")
+    print(f"  ✓ Menu: {p['menu']}")
+    print(f"  ✓ Animations: {p['animations']}")
+    print(f"  ✓ Compositor: {p['compositor']}")
+    print(f"  ✓ Performance: {p['performance']}")
+    print(f"  ⚡ Reboot or logout to see full effect.")
+
+def list_profiles():
+    cur = None
+    if os.path.exists(STATE_FILE):
+        with open(STATE_FILE) as f: cur = json.load(f).get("profile")
+    for name, p in PROFILES.items():
+        marker = "▶" if name == cur else " "
+        print(f"  {marker} {name:12} {p['name']:20} {p['performance']:12} {p['accent']}")
+        print(f"      {p['tagline']}")
+
+def preview(name):
+    if name not in PROFILES: print(f"Unknown: {name}"); return
+    p = PROFILES[name]
+    print(f"  {p['name']}")
+    print(f"  {p['tagline']}")
+    print(f"  Theme: {p['theme']} ({p['accent']})")
+    print(f"  Menu: {p['menu']}")
+    print(f"  Animations: {p['animations']}")
+    print(f"  Compositor: {p['compositor']}")
+    print(f"  Performance: {p['performance']}")
+    print(f"  For: {p['target']}")
+    print(f"  {p['description']}")
+
+def main():
+    if len(sys.argv) < 2:
+        list_profiles(); return
+    c = sys.argv[1]
+    if c == "list": list_profiles()
+    elif c == "apply" and len(sys.argv) >= 3: apply(sys.argv[2])
+    elif c == "preview" and len(sys.argv) >= 3: preview(sys.argv[2])
+    elif c == "current":
+        if os.path.exists(STATE_FILE):
+            with open(STATE_FILE) as f: print(f"Current: {json.load(f).get('profile', 'none')}")
+        else: print("Current: default (focus)")
+    else: print(__doc__)
+
+if __name__ == "__main__": main()

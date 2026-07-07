@@ -1,0 +1,175 @@
+# Synthex KWin Window Rules
+# kwin-synthex.kwinrules
+# Installed to: /usr/share/synthex/plasma/config/
+#
+# These rules ensure Synthex-native applications and common
+# third-party apps behave consistently under KWin.
+#
+# Format: KWin window rule entries (5.x/6.x compatible)
+#
+# Rule format per entry:
+#   [<rule-uuid>]
+#   Description=<name>
+#   rule.<property>=<value>
+#   match.<match-type>=<value>
+#   ...
+
+# ─── Firefox — Native Wayland, no titlebar when maximized ─────────────────
+[firefox-wayland]
+Description=Firefox — No titlebar when maximized
+match.windowclass=firefox
+match.windowtypes=normal
+rule.noborder=true
+rule.noborderrule=2  # Apply only when maximized
+rule.maximize=true
+rule.maximizerule=2  # Remember maximized state
+rule.above=true
+rule.aboverule=2     # Disabled by default
+
+# ─── GNOME/GTK Apps — Force Breeze decoration ────────────────────────────
+[gtk-decoration]
+Description=GTK apps — Force Breeze decoration
+match.windowclass=org.gnome.*
+match.windowtypes=normal
+rule.decoration=breeze
+rule.decorationrule=2  # Force
+
+[gtk-decoration-2]
+Description=GTK apps — Force Breeze decoration (legacy)
+match.windowclass=gimp-2.99
+match.windowtypes=normal
+rule.decoration=breeze
+rule.decorationrule=2
+
+# ─── Steam — Force full compositing ───────────────────────────────────────
+[steam-compositor]
+Description=Steam — Force compositing
+match.windowclass=steam
+match.windowtypes=normal
+rule.compositing=true
+rule.compositingrule=2  # Force on
+rule.blockcompositing=false
+rule.blockcompositingrule=2
+
+# ─── Steam Games (Gamescope) — Borderless fullscreen ──────────────────────
+[steam-game-borderless]
+Description=Steam games — Borderless fullscreen
+match.windowclass=gamescope
+match.windowtypes=normal
+rule.noborder=true
+rule.noborderrule=2
+rule.fullscreen=true
+rule.fullscreenrule=2
+
+# ─── Discord — Keep above when in call ────────────────────────────────────
+[discord-above]
+Description=Discord — Keep above during calls
+match.windowclass=discord
+match.windowtypes=normal
+rule.above=true
+rule.aboverule=3  # Apply only when window has specific caption
+
+# ─── File Dialog — No taskbar entry ──────────────────────────────────────
+[filedialog-skip-taskbar]
+Description=File dialogs — Skip taskbar
+match.windowclass=kfiledialog
+match.windowtypes=dialog
+rule.skiptaskbar=true
+rule.skiptaskbarrule=2
+
+# ─── Plasma Splash — Skip taskbar ────────────────────────────────────────
+[splash-skip]
+Description=Plasma splash — Skip taskbar
+match.windowclass=plasmashell
+match.windowtypes=splash
+rule.skiptaskbar=true
+rule.skiptaskbarrule=2
+
+# ─── KDE Connect — Notification popups ───────────────────────────────────
+[kdeconnect-notification]
+Description=KDE Connect — Notification popups
+match.windowclass=kdeconnect-app
+match.windowtypes=notification
+rule.skiptaskbar=true
+rule.skiptaskbarrule=2
+rule.skipswitcher=true
+rule.skipswitcherrule=2
+
+# ─── Synthex Software Center — Start maximized ─────────────────────────────
+[synthex-software-max]
+Description=Synthex Software Center — Maximized by default
+match.windowclass=synthex-software-center
+match.windowtypes=normal
+rule.maximize=true
+rule.maximizerule=2
+
+# ─── Terminal (Konsole) — Minimum size ───────────────────────────────────
+[konsole-min-size]
+Description=Konsole — Minimum size
+match.windowclass=konsole
+match.windowtypes=normal
+rule.minsize=640x400
+rule.minsizerule=2
+
+# ─── Virtual Machines — Keep above ────────────────────────────────────────
+[virt-manager-above]
+Description=Virt-Manager — Keep above
+match.windowclass=virt-manager
+match.windowtypes=normal
+rule.above=true
+rule.aboverule=3  # While focused
+
+# ─── Calculator — Keep on top ─────────────────────────────────────────────
+[calculator-above]
+Description=Calculator — Keep above
+match.windowclass=kcalc
+match.windowtypes=normal
+rule.above=true
+rule.aboverule=2
+
+# ─── OBS Studio — Force compositing ──────────────────────────────────────
+[obs-compositor]
+Description=OBS Studio — Force compositing
+match.windowclass=obs
+match.windowtypes=normal
+rule.compositing=true
+rule.compositingrule=2
+rule.blockcompositing=false
+rule.blockcompositingrule=2
+
+# ─── Wine/Proton — Borderless for games ──────────────────────────────────
+[wine-borderless]
+Description=Wine/Proton — Remove titlebar
+match.windowclass=wine*
+match.windowtypes=normal
+rule.noborder=true
+rule.noborderrule=3  # Optional — user can enable
+
+# ─── Firefox Picture-in-Picture ──────────────────────────────────────────
+[firefox-pip]
+Description=Firefox PiP — Keep above, skip taskbar
+match.windowclass=firefox
+match.windowtypes=normal
+match.windowrole=PictureInPicture
+rule.above=true
+rule.aboverule=2
+rule.skiptaskbar=true
+rule.skiptaskbarrule=2
+rule.skipswitcher=true
+rule.skipswitcherrule=2
+
+# ─── Zoom / WebRTC share — Keep above when sharing ───────────────────────
+[zoom-above]
+Description=Zoom — Keep above during screen share
+match.windowclass=zoom
+match.windowtypes=normal
+rule.above=true
+rule.aboverule=3
+
+# ─── Electron apps — Acceptable defaults ─────────────────────────────────
+[electron-defaults]
+Description=Electron apps — Standard behavior
+match.windowclass=electron*
+match.windowtypes=normal
+rule.decoration=breeze
+rule.decorationrule=1  # Suggest, not force

@@ -1,46 +1,72 @@
 [workspace]
 resolver = "2"
 members = [
+    # Core daemons
+    "src/system-daemon",
     "src/hwdaemon",
     "src/desktopd",
-    "src/solus-cli",
-    "src/stored",
     "src/gpu-setupd",
-    "src/system-daemon",
+    "src/stored",
     "src/ai-daemon",
+    "src/snapshot-manager",
+    # CLI tools
+    "src/synthex-cli",
+    "src/synthbox",
+    # Security
+    "src/synthguard",
+    "src/synthshield",
+    "src/synthvault",
+    "src/synthidentity",
+    # System management
+    "src/synthupdate",
+    "src/synthnet",
+    "src/synthex-app-installer",
+    "src/synthex-compat-db",
+    "src/synthex-codec-installer-rs",
+    "src/synthex-handheld-rs",
+    "src/synthex-kernel-manager-rs",
+    "src/synthex-perf-tuning-rs",
+    "src/synthex-proton-manager-rs",
+    "src/synthex-recovery-rs",
+    "src/synthex-service-manager-rs",
+    "src/synthex-system-report-rs",
+    "src/synthex-terminal-workspace",
+    "src/synthex-wine-manager",
+    # Integration
     "src/installer-detect",
     "src/integration-engine",
-    "src/snapshot-manager",
-    "src/solus-rust-tools/solus-pkg",
-    "src/solus-rust-tools/solus-update-manager",
-    "src/solus-rust-tools/solus-driver-manager",
-    "src/solus-recovery-rs",
-    "src/solus-service-manager-rs",
-    "src/solus-kernel-manager-rs",
-    "src/solus-compat-db",
+    # Rust tool suite (sub-crates)
+    "src/synthex-rust-tools/synthex-pkg",
+    "src/synthex-rust-tools/synthex-update-manager",
+    "src/synthex-rust-tools/synthex-driver-manager",
 ]
 
 [workspace.package]
 version = "0.1.0"
-edition = "2024"
+edition = "2021"
 license = "MIT OR Apache-2.0"
-authors = ["Solus Linux Team <dev@solus.org>"]
+authors = ["Synthex Project <dev@getsynthex.org>"]
 
 [workspace.dependencies]
-serde = { version = "1", features = ["derive"] }
-serde_json = "1"
-tokio = { version = "1", features = ["full"] }
+# Core
+anyhow = "1.0"
+clap = { version = "4.5", features = ["derive"] }
+serde = { version = "1.0", features = ["derive"] }
+serde_json = "1.0"
+tokio = { version = "1.38", features = ["full"] }
 tracing = "0.1"
 tracing-subscriber = { version = "0.3", features = ["env-filter"] }
-zbus = { version = "5", features = ["tokio"] }
-anyhow = "1"
-clap = { version = "4", features = ["derive"] }
 sysinfo = "0.33"
-dirs = "5"
 chrono = { version = "0.4", features = ["serde"] }
-reqwest = { version = "0.12", default-features = false, features = ["json", "rustls-tls"] }
-toml = "0.8"
+# D-Bus
+zbus = "5.0"
+# Async / IO
+reqwest = { version = "0.12", features = ["json"] }
 futures-util = "0.3"
-glob = "0.3"
+# Filesystem / system
 walkdir = "2"
+glob = "0.3"
+dirs = "6.0"
+toml = "0.8"
+# CLI
 indicatif = "0.17"

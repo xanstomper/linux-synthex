@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Linux Solus Project File Tree Generator
+# Linux Synthex Project File Tree Generator
 # Generates a complete ASCII tree of the project
 
 PROJECT_ROOT="$(cd "$(dirname "$0")/.." && pwd)"

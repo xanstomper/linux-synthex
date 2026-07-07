@@ -1,4 +1,4 @@
-# Building Packages for Solus Linux
+# Building Packages for SynthOS
 
 > **Audience:** Package maintainers and developers  
 > **Last updated:** July 2026  
@@ -25,7 +25,7 @@
 
 ### 1.1 What is an RPM?
 
-RPM (RPM Package Manager) is the package format used by Solus. An RPM is a compressed archive containing:
+RPM (RPM Package Manager) is the package format used by Synthex. An RPM is a compressed archive containing:
 - Binary files to install
 - Metadata (name, version, dependencies)
 - Scripts (pre/post install/uninstall)
@@ -43,7 +43,7 @@ RPM (RPM Package Manager) is the package format used by Solus. An RPM is a compr
 | **name** | Package name (lowercase, no spaces) | `firefox` |
 | **version** | Upstream version (X.Y.Z) | `128.0.3` |
 | **release** | Package revision (starts at 1) | `1` |
-| **dist tag** | Distribution identifier | `solus` |
+| **dist tag** | Distribution identifier | `synthex` |
 | **architecture** | CPU architecture | `x86_64` |
 
 **Examples:**
@@ -109,21 +109,21 @@ sudo usermod -aG mock $USER
 # Log out and back in for group changes
 ```
 
-### 2.2 Solus Mock Configuration
+### 2.2 Synthex Mock Configuration
 
 ```bash
-# Check if Solus mock config exists
-ls /etc/mock/ | grep solus
+# Check if Synthex mock config exists
+ls /etc/mock/ | grep synthex
 # If not, create one:
 
-# Create Solus config
-sudo tee /etc/mock/solus-x86_64.cfg << 'EOF'
-config_opts['root'] = 'solus-x86_64'
+# Create Synthex config
+sudo tee /etc/mock/synthex-x86_64.cfg << 'EOF'
+config_opts['root'] = 'synthex-x86_64'
 config_opts['target_arch'] = 'x86_64'
 config_opts['legal_host_arches'] = ['x86_64']
 
 config_opts['chroot_setup_cmd'] = 'install @buildsys-build'
-config_opts['dist'] = 'solus'
+config_opts['dist'] = 'synthex'
 config_opts['releasever'] = '4'
 
 config_opts['yum.conf'] = """
@@ -135,19 +135,19 @@ retries=20
 obsoletes=1
 gpgcheck=0
 
-[solus]
-name=Solus $releasever - x86_64
-baseurl=https://mirrors.getsol.us/repo/$releasever/x86_64/
+[synthex]
+name=Synthex $releasever - x86_64
+baseurl=https://mirrors.getsynthex.org/repo/$releasever/x86_64/
 enabled=1
 gpgcheck=1
-gpgkey=https://getsol.us/solus-keyring.gpg
+gpgkey=https://getsynthex.org/synthex-keyring.gpg
 
-[solus-updates]
-name=Solus $releasever - x86_64 - Updates
-baseurl=https://mirrors.getsol.us/repo/$releasever/x86_64/updates/
+[synthex-updates]
+name=Synthex $releasever - x86_64 - Updates
+baseurl=https://mirrors.getsynthex.org/repo/$releasever/x86_64/updates/
 enabled=1
 gpgcheck=1
-gpgkey=https://getsol.us/solus-keyring.gpg
+gpgkey=https://getsynthex.org/synthex-keyring.gpg
 """
 EOF
 ```
@@ -156,20 +156,20 @@ EOF
 
 ```bash
 # Build from source RPM
-mock -r solus-x86_64 --rebuild /path/to/package-1.0.0-1.src.rpm
+mock -r synthex-x86_64 --rebuild /path/to/package-1.0.0-1.src.rpm
 
 # Build from spec file (mock creates SRPM first)
-mock -r solus-x86_64 --buildsrpm --spec package.spec --sources ~/rpmbuild/SOURCES/
-mock -r solus-x86_64 --rebuild ~/rpmbuild/SRPMS/package-1.0.0-1.src.rpm
+mock -r synthex-x86_64 --buildsrpm --spec package.spec --sources ~/rpmbuild/SOURCES/
+mock -r synthex-x86_64 --rebuild ~/rpmbuild/SRPMS/package-1.0.0-1.src.rpm
 
 # Build and keep chroot for debugging
-mock -r solus-x86_64 -v --rebuild package-1.0.0-1.src.rpm --resultdir=./results
+mock -r synthex-x86_64 -v --rebuild package-1.0.0-1.src.rpm --resultdir=./results
 
 # Interactive shell in chroot
-mock -r solus-x86_64 --shell
+mock -r synthex-x86_64 --shell
 
 # Clean chroot
-mock -r solus-x86_64 --clean
+mock -r synthex-x86_64 --clean
 ```
 
 ### 2.4 Mock Configuration Options
@@ -186,8 +186,8 @@ mock -r solus-x86_64 --clean
 --without=option    # Disable conditional build
 
 # Debugging failed builds:
-mock -r solus-x86_64 --rebuild package.src.rpm --no-cleanup-after
-mock -r solus-x86_64 --shell  # Then inspect /builddir/build/
+mock -r synthex-x86_64 --rebuild package.src.rpm --no-cleanup-after
+mock -r synthex-x86_64 --shell  # Then inspect /builddir/build/
 ```
 
 ---
@@ -207,31 +207,31 @@ sudo dnf5 install copr-cli
 copr-cli login
 
 # Create a new project
-copr-cli create solus-experimental \
+copr-cli create synthex-experimental \
     --chroot fedora-40-x86_64 \
-    --description "Experimental Solus packages" \
-    --instructions "sudo dnf5 copr enable @solus/solus-experimental" \
-    --unlisted-group solus
+    --description "Experimental Synthex packages" \
+    --instructions "sudo dnf5 copr enable @synthex/synthex-experimental" \
+    --unlisted-group synthex
 
-# Or for Solus-native builds, specify custom chroot
-copr-cli create solus-custom \
+# Or for Synthex-native builds, specify custom chroot
+copr-cli create synthex-custom \
     --chroot custom-1 \
-    --chroot-custom-1-name "solus-4-x86_64" \
-    --chroot-custom-1-baseurl "https://mirrors.getsol.us/repo/4/x86_64/" \
-    --chroot-custom-1-repos "https://mirrors.getsol.us/repo/4/x86_64/updates/"
+    --chroot-custom-1-name "synthex-4-x86_64" \
+    --chroot-custom-1-baseurl "https://mirrors.getsynthex.org/repo/4/x86_64/" \
+    --chroot-custom-1-repos "https://mirrors.getsynthex.org/repo/4/x86_64/updates/"
 ```
 
 ### 3.2 Building with Copr
 
 ```bash
 # Build from URL
-copr-cli build solus-experimental https://example.com/package-1.0.0.src.rpm
+copr-cli build synthex-experimental https://example.com/package-1.0.0.src.rpm
 
 # Build from local SRPM
-copr-cli build solus-experimental ~/rpmbuild/SRPMS/package-1.0.0-1.src.rpm
+copr-cli build synthex-experimental ~/rpmbuild/SRPMS/package-1.0.0-1.src.rpm
 
 # Build from spec (automatically downloads sources)
-copr-cli buildscm solus-experimental \
+copr-cli buildscm synthex-experimental \
     --clone-url https://github.com/user/package \
     --spec package.spec \
     --commit main
@@ -240,22 +240,22 @@ copr-cli buildscm solus-experimental \
 copr-cli watch-build <build-id>
 
 # List builds
-copr-cli list-builds solus-experimental
+copr-cli list-builds synthex-experimental
 ```
 
 ### 3.3 Using Copr Repository
 
 ```bash
 # Enable a Copr repo
-sudo dnf5 copr enable @solus/solus-experimental
+sudo dnf5 copr enable @synthex/synthex-experimental
 
 # Or manually:
-sudo tee /etc/yum.repos.d/copr-solus.repo <<EOF
-[copr-solus-experimental]
-name=Copr - Solus Experimental
-baseurl=https://download.copr.fedorainfracloud.org/results/@solus/solus-experimental/fedora-\$releasever-\$basearch/
+sudo tee /etc/yum.repos.d/copr-synthex.repo <<EOF
+[copr-synthex-experimental]
+name=Copr - Synthex Experimental
+baseurl=https://download.copr.fedorainfracloud.org/results/@synthex/synthex-experimental/fedora-\$releasever-\$basearch/
 gpgcheck=1
-gpgkey=https://download.copr.fedorainfracloud.org/results/@solus/solus-experimental/pubkey.gpg
+gpgkey=https://download.copr.fedorainfracloud.org/results/@synthex/synthex-experimental/pubkey.gpg
 enabled=1
 EOF
 
@@ -328,10 +328,10 @@ sudo dnf5 build package.spec
 # This automatically resolves BuildRequires and builds
 ```
 
-### 4.4 Building Solus Packages (from solus-dev)
+### 4.4 Building Synthex Packages (from synthex-dev)
 
 ```bash
-cd ~/solus-dev/packages
+cd ~/synthex-dev/packages
 
 # Build a single package
 make <package-name>
@@ -627,12 +627,12 @@ Runtime libraries for %{name}
 
 ```rpm
 %changelog
-* Mon Jun 23 2026 Developer Name <dev@getsol.us> - 1.2.3-1
+* Mon Jun 23 2026 Developer Name <dev@getsynthex.org> - 1.2.3-1
 - Update to 1.2.3
 - Security fixes for CVE-2024-XXXX
 
-* Thu May 15 2026 Developer Name <dev@getsol.us> - 1.2.2-1
-- Initial package for Solus
+* Thu May 15 2026 Developer Name <dev@getsynthex.org> - 1.2.2-1
+- Initial package for Synthex
 ```
 
 ### 5.5 Complete Minimal Spec
@@ -672,7 +672,7 @@ A simple hello world program demonstrating RPM packaging.
 %{_mandir}/man1/hello-world.1*
 
 %changelog
-* Mon Jun 23 2026 Developer <dev@getsol.us> - 1.0.0-1
+* Mon Jun 23 2026 Developer <dev@getsynthex.org> - 1.0.0-1
 - Initial package
 ```
 
@@ -728,7 +728,7 @@ quilt push
 Patch0:  fix-build.patch
 Patch1:  add-feature.patch
 Patch2:  fix-security.patch
-Patch3:  solus-defaults.patch
+Patch3:  synthex-defaults.patch
 
 # Apply in %prep
 %prep
@@ -755,7 +755,7 @@ Patch3:  solus-defaults.patch
   - `feature-*` — New features
   - `security-*` — Security fixes
   - `backport-*` — Backported upstream fixes
-  - `solus-*` — Solus-specific changes
+  - `synthex-*` — Synthex-specific changes
 - **Document patches** with commit messages in the patch header
 - **Upstream first** — send patches upstream whenever possible
 - **Regenerate on version bumps** — patches may need updating
@@ -764,14 +764,14 @@ Patch3:  solus-defaults.patch
 ### 6.5 Patch Header Format
 
 ```diff
-From: Developer Name <dev@getsol.us>
+From: Developer Name <dev@getsynthex.org>
 Date: Mon, 23 Jun 2026 12:00:00 -0400
 Subject: [PATCH] Short description of the patch
 
 Longer description explaining why this patch is needed,
 what it changes, and any side effects.
 
-Signed-off-by: Developer Name <dev@getsol.us>
+Signed-off-by: Developer Name <dev@getsynthex.org>
 
 ---
  src/main.c | 5 +++++
@@ -957,7 +957,7 @@ Requires:   libfoo%{?_isa} >= 1.0
 
 ```bash
 # Using mock for different architecture
-mock -r solus-aarch64 --rebuild package.src.rpm
+mock -r synthex-aarch64 --rebuild package.src.rpm
 
 # For cross-compilation environment
 sudo dnf5 install qemu-user-static qemu-user-binfmt
@@ -974,7 +974,7 @@ sudo dnf5 install qemu-user-static qemu-user-binfmt
 # Generate a signing key (if you don't have one)
 gpg --gen-key
 # Real name: Developer Name
-# Email: dev@getsol.us
+# Email: dev@getsynthex.org
 # Type: RSA (4096 bits)
 # Expiration: 2y (recommended)
 
@@ -989,7 +989,7 @@ gpg --list-secret-keys
 # Configure RPM macros for signing
 cat >> ~/.rpmmacros <<EOF
 %_signature gpg
-%_gpg_name Developer Name <dev@getsol.us>
+%_gpg_name Developer Name <dev@getsynthex.org>
 %_gpgbin /usr/bin/gpg
 %_gpg_path ~/.gnupg
 EOF
@@ -1052,7 +1052,7 @@ expect eof
 
 ### 10.1 Before Submitting
 
-Checklist before contributing a package to Solus:
+Checklist before contributing a package to Synthex:
 
 ```
 ☐ Package builds successfully
@@ -1061,7 +1061,7 @@ Checklist before contributing a package to Solus:
 ☐ Package is properly licensed (FOSS-compatible)
 ☐ No bundled libraries without reason
 ☐ %check tests pass (if applicable)
-☐ Spec file follows Solus conventions
+☐ Spec file follows Synthex conventions
 ☐ Files are properly split into subpackages
 ☐ Changelog entry is present
 ☐ Desktop file exists (for GUI apps)
@@ -1069,7 +1069,7 @@ Checklist before contributing a package to Solus:
 ☐ Systemd service file exists (if daemon)
 ```
 
-### 10.2 Solus-Specific Requirements
+### 10.2 Synthex-Specific Requirements
 
 ```bash
 # Desktop file validation
@@ -1091,7 +1091,7 @@ rpm -q --filesbypkg -qp package.rpm | grep -E '\.(so|a)$' | head
 2. **Add your package** in the correct directory (`packages/<first-letter>/<name>/`)
 3. **Include all files:** spec, sources, patches
 4. **Commit** with descriptive message
-5. **Create PR** against solus-project/packages
+5. **Create PR** against synthex-project/packages
 
 See [Contributing Guide](contributing.md) for detailed PR workflow.
 
@@ -1099,12 +1099,12 @@ See [Contributing Guide](contributing.md) for detailed PR workflow.
 
 What reviewers will check:
 
-1. **Spec correctness** — follows Solus conventions
+1. **Spec correctness** — follows Synthex conventions
 2. **Build reproducibility** — builds consistently in clean chroot
 3. **Dependency completeness** — nothing missing, nothing extra
 4. **License compliance** — proper licensing metadata
 5. **File placement** — FHS compliance
-6. **Integration** — works with Solus desktop/tools
+6. **Integration** — works with Synthex desktop/tools
 
 ### 10.5 Common Review Feedback
 
@@ -1126,7 +1126,7 @@ What reviewers will check:
 ```bash
 # Build
 rpmbuild -ba package.spec                    # Full build
-mock -r solus-x86_64 --rebuild package.src.rpm  # Clean build
+mock -r synthex-x86_64 --rebuild package.src.rpm  # Clean build
 
 # Query
 rpm -qip package.rpm                         # Package info

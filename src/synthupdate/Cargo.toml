@@ -1,0 +1,14 @@
+[package]
+name = "synthupdate"
+version = "0.1.0"
+edition = "2021"
+description = "SynthOS synthupdate"
+
+[dependencies]
+anyhow = { workspace = true }
+clap = { workspace = true, features = ["derive"] }
+serde = { workspace = true, features = ["derive"] }
+serde_json = { workspace = true }
+tokio = { workspace = true, features = ["full"] }
+tracing = { workspace = true }
+chrono = { workspace = true }

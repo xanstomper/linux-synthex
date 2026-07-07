@@ -1,4 +1,4 @@
-# Solus Linux RPM Spec — cosmic-screenshot
+# SynthOS RPM Spec — cosmic-screenshot
 # COSMIC screenshot tool (Rust/Iced)
 # Origin: Pop!_OS (System76)
 
@@ -45,5 +45,5 @@ install -D -m 0755 target/release/cosmic-screenshot %{buildroot}%{_bindir}/cosmi
 %{_bindir}/cosmic-screenshot
 
 %changelog
-* Mon Jul 07 2026 Solus Rust Team <rust@solus-project.org> - %{cosmicscreenshot_version}-1
-- Initial Solus package — COSMIC screenshot tool
+* Mon Jul 07 2026 Synthex Rust Team <rust@synthex-project.org> - %{cosmicscreenshot_version}-1
+- Initial Synthex package — COSMIC screenshot tool

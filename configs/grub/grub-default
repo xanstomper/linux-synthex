@@ -1,7 +1,7 @@
-# /etc/default/grub — Solus GRUB defaults
+# /etc/default/grub — Synthex GRUB defaults
 
 GRUB_TIMEOUT=5
-GRUB_DISTRIBUTOR="Solus Linux"
+GRUB_DISTRIBUTOR="Synthex Linux"
 GRUB_DEFAULT=saved
 GRUB_DISABLE_SUBMENU=true
 GRUB_TERMINAL_OUTPUT="gfxterm"
@@ -27,10 +27,10 @@ GRUB_VIDEO_BACKEND=modetest
 GRUB_FONT=/usr/share/grub/fonts/inter-regular-16.pf2
 
 # Theme
-GRUB_THEME="/usr/share/grub/themes/solus/theme.txt"
+GRUB_THEME="/usr/share/grub/themes/synthex/theme.txt"
 
 # Background
-GRUB_BACKGROUND="/usr/share/grub/themes/solus/background.png"
+GRUB_BACKGROUND="/usr/share/grub/themes/synthex/background.png"
 
 # Hidden menu (show for 3 seconds on boot)
 GRUB_HIDDEN_TIMEOUT=0

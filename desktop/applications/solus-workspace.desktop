@@ -1,9 +1,0 @@
-[Desktop Entry]
-Type=Application
-Name=Solus Workspace Switcher
-Comment=Switch between Gaming/Dev/Creator/Battery modes
-Exec=solus-workspace
-Icon=solus-workspace
-Categories=Applications;System;
-Terminal=true
-StartupNotify=true

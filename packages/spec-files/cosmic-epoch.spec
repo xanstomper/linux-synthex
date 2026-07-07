@@ -1,4 +1,4 @@
-# Solus Linux RPM Spec — cosmic-epoch
+# SynthOS RPM Spec — cosmic-epoch
 # COSMIC greeter/login manager (Rust/Iced)
 # Origin: Pop!_OS (System76)
 
@@ -55,5 +55,5 @@ EOF
 /etc/pam.d/cosmic-epoch
 
 %changelog
-* Mon Jul 07 2026 Solus Rust Team <rust@solus-project.org> - %{cosmicepoch_version}-1
-- Initial Solus package — COSMIC epoch greeter
+* Mon Jul 07 2026 Synthex Rust Team <rust@synthex-project.org> - %{cosmicepoch_version}-1
+- Initial Synthex package — COSMIC epoch greeter
