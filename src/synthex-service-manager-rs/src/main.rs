@@ -57,7 +57,7 @@ struct ServiceSummary {
     total: usize,
     running: usize,
     failed: usize,
-    solus_services: Vec<ServiceStatus>,
+    synthex_services: Vec<ServiceStatus>,
     system_state: String,
 }
 
@@ -97,7 +97,7 @@ fn get_service_status(name: &str) -> ServiceStatus {
     }
 }
 
-fn list_solus(json: bool) -> String {
+fn list_synthex(json: bool) -> String {
     let mut services = Vec::new();
     for (name, desc, _) in SYNTHEX_SERVICES {
         let mut st = get_service_status(name);
@@ -117,7 +117,7 @@ fn list_solus(json: bool) -> String {
 }
 
 fn list_services(filter: &str, json: bool) -> String {
-    if filter == "synthex" { return list_solus(json); }
+    if filter == "synthex" { return list_synthex(json); }
     let args: &[&str] = match filter {
         "running" => &["list-units", "--type=service", "--state=running", "--no-pager", "--no-legend"],
         "failed" => &["--failed", "--no-pager", "--no-legend"],
@@ -159,15 +159,15 @@ fn get_summary() -> ServiceSummary {
     let nr = running.lines().filter(|l| !l.trim().is_empty()).count();
     let failed = systemctl(&["--failed", "--no-pager", "--no-legend"]);
     let nf = failed.lines().filter(|l| !l.trim().is_empty()).count();
-    let mut solus_services = Vec::new();
+    let mut synthex_services = Vec::new();
     for (name, desc, _) in SYNTHEX_SERVICES {
         let mut st = get_service_status(name);
         st.description = desc.to_string();
-        solus_services.push(st);
+        synthex_services.push(st);
     }
     ServiceSummary {
         total, running: nr, failed: nf,
-        solus_services,
+        synthex_services,
         system_state: systemctl(&["is-system-running"]).trim().to_string(),
     }
 }
@@ -216,7 +216,7 @@ fn main() -> Result<()> {
             if json { println!("{out}"); } else { print!("{out}"); }
         }
         Commands::Synthex => {
-            let out = list_solus(json);
+            let out = list_synthex(json);
             if json { println!("{out}"); } else { print!("{out}"); }
         }
         Commands::Summary => {
@@ -232,7 +232,7 @@ fn main() -> Result<()> {
                 println!("    System:  {}", s.system_state);
                 println!("");
                 println!("  Synthex Services:");
-                for svc in &s.solus_services {
+                for svc in &s.synthex_services {
                     let icon = if svc.active { "[OK]" } else if svc.enabled { "[IDLE]" } else { "[OFF]" };
                     println!("    {icon} {:<35} {}", svc.name, svc.state);
                 }
@@ -242,15 +242,15 @@ fn main() -> Result<()> {
             let s = get_summary();
             let total = s.total.max(1);
             let running_pct = (s.running as f64 / total as f64 * 100.0) as u32;
-            let mut solus_running = 0;
-            for svc in &s.solus_services { if svc.active { solus_running += 1; } }
-            let solus_pct = if !s.solus_services.is_empty() {
-                (solus_running as f64 / s.solus_services.len() as f64 * 100.0) as u32
+            let mut synthex_running = 0;
+            for svc in &s.synthex_services { if svc.active { synthex_running += 1; } }
+            let synthex_pct = if !s.synthex_services.is_empty() {
+                (synthex_running as f64 / s.synthex_services.len() as f64 * 100.0) as u32
             } else { 0 };
             let score = if s.failed == 0 {
-                (running_pct + solus_pct) / 2
+                (running_pct + synthex_pct) / 2
             } else {
-                (running_pct + solus_pct).saturating_sub((s.failed as u32) * 10)
+                (running_pct + synthex_pct).saturating_sub((s.failed as u32) * 10)
             };
             if json {
                 use std::collections::HashMap;
@@ -270,7 +270,7 @@ fn main() -> Result<()> {
                 println!("  Service Health: {}/100 - {grade}", score);
                 println!("    Running:    {} ({running_pct}%)", s.running);
                 println!("    Failed:     {}", s.failed);
-                println!("    Synthex:      {solus_running}/{} ({solus_pct}%)", s.solus_services.len());
+                println!("    Synthex:      {synthex_running}/{} ({synthex_pct}%)", s.synthex_services.len());
                 if s.system_state != "running" {
                     println!("    System:     {} - not fully running!", s.system_state);
                 }

@@ -2,7 +2,7 @@
 """dnf-synthex-protect — DNF5 plugin: block removal of protected packages,
 auto-snapshot before system updates, and verify dependencies.
 
-Install to /usr/lib/dnf5/plugins/dnf_solus_protect.py and enable in
+Install to /usr/lib/dnf5/plugins/dnf_synthex_protect.py and enable in
 /etc/dnf/dnf5-plugins.conf or via the dnf5 plugins dir.
 """
 import os

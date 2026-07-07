@@ -201,8 +201,8 @@ fn verify(package: Option<&str>) -> Result<()> {
 }
 
 fn list_categories(category: Option<&str>) -> Result<()> {
-    let solus_repo = "/etc/yum.repos.d/synthex.repo";
-    let _repo_content = std::fs::read_to_string(solus_repo).unwrap_or_default();
+    let synthex_repo = "/etc/yum.repos.d/synthex.repo";
+    let _repo_content = std::fs::read_to_string(synthex_repo).unwrap_or_default();
 
     println!("=== Synthex Package Categories ===");
     println!();
@@ -234,7 +234,7 @@ fn list_categories(category: Option<&str>) -> Result<()> {
     Ok(())
 }
 
-fn list_solus_packages(query: Option<&str>, all: bool) -> Result<()> {
+fn list_synthex_packages(query: Option<&str>, all: bool) -> Result<()> {
     let repo_flag = "--repo=synthex";
 
     if all {
@@ -269,6 +269,6 @@ fn main() -> Result<()> {
         Cli::Refresh => refresh(),
         Cli::Verify { package } => verify(package.as_deref()),
         Cli::Categories { category } => list_categories(category.as_deref()),
-        Cli::Synthex { query, all } => list_solus_packages(query.as_deref(), all),
+        Cli::Synthex { query, all } => list_synthex_packages(query.as_deref(), all),
     }
 }

@@ -90,7 +90,7 @@ Rectangle {
                             { label: "Profile", value: selectedProfile },
                             { label: "Theme", value: selectedTheme },
                             { label: "Bundles", value: selectedBundles.length > 0 ? selectedBundles.join(', ') : 'None' },
-selectedApps.length > 0 ? selectedApps.join(', ') : 'None' },
+                            { label: "Apps", value: selectedApps.length > 0 ? selectedApps.join(', ') : 'None' },
                             { label: "Status", value: setupComplete ? 'Complete' : 'Configuring...' }
                         ]
 

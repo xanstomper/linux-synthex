@@ -29,7 +29,7 @@ LOADER
     echo "✅ loader.conf written"
 }
 
-generate_solus_entry() {
+generate_synthex_entry() {
     local kernel_version="$1"
     local entry_name="synthex-${kernel_version}.conf"
     
@@ -117,7 +117,7 @@ main() {
     latest_kernel=$(ls -1 /boot/vmlinuz-* 2>/dev/null | sort -V | tail -1)
     if [ -n "$latest_kernel" ]; then
         version="${latest_kernel#/boot/vmlinuz-}"
-        generate_solus_entry "$version"
+        generate_synthex_entry "$version"
         generate_recovery_entry "$version"
         echo "✅ Created entries for kernel: $version"
     else
@@ -148,7 +148,7 @@ case "${1:-}" in
         latest_kernel=$(ls -1 /boot/vmlinuz-* 2>/dev/null | sort -V | tail -1)
         if [ -n "$latest_kernel" ]; then
             version="${latest_kernel#/boot/vmlinuz-}"
-            generate_solus_entry "$version"
+            generate_synthex_entry "$version"
             generate_recovery_entry "$version"
             echo "✅ Updated entries for kernel: $version"
         fi

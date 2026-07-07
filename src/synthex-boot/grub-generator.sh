@@ -112,9 +112,9 @@ done
 LINUX
 chmod +x "${GRUB_CONFIG_DIR}/10_linux"
 
-# ─── 30_solus — Synthex-specific entries ────────────────────────────
+# ─── 30_synthex — Synthex-specific entries ────────────────────────────
 
-cat > "${GRUB_CONFIG_DIR}/30_solus" << 'SYNTHEX'
+cat > "${GRUB_CONFIG_DIR}/30_synthex" << 'SYNTHEX'
 #!/bin/sh
 set -e
 
@@ -191,7 +191,7 @@ if [ -f /boot/memtest86+/memtest.bin ]; then
     echo "}"
 fi
 SYNTHEX
-chmod +x "${GRUB_CONFIG_DIR}/30_solus"
+chmod +x "${GRUB_CONFIG_DIR}/30_synthex"
 
 # ─── 40_custom — User custom entries ──────────────────────────────
 

@@ -271,7 +271,7 @@ feature branches ──► rawhide
 | GitHub | Code, issues, discussions | Now |
 | Discord | Community chat | Alpha |
 | Matrix | Open chat | Alpha |
-| Reddit r/linuxsolus | Community | Beta |
+| Reddit r/synthex | Community | Beta |
 | YouTube | Tutorials, showcases | Beta |
 | Twitter/X | Announcements | Alpha |
 | Mastodon | Fediverse presence | Alpha |

@@ -382,7 +382,7 @@ Each section contains control items with the following format:
     Pass/Fail: ___/___
 
 [ ] SE-05: File contexts for Synthex binaries are correct
-    Expected: solus_software_center_exec_t, etc.
+    Expected: synthex_software_center_exec_t, etc.
     Command: ls -Z /usr/bin/synthex-*
     Result: ________________
     Pass/Fail: ___/___
@@ -820,7 +820,7 @@ Each section contains control items with the following format:
 
 ```
 [ ] SW-01: Software Center runs with SELinux restrictions
-    Expected: solus_software_center_t context
+    Expected: synthex_software_center_t context
     Command: ps -Z -C synthex-software-center 2>/dev/null | awk '{print $1}'
     Result: ________________
     Pass/Fail: ___/___

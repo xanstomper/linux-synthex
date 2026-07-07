@@ -662,7 +662,7 @@ level: critical
 
 ```
 [index=linux sourcetype=audit]
-| search "solus_kernel_module" OR "solus_privileged_exec"
+| search "synthex_kernel_module" OR "synthex_privileged_exec"
 | stats count by host, auid, comm, key
 | where count > 10
 ```

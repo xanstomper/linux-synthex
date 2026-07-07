@@ -166,9 +166,9 @@ This file defines what security events are logged. Key monitoring areas:
 |------------|------------------|----------|
 | `solus_kernel_module` | Module load/unload | Rootkit detection |
 | `solus_sysctl` | Kernel parameter changes | Configuration tampering |
-| `solus_sudo` | Privilege escalation | Intrusion detection |
+| `synthex_sudo` | Privilege escalation | Intrusion detection |
 | `solus_file_perm` | Permission changes | Data integrity |
-| `solus_network_config` | Network configuration | Exfiltration |
+| `synthex_network_config` | Network configuration | Exfiltration |
 | `solus_time_change` | Clock modification | Log manipulation |
 | `solus_package_mgmt` | Package operations | Supply chain attacks |
 

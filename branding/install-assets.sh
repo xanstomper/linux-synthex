@@ -69,10 +69,10 @@ echo "Installing KWin scripts..."
 cp -r "$SCRIPT_DIR"/kwin-scripts/* /usr/share/kwin/scripts/ 2>/dev/null || true
 echo "  done"
 
-# KCM → /usr/share/kcm_solus_profiles/
+# KCM → /usr/share/kcm_synthex_profiles/
 echo "Installing KCM module..."
-mkdir -p /usr/share/kcm_solus_profiles
-cp "$SCRIPT_DIR"/kcm-synthex-profiles/main.qml /usr/share/kcm_solus_profiles/ 2>/dev/null || true
+mkdir -p /usr/share/kcm_synthex_profiles
+cp "$SCRIPT_DIR"/kcm-synthex-profiles/main.qml /usr/share/kcm_synthex_profiles/ 2>/dev/null || true
 echo "  done"
 
 # GTK Themes

@@ -33,7 +33,7 @@ ApplicationWindow {
                         Text { anchors.centerIn: parent; text: "S"; font.pixelSize: 24; font.bold: true; color: "#0B0F1A" }
                     }
                     ColumnLayout { spacing: 2
-                        Text { text: "SynthOS"; font.pixelSize: 24; font.bold: true; color: "#FFFFFF" }
+                        Text { text: "Synthex"; font.pixelSize: 24; font.bold: true; color: "#FFFFFF" }
                         Text { text: "Illuminate Your Desktop"; font.pixelSize: 12; color: "#9BBD5C" }
                     }
                 }
@@ -108,7 +108,7 @@ ApplicationWindow {
                 }
 
                 // Page 3: App Picker (37 popular apps)
-                AppPicker {
+                Pages.AppPicker {
                     id: appPicker
                     anchors.fill: parent
                     anchors.margins: 0
@@ -123,7 +123,7 @@ ApplicationWindow {
                     }
                 }
                 // Page 3: Finish (uses dedicated Finish page)
-                FinishPage {
+                Pages.Finish {
                     id: finishPageItem
                     anchors.fill: parent
                     anchors.margins: 0

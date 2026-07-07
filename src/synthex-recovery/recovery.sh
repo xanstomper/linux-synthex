@@ -188,7 +188,7 @@ detect_root_device() {
     root_dev="$(findmnt -n -o SOURCE / 2>/dev/null || echo "")"
     if [[ -z "${root_dev}" ]]; then
         # Try /dev/disk/by-label
-        for label in synthex-root solus_root Synthex ROOT; do
+        for label in synthex-root synthex_root Synthex ROOT; do
             if [[ -L "/dev/disk/by-label/${label}" ]]; then
                 root_dev="$(readlink -f "/dev/disk/by-label/${label}")"
                 break
