@@ -100,14 +100,14 @@ ApplicationWindow {
                         }
                         Button {
                             text: "Next →"; Layout.alignment: Qt.AlignHCenter; Layout.topMargin: 12
-                            onClicked: oobe.currentStep = 3
+                            onClicked: oobe.currentStep = 2
                             contentItem: Text { text: parent.text; color: "#0B0F1A"; font.pixelSize: 14; font.bold: true }
                             background: Rectangle { color: "#9BBD5C"; radius: 8; implicitWidth: 160; implicitHeight: 40 }
                         }
                     }
                 }
 
-                // Page 3: App Picker (37 popular apps)
+                // Page 2: App Picker (37 popular apps)
                 Pages.AppPicker {
                     id: appPicker
                     anchors.fill: parent

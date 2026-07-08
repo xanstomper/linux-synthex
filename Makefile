@@ -15,7 +15,8 @@ build: build-rust build-qml build-agent
 	@echo "All components built successfully"
 
 build-rust:
-	cd src && cargo build --release
+	@echo "Building Rust workspace (root Cargo.toml)..."
+	cargo build --release
 	@echo "Rust tools built successfully"
 
 build-qml:
@@ -54,6 +55,7 @@ iso: packages
 	@VERSION=$(VERSION) ./src/synthex-installer/build-synthex-iso.sh --edition $(EDITION)
 
 clean:
-	cd src && cargo clean
+	@echo "Cleaning build artifacts..."
+	cargo clean
 	rm -rf build/iso-out build/rpms
 	@echo "Clean complete"
