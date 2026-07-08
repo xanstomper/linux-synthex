@@ -9,14 +9,13 @@ ExecStart=/usr/libexec/synthex/synthex-auto-tune
 StandardOutput=journal
 StandardError=journal
 TimeoutStartSec=120
-ProtectSystem=full
+# Auto-tune writes sysctl, modprobe, pipewire, udev rules, env.d — needs access
 PrivateTmp=yes
 NoNewPrivileges=yes
 SystemCallArchitectures=native
-ProtectKernelTunables=yes
 ProtectControlGroups=yes
 MemoryMax=128M
+CPUQuota=30%
+
 [Install]
 WantedBy=graphical-session.target
-
-CPUQuota=30%

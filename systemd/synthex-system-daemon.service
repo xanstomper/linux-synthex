@@ -22,7 +22,6 @@ NoNewPrivileges=yes
 PrivateTmp=yes
 ProtectSystem=full
 SystemCallArchitectures=native
-ProtectKernelTunables=yes
 ProtectControlGroups=yes
 
 [Install]

@@ -18,6 +18,7 @@ ProtectKernelTunables=yes
 ProtectKernelModules=yes
 ProtectControlGroups=yes
 MemoryMax=256M
+
 [Install]
 WantedBy=multi-user.target
 

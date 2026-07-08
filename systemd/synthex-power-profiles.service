@@ -14,13 +14,12 @@ RemainAfterExit=yes
 MemoryMax=32M
 CPUQuota=10%
 
-# Security — needs CPU governor writes
+# Security — needs CPU governor writes + sysfs access
 ProtectSystem=full
 ProtectHome=read-only
 PrivateTmp=yes
 NoNewPrivileges=yes
 SystemCallArchitectures=native
-ProtectKernelTunables=yes
 ProtectControlGroups=yes
 CapabilityBoundingSet=CAP_SYS_ADMIN
 

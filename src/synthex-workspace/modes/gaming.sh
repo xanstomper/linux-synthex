@@ -5,7 +5,7 @@
 # Applies maximum performance settings for gaming:
 #   - CPU governor: performance
 #   - GPU: high performance level
-#   - Compositor: suspended (via qdbus or killall plasmashell)
+#   - Compositor: suspended (via qdbus)
 #   - Non-essential services: stopped
 #   - Gamemode: enabled via gamemoderun
 #   - Tuned: throughput-performance
