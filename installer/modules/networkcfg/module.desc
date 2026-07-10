@@ -1,0 +1,5 @@
+---
+type:      "job"
+name:      "networkcfg"
+interface: "qtplugin"
+load:      "libcalamares_networkcfg.so"

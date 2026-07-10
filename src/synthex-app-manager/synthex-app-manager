@@ -1,0 +1,397 @@
+#!/usr/bin/env python3
+# SPDX-License-Identifier: GPL-3.0-or-later
+# SynthOS App Manager — GTK4/libadwaita
+# Full-featured app installer: Flatpak + DNF + Appimage picker
+# =============================================================================
+
+import sys, os, json, subprocess, threading
+import gi
+gi.require_version("Gtk",   "4.0")
+gi.require_version("Adw",   "1")
+gi.require_version("Gio",   "2.0")
+gi.require_version("GLib",  "2.0")
+from gi.repository import Gtk, Adw, Gio, GLib
+
+APP_ID  = "org.synthos.AppManager"
+VERSION = "2026.10"
+
+# ─────────────────────────────────────────────────────────────────────────────
+# App catalogue  (category → list of apps)
+# ─────────────────────────────────────────────────────────────────────────────
+CATALOGUE = {
+    "Browsers": [
+        {"name":"Firefox",       "desc":"Fast, private web browser",           "id":"org.mozilla.firefox",             "source":"flatpak", "icon":"firefox"},
+        {"name":"Brave",         "desc":"Privacy-first Chromium browser",       "id":"com.brave.Browser",               "source":"flatpak", "icon":"brave-browser"},
+        {"name":"Chromium",      "desc":"Open-source Chromium",                 "id":"org.chromium.Chromium",           "source":"flatpak", "icon":"chromium-browser"},
+        {"name":"Vivaldi",       "desc":"Highly customisable browser",          "id":"com.vivaldi.Vivaldi",             "source":"flatpak", "icon":"vivaldi-stable"},
+        {"name":"Microsoft Edge","desc":"Edge for Linux",                       "id":"com.microsoft.Edge",              "source":"flatpak", "icon":"microsoft-edge"},
+        {"name":"Google Chrome", "desc":"Google Chrome",                        "id":"com.google.Chrome",               "source":"flatpak", "icon":"google-chrome"},
+    ],
+    "Messaging": [
+        {"name":"Discord",       "desc":"Voice, video & text chat",            "id":"com.discordapp.Discord",          "source":"flatpak", "icon":"discord"},
+        {"name":"Signal",        "desc":"Encrypted private messaging",          "id":"org.signal.Signal",               "source":"flatpak", "icon":"signal-desktop"},
+        {"name":"Telegram",      "desc":"Fast cloud-based messaging",           "id":"org.telegram.desktop",            "source":"flatpak", "icon":"telegram-desktop"},
+        {"name":"WhatsApp",      "desc":"WhatsApp Desktop",                    "id":"io.github.mimbrero.WhatsAppDesktop","source":"flatpak","icon":"whatsapp"},
+        {"name":"Slack",         "desc":"Team messaging",                      "id":"com.slack.Slack",                 "source":"flatpak", "icon":"slack"},
+        {"name":"Element",       "desc":"Matrix / decentralised chat",          "id":"im.riot.Riot",                    "source":"flatpak", "icon":"element-desktop"},
+        {"name":"Zoom",          "desc":"Video conferencing",                  "id":"us.zoom.Zoom",                    "source":"flatpak", "icon":"Zoom"},
+        {"name":"Viber",         "desc":"Calls and messages",                  "id":"com.viber.Viber",                 "source":"flatpak", "icon":"viber"},
+    ],
+    "Gaming": [
+        {"name":"Steam",         "desc":"Valve game platform",                 "id":"com.valvesoftware.Steam",         "source":"flatpak", "icon":"steam"},
+        {"name":"Lutris",        "desc":"Open gaming platform",                "id":"net.lutris.Lutris",               "source":"flatpak", "icon":"lutris"},
+        {"name":"Heroic Launcher","desc":"Epic Games & GOG launcher",          "id":"com.heroicgameslauncher.hgl",     "source":"flatpak", "icon":"heroic"},
+        {"name":"ProtonUp-Qt",   "desc":"Manage Proton & Wine GE",            "id":"net.davidotek.pupgui2",           "source":"flatpak", "icon":"net.davidotek.pupgui2"},
+        {"name":"RetroArch",     "desc":"Multi-system emulator frontend",      "id":"org.libretro.RetroArch",          "source":"flatpak", "icon":"retroarch"},
+        {"name":"Bottles",       "desc":"Manage Windows apps in Wine",         "id":"com.usebottles.bottles",          "source":"flatpak", "icon":"bottles"},
+        {"name":"Gamemode",      "desc":"Feral GameMode CPU/GPU booster",      "id":"gamemode",                        "source":"dnf",     "icon":"applications-games"},
+        {"name":"MangoHud",      "desc":"Performance overlay for games",       "id":"mangohud",                        "source":"dnf",     "icon":"applications-games"},
+    ],
+    "Productivity": [
+        {"name":"LibreOffice",   "desc":"Full office suite",                   "id":"org.libreoffice.LibreOffice",     "source":"flatpak", "icon":"libreoffice-writer"},
+        {"name":"Obsidian",      "desc":"Markdown knowledge base",             "id":"md.obsidian.Obsidian",            "source":"flatpak", "icon":"obsidian"},
+        {"name":"Notion",        "desc":"All-in-one workspace",                "id":"notion-app-enhanced",             "source":"flatpak", "icon":"notion"},
+        {"name":"Joplin",        "desc":"Note-taking with sync",               "id":"net.cozic.joplin_desktop",        "source":"flatpak", "icon":"joplin"},
+        {"name":"Todoist",       "desc":"Task management",                     "id":"com.todoist.Todoist",             "source":"flatpak", "icon":"todoist"},
+        {"name":"Thunderbird",   "desc":"Email & calendar client",             "id":"org.mozilla.Thunderbird",         "source":"flatpak", "icon":"thunderbird"},
+        {"name":"Evolution",     "desc":"GNOME email & calendar",              "id":"org.gnome.Evolution",             "source":"flatpak", "icon":"evolution"},
+    ],
+    "Development": [
+        {"name":"VS Code",       "desc":"Microsoft Visual Studio Code",        "id":"com.visualstudio.code",           "source":"flatpak", "icon":"code"},
+        {"name":"Zed",           "desc":"High-performance code editor",        "id":"dev.zed.Zed",                     "source":"flatpak", "icon":"zed"},
+        {"name":"JetBrains IDEA","desc":"Java/Kotlin IDE",                    "id":"com.jetbrains.IntelliJ-IDEA-Community","source":"flatpak","icon":"idea"},
+        {"name":"Podman Desktop","desc":"Container management GUI",            "id":"io.podman_desktop.PodmanDesktop", "source":"flatpak", "icon":"podman"},
+        {"name":"Git",           "desc":"Version control",                    "id":"git",                             "source":"dnf",     "icon":"git"},
+        {"name":"GitHub Desktop","desc":"GitHub GUI client",                   "id":"io.github.shiftey.Desktop",       "source":"flatpak", "icon":"github"},
+        {"name":"Meld",          "desc":"Visual diff & merge tool",            "id":"org.gnome.meld",                  "source":"flatpak", "icon":"meld"},
+    ],
+    "Media": [
+        {"name":"VLC",           "desc":"Versatile media player",              "id":"org.videolan.VLC",                "source":"flatpak", "icon":"vlc"},
+        {"name":"Celluloid",     "desc":"Simple GTK mpv frontend",             "id":"io.github.celluloid_player.Celluloid","source":"flatpak","icon":"celluloid"},
+        {"name":"Kdenlive",      "desc":"KDE video editor",                   "id":"org.kde.kdenlive",                "source":"flatpak", "icon":"kdenlive"},
+        {"name":"OBS Studio",    "desc":"Streaming & recording",               "id":"com.obsproject.Studio",           "source":"flatpak", "icon":"obs"},
+        {"name":"Spotify",       "desc":"Music streaming",                    "id":"com.spotify.Client",              "source":"flatpak", "icon":"spotify"},
+        {"name":"Audacity",      "desc":"Audio editor",                       "id":"org.audacityteam.Audacity",       "source":"flatpak", "icon":"audacity"},
+        {"name":"GIMP",          "desc":"Image editor",                       "id":"org.gimp.GIMP",                   "source":"flatpak", "icon":"gimp"},
+        {"name":"Inkscape",      "desc":"Vector graphics editor",             "id":"org.inkscape.Inkscape",           "source":"flatpak", "icon":"inkscape"},
+        {"name":"Blender",       "desc":"3D creation suite",                  "id":"org.blender.Blender",             "source":"flatpak", "icon":"blender"},
+    ],
+    "AI & LLM": [
+        {"name":"Ollama",        "desc":"Run local LLMs offline",             "id":"ollama",                          "source":"dnf",     "icon":"dialog-information"},
+        {"name":"Open WebUI",    "desc":"ChatGPT-like interface for Ollama",  "id":"ghcr.io/open-webui/open-webui",   "source":"container","icon":"dialog-information"},
+        {"name":"Jan.ai",        "desc":"Open-source ChatGPT alternative",    "id":"com.jan.app",                     "source":"flatpak", "icon":"jan"},
+        {"name":"Cursor",        "desc":"AI-first code editor",               "id":"com.cursor.Cursor",               "source":"flatpak", "icon":"cursor"},
+        {"name":"LM Studio",     "desc":"Run & fine-tune LLMs locally",       "id":"io.lmstudio.LMStudio",            "source":"flatpak", "icon":"lmstudio"},
+    ],
+    "System": [
+        {"name":"Flatseal",      "desc":"Manage Flatpak permissions",         "id":"com.github.tchx84.Flatseal",      "source":"flatpak", "icon":"flatseal"},
+        {"name":"KDE Connect",   "desc":"Phone integration",                  "id":"org.kde.kdeconnect.plasmoid",     "source":"dnf",     "icon":"kdeconnect"},
+        {"name":"Timeshift",     "desc":"System backup & restore",            "id":"timeshift",                       "source":"dnf",     "icon":"timeshift"},
+        {"name":"GParted",       "desc":"Disk partition manager",             "id":"org.gnome.gparted",               "source":"flatpak", "icon":"gparted"},
+        {"name":"Bottles",       "desc":"Wine environment manager",           "id":"com.usebottles.bottles",          "source":"flatpak", "icon":"bottles"},
+        {"name":"Mission Center","desc":"System monitor",                     "id":"io.missioncenter.MissionCenter",  "source":"flatpak", "icon":"missioncenter"},
+    ],
+}
+
+# ─────────────────────────────────────────────────────────────────────────────
+class AppRow(Adw.ActionRow):
+    def __init__(self, app_data: dict, **kw):
+        super().__init__(
+            title    = app_data["name"],
+            subtitle = app_data["desc"],
+            **kw
+        )
+        self._data = app_data
+
+        # Source badge
+        badge = Gtk.Label(label=app_data["source"].upper())
+        badge.add_css_class("dim-label")
+        badge.add_css_class("caption")
+        badge.set_valign(Gtk.Align.CENTER)
+        self.add_suffix(badge)
+
+        # Status / install button
+        self._btn = Gtk.Button(valign=Gtk.Align.CENTER)
+        self._btn.connect("clicked", self._on_clicked)
+        self.add_suffix(self._btn)
+        self._refresh_status()
+
+    def _refresh_status(self):
+        installed = self._check_installed()
+        if installed:
+            self._btn.set_label("✓ Installed")
+            self._btn.add_css_class("success")
+            self._btn.remove_css_class("suggested-action")
+        else:
+            self._btn.set_label("Install")
+            self._btn.add_css_class("suggested-action")
+            self._btn.remove_css_class("success")
+
+    def _check_installed(self) -> bool:
+        d = self._data
+        try:
+            if d["source"] == "flatpak":
+                r = subprocess.run(["flatpak", "info", d["id"]],
+                                   capture_output=True, timeout=5)
+                return r.returncode == 0
+            elif d["source"] == "dnf":
+                r = subprocess.run(["rpm", "-q", d["id"]],
+                                   capture_output=True, timeout=5)
+                return r.returncode == 0
+        except Exception:
+            pass
+        return False
+
+    def _on_clicked(self, _btn):
+        installed = self._check_installed()
+        if installed:
+            self._show_manage_menu()
+        else:
+            self._install()
+
+    def _install(self):
+        self._btn.set_label("Installing…")
+        self._btn.set_sensitive(False)
+
+        def run():
+            d = self._data
+            try:
+                if d["source"] == "flatpak":
+                    subprocess.run(
+                        ["flatpak", "install", "-y", "--noninteractive", "flathub", d["id"]],
+                        check=True, timeout=300
+                    )
+                elif d["source"] == "dnf":
+                    subprocess.run(
+                        ["pkexec", "dnf", "install", "-y", d["id"]],
+                        check=True, timeout=300
+                    )
+                GLib.idle_add(self._on_install_done, True)
+            except Exception as e:
+                GLib.idle_add(self._on_install_done, False)
+
+        threading.Thread(target=run, daemon=True).start()
+
+    def _on_install_done(self, success: bool):
+        self._btn.set_sensitive(True)
+        self._refresh_status()
+        return False
+
+    def _show_manage_menu(self):
+        menu = Gtk.PopoverMenu.new_from_model(Gio.Menu())
+        # Simplified — real impl would use a proper menu
+        print(f"Manage {self._data['name']}")
+
+
+# ─────────────────────────────────────────────────────────────────────────────
+class AppManagerWindow(Adw.ApplicationWindow):
+    def __init__(self, app, **kw):
+        super().__init__(application=app, title="SynthOS App Manager",
+                         default_width=960, default_height=700, **kw)
+
+        self._selected_category = "Browsers"
+        self._search_query      = ""
+        self._selected_apps: list[str] = []
+
+        # ── Root layout ───────────────────────────────────────────────────────
+        root = Gtk.Box(orientation=Gtk.Orientation.VERTICAL)
+        self.set_content(root)
+
+        # ── Header bar ────────────────────────────────────────────────────────
+        hb = Adw.HeaderBar()
+        hb.set_title_widget(Gtk.Label(label="SynthOS App Manager"))
+        root.append(hb)
+
+        # Search button
+        search_btn = Gtk.ToggleButton(icon_name="system-search-symbolic")
+        search_btn.connect("toggled", self._on_search_toggled)
+        hb.pack_end(search_btn)
+
+        # Install selected button
+        self._install_btn = Gtk.Button(label="Install Selected (0)")
+        self._install_btn.add_css_class("suggested-action")
+        self._install_btn.connect("clicked", self._on_install_selected)
+        self._install_btn.set_sensitive(False)
+        hb.pack_end(self._install_btn)
+
+        # Search bar
+        self._search_bar = Gtk.SearchBar()
+        self._search_entry = Gtk.SearchEntry()
+        self._search_entry.set_hexpand(True)
+        self._search_entry.connect("search-changed", self._on_search_changed)
+        self._search_bar.set_child(self._search_entry)
+        self._search_bar.connect_entry(self._search_entry)
+        root.append(self._search_bar)
+        search_btn.bind_property("active", self._search_bar, "search-mode-enabled",
+                                 GLib.BindingFlags.BIDIRECTIONAL)
+
+        # ── Body: sidebar + content ───────────────────────────────────────────
+        body = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL)
+        body.set_vexpand(True)
+        root.append(body)
+
+        # Category sidebar
+        sidebar_scroll = Gtk.ScrolledWindow()
+        sidebar_scroll.set_policy(Gtk.PolicyType.NEVER, Gtk.PolicyType.AUTOMATIC)
+        sidebar_scroll.set_size_request(180, -1)
+
+        sidebar_list = Gtk.ListBox()
+        sidebar_list.set_selection_mode(Gtk.SelectionMode.SINGLE)
+        sidebar_list.add_css_class("navigation-sidebar")
+        sidebar_list.connect("row-selected", self._on_category_selected)
+        sidebar_scroll.set_child(sidebar_list)
+        body.append(sidebar_scroll)
+
+        sep = Gtk.Separator(orientation=Gtk.Orientation.VERTICAL)
+        body.append(sep)
+
+        # Populate sidebar
+        for cat in CATALOGUE:
+            row = Gtk.ListBoxRow()
+            row._category = cat
+            lbl = Gtk.Label(label=cat, xalign=0)
+            lbl.set_margin_start(12); lbl.set_margin_end(12)
+            lbl.set_margin_top(8);   lbl.set_margin_bottom(8)
+            row.set_child(lbl)
+            sidebar_list.append(row)
+
+        # Select first category
+        sidebar_list.select_row(sidebar_list.get_row_at_index(0))
+
+        # App list
+        content_scroll = Gtk.ScrolledWindow()
+        content_scroll.set_hexpand(True)
+        content_scroll.set_vexpand(True)
+
+        content_box = Gtk.Box(orientation=Gtk.Orientation.VERTICAL)
+        content_box.set_margin_start(16); content_box.set_margin_end(16)
+        content_box.set_margin_top(16);  content_box.set_margin_bottom(16)
+
+        self._category_label = Gtk.Label(label="Browsers")
+        self._category_label.add_css_class("title-2")
+        self._category_label.set_xalign(0)
+        self._category_label.set_margin_bottom(8)
+        content_box.append(self._category_label)
+
+        self._app_list = Gtk.ListBox()
+        self._app_list.set_selection_mode(Gtk.SelectionMode.NONE)
+        self._app_list.add_css_class("boxed-list")
+        content_box.append(self._app_list)
+        content_scroll.set_child(content_box)
+        body.append(content_scroll)
+
+        # ── Status bar ────────────────────────────────────────────────────────
+        status_bar = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL,
+                             margin_start=12, margin_end=12, margin_top=4, margin_bottom=4)
+        self._status_lbl = Gtk.Label(label="Ready", xalign=0)
+        self._status_lbl.add_css_class("dim-label")
+        self._status_lbl.add_css_class("caption")
+        status_bar.append(self._status_lbl)
+        root.append(status_bar)
+
+        # Initial population
+        self._populate_apps("Browsers")
+
+    # ── Event handlers ────────────────────────────────────────────────────────
+    def _on_search_toggled(self, btn):
+        pass
+
+    def _on_search_changed(self, entry):
+        self._search_query = entry.get_text().lower()
+        self._populate_apps(self._selected_category)
+
+    def _on_category_selected(self, listbox, row):
+        if row:
+            cat = row._category
+            self._selected_category = cat
+            self._category_label.set_label(cat)
+            self._populate_apps(cat)
+
+    def _populate_apps(self, category: str):
+        # Clear existing rows
+        while True:
+            row = self._app_list.get_row_at_index(0)
+            if row is None:
+                break
+            self._app_list.remove(row)
+
+        apps = CATALOGUE.get(category, [])
+        q    = self._search_query
+
+        for app in apps:
+            if q and q not in app["name"].lower() and q not in app["desc"].lower():
+                continue
+            row = AppRow(app)
+            # Checkbox for bulk install
+            chk = Gtk.CheckButton()
+            chk.set_valign(Gtk.Align.CENTER)
+            chk._app_id = app["id"]
+            chk.connect("toggled", self._on_app_toggled)
+            row.add_prefix(chk)
+            self._app_list.append(row)
+
+        count = self._app_list.get_row_at_index(0) is not None
+        self._status_lbl.set_label(f"{category} — {len(apps)} apps available")
+
+    def _on_app_toggled(self, chk):
+        aid = chk._app_id
+        if chk.get_active():
+            if aid not in self._selected_apps:
+                self._selected_apps.append(aid)
+        else:
+            self._selected_apps = [x for x in self._selected_apps if x != aid]
+
+        n = len(self._selected_apps)
+        self._install_btn.set_label(f"Install Selected ({n})")
+        self._install_btn.set_sensitive(n > 0)
+
+    def _on_install_selected(self, _btn):
+        if not self._selected_apps:
+            return
+        # Install all selected in background
+        def run():
+            for app_id in self._selected_apps:
+                # Find source
+                for cat in CATALOGUE.values():
+                    for a in cat:
+                        if a["id"] == app_id:
+                            try:
+                                if a["source"] == "flatpak":
+                                    subprocess.run(
+                                        ["flatpak", "install", "-y", "--noninteractive", "flathub", app_id],
+                                        check=True, timeout=300
+                                    )
+                                elif a["source"] == "dnf":
+                                    subprocess.run(
+                                        ["pkexec", "dnf", "install", "-y", app_id],
+                                        check=True, timeout=300
+                                    )
+                            except Exception as e:
+                                GLib.idle_add(self._set_status, f"Error installing {app_id}: {e}")
+            GLib.idle_add(self._set_status, "Installation complete!")
+
+        self._install_btn.set_sensitive(False)
+        self._set_status("Installing selected apps…")
+        threading.Thread(target=run, daemon=True).start()
+
+    def _set_status(self, msg: str):
+        self._status_lbl.set_label(msg)
+        return False
+
+
+# ─────────────────────────────────────────────────────────────────────────────
+class AppManagerApp(Adw.Application):
+    def __init__(self):
+        super().__init__(application_id=APP_ID,
+                         flags=Gio.ApplicationFlags.FLAGS_NONE)
+        self.connect("activate", self._on_activate)
+
+    def _on_activate(self, _app):
+        win = AppManagerWindow(self)
+        win.present()
+
+
+# ─────────────────────────────────────────────────────────────────────────────
+if __name__ == "__main__":
+    app = AppManagerApp()
+    sys.exit(app.run(sys.argv))

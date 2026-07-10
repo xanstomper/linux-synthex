@@ -1,0 +1,5 @@
+---
+type:      "job"
+name:      "services-systemd"
+interface: "qtplugin"
+load:      "libcalamares_services-systemd.so"

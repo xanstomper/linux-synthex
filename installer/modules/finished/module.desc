@@ -1,0 +1,5 @@
+---
+type:      "view"
+name:      "finished"
+interface: "qtplugin"
+load:      "libcalamares_finished.so"

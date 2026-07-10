@@ -1,0 +1,10 @@
+[Desktop Entry]
+Name=SynthOS Konsole
+Comment=SynthOS Konsole profile - optimised for konsole workflow
+Icon=org.konsole.Konsole
+Type=X-Synthex-Profile
+X-KDE-PluginInfo-Name=synthex-konsole
+X-KDE-PluginInfo-Version=2026.10
+X-KDE-PluginInfo-Author=Synthex Team
+X-KDE-PluginInfo-Email=team@synthex-os.org
+X-KDE-PluginInfo-License=GPL-3.0-or-later

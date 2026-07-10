@@ -1,0 +1,5 @@
+---
+type:      "view"
+name:      "locale"
+interface: "qtplugin"
+load:      "libcalamares_locale.so"

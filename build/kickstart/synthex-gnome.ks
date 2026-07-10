@@ -32,7 +32,22 @@ services --disabled=initial-setup,initial-setup-graphical
 # PACKAGE SECTION
 # =============================================================================
 
+
+# ── Disk Partitioning ──────────────────────────────────────────────────────
+zerombr
+clearpart --all --initlabel
+autopart --type=btrfs --encrypted=false
+
 %packages --instLangs=en_US.UTF-8 --excludeWeakdeps --nocore
+
+# Core system
+synthex-core
+synthex-base
+
+# Plymouth
+plymouth
+plymouth-theme-synthex
+plymouth-plugin-script
 
 # ---- GNOME Desktop ----
 @gnome-desktop

@@ -1,0 +1,5 @@
+---
+type:      "view"
+name:      "partition"
+interface: "qtplugin"
+load:      "libcalamares_partition.so"

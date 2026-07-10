@@ -1,0 +1,13 @@
+[SddmGreeterTheme]
+Id=synthex
+Name=SynthOS
+Description=Official SynthOS login theme — dark navy, amber gold accents
+Author=SynthOS Team
+AuthorEmail=team@synthex-os.org
+License=GPL-3.0+
+Type=sddm-theme
+Version=2026.10
+Website=https://synthex-os.org
+ScreenShotPath=preview.svg
+MainScript=Main.qml
+ConfigFile=theme.conf

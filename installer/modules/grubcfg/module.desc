@@ -1,0 +1,5 @@
+---
+type:      "job"
+name:      "grubcfg"
+interface: "qtplugin"
+load:      "libcalamares_grubcfg.so"

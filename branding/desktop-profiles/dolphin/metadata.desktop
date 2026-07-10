@@ -1,0 +1,10 @@
+[Desktop Entry]
+Name=SynthOS Dolphin
+Comment=SynthOS Dolphin profile - optimised for dolphin workflow
+Icon=org.dolphin.Dolphin
+Type=X-Synthex-Profile
+X-KDE-PluginInfo-Name=synthex-dolphin
+X-KDE-PluginInfo-Version=2026.10
+X-KDE-PluginInfo-Author=Synthex Team
+X-KDE-PluginInfo-Email=team@synthex-os.org
+X-KDE-PluginInfo-License=GPL-3.0-or-later

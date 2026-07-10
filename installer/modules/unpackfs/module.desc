@@ -1,0 +1,5 @@
+---
+type:      "job"
+name:      "unpackfs"
+interface: "qtplugin"
+load:      "libcalamares_unpackfs.so"

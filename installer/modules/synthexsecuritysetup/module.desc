@@ -1,0 +1,6 @@
+---
+type:       "job"
+name:       "synthexsecuritysetup"
+interface:  "python"
+script:     "main.py"
+timeout:    120

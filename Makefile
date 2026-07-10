@@ -1,61 +1,111 @@
-# SynthOS Build System
-# Targets: build, iso, packages, clean
+# ============================================================
+# SynthOS Linux — Top-Level Makefile
+# ============================================================
+VERSION     ?= 2026.10
+CODENAME    ?= Ignition
+EDITION     ?= plasma
+OUTPUT_DIR  ?= build/out
 
-VERSION ?= 2026.10
-EDITION ?= plasma
+# Colour helpers
+GREEN  := \033[0;32m
+YELLOW := \033[0;33m
+BOLD   := \033[1m
+RESET  := \033[0m
 
-.PHONY: all build build-rust build-qml build-agent \
-	build-desktopd build-stored build-hwdaemon \
-	build-gpu-setupd build-control-center build-studio \
-	packages iso clean
+.PHONY: all help rust iso iso-all iso-plasma iso-hyprland iso-gnome iso-gaming iso-minimal \
+        ks-validate rpms clean clean-iso srctars release docs
 
-all: build-rust iso
+help:
+	@echo ""
+	@echo "  $(BOLD)SynthOS $(VERSION) — $(CODENAME)$(RESET)"
+	@echo ""
+	@echo "  Primary targets:"
+	@echo "    make iso            Build Plasma ISO (default edition)"
+	@echo "    make iso-all        Build all 5 editions in parallel"
+	@echo "    make iso EDITION=X  Build specific edition (plasma/hyprland/gnome/gaming/minimal)"
+	@echo "    make rust           Build Rust workspace (release)"
+	@echo "    make rpms           Build all RPM packages"
+	@echo "    make ks-validate    Validate all kickstart files"
+	@echo "    make release        Full release artifact set"
+	@echo "    make clean          Remove build artefacts"
+	@echo ""
 
-build: build-rust build-qml build-agent
-	@echo "All components built successfully"
+all: rust ks-validate iso
 
-build-rust:
-	@echo "Building Rust workspace (root Cargo.toml)..."
-	cargo build --release
-	@echo "Rust tools built successfully"
+# ── Rust workspace ────────────────────────────────────────────────────────────
+rust:
+	@echo -e "$(GREEN)[BUILD]$(RESET) Rust workspace..."
+	cargo build --release --workspace
+	@count=$$(ls target/release/ 2>/dev/null | grep -vE '\.d$$|\.rlib$$|deps|build|incremental|examples' | wc -l); \
+	echo -e "$(GREEN)[OK]$(RESET)    $$count binaries in target/release/"
 
-build-qml:
-	@echo "QML apps built (no compilation needed)"
+# ── Kickstart validation ──────────────────────────────────────────────────────
+ks-validate:
+	@echo -e "$(GREEN)[KS]$(RESET) Validating kickstart files..."
+	@bash build/scripts/prepare-kickstart.sh all --validate-only
 
-build-agent:
-	@echo "Synthex Agent daemon (Python/D-Bus, no compilation needed)"
+# ── ISO builds ────────────────────────────────────────────────────────────────
+iso:
+	@echo -e "$(GREEN)[ISO]$(RESET) Building $(EDITION) edition (version $(VERSION))..."
+	@VERSION=$(VERSION) EDITION=$(EDITION) OUTPUT_DIR=$(OUTPUT_DIR) \
+	    bash build/scripts/build-iso.sh $(EDITION) --version $(VERSION)
 
-build-desktopd: build-rust
-	@echo "synthex-desktopd built"
+iso-plasma:   EDITION=plasma
+iso-hyprland: EDITION=hyprland
+iso-gnome:    EDITION=gnome
+iso-gaming:   EDITION=gaming
+iso-minimal:  EDITION=minimal
 
-build-stored: build-rust
-	@echo "synthex-stored built"
+iso-plasma iso-hyprland iso-gnome iso-gaming iso-minimal: iso
 
-build-hwdaemon: build-rust
-	@echo "synthex-hwdaemon built"
+iso-all:
+	@echo -e "$(GREEN)[ISO]$(RESET) Building all editions in parallel..."
+	@$(MAKE) -j5 iso-plasma iso-hyprland iso-gnome iso-gaming iso-minimal
 
-build-gpu-setupd: build-rust
-	@echo "synthex-gpu-setupd built"
+# ── RPM packages ──────────────────────────────────────────────────────────────
+srctars:
+	@echo -e "$(GREEN)[SRC]$(RESET) Creating source tarballs..."
+	@mkdir -p ~/rpmbuild/SOURCES
+	@tar czf ~/rpmbuild/SOURCES/synthex-installer-$(VERSION).tar.gz \
+	    --transform "s|^installer/|synthex-installer-$(VERSION)/|" installer/
+	@tar czf ~/rpmbuild/SOURCES/synthex-branding-$(VERSION).tar.gz \
+	    --transform "s|^branding/|synthex-branding-$(VERSION)/|" branding/
+	@tar czf ~/rpmbuild/SOURCES/synthex-desktop-$(VERSION).tar.gz \
+	    --transform "s|^desktop/|synthex-desktop-$(VERSION)/|" desktop/
+	@echo -e "$(GREEN)[OK]$(RESET)    Source tarballs in ~/rpmbuild/SOURCES/"
 
-build-control-center: build-rust build-qml
-	@echo "synthex-control-center built"
+rpms: srctars
+	@echo -e "$(GREEN)[RPM]$(RESET) Building all RPM packages..."
+	@mkdir -p build/rpms build/srpms
+	@FAIL=0; \
+	for spec in packages/spec-files/*.spec; do \
+	    name=$$(basename "$$spec" .spec); \
+	    rpmbuild -ba "$$spec" \
+	        --define "_sourcedir $$(pwd)" \
+	        --define "_rpmdir $$(pwd)/build/rpms" \
+	        --define "_srcrpmdir $$(pwd)/build/srpms" \
+	        2>&1 | tail -1 || FAIL=1; \
+	done; \
+	count=$$(ls build/rpms/**/*.rpm 2>/dev/null | wc -l); \
+	echo -e "$(GREEN)[OK]$(RESET)    $$count RPM packages built"; \
+	exit $$FAIL
 
-build-studio: build-rust build-qml
-	@echo "synthex-studio built"
+# ── Full release ──────────────────────────────────────────────────────────────
+release: rust ks-validate iso-all
+	@bash build/scripts/release.sh $(VERSION)
 
-packages: build-rust
-	@echo "Building RPM packages..."
-	@for spec in packages/spec-files/*.spec; do \
-		rpmbuild -bb $$spec --define "_sourcedir ." --define "_rpmdir build/rpms" || true; \
-	done
-	@echo "RPM packages built in build/rpms"
+# ── Documentation ─────────────────────────────────────────────────────────────
+docs:
+	@echo -e "$(GREEN)[DOCS]$(RESET) Documentation files:"
+	@wc -l docs/*.md README.md CHANGELOG.md 2>/dev/null | tail -1
 
-iso: packages
-	@echo "Building Synthex $(EDITION) ISO..."
-	@VERSION=$(VERSION) ./src/synthex-installer/build-synthex-iso.sh --edition $(EDITION)
-
+# ── Clean ─────────────────────────────────────────────────────────────────────
 clean:
-	@echo "Cleaning build artifacts..."
-	cargo clean
-	rm -rf build/iso-out build/rpms
-	@echo "Clean complete"
+	@echo -e "$(YELLOW)[CLEAN]$(RESET) Removing build artefacts..."
+	cargo clean 2>/dev/null || true
+	rm -rf build/out build/rpms build/srpms build/release
+	@echo -e "$(GREEN)[OK]$(RESET)    Clean complete"
+
+clean-iso:
+	@rm -f build/out/*.iso build/out/SHA256SUMS*
+	@echo -e "$(GREEN)[OK]$(RESET)    ISO files removed"

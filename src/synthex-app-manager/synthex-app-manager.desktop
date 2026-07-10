@@ -1,0 +1,14 @@
+[Desktop Entry]
+Type=Application
+Name=SynthOS App Manager
+GenericName=App Manager
+Comment=Install, manage, and discover applications on SynthOS Linux
+Exec=/usr/lib/synthex/synthex-app-manager
+Icon=system-software-install
+Categories=System;PackageManager;GTK;
+Keywords=install;apps;packages;flatpak;software;
+StartupNotify=true
+StartupWMClass=synthex-app-manager
+X-SynthOS-Module=app-manager
+X-SynthOS-Section=system
+X-GNOME-Autostart-enabled=false

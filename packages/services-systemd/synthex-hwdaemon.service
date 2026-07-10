@@ -1,0 +1,15 @@
+[Unit]
+Description=SynthOS hwdaemon service
+After=network.target graphical-session.target
+PartOf=graphical-session.target
+
+[Service]
+Type=dbus
+BusName=org.synthex.Hwdaemon
+ExecStart=/usr/libexec/synthex/synthex-hwdaemon
+Restart=on-failure
+RestartSec=3
+TimeoutStartSec=30
+
+[Install]
+WantedBy=graphical-session.target

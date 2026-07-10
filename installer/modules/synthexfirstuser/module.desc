@@ -1,0 +1,6 @@
+---
+type:       "job"
+name:       "synthexfirstuser"
+interface:  "python"
+script:     "main.py"
+timeout:    120

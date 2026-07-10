@@ -1,0 +1,15 @@
+[Unit]
+Description=SynthOS ai-hub service
+After=network.target graphical-session.target
+PartOf=graphical-session.target
+
+[Service]
+Type=dbus
+BusName=org.synthex.AiHub
+ExecStart=/usr/libexec/synthex/synthex-ai-hub
+Restart=on-failure
+RestartSec=3
+TimeoutStartSec=30
+
+[Install]
+WantedBy=graphical-session.target

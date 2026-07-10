@@ -1,0 +1,5 @@
+---
+type:      "job"
+name:      "dracut"
+interface: "qtplugin"
+load:      "libcalamares_dracut.so"

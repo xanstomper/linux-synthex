@@ -50,7 +50,20 @@ network --bootproto=dhcp --device=link --hostname=synthex-plasma --activate
 # PACKAGE SECTION
 # =============================================================================
 
+zerombr
+clearpart --all --initlabel
+autopart --type=btrfs --encrypted=false
+
 %packages --instLangs=en_US.UTF-8 --excludeWeakdeps --nocore
+
+# Core system
+synthex-core
+synthex-base
+
+# Plymouth
+plymouth
+plymouth-theme-synthex
+plymouth-plugin-script
 
 # ---- Core System ----
 @fedora-kde-desktop

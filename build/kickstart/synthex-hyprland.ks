@@ -33,7 +33,22 @@ services --enabled=NetworkManager,bluetooth,sshd,avahi-daemon
 # PACKAGE SECTION
 # =============================================================================
 
+
+# ── Disk Partitioning ──────────────────────────────────────────────────────
+zerombr
+clearpart --all --initlabel
+autopart --type=btrfs --encrypted=false
+
 %packages --instLangs=en_US.UTF-8 --excludeWeakdeps --nocore
+
+# Core system
+synthex-core
+synthex-base
+
+# Plymouth
+plymouth
+plymouth-theme-synthex
+plymouth-plugin-script
 
 # ---- Hyprland Desktop ----
 @base-x

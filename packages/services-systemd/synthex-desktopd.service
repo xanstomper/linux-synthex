@@ -1,0 +1,15 @@
+[Unit]
+Description=SynthOS desktopd service
+After=network.target graphical-session.target
+PartOf=graphical-session.target
+
+[Service]
+Type=dbus
+BusName=org.synthex.Desktopd
+ExecStart=/usr/libexec/synthex/synthex-desktopd
+Restart=on-failure
+RestartSec=3
+TimeoutStartSec=30
+
+[Install]
+WantedBy=graphical-session.target

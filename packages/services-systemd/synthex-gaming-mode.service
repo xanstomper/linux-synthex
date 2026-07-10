@@ -1,0 +1,15 @@
+[Unit]
+Description=SynthOS gaming-mode service
+After=network.target graphical-session.target
+PartOf=graphical-session.target
+
+[Service]
+Type=dbus
+BusName=org.synthex.GamingMode
+ExecStart=/usr/libexec/synthex/synthex-gaming-mode
+Restart=on-failure
+RestartSec=3
+TimeoutStartSec=30
+
+[Install]
+WantedBy=graphical-session.target

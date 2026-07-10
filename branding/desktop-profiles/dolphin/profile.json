@@ -1,0 +1,15 @@
+{
+  "id": "synthex-dolphin",
+  "display": "SynthOS Dolphin",
+  "description": "SynthOS profile optimised for dolphin users",
+  "look_and_feel": "org.kde.synthex.desktop",
+  "color_scheme": "SynthexDark",
+  "features": ["taskbar", "dolphin", "file-manager"],
+  "default_apps": {
+    "file-manager": "dolphin",
+    "terminal": "konsole",
+    "browser": "firefox"
+  },
+  "bundles": ["synthex-core"],
+  "wallpaper": "synthex-default"
+}

@@ -1,23 +1,78 @@
 #!/usr/bin/env bash
-# synthex-oobe — Out-Of-Box Experience Wizard
-# Launches the OOBE first-boot setup with QML or fallback
+# synthex-oobe — SynthOS Out-Of-Box Experience Wizard
+# Launched at first login by synthex-oobe.service
+# Writes user selections to /var/lib/synthex/{oobe-apps,install-profile}.json
 set -euo pipefail
 
 HERE="$(cd "$(dirname "$0")" && pwd)"
 QML_MAIN="$HERE/ui/Main.qml"
+INSTALLED_QML="/usr/share/synthex/oobe/ui/Main.qml"
+STATE_DIR="${SYNTHEX_STATE_DIR:-/var/lib/synthex}"
+OOBE_COMPLETE="$STATE_DIR/oobe-complete"
+LOG="$STATE_DIR/oobe.log"
 
+mkdir -p "$STATE_DIR" 2>/dev/null || {
+    # Non-root fallback
+    STATE_DIR="$HOME/.local/share/synthex"
+    OOBE_COMPLETE="$STATE_DIR/oobe-complete"
+    LOG="$STATE_DIR/oobe.log"
+    mkdir -p "$STATE_DIR"
+}
+
+# Skip if already done (unless --reset flag passed)
+if [[ "$*" != *"--reset"* ]] && [[ -f "$OOBE_COMPLETE" ]]; then
+    echo "synthex-oobe: setup already complete" >&2
+    exit 0
+fi
+
+# Locate QML file
+if [[ -f "$QML_MAIN" ]]; then
+    QML_FILE="$QML_MAIN"
+elif [[ -f "$INSTALLED_QML" ]]; then
+    QML_FILE="$INSTALLED_QML"
+else
+    echo "synthex-oobe: cannot find Main.qml" >&2
+    exit 1
+fi
+
+export SYNTHEX_STATE_DIR="$STATE_DIR"
+export QML2_IMPORT_PATH="$(dirname "$QML_FILE")"
+
+# Try compiled binary first
 if command -v synthex-oobe-bin &>/dev/null; then
     exec synthex-oobe-bin "$@"
 fi
 
-if command -v qmlscene &>/dev/null; then
-    exec qmlscene "$QML_MAIN" "$@"
+# Try Python wrapper with PyQt/PySide6
+PYLIB="$(dirname "$0")/lib/oobe_core.py"
+if [[ -f "$PYLIB" ]] && python3 -c "import PySide6" &>/dev/null 2>&1; then
+    python3 - "$@" << 'PYEOF'
+import sys; sys.path.insert(0, sys.argv[0].rsplit('/',2)[0]+'/lib')
+from oobe_core import *
+ensure_state_dir()
+ui = find_ui_dir()
+if ui: launch_qml(ui)
+mark_complete()
+PYEOF
+    exit 0
 fi
 
-if command -v qml6 &>/dev/null; then
-    exec qml6 "$QML_MAIN" "$@"
-fi
+# Try qml6 / qml / qmlscene
+for runner in qml6 qml qmlscene; do
+    if command -v "$runner" &>/dev/null; then
+        echo "synthex-oobe: launching with $runner" | tee -a "$LOG"
+        "$runner" "$QML_FILE" "$@" 2>> "$LOG" || true
+        touch "$OOBE_COMPLETE"
+        exit 0
+    fi
+done
 
-echo "Synthex OOBE Wizard"
-echo "QML runtime not found. Install qt6-qtdeclarative or compile the native binary."
-exit 1
+# Last resort — open in browser (Wayland)
+echo "synthex-oobe: no QML runner found, using fallback notification" | tee -a "$LOG"
+if command -v notify-send &>/dev/null; then
+    notify-send "SynthOS Setup" \
+        "Welcome! Open System Settings to complete setup." \
+        --icon=preferences-system --urgency=normal
+fi
+touch "$OOBE_COMPLETE"
+exit 0

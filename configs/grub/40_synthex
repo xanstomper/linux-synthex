@@ -1,0 +1,139 @@
+#!/bin/sh
+# /etc/grub.d/40_synthex — Custom SynthOS GRUB2 menu entries
+# Install: sudo cp 40_synthex /etc/grub.d/ && sudo chmod +x /etc/grub.d/40_synthex
+# Apply:   sudo grub2-mkconfig -o /boot/grub2/grub.cfg
+set -e
+
+. /usr/share/grub/grub-mkconfig_lib
+
+SYNTHEX_TITLE="SynthOS"
+SYNTHEX_VERSION="2026.10"
+SYNTHEX_ICON="synthex"
+
+# Locate the newest kernel
+KERNEL=$(ls /boot/vmlinuz-* 2>/dev/null | grep -v rescue | sort -V | tail -1)
+INITRD=$(ls /boot/initramfs-*.img 2>/dev/null | grep -v rescue | grep -v kdump | sort -V | tail -1)
+
+# Previous kernel (second-newest)
+KERNEL_PREV=$(ls /boot/vmlinuz-* 2>/dev/null | grep -v rescue | sort -V | tail -2 | head -1)
+INITRD_PREV=$(ls /boot/initramfs-*.img 2>/dev/null | grep -v rescue | grep -v kdump | sort -V | tail -2 | head -1)
+
+# Rescue kernel
+KERNEL_RESCUE=$(ls /boot/vmlinuz-*rescue* 2>/dev/null | sort -V | tail -1 || true)
+INITRD_RESCUE=$(ls /boot/initramfs-*rescue*.img 2>/dev/null | sort -V | tail -1 || true)
+
+# Read default cmdline options
+CMDLINE_LINUX="${GRUB_CMDLINE_LINUX:-}"
+CMDLINE_LINUX_DEFAULT="${GRUB_CMDLINE_LINUX_DEFAULT:-quiet splash}"
+
+# Resolve root UUID
+ROOT_UUID=$(grub_get_device_id "$(grub_find_good_root_device /)")
+
+# Determine if we're on EFI or legacy
+if [ -d /sys/firmware/efi ]; then
+    BOOT_TYPE="EFI"
+else
+    BOOT_TYPE="BIOS"
+fi
+
+[ -z "$KERNEL" ] && exit 0
+
+# Strip /boot prefix if kernel lives in /boot on its own partition
+if [ "$(grub_find_good_root_device /boot)" != "$(grub_find_good_root_device /)" ]; then
+    KERNEL_REL="${KERNEL#/boot}"
+    INITRD_REL="${INITRD#/boot}"
+    KERNEL_PREV_REL="${KERNEL_PREV#/boot}"
+    INITRD_PREV_REL="${INITRD_PREV#/boot}"
+else
+    KERNEL_REL="$KERNEL"
+    INITRD_REL="$INITRD"
+    KERNEL_PREV_REL="$KERNEL_PREV"
+    INITRD_PREV_REL="$INITRD_PREV"
+fi
+
+# Get version strings
+KVER=$(echo "$KERNEL" | sed 's|.*vmlinuz-||')
+KVER_PREV=$(echo "$KERNEL_PREV" | sed 's|.*vmlinuz-||')
+
+# ── Helper: emit a standard menu entry ──────────────────────────────────────
+emit_entry() {
+    local TITLE="$1"
+    local KPATH="$2"
+    local IPATH="$3"
+    local EXTRA="$4"
+    local CLASS="$5"
+
+    cat << ENTRY
+menuentry '${TITLE}' --class synthex --class linux --class gnu-linux --class ${CLASS:-os} {
+    load_video
+    set gfxpayload=keep
+    insmod gzio
+    if [ x\$grub_platform = xxen ]; then
+        insmod xzio
+        insmod lzopio
+    fi
+    insmod part_gpt
+    insmod part_msdos
+    insmod ext2
+    insmod btrfs
+    search --no-floppy --fs-uuid --set=root ${ROOT_UUID}
+    echo 'Loading ${SYNTHEX_TITLE} ${SYNTHEX_VERSION} kernel...'
+    linux   ${KPATH} root=UUID=${ROOT_UUID} ro ${CMDLINE_LINUX} ${CMDLINE_LINUX_DEFAULT} ${EXTRA}
+    echo 'Loading initial ramdisk...'
+    initrd  ${IPATH}
+}
+ENTRY
+}
+
+# ── Primary SynthOS entry ────────────────────────────────────────────────────
+echo "submenu '${SYNTHEX_TITLE} ${SYNTHEX_VERSION} (Kernel ${KVER})' {"
+emit_entry "${SYNTHEX_TITLE} ${SYNTHEX_VERSION}" "$KERNEL_REL" "$INITRD_REL" "" "synthex"
+
+# Recovery mode
+emit_entry "${SYNTHEX_TITLE} ${SYNTHEX_VERSION} — Recovery Mode" \
+    "$KERNEL_REL" "$INITRD_REL" \
+    "single systemd.unit=rescue.target rd.break=mount nomodeset" \
+    "recovery"
+
+# Safe graphics mode (nomodeset)
+emit_entry "${SYNTHEX_TITLE} ${SYNTHEX_VERSION} — Safe Graphics" \
+    "$KERNEL_REL" "$INITRD_REL" \
+    "nomodeset modprobe.blacklist=nvidia nouveau.modeset=0" \
+    "os"
+echo "}"
+
+# ── Previous kernel (if different) ──────────────────────────────────────────
+if [ -n "$KERNEL_PREV" ] && [ "$KERNEL_PREV" != "$KERNEL" ]; then
+    echo "submenu '${SYNTHEX_TITLE} ${SYNTHEX_VERSION} (Kernel ${KVER_PREV} — previous)' {"
+    emit_entry "${SYNTHEX_TITLE} — Kernel ${KVER_PREV}" "$KERNEL_PREV_REL" "$INITRD_PREV_REL" "" "os"
+    emit_entry "${SYNTHEX_TITLE} — Kernel ${KVER_PREV} Recovery" \
+        "$KERNEL_PREV_REL" "$INITRD_PREV_REL" \
+        "single systemd.unit=rescue.target" "recovery"
+    echo "}"
+fi
+
+# ── Rescue entry ─────────────────────────────────────────────────────────────
+if [ -n "$KERNEL_RESCUE" ] && [ -n "$INITRD_RESCUE" ]; then
+    KRESC_REL="$KERNEL_RESCUE"
+    IRESC_REL="$INITRD_RESCUE"
+    [ "$(grub_find_good_root_device /boot)" != "$(grub_find_good_root_device /)" ] && {
+        KRESC_REL="${KERNEL_RESCUE#/boot}"
+        IRESC_REL="${INITRD_RESCUE#/boot}"
+    }
+    emit_entry "${SYNTHEX_TITLE} Rescue Image (${KVER})" \
+        "$KRESC_REL" "$IRESC_REL" \
+        "systemd.unit=rescue.target rd.break=mount nomodeset" \
+        "recovery"
+fi
+
+# ── Memtest (if available) ───────────────────────────────────────────────────
+if [ -f /boot/memtest86+.bin ] || [ -f /boot/memtest86+-ia32.efi ]; then
+    cat << 'MEMTEST'
+menuentry 'Memory Test (Memtest86+)' --class memtest86 --class gnu --class tool {
+    insmod part_gpt
+    insmod part_msdos
+    insmod ext2
+    linux16 /boot/memtest86+.bin
+}
+MEMTEST
+fi

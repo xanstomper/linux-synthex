@@ -1,38 +1,58 @@
-# ─── Synthex Calamares Branding Descriptor ────────────────────────
-# This file defines the visual identity of the installer.
+# ─── SynthOS Calamares Branding Descriptor ────────────────────────────────────
 # Location: /usr/share/calamares/branding/synthex/branding.desc
+# This file defines the visual identity of the Calamares installer.
 ---
 componentName: synthex
 
 strings:
-  productName: "Synthex"
-  shortProductName: "Synthex"
-  version: "2026.1"
-  shortVersion: "2026.1"
-  versionedName: "Synthex 2026.1"
-  shortVersionedName: "Synthex 2026.1"
-  bootloaderEntryName: "Synthex"
-  productUrl: "https://getsynthex.org"
-  supportUrl: "https://discuss.getsynthex.org"
-  bugUrl: "https://dev.getsynthex.org"
-  releaseNotesUrl: "https://getsynthex.org/releases"
+  productName:         "SynthOS"
+  shortProductName:    "SynthOS"
+  version:             "2026.10"
+  shortVersion:        "2026.10"
+  versionedName:       "SynthOS 2026.10"
+  shortVersionedName:  "SynthOS 2026.10"
+  bootloaderEntryName: "SynthOS"
+  productUrl:          "https://synthex-os.org"
+  supportUrl:          "https://discuss.synthex-os.org"
+  bugUrl:              "https://github.com/synthex-linux/issues"
+  releaseNotesUrl:     "https://synthex-os.org/releases/2026.10"
+  showKnownIssuesUrl:  "https://synthex-os.org/releases/2026.10#known-issues"
+  showReleaseNotesUrl: "https://synthex-os.org/releases/2026.10"
 
 images:
-  productLogo: "synthex-logo.png"
-  productIcon: "synthex-icon.png"
+  productLogo:    "synthex-logo.png"
+  productIcon:    "synthex-icon.png"
   productWelcome: "synthex-welcome.png"
 
-slideshow: "show.qml"
+slideshow:    "show.qml"
 slideshowAPI: 2
 
 style:
-  SidebarBackground: "#1a1a2e"
-  SidebarText: "#ffffff"
-  SidebarTextCurrent: "#33ccff"
-  SidebarBackgroundCurrent: "#16213e"
+  # Sidebar (left panel in Calamares)
+  SidebarBackground:        "#1A1A2E"
+  SidebarText:              "#FFFFFF"
+  SidebarTextSelect:        "#FFFFFF"
+  SidebarBackgroundCurrent: "#FFB300"
+  SidebarTextCurrent:       "#0B0F1A"
+  sidebarBackgroundSelect:  "#2A2A4E"
+  sidebarTextSelect:        "#FFFFFF"
 
-colors:
-  sidebarBackground: "#1a1a2e"
-  sidebarText: "#ffffff"
-  sidebarTextSelect: "#33ccff"
-  sidebarBackgroundSelect: "#16213e"
+  # Main content area
+  Background:               "#0B0F1A"
+  BackgroundStartColor:     "#0B0F1A"
+  BackgroundEndColor:       "#111827"
+
+  # Buttons
+  ButtonBackground:         "#FFB300"
+  ButtonText:               "#0B0F1A"
+  ButtonAccentColor:        "#FF8C00"
+
+  # Accents
+  LinkColor:                "#FFB300"
+  CheckForeground:          "#9BBD5C"
+  BulletHighlight:          "#FFB300"
+  SidebarTextCurrent:       "#0B0F1A"
+
+  # Typography
+  Font:                     "Noto Sans"
+  FontSize:                 "11"

@@ -1,257 +1,269 @@
-# SynthOS
+<div align="center">
 
-A next-generation Fedora-based Linux distribution designed to be the definitive Linux desktop operating system. Combines the best of Fedora, Arch, Mint, Nobara, CachyOS, and Bazzite.
+# ☀️ SynthOS Linux
 
-## Quick Start
+**Illuminate Your Desktop**
 
-### Build the ISO (on Fedora 41+)
-```bash
-sudo dnf install lorax livemedia-creator pykickstart
-sudo bash scripts/build-synthex.sh docker-build
-sudo bash scripts/build-synthex.sh build-iso
-```
+[![License: GPL-3.0+](https://img.shields.io/badge/License-GPL--3.0%2B-blue.svg)](LICENSE)
+[![Version](https://img.shields.io/badge/Version-2026.10-orange.svg)](docs/RELEASE-NOTES-2026.10.md)
+[![Status](https://img.shields.io/badge/Status-Pre--Release-yellow.svg)]()
+[![Base](https://img.shields.io/badge/Base-Fedora%20Rawhide-informational.svg)]()
 
-### Or build with Docker (any Linux host)
-```bash
-sudo bash scripts/build-synthex.sh docker-build
-sudo bash scripts/build-synthex.sh build-rootfs
-sudo bash scripts/build-synthex.sh build-iso
-```
+A next-generation Fedora-based Linux distribution designed to be the definitive desktop experience — gaming-ready, developer-friendly, AI-integrated, and beautiful out of the box.
 
-### Run integration tests
-```bash
-python3 tests/integration-tests.py   # 70 tests — validates code, configs, services, builds
-make check    # validation targets for systemd, JSON, Python, desktop files
-make rust-check  # cargo check — verify Rust workspace compiles cleanly
-```
+</div>
 
-## Features
+---
 
-### System
-- **KDE Plasma** desktop with Mint-inspired theme
-- **Synthex Mint** layout — bottom panel, window list, classic menu
-- **BTRFS** filesystem with automatic snapper snapshots
-- **SELinux** enforcing by default
-- **Firewalld** with profiles (gaming, secure, dev, home)
-- **Wayland**-first graphics — KWin compositor with OpenGL
-- **PipeWire** audio
+## 🌟 What is SynthOS?
 
-### Gaming
-- **Steam** pre-installed with Proton support
-- **Proton GE** — latest community Proton builds
-- **GE-Proton Manager** — per-game Proton version management
-- **Gaming Mode** — Steam Big Picture auto-launch, CPU/GPU optimization
-- **GPU Switcher** — NVIDIA Optimus hybrid graphics support
-- **MangoHUD, Gamescope, Gamemode, vkBasalt** 
-- **Lutris, Heroic Games Launcher, Prism Launcher**
-- **WINE + Winetricks** — full Windows compatibility
-- **OBS Studio** with streaming support
+SynthOS (formerly "Synthex") is a curated Linux desktop distribution built on Fedora Rawhide, delivering:
 
-### Performance
-- **BORE Scheduler** — burst-oriented response enhancer
-- **EEVDF** — Earliest Eligible Virtual Deadline scheduler
-- **FSYNC/Futex2** — Wine/Proton game sync primitives
-- **x86-64-v3** optimized by default
-- **Performance profiles** — gaming, balanced, powersave
-- **ZRAM** compressed swap
+- **7 Desktop Profiles** — Gaming, Focus, Pro, Studio, AI, Classic, Lite  
+- **Gorgeous theming** — Dark navy/amber SDDM login, animated Plymouth splash, custom GRUB
+- **Gaming-first kernel** — BORE scheduler, low-latency patches, Proton/Steam pre-configured
+- **AI-native** — Local LLM (Ollama), Whisper voice commands, `synth ai` shell assistant
+- **Secure by default** — SELinux enforcing, SynthGuard IDS, LUKS2, DNS-over-HTTPS
+- **Polished installer** — Calamares with 7-slide slideshow, profile picker, app selection wizard
+- **First-run wizard** — OOBE with profile/theme/app selection that applies on first login
 
-### Security
-- **SELinux** enforcing with custom Synthex policy
-- **Firewalld** with nftables backend
-- **Secure Boot** support (shim + GRUB)
-- **LUKS2** full disk encryption
-- **TPM2** measured boot
-- **Kernel lockdown** mode
-- **Hardened** sysctl, auditd, limits
+---
 
-### Applications
-- **Firefox** (default browser)
-- **LibreOffice** (Writer, Calc, Impress)
-- **Thunderbird** (email)
-- **GIMP, Krita, Inkscape** (graphics)
-- **Kdenlive** (video editing)
-- **Elisa** (music player)
-- **Haruna** (video player)
-- **Dolphin, Konsole, Kate, Gwenview, Spectacle**
-
-### Development
-- **VS Code** pre-installed
-- **Git, Rust 1.80+, Go, Node.js, Java 21**
-- **Docker, Podman, Buildah, Skopeo** — containers
-- **QEMU/KVM + Virt-Manager** — virtualization
-- **SystemTap, GDB, Valgrind, strace** — debugging
-
-### Rust Toolchain
-- **rustc** — Rust compiler (v1.80.0+, LLVM 17 backend)
-- **cargo** — Package manager and build system
-- **rust-src** — Source code for IDE/rust-analyzer
-- **rustfmt, clippy, rust-analyzer** — Developer tooling
-- **Rust-for-Linux** — Kernel module development support
-
-### Rust Utility Suite
-| Traditional | Rust Replacement | Package | Description |
-|-------------|-----------------|---------|-------------|
-| `grep` | `rg` (ripgrep) | `ripgrep` | Ultra-fast recursive search, .gitignore-aware |
-| `find` | `fd` | `fd-find` | Intuitive file finder with sensible defaults |
-| `cat` | `bat` | `bat` | Syntax-highlighted output, git integration |
-| `ls` | `eza` | `eza` | Colorised, tree view, icons, git status |
-| `du` | `dust` | `dust` | Visual disk usage with bar charts |
-| `htop` | `btm` (bottom) | `bottom` | Graphical terminal system monitor |
-| `sed` | `sd` | `sd` | Intuitive find & replace CLI |
-| prompt | `starship` | `starship` | Cross-shell prompt, minimal and fast |
-| `tmux` | `zellij` | `zellij` | Terminal multiplexer with workspace layout |
-| `diff` | `delta` | `git-delta` | Syntax-highlighted git diff pager |
-| `ps` | `procs` | `procs` | Modern process list with tree view |
-| `time` | `hyperfine` | `hyperfine` | Statistical command benchmarking |
-| `dig` | `dog` | `dog` | DNS lookup client with color |
-| `nethogs` | `bandwhich` | `bandwhich` | Real-time bandwidth per process |
-| `du` (TUI) | `dua` | `dua-cli` | Interactive disk usage analyzer |
-| `ping` | `gping` | `gping` | Latency with real-time graph |
-| `make` | `just` | `just` | Command runner (simpler make) |
-
-### Synthex Native Rust Tools
-| Command | Description |
-|---------|-------------|
-| `synthex-integration-engine` | Upstream monitoring — tracks Arch, Nobara, Bazzite, CachyOS, KDE, Mesa, Kernel, Proton-GE |
-| `synthex-snapshot` | Btrfs snapshot manager — create, list, rollback, verify, clean |
-| `synthex-update-manager` | System update manager with BTRFS snapshots |
-| `synthex-driver-manager` | GPU detection and driver auto-install |
-| `synthex-pkg` (alias `spkg`) | Package manager with Synthex repo awareness |
-| `synthex-ai-daemon` | AI assistant — Ollama integration, hardware advice |
-| `synthex-system-daemon` | Performance auto-tuner — CPU governor, TDP, GPU power |
-| `synthex-hwdaemon` | Hardware detection daemon — D-Bus service |
-| `synthex-desktopd` | Desktop layout/theme engine |
-| `synthex-gpu-setupd` | GPU driver auto-installer — AMD, Intel, NVIDIA |
-| `synthex-stored` | Software center backend — DNF5, Flatpak |
-| `synthex-installer-detect` | Hardware detection for Calamares installer |
-| `synthex-cli` | Unified system tool — info, doctor, mode, update, health |
-
-### Synthex Tools
-| Command | Description |
-|---------|-------------|
-| `synthex` | Unified command center (19 commands) |
-| `synthex-layout` | Switch desktop layouts |
-| `synthex-gaming-mode` | Gaming mode (Big Picture + performance) |
-| `synthex-gpu-switch` | NVIDIA Optimus GPU switching |
-| `synthex-proton` | Proton version manager |
-| `synthex-firewall` | Firewall profile switcher |
-| `synthex-update` | Update manager with snapshots (Rust) |
-|| `synthex-driver-manager` | GPU driver auto-install (Rust) |
-|| `synthex-pkg` | Package manager with repo awareness (Rust) |
-||| `synthex-system-daemon` | Performance auto-tuner for VRR, HDR, CPU, TDP (Rust) |
-||| `synthex-ai-daemon` | Local AI assistant via Ollama, whisper voice commands (Rust) |
-||| `synthex-installer-detect` | HW auto-detection for Calamares installs (Rust) |
-||| `synthex-blueprint` | Export/import system identity (.zbp) |
-
-### COSMIC Desktop (Pop!_OS Rust Port)
-| Component | Package | Role |
-|---|---|---|
-| | `cosmic-comp` | Wayland compositor — tiling/stacking, GPU-accelerated |
-| | `cosmic-bg` | Wallpaper and background daemon |
-| | `cosmic-panel` | Desktop panel with app launcher, workspaces, system tray |
-| | `cosmic-app-library` | Searchable application launcher |
-| | `cosmic-randr` | Display configuration (xrandr replacement) |
-| | `cosmic-osd` | Volume, brightness, media on-screen display |
-| | `cosmic-notifications` | Desktop notification daemon |
-| | `cosmic-epoch` | PAM-based greeter/login manager |
-| | `cosmic-settings` | Full graphical settings (12+ categories) |
-| | `cosmic-term` | GPU-accelerated terminal with split panes |
-| | `cosmic-files` | Dual-pane file manager |
-| | `cosmic-text-editor` | Modern text editor with syntax highlighting |
-| | `cosmic-workspaces` | Virtual desktop workspace overview |
-| | `cosmic-applets` | Desktop applets (monitor, clock, network) |
-| | `cosmic-screenshot` | Screenshot + recording + annotations |
-| | `xdg-desktop-portal-cosmic` | Portal backend for Flatpak/Snap |
-
-### Rust CLI Utilities (Ported from Fedora, Arch)
-| Tool | Replaces | Spec |
-|---|---|---|
-| `ripgrep (rg)` | grep | `rust-utils-ripgrep.spec` |
-| `fd-find (fd)` | find | `rust-utils-fd.spec` |
-| `bat` | cat | `rust-utils-bat.spec` |
-| `eza` | ls | `rust-utils-eza.spec` |
-| `dust` | du | `rust-utils-dust.spec` |
-| `bottom (btm)` | htop | `rust-utils-bottom.spec` |
-| `sd` | sed | `rust-utils-sd.spec` |
-| `starship` | shell prompt | `rust-utils-starship.spec` |
-| `zellij` | tmux | `rust-utils-zellij.spec` |
-| `git-delta` | diff | `rust-utils-delta.spec` |
-| `procs` | ps | `rust-utils-procs.spec` |
-| `hyperfine` | time (benchmark) | `rust-utils-hyperfine.spec` |
-| `dog` | dig (DNS) | `rust-utils-dog.spec` |
-| `dua-cli` | ncdu | `rust-utils-dua-cli.spec` |
-| `gping` | ping | `rust-utils-gping.spec` |
-| `bandwhich` | nethogs | `rust-utils-bandwhich.spec` |
-| `just` | make | `rust-utils-just.spec` |
-| `helix` | vim/nano (editor) | `rust-utils-helix.spec` |
-| `nushell (nu)` | bash | `rust-utils-nushell.spec` |
-| `zoxide` | cd | `rust-utils-zoxide.spec` |
-| `atuin` | history | `rust-utils-atuin.spec` |
-| `tealdeer` | man (tldr) | `rust-utils-tealdeer.spec` |
-| `ouch` | tar/gzip/zip | `rust-utils-ouch.spec` |
-
-`synthex-ai-hub`
-| `synthex-webapp` | Turn websites into native apps |
-
-### System Services (all Rust)
-| Service | Language | Description |
-|---------|----------|-------------|
-| `synthex-system-daemon` | Rust | Performance auto-tuner — CPU, TDP, GPU, gaming, VRR, HDR |
-| `synthex-integration-engine` | Rust | Upstream monitoring — tracks Arch, Nobara, Bazzite, CachyOS, KDE, Mesa |
-| `synthex-snapshot-manager` | Rust | Btrfs snapshot creation, rollback, verification, cleanup |
-| `synthex-hwdaemon` | Rust | Hardware detection daemon — CPU, GPU, RAM, disks, network |
-| `synthex-gpu-setupd` | Rust | GPU driver auto-installer — AMD, Intel, NVIDIA, Secure Boot |
-| `synthex-desktopd` | Rust | Desktop layout/theme/mode engine — Mint, Windows, Gaming, macOS |
-| `synthex-stored` | Rust | Software center backend — DNF, Flatpak, AppImage, AUR |
-| `synthex-ai-daemon` | Rust | Local AI assistant — Ollama integration, whisper, diagnostics |
-| `synthex-installer-detect` | Rust | Hardware detection for Calamares installer |
-| `synthex-cli` | Rust | Unified CLI — info, doctor, mode, update, snapshot, health |
-| `synthex-recovery` | Rust | Recovery framework — boot, driver, package, network repair |
-| `synthex-service-manager` | Rust | Systemd service management — list, start, stop, enable, disable |
-| `synthex-kernel-manager` | Rust | Kernel management — list, install, remove, switch, cleanup |
-| `synthex-compat-db` | Rust | Hardware compatibility database — scan, check, report |
-
-### GUI Applications
-| Application | Framework | Description |
-|-------------|-----------|-------------|
-| `synthex-control-center` | QML/C++ | Unified control center — 13 pages (Dashboard, System, Performance, Gaming, Developer, Themes, Security, Updates, Drivers, RGB, Snapshots, Kernel, Controllers) |
-| `synthex-software-center` | QML | Mint-inspired software manager with category browsing |
-| `synthex-oobe` | QML | First-run wizard — profile selection, theme, bundles |
-| `synthex-gaming-center` | QML | Gaming hub — Steam, Proton, MangoHUD, Gamescope |
-| `synthex-studio` | QML/C++ | Theme studio with preset designer |
-| `synthex-welcome` | Python | Welcome application with links and tutorials |
-| `synthex-agent` | Python | AI-powered desktop agent |
-
-## Project Structure
+## 📁 Repository Structure
 
 ```
 linux-synthex/
-├── branding/         # Logos, themes, wallpapers, icons
-├── build/            # ISO build scripts, kickstart files
-├── ci/               # GitHub Actions workflows (incl Rust CI)
-├── desktop/          # KDE configs, KCM modules, launchers
-├── installer/        # Calamares config and modules
-├── kernel/           # Kernel config (BORE + EEVDF + FSYNC + Rust)
-├── layouts/          # Desktop layout presets
-├── modes/            # Performance mode scripts
-├── packages/         # RPM spec files, repo configs
-├── scripts/          # Docker build scripts
-├── security/         # SELinux policy, hardening configs
-├── src/
-│   ├── synthex-rust-tools/   # Rust workspace (update-manager, driver-manager, pkg)
-│   ├── synthex-*/            # C/C++/Python/QML system tools
-│   └── ...
-├── systemd/          # systemd service units
-└── tests/            # Integration tests and validation
+├── src/                        # All Synthex application source code
+│   ├── synthex-control-center/ # System settings hub (Qt6/QML)
+│   ├── synthex-oobe/           # First-run setup wizard (QML + Python)
+│   ├── synthex-welcome/        # Welcome screen (Python/Qt)
+│   ├── synthex-gaming-center/  # Gaming launcher (Qt6/QML)
+│   ├── synthex-software-center/# App store (Qt6/QML)
+│   ├── synthex-installer/      # ISO build pipeline
+│   ├── synthex-agent/          # Desktop assistant daemon
+│   └── ...                     # 60+ additional components
+├── packages/
+│   ├── spec-files/             # 161 RPM spec files
+│   └── groups/                 # Comps groups XML
+├── installer/
+│   ├── config/                 # Calamares settings.conf + module configs
+│   ├── modules/                # Custom Calamares Python modules
+│   │   ├── synthexprofile/     # Profile selection module
+│   │   └── synthexpostinstall/ # Post-install wiring (apps, services, theme)
+│   └── scripts/post-install/   # Hardware detect, GPU setup, theme apply, GRUB
+├── branding/
+│   ├── calamares/              # Installer branding + 7-slide slideshow
+│   ├── desktop-profiles/       # Per-profile KDE look-and-feel packages
+│   ├── plymouth/               # Boot splash theme + install script
+│   └── theme/                  # Design tokens, logo sources
+├── desktop/
+│   ├── sddm/synthex-sddm-theme/# Login screen (QML, dark navy/amber)
+│   ├── grub-theme/             # GRUB2 bootloader theme
+│   ├── plymouth/synthex-theme/ # Plymouth boot splash (script + SVGs)
+│   └── plasma/                 # KDE Plasma workspace configs
+├── configs/
+│   ├── grub/40_synthex         # Custom GRUB menu entries script
+│   ├── sddm/                   # SDDM configuration
+│   └── dracut/                 # Dracut initramfs config
+├── build/
+│   ├── kickstart/              # ISO kickstart files (plasma/gnome/hyprland/gaming)
+│   ├── livecd/                 # LiveCD creator configs
+│   └── scripts/                # Build helper scripts
+├── systemd/                    # systemd service/timer unit files
+├── docs/                       # Documentation + release notes
+└── Makefile                    # Build system
 ```
 
-## Included from other distros
+---
 
-| Distro | Features integrated into Synthex |
-|--------|-------------------------------|
-| **Mint** | Welcome screen, update manager, bottom panel layout, green Mint-Y theme |
-| **Nobara** | Gaming kernel patches, Proton management, GPU switching, NVIDIA drivers |
-| **CachyOS** | BORE scheduler, x86-64-v3, performance profiles, memory tuning |
-| **Bazzite** | Gaming mode (Steam Big Picture), controller support, game streaming (Sunshine) |
-| **Fedora** | Base system, package management (DNF5), SELinux, BTRFS |
-| **Arch** | Rolling-style updates with snapshots, customization freedom |
+## 🚀 Quick Start
+
+### Building an ISO
+
+```bash
+# Prerequisites (Fedora/RHEL host)
+sudo dnf install lorax livemedia-creator pykickstart xorriso isohybrid
+
+# Build KDE Plasma edition (default)
+make iso-plasma VERSION=2026.10
+
+# Other editions
+make iso-gaming      # Gaming-optimized
+make iso-hyprland    # Hyprland WM
+make iso-gnome       # GNOME desktop
+make iso-minimal     # Minimal CLI base
+
+# Output: build/iso-out/synthex-plasma-2026.10-v3.iso
+```
+
+### Installing Themes (on an existing system)
+
+```bash
+# Install all SynthOS themes at once
+make install-themes
+
+# Or individually:
+sudo make install-sddm-theme      # Login screen
+sudo make install-grub-theme      # Bootloader
+sudo make install-plymouth-theme  # Boot splash
+```
+
+### Building Packages
+
+```bash
+# Build all RPM packages (requires rpmbuild)
+make packages
+
+# Or build in Docker:
+make dev-container
+```
+
+---
+
+## 🎨 Desktop Profiles
+
+| Profile   | Icon | Description |
+|-----------|------|-------------|
+| **Classic**  | 🖥  | Familiar, Windows-like layout for new Linux users |
+| **Gaming**   | 🎮 | Big Picture mode, Steam, Proton, Gamescope |
+| **Focus**    | ⚡  | Minimal, keyboard-driven, distraction-free |
+| **Pro**      | 💻 | Developer cockpit: Rust, Python, Docker, VS Code |
+| **Studio**   | 🎨 | Creative suite: Kdenlive, Krita, Blender, OBS |
+| **AI Hub**   | 🤖 | Ollama, Whisper, synth-ai shell, AI workspace |
+| **Lite**     | 🪶  | Lightweight, fast, for older/low-RAM hardware |
+
+---
+
+## 🎮 Gaming Stack
+
+| Component | Version | Notes |
+|-----------|---------|-------|
+| Kernel    | synthex-kernel | BORE + FUTEX2 + HDR patches |
+| Steam     | Latest  | Pre-installed (native + Flatpak) |
+| Proton GE | Latest  | Valve + GloriousEggroll |
+| Gamescope | 3.14+   | VRR, HDR, per-game FSR |
+| MangoHUD  | 0.7.x   | GPU/CPU overlay |
+| GameMode  | 1.8     | CPU/GPU boost daemon |
+| DXVK      | 2.4+    | DirectX → Vulkan |
+| VKD3D-Proton | 2.13+ | DX12 → Vulkan |
+| Heroic    | 2.14+   | Epic/GOG/Amazon stores |
+| Lutris    | 0.5.x   | Universal game launcher |
+
+---
+
+## 🛠 System Components
+
+```
+synthex-system-daemon   — Master system daemon (D-Bus hub)
+synthex-hwdaemon        — Hardware detection & management
+synthex-desktopd        — Desktop session coordinator
+synthex-agent           — AI assistant daemon
+synthex-firstboot       — First-boot initialization service
+synthex-oobe            — First-login setup wizard
+synthex-welcome         — Welcome screen app
+synthex-control-center  — System settings GUI
+synthex-software-center — Unified app store
+synthex-update-manager  — System update GUI
+synthex-gaming-mode     — Gaming mode switcher
+synthex-gpu-setupd      — GPU configuration daemon
+synthex-recovery        — Recovery mode helper
+synthguard              — Security/IDS daemon
+synthnet                — Network configuration
+synthvault              — Secret/credential manager
+```
+
+---
+
+## 🔧 Configuration
+
+### Boot Parameters
+
+```bash
+# Added to GRUB_CMDLINE_LINUX_DEFAULT by synthex-grub-setup.sh:
+quiet splash
+
+# Gaming mode (applied by synthex-gaming-mode):
+mitigations=off threadirqs
+
+# Encrypted systems (added by Calamares):
+rd.luks.uuid=<UUID>
+
+# NVIDIA with Wayland:
+nvidia-drm.modeset=1 nvidia.NVreg_PreserveVideoMemoryAllocations=1
+```
+
+### Key File Locations
+
+| File | Purpose |
+|------|---------|
+| `/var/lib/synthex/install-profile.json` | Active desktop profile |
+| `/var/lib/synthex/oobe-apps.json` | Apps selected in OOBE |
+| `/var/lib/synthex/firstboot-complete` | First-boot completion marker |
+| `/etc/synthex/synthex.conf` | Global SynthOS configuration |
+| `/etc/sddm.conf.d/synthex.conf` | SDDM theme config |
+| `/etc/default/grub` | GRUB boot parameters |
+| `/usr/share/plymouth/themes/synthex/` | Plymouth theme |
+
+---
+
+## 📦 Edition ISOs
+
+| Edition | Size | Profile | Default WM |
+|---------|------|---------|------------|
+| Plasma  | ~3.2 GB | Full | KDE Plasma 6.2 |
+| Hyprland| ~2.8 GB | Focus/Gaming | Hyprland 0.42 |
+| GNOME   | ~3.0 GB | Full | GNOME 47 |
+| Gaming  | ~3.8 GB | Gaming | KDE Plasma |
+| Minimal | ~900 MB | None | None (CLI) |
+
+---
+
+## 🤝 Contributing
+
+1. Fork the repository
+2. Create a feature branch: `git checkout -b feat/my-feature`
+3. Make changes and test
+4. Open a pull request
+
+### Building a Component
+
+```bash
+# Build a specific Rust component
+cargo build --release -p synthex-hwdaemon
+
+# Run the OOBE wizard in reset mode
+make run-oobe
+
+# Validate all configs
+make validate
+```
+
+---
+
+## 📜 License
+
+- Source code: **GPL-3.0+**
+- Artwork & wallpapers: **CC-BY-SA-4.0**
+- Documentation: **CC-BY-4.0**
+
+---
+
+## 🔗 Links
+
+| | |
+|-|-|
+| 🌐 Website | https://synthex-os.org |
+| 💬 Forum | https://discuss.synthex-os.org |
+| 🐛 Issues | https://github.com/synthex-linux/issues |
+| 🎮 Discord | https://discord.gg/synthex |
+| 📧 Contact | team@synthex-os.org |
+
+---
+
+<div align="center">
+
+**Built with ❤ by the SynthOS community**
+
+*SynthOS is an independent project not affiliated with Fedora Project or Red Hat.*
+
+</div>

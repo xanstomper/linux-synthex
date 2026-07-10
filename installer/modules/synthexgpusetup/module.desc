@@ -1,0 +1,6 @@
+---
+type:       "job"
+name:       "synthexgpusetup"
+interface:  "python"
+script:     "main.py"
+timeout:    360

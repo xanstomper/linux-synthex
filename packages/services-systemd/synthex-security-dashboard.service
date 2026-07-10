@@ -1,0 +1,15 @@
+[Unit]
+Description=SynthOS security-dashboard service
+After=network.target graphical-session.target
+PartOf=graphical-session.target
+
+[Service]
+Type=dbus
+BusName=org.synthex.SecurityDashboard
+ExecStart=/usr/libexec/synthex/synthex-security-dashboard
+Restart=on-failure
+RestartSec=3
+TimeoutStartSec=30
+
+[Install]
+WantedBy=graphical-session.target

@@ -1,0 +1,5 @@
+---
+type:      "view"
+name:      "keyboard"
+interface: "qtplugin"
+load:      "libcalamares_keyboard.so"

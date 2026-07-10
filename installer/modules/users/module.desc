@@ -1,0 +1,5 @@
+---
+type:      "view"
+name:      "users"
+interface: "qtplugin"
+load:      "libcalamares_users.so"

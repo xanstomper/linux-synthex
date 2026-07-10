@@ -1,0 +1,9 @@
+[kdeglobals]
+ColorScheme=SynthexDark
+XftAntialias=true
+XftHintStyle=hintmedium
+XftSubPixel=rgb
+
+[kwinrc]
+CompositingType=OpenGL
+GLBackend=OpenGL2

@@ -1,0 +1,15 @@
+[Unit]
+Description=SynthOS audit service
+After=network.target graphical-session.target
+PartOf=graphical-session.target
+
+[Service]
+Type=dbus
+BusName=org.synthex.Audit
+ExecStart=/usr/libexec/synthex/synthex-audit
+Restart=on-failure
+RestartSec=3
+TimeoutStartSec=30
+
+[Install]
+WantedBy=graphical-session.target

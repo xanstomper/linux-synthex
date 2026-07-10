@@ -1,0 +1,246 @@
+# SynthOS Build & Release CI
+name: SynthOS Build Pipeline
+
+on:
+  push:
+    branches: [main, develop, "release/*"]
+    tags:     ["v*", "2026.*"]
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+    inputs:
+      edition:
+        description: 'ISO edition to build'
+        required: false
+        default: 'plasma'
+        type: choice
+        options: [plasma, hyprland, gnome, gaming, minimal, all]
+      version:
+        description: 'Version string'
+        required: false
+        default: '2026.10'
+
+env:
+  CARGO_TERM_COLOR: always
+  RUST_BACKTRACE: 1
+  VERSION: ${{ github.event.inputs.version || '2026.10' }}
+
+jobs:
+  # ── Job 1: Rust workspace ─────────────────────────────────────────────────
+  rust-build:
+    name: Rust Workspace
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Cache Rust
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.cargo/registry
+            ~/.cargo/git
+            target
+          key: ${{ runner.os }}-cargo-${{ hashFiles('**/Cargo.lock') }}
+
+      - name: Install Rust stable
+        uses: dtolnay/rust-toolchain@stable
+        with:
+          components: clippy, rustfmt
+
+      - name: Clippy
+        run: cargo clippy --workspace --all-targets -- -D warnings
+
+      - name: Build release
+        run: cargo build --release --workspace
+
+      - name: Count binaries
+        run: |
+          count=$(ls target/release/ | grep -v '\.d$\|\.rlib$\|deps\|build\|incremental\|examples' | wc -l)
+          echo "Built $count binaries"
+          [ "$count" -ge 28 ] || (echo "Expected ≥28 binaries, got $count" && exit 1)
+
+      - name: Upload binaries
+        uses: actions/upload-artifact@v4
+        with:
+          name: synthex-binaries-${{ env.VERSION }}
+          path: target/release/synthex-*
+          retention-days: 7
+
+  # ── Job 2: Kickstart validation ───────────────────────────────────────────
+  kickstart-validate:
+    name: Kickstart Files
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install pykickstart
+        run: sudo apt-get install -y pykickstart || pip install pykickstart
+
+      - name: Validate all KS files
+        run: |
+          echo "Validating kickstart files..."
+          FAIL=0
+          for ks in build/kickstart/*.ks; do
+            name=$(basename "$ks")
+            echo -n "  $name: "
+            if ksvalidator "$ks" 2>/dev/null; then
+              echo "✓"
+            else
+              echo "✗ FAILED"
+              FAIL=1
+            fi
+          done
+          exit $FAIL
+
+      - name: Check required sections
+        run: bash build/scripts/prepare-kickstart.sh all --validate-only
+
+  # ── Job 3: Spec file lint ─────────────────────────────────────────────────
+  spec-lint:
+    name: RPM Spec Lint
+    runs-on: fedora-latest
+    container: fedora:41
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install rpmlint
+        run: dnf install -y rpmlint rpm-build
+
+      - name: Lint critical specs
+        run: |
+          FAIL=0
+          for spec in packages/spec-files/synthex-core.spec \
+                      packages/spec-files/synthex-installer.spec \
+                      packages/spec-files/synthex-branding.spec; do
+            echo "Linting $spec..."
+            rpmlint "$spec" || FAIL=1
+          done
+          exit $FAIL
+
+  # ── Job 4: Python module tests ────────────────────────────────────────────
+  python-tests:
+    name: Installer Modules
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Install deps
+        run: pip install pyaml jsonschema
+
+      - name: Syntax-check all installer modules
+        run: |
+          FAIL=0
+          for py in installer/modules/*/main.py; do
+            echo -n "  $(dirname $py | xargs basename): "
+            python3 -m py_compile "$py" && echo "✓" || { echo "✗"; FAIL=1; }
+          done
+          exit $FAIL
+
+      - name: Syntax-check agent
+        run: |
+          python3 -m py_compile src/synthex-agent/__init__.py
+          python3 -m py_compile src/synthex-agent/daemon/synthex-agentd
+
+  # ── Job 5: Theme assets ───────────────────────────────────────────────────
+  theme-check:
+    name: Theme Assets
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Check GRUB theme
+        run: |
+          for f in background.png theme.txt font-regular.pf2 select_c.png; do
+            [ -f "branding/grub/themes/synthex/$f" ] && echo "✓ GRUB $f" || \
+              { echo "✗ Missing GRUB $f"; exit 1; }
+          done
+
+      - name: Check Plymouth theme
+        run: |
+          for f in synthex.script synthex.plymouth; do
+            [ -f "branding/plymouth/theme/$f" ] && echo "✓ Plymouth $f" || \
+              { echo "✗ Missing Plymouth $f"; exit 1; }
+          done
+
+      - name: Check SDDM theme
+        run: |
+          for f in Main.qml theme.conf metadata.desktop; do
+            [ -f "desktop/sddm/synthex-sddm-theme/$f" ] && echo "✓ SDDM $f" || \
+              { echo "✗ Missing SDDM $f"; exit 1; }
+          done
+
+  # ── Job 6: ISO build (on tag/manual only) ────────────────────────────────
+  iso-build:
+    name: ISO Build (${{ github.event.inputs.edition || 'plasma' }})
+    runs-on: ubuntu-24.04
+    needs: [rust-build, kickstart-validate, python-tests, theme-check]
+    if: startsWith(github.ref, 'refs/tags/') || github.event_name == 'workflow_dispatch'
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Download binaries
+        uses: actions/download-artifact@v4
+        with:
+          name: synthex-binaries-${{ env.VERSION }}
+          path: target/release/
+
+      - name: Install ISO build tools
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y lorax xorriso isomd5sum squashfs-tools \
+              python3-pyaml python3-jsonschema
+
+      - name: Build ISO
+        run: |
+          EDITION=${{ github.event.inputs.edition || 'plasma' }}
+          VERSION=${{ env.VERSION }}
+          bash build/scripts/build-iso.sh "$EDITION" --version "$VERSION"
+
+      - name: Verify ISO
+        run: |
+          ISO=$(ls build/out/SynthOS-*.iso | head -1)
+          echo "ISO: $ISO"
+          ls -lh "$ISO"
+          isoinfo -d -i "$ISO" | grep -E "Volume|Disc"
+          sha256sum "$ISO" | tee build/out/SHA256SUMS
+
+      - name: Upload ISO
+        uses: actions/upload-artifact@v4
+        with:
+          name: SynthOS-${{ env.VERSION }}-${{ github.event.inputs.edition || 'plasma' }}-x86_64
+          path: |
+            build/out/SynthOS-*.iso
+            build/out/SHA256SUMS
+          retention-days: 30
+
+  # ── Job 7: GitHub Release ─────────────────────────────────────────────────
+  release:
+    name: Publish Release
+    runs-on: ubuntu-24.04
+    needs: [iso-build]
+    if: startsWith(github.ref, 'refs/tags/')
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Download all ISOs
+        uses: actions/download-artifact@v4
+        with:
+          pattern: SynthOS-*-x86_64
+          merge-multiple: true
+          path: release/
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          name: "SynthOS ${{ env.VERSION }} — Ignition"
+          body_path: docs/RELEASE-NOTES-2026.10.md
+          draft: false
+          prerelease: false
+          files: |
+            release/SynthOS-*.iso
+            release/SHA256SUMS

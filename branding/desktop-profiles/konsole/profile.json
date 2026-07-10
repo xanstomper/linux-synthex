@@ -1,0 +1,15 @@
+{
+  "id": "synthex-konsole",
+  "display": "SynthOS Konsole",
+  "description": "SynthOS profile optimised for konsole users",
+  "look_and_feel": "org.kde.synthex.desktop",
+  "color_scheme": "SynthexDark",
+  "features": ["taskbar", "konsole", "file-manager"],
+  "default_apps": {
+    "file-manager": "konsole",
+    "terminal": "konsole",
+    "browser": "firefox"
+  },
+  "bundles": ["synthex-core"],
+  "wallpaper": "synthex-default"
+}

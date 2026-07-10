@@ -1,0 +1,15 @@
+[Unit]
+Description=SynthOS proton-manager service
+After=network.target graphical-session.target
+PartOf=graphical-session.target
+
+[Service]
+Type=dbus
+BusName=org.synthex.ProtonManager
+ExecStart=/usr/libexec/synthex/synthex-proton-manager
+Restart=on-failure
+RestartSec=3
+TimeoutStartSec=30
+
+[Install]
+WantedBy=graphical-session.target

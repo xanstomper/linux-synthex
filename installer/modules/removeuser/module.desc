@@ -1,0 +1,5 @@
+---
+type:      "job"
+name:      "removeuser"
+interface: "qtplugin"
+load:      "libcalamares_removeuser.so"

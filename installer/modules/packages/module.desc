@@ -1,0 +1,5 @@
+---
+type:      "job"
+name:      "packages"
+interface: "qtplugin"
+load:      "libcalamares_packages.so"
