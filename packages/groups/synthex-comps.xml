@@ -21,6 +21,8 @@
           <packagereq type="mandatory">synthex-desktopd</packagereq>
           <packagereq type="mandatory">synthex-gpu-setupd</packagereq>
           <packagereq type="mandatory">synthex-stored</packagereq>
+          <!-- AI consciousness daemon (the OS "brain") -->
+          <packagereq type="mandatory">synthex-aether</packagereq>
           <!-- CLI tools -->
           <packagereq type="mandatory">synthex-cli</packagereq>
           <packagereq type="mandatory">synthex-pkg</packagereq>
@@ -216,7 +218,9 @@
         <default>false</default>
         <packagelist>
           <packagereq type="mandatory">synthex-ai-daemon</packagereq>
+          <packagereq type="mandatory">synthex-aether</packagereq>
           <packagereq type="default">synthex-ai-hub</packagereq>
+          <packagereq type="default">synthex-sentinel</packagereq>
           <packagereq type="optional">synthex-ai-platform</packagereq>
         </packagelist>
       </group>

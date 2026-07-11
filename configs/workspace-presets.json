@@ -1,0 +1,11 @@
+{
+  "version": "1.0",
+  "workspaces": [
+    {
+      "name": "Default",
+      "icon": "desktop",
+      "apps": [],
+      "description": "Default workspace preset"
+    }
+  ]
+}

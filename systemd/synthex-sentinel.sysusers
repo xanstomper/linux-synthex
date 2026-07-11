@@ -1,0 +1,2 @@
+#Type Name             ID GECOS                    Home directory                 Shell
+u     synthex-sentinel  -  "SynthOS AETHER SENTINEL" /var/lib/synthex/sentinel      /usr/sbin/nologin

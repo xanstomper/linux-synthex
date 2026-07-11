@@ -52,6 +52,12 @@ pub struct MemoryStore {
     db: Arc<Mutex<Connection>>,
 }
 
+impl std::fmt::Debug for MemoryStore {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        f.debug_struct("MemoryStore").finish_non_exhaustive()
+    }
+}
+
 // SAFETY: rusqlite::Connection is Send; we never allow concurrent access (Mutex).
 unsafe impl Sync for MemoryStore {}
 

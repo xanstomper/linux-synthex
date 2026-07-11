@@ -13,7 +13,8 @@ BOLD   := \033[1m
 RESET  := \033[0m
 
 .PHONY: all help rust iso iso-all iso-plasma iso-hyprland iso-gnome iso-gaming iso-minimal \
-        ks-validate rpms clean clean-iso srctars release docs
+        ks-validate rpms clean clean-iso srctars release docs \
+        aether sentinel
 
 help:
 	@echo ""
@@ -30,7 +31,7 @@ help:
 	@echo "    make clean          Remove build artefacts"
 	@echo ""
 
-all: rust ks-validate iso
+all: rust ks-validate aether sentinel iso
 
 # ── Rust workspace ────────────────────────────────────────────────────────────
 rust:
@@ -38,6 +39,20 @@ rust:
 	cargo build --release --workspace
 	@count=$$(ls target/release/ 2>/dev/null | grep -vE '\.d$$|\.rlib$$|deps|build|incremental|examples' | wc -l); \
 	echo -e "$(GREEN)[OK]$(RESET)    $$count binaries in target/release/"
+
+# ── AETHER CORE (independent Cargo workspace) ──────────────────────────────
+aether:
+	@echo -e "$(GREEN)[BUILD]$(RESET) AETHER CORE workspace (aether/core)..."
+	cd aether/core && cargo build --release
+	@echo -e "$(GREEN)[OK]$(RESET)    aetherd -> aether/core/target/release/aetherd"
+
+# ── AETHER SENTINEL (independent Cargo workspace) ─────────────────────────
+sentinel:
+	@echo -e "$(GREEN)[BUILD]$(RESET) AETHER SENTINEL workspace (aether/sentinel)..."
+	cd aether/sentinel && cargo build --release
+	@echo -e "$(GREEN)[OK]$(RESET)    aether-sentinel -> aether/sentinel/target/release/aether-sentinel"
+
+
 
 # ── Kickstart validation ──────────────────────────────────────────────────────
 ks-validate:
@@ -91,7 +106,7 @@ rpms: srctars
 	exit $$FAIL
 
 # ── Full release ──────────────────────────────────────────────────────────────
-release: rust ks-validate iso-all
+release: rust ks-validate aether sentinel iso-all
 	@bash build/scripts/release.sh $(VERSION)
 
 # ── Documentation ─────────────────────────────────────────────────────────────

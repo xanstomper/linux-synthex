@@ -200,7 +200,11 @@ fn window_to_saved_app(w: &WindowSnapshot, workspace_n: u32) -> Option<SavedApp>
     let env_overrides = read_proc_env(pid);
 
     Some(SavedApp {
-        name: w.class.clone().or(w.process_name.clone()).unwrap_or_else(|| cmdline[0].clone()),
+        name: if !w.class.is_empty() {
+            w.class.clone()
+        } else {
+            w.process_name.clone().unwrap_or_else(|| cmdline[0].clone())
+        },
         cmdline,
         exe,
         working_dir: w.working_directory.clone(),

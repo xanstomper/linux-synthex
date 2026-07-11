@@ -1,0 +1,48 @@
+[Unit]
+Description=SynthOS AETHER SENTINEL — zero-trust security intelligence
+Documentation=https://github.com/SynthOS-Linux/linux-synthex
+After=network.target synthex-aether.service
+Requires=synthex-aether.service
+# Sentinel grades agent activity, so it should be up before agent daemons run.
+Before=synthex-agent.service
+
+[Service]
+Type=simple
+ExecStart=/usr/lib/synthex/aether-sentinel
+Restart=always
+RestartSec=3
+TimeoutStartSec=30
+
+# Dedicated unprivileged system user
+User=synthex-sentinel
+Group=synthex-sentinel
+
+# Filesystem hardening
+ProtectSystem=strict
+ProtectHome=read-only
+PrivateTmp=true
+PrivateDevices=true
+ProtectKernelTunables=true
+ProtectKernelModules=true
+ProtectControlGroups=true
+RestrictRealtime=true
+RestrictSUIDSGID=true
+LockPersonality=true
+MemoryDenyWriteExecute=true
+
+# Writable paths
+ReadWritePaths=/var/lib/synthex /run/synthex
+
+RuntimeDirectory=synthex
+RuntimeDirectoryMode=0750
+StateDirectory=synthex/sentinel
+StateDirectoryMode=0700
+
+NoNewPrivileges=yes
+
+LimitNOFILE=65536
+MemoryMax=256M
+CPUQuota=15%
+
+[Install]
+WantedBy=multi-user.target synthex.target

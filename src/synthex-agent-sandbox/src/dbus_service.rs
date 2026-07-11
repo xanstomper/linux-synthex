@@ -246,7 +246,8 @@ impl AgentSandboxInterface {
         mode: String,
     ) -> zbus::fdo::Result<bool> {
         let state = self.state.read().await;
-        let map = state.registry.inner().read().await;
+        let registry = state.registry.inner();
+        let map = registry.read().await;
         let sb = map.get(&sandbox_id)
             .ok_or_else(|| zbus::fdo::Error::Failed(format!("Sandbox not found: {}", sandbox_id)))?;
 

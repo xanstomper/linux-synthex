@@ -1,0 +1,120 @@
+{
+  "output": {
+    "blocklist": [],
+    "plugins_order": [
+      "bass_enhancer#0",
+      "equalizer#0",
+      "convolver#0",
+      "crystalizer#0",
+      "stereo_tools#0",
+      "limiter#0"
+    ],
+    "bass_enhancer#0": {
+      "input-gain":    0.0,
+      "output-gain":   0.0,
+      "amount":        4.5,
+      "harmonics":     8.5,
+      "scope":         90.0,
+      "floor":         20.0,
+      "frequency":     85.0,
+      "floor-active":  true,
+      "listen":        false,
+      "plugins_order": []
+    },
+    "equalizer#0": {
+      "input-gain":    0.0,
+      "output-gain":   0.0,
+      "mode":          "IIR",
+      "num-bands":     10,
+      "split-channels": false,
+      "plugins_order": [],
+      "band0":  { "frequency":    31.0, "gain":  3.5, "mode": "Peak", "mute": false, "q": 0.7,  "slope": "x1", "solo": false, "type": "Bell" },
+      "band1":  { "frequency":    63.0, "gain":  2.5, "mode": "Peak", "mute": false, "q": 0.8,  "slope": "x1", "solo": false, "type": "Bell" },
+      "band2":  { "frequency":   125.0, "gain":  1.0, "mode": "Peak", "mute": false, "q": 1.0,  "slope": "x1", "solo": false, "type": "Bell" },
+      "band3":  { "frequency":   250.0, "gain": -0.5, "mode": "Peak", "mute": false, "q": 1.2,  "slope": "x1", "solo": false, "type": "Bell" },
+      "band4":  { "frequency":   500.0, "gain":  0.0, "mode": "Peak", "mute": false, "q": 1.4,  "slope": "x1", "solo": false, "type": "Bell" },
+      "band5":  { "frequency":  1000.0, "gain":  0.5, "mode": "Peak", "mute": false, "q": 1.4,  "slope": "x1", "solo": false, "type": "Bell" },
+      "band6":  { "frequency":  2000.0, "gain":  1.5, "mode": "Peak", "mute": false, "q": 1.6,  "slope": "x1", "solo": false, "type": "Bell" },
+      "band7":  { "frequency":  4000.0, "gain":  2.0, "mode": "Peak", "mute": false, "q": 1.6,  "slope": "x1", "solo": false, "type": "Bell" },
+      "band8":  { "frequency":  8000.0, "gain":  1.0, "mode": "Peak", "mute": false, "q": 1.8,  "slope": "x1", "solo": false, "type": "Bell" },
+      "band9":  { "frequency": 16000.0, "gain": -1.0, "mode": "Peak", "mute": false, "q": 0.9,  "slope": "x1", "solo": false, "type": "Bell" }
+    },
+    "convolver#0": {
+      "input-gain":    0.0,
+      "output-gain":  -1.5,
+      "ir-width":     100,
+      "kernel-path":  "/usr/share/easyeffects/irs/hrtf-gaming-7.1.irs",
+      "plugins_order": []
+    },
+    "crystalizer#0": {
+      "input-gain":    0.0,
+      "output-gain":   0.0,
+      "aggressive":    false,
+      "plugins_order": [],
+      "band0":  { "intensity": 3.5, "mute": false, "bypass": false },
+      "band1":  { "intensity": 3.0, "mute": false, "bypass": false },
+      "band2":  { "intensity": 2.5, "mute": false, "bypass": false },
+      "band3":  { "intensity": 2.0, "mute": false, "bypass": false },
+      "band4":  { "intensity": 2.0, "mute": false, "bypass": false },
+      "band5":  { "intensity": 2.0, "mute": false, "bypass": false },
+      "band6":  { "intensity": 1.5, "mute": false, "bypass": false },
+      "band7":  { "intensity": 1.0, "mute": false, "bypass": false },
+      "band8":  { "intensity": 0.5, "mute": false, "bypass": false },
+      "band9":  { "intensity": 0.5, "mute": false, "bypass": false },
+      "band10": { "intensity": 0.5, "mute": false, "bypass": false },
+      "band11": { "intensity": 0.5, "mute": false, "bypass": false },
+      "band12": { "intensity": 0.5, "mute": false, "bypass": false }
+    },
+    "stereo_tools#0": {
+      "input-gain":      0.0,
+      "output-gain":     0.0,
+      "balance-in":      0.0,
+      "balance-out":     0.0,
+      "delay":           2.05,
+      "middle-level":    0.0,
+      "side-level":      0.0,
+      "sc-level":        1.0,
+      "softclip":        false,
+      "mutel":           false,
+      "muter":           false,
+      "phasel":          false,
+      "phaser":          false,
+      "mode":            "LR > MS > LR",
+      "plugins_order":   []
+    },
+    "limiter#0": {
+      "input-gain":       0.0,
+      "output-gain":      0.0,
+      "mode":             "Herm Thin",
+      "oversampling":     "None",
+      "dithering":        "None",
+      "threshold":       -0.5,
+      "lookahead":        5.0,
+      "attack":           5.0,
+      "release":        500.0,
+      "alr-attack":      5.0,
+      "alr-knee":        0.0,
+      "alr-release":   300.0,
+      "alr":             false,
+      "gain-boost":      false,
+      "external-sc":     false,
+      "sidechain": {
+        "type":          "Feed-forward",
+        "mode":          "RMS",
+        "source":        "Middle",
+        "dyn-preamplifier": false,
+        "preamp":         0.0,
+        "reactivity":    10.0,
+        "lookahead":      0.0
+      },
+      "plugins_order": []
+    }
+  },
+  "metadata": {
+    "profile":      "gaming",
+    "description":  "SynthOS Gaming — 7.1 virtualisation, bass enhancement, crystalizer presence boost",
+    "version":      "1.0.0",
+    "author":       "SynthOS Brain OS",
+    "created":      "2026-07-11"
+  }
+}

@@ -28,10 +28,48 @@ Kirigami.ApplicationWindow {
     property bool gamemodeActive: false
     property string searchQuery: ""
 
-    // Update game mode status
+    // Poll gamemode status via synthex-gaming-mode IPC every 3 s
     Timer {
         interval: 3000; running: true; repeat: true
-        onTriggered: gamemodeActive = false // TODO: check via IPC
+        onTriggered: {
+            gamemodeSocket.send("STATUS")
+        }
+    }
+
+    // Lightweight Unix-socket client for synthex-gaming-mode
+    // Reads: "active\n" → gamemodeActive = true; "inactive\n" → false
+    // Falls back gracefully if the socket isn't present (no gaming features).
+    property var _gamemodeSocket: null
+    Component.onCompleted: {
+        gamemodeSocket.open()
+    }
+    Component.onDestruction: {
+        gamemodeSocket.close()
+    }
+
+    // QML LocalSocket (Qt5/Qt6)
+    LocalSocket {
+        id: gamemodeSocket
+        serverName: "/run/synthex/gaming-mode.sock"
+
+        onConnected:    send("STATUS")
+        onDisconnected: gamemodeActive = false
+        onError:        gamemodeActive = false   // socket not available → show as OFF
+
+        onReadyRead: {
+            var reply = String(readAll()).trim()
+            if (reply === "active")   gamemodeActive = true
+            else                       gamemodeActive = false
+        }
+
+        function send(msg) {
+            if (state === LocalSocket.ConnectedState) {
+                write(msg + "\n")
+            } else {
+                // Reconnect and retry
+                open()
+            }
+        }
     }
 
     // ── Header ───────────────────────────────────────────────────────────────
@@ -106,8 +144,12 @@ Kirigami.ApplicationWindow {
             }
             MouseArea {
                 anchors.fill: parent
-                onClicked: gamemodeActive = !gamemodeActive
-                // TODO: actually toggle via gamemoded IPC
+                onClicked: {
+                    // Optimistically flip the indicator, then confirm via IPC
+                    var desired = !gamemodeActive
+                    gamemodeSocket.send(desired ? "ENABLE" : "DISABLE")
+                    // The timer poll will correct the UI if the IPC call fails
+                }
             }
         }
     }
@@ -242,8 +284,14 @@ Kirigami.ApplicationWindow {
                     RowLayout {
                         Kirigami.FormData.label: i18n("Enable GameMode daemon:")
                         Switch {
-                            id: gmdSwitch; checked: true
-                            onToggled: {} // TODO: gamemoded toggle
+                            id: gmdSwitch
+                            checked: gamemodeActive
+                            onToggled: {
+                                // Forward the toggle to the gaming-mode IPC socket.
+                                // gamemodeSocket is defined near the top of the file;
+                                // the timer poll will reconcile the UI if IPC fails.
+                                gamemodeSocket.send(checked ? "ENABLE" : "DISABLE")
+                            }
                         }
                     }
 

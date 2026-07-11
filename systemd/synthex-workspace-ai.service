@@ -1,0 +1,53 @@
+[Unit]
+Description=SynthOS Workspace AI – Multi-workspace agent consciousness
+Documentation=https://github.com/SynthOS-Linux/linux-synthex
+After=dbus.service synthex-brain.service synthex-neural-ipc.service
+Requires=dbus.service synthex-brain.service
+BindsTo=synthex-brain.service
+
+[Service]
+Type=dbus
+BusName=org.synthex.WorkspaceAI
+ExecStart=/usr/lib/synthex/synthex-workspace-ai
+Restart=on-failure
+RestartSec=3
+TimeoutStartSec=20
+Environment=RUST_LOG=info
+
+# Dedicated unprivileged system user
+User=synthex-brain
+Group=synthex-brain
+
+# Filesystem hardening
+ProtectSystem=strict
+ProtectHome=read-only
+PrivateTmp=true
+PrivateDevices=true
+ProtectKernelTunables=true
+ProtectKernelModules=true
+ProtectControlGroups=true
+RestrictRealtime=true
+RestrictSUIDSGID=true
+LockPersonality=true
+MemoryDenyWriteExecute=true
+NoNewPrivileges=yes
+
+# Needs session D-Bus to talk to KWin; needs X11 for xdotool fallback
+ReadWritePaths=/var/lib/synthex /var/log/synthex /run/synthex
+RuntimeDirectory=synthex/workspace-ai
+RuntimeDirectoryMode=0750
+StateDirectory=synthex/workspace-ai
+StateDirectoryMode=0700
+LogsDirectory=synthex
+LogsDirectoryMode=0750
+
+# Forward session env so KWin D-Bus and xdotool work
+PassEnvironment=DISPLAY XAUTHORITY DBUS_SESSION_BUS_ADDRESS HOME XDG_RUNTIME_DIR
+
+# Resource limits
+LimitNOFILE=32768
+MemoryMax=256M
+CPUQuota=15%
+
+[Install]
+WantedBy=multi-user.target synthex.target

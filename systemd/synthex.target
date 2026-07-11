@@ -12,7 +12,9 @@ Wants=synthex-recovery.service synthex-oobe.service
 Wants=synthex-blueprint.service synthex-blueprint.timer
 Wants=synthex-ananicy.service
 
-# AI
+# AI — consciousness + agent runtime
+Wants=synthex-aether.service
+Wants=synthex-sentinel.service
 Wants=synthex-ai-hub.service
 Wants=synthex-agent.service
 

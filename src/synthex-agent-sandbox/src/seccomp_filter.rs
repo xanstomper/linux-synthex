@@ -193,9 +193,57 @@ impl SeccompFilter {
             debug!("Seccomp denylist filter installed ({} syscalls blocked)", self.blocked_syscalls.len());
         }
 
-        // TODO: compile and load the actual BPF program via seccomp_init(3) / seccomp_load(3).
-        // The placeholder above is sufficient to lock in NO_NEW_PRIVS while
-        // the namespace isolation provides the primary containment.
+        // Build and load the seccomp BPF filter using the `seccomp` crate.
+        //
+        // In allowlist_mode every syscall NOT in blocked_syscalls is killed;
+        // in denylist_mode every syscall IN blocked_syscalls is killed.
+        if kernel_supports_seccomp() {
+            let default_action = if self.allowlist_mode {
+                // "allowlist" means "allow only these; kill everything else"
+                seccomp::Action::KillProcess
+            } else {
+                // "denylist" means "allow everything except these"
+                seccomp::Action::Allow
+            };
+
+            let mut ctx = seccomp::Context::init(default_action).map_err(|e| {
+                anyhow::anyhow!("seccomp::Context::init failed: {e}")
+            })?;
+
+            for &nr in &self.blocked_syscalls {
+                let rule_action = if self.allowlist_mode {
+                    seccomp::Action::Allow       // allowlist entry → permit this syscall
+                } else {
+                    seccomp::Action::KillProcess // denylist entry  → kill on this syscall
+                };
+                ctx.add_rule(seccomp::Rule::new(
+                    nr as usize,
+                    seccomp::Compare::always(),
+                    rule_action,
+                ))
+                .map_err(|e| anyhow::anyhow!("seccomp add_rule(nr={nr}) failed: {e}"))?;
+            }
+
+            ctx.load().map_err(|e| anyhow::anyhow!("seccomp::Context::load failed: {e}"))?;
+
+            if self.allowlist_mode {
+                debug!(
+                    "Seccomp allowlist BPF filter loaded ({} syscalls permitted)",
+                    self.blocked_syscalls.len()
+                );
+            } else {
+                debug!(
+                    "Seccomp denylist BPF filter loaded ({} syscalls blocked)",
+                    self.blocked_syscalls.len()
+                );
+            }
+        } else {
+            // Kernel does not support seccomp(2); namespace isolation is the
+            // primary containment layer so we log a warning but do not abort.
+            log::warn!(
+                "Kernel does not support seccomp — relying on namespace isolation only"
+            );
+        }
 
         Ok(())
     }

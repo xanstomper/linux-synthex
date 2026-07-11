@@ -45,6 +45,7 @@ pub struct ContextSnapshot {
 
 // ── Monitor ───────────────────────────────────────────────────────────────────
 
+#[derive(Debug)]
 pub struct ContextMonitor {
     state:    RwLock<ContextSnapshot>,
     /// Previous `/proc/stat` totals for CPU-delta calculation.
@@ -159,7 +160,7 @@ impl ContextMonitor {
 
 // ── CPU stat ──────────────────────────────────────────────────────────────────
 
-#[derive(Clone)]
+#[derive(Debug, Clone)]
 struct CpuStat {
     total: u64,
     idle:  u64,

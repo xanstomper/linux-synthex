@@ -1,0 +1,298 @@
+#!/usr/bin/env bash
+# =============================================================================
+# SynthOS Brain OS — Spatial Audio Subsystem Installer
+# /home/jewboy420/linux-synthex/desktop/synthex-spatial-audio/setup.sh
+#
+# Idempotent installer and configurator for the SynthEx spatial audio stack.
+# Safe to run multiple times — checks before writing/installing.
+# =============================================================================
+
+set -euo pipefail
+
+# ── Colours ──────────────────────────────────────────────────────────────────
+RED='\033[0;31m'; GREEN='\033[0;32m'; YELLOW='\033[1;33m'
+CYAN='\033[0;36m'; BOLD='\033[1m'; RESET='\033[0m'
+
+info()    { echo -e "${CYAN}[synthex-audio]${RESET} $*"; }
+ok()      { echo -e "${GREEN}[  OK  ]${RESET} $*"; }
+warn()    { echo -e "${YELLOW}[ WARN ]${RESET} $*"; }
+die()     { echo -e "${RED}[ FAIL ]${RESET} $*" >&2; exit 1; }
+section() { echo -e "\n${BOLD}── $* ──${RESET}"; }
+
+# ── Paths ─────────────────────────────────────────────────────────────────────
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+PIPEWIRE_CONF_DIR="${HOME}/.config/pipewire/pipewire.conf.d"
+PIPEWIRE_CONF="${PIPEWIRE_CONF_DIR}/99-synthex-spatial.conf"
+EASYEFFECTS_PRESET_DIR="${HOME}/.config/easyeffects/output"
+SYNTHEX_DATA_DIR="${HOME}/.local/share/synthex"
+SYNTHEX_BIN_DIR="${HOME}/.local/bin"
+SERVICE_SRC="${SCRIPT_DIR}/synthex-spatial-audio.service"
+SERVICE_DEST="${HOME}/.config/systemd/user/synthex-spatial-audio.service"
+DBUS_SERVICE_DIR="${HOME}/.local/share/dbus-1/services"
+DAEMON_SRC="${SCRIPT_DIR}/spatial-audio-daemon.py"
+HRTF_PROFILE_FILE="${SYNTHEX_DATA_DIR}/hrtf-profile"
+LOG_FILE="${SYNTHEX_DATA_DIR}/setup.log"
+
+REQUIRED_PKGS=(
+    pipewire
+    pipewire-pulse
+    pipewire-alsa
+    wireplumber
+    easyeffects
+    python3-dbus
+    python3-gi
+    python3-requests
+    ladspa-sdk
+    swh-plugins
+    calf-plugins
+    ir.lv2
+)
+
+# ── Logging ───────────────────────────────────────────────────────────────────
+mkdir -p "${SYNTHEX_DATA_DIR}"
+exec > >(tee -a "${LOG_FILE}") 2>&1
+info "Setup started at $(date -Iseconds)"
+
+# ── Prerequisite checks ───────────────────────────────────────────────────────
+section "Prerequisite Checks"
+
+[[ "${EUID}" -eq 0 ]] && die "Do not run as root. This installs into your user session."
+
+command -v apt-get &>/dev/null || die "This installer requires an apt-based distro (Debian/Ubuntu/Pop!_OS)."
+command -v systemctl &>/dev/null || die "systemd is required."
+
+# ── Package installation ──────────────────────────────────────────────────────
+section "Package Installation"
+
+MISSING_PKGS=()
+for pkg in "${REQUIRED_PKGS[@]}"; do
+    dpkg -s "${pkg}" &>/dev/null || MISSING_PKGS+=("${pkg}")
+done
+
+if [[ ${#MISSING_PKGS[@]} -gt 0 ]]; then
+    info "Installing missing packages: ${MISSING_PKGS[*]}"
+    sudo apt-get update -qq
+    sudo apt-get install -y "${MISSING_PKGS[@]}"
+    ok "Packages installed."
+else
+    ok "All required packages already present."
+fi
+
+# ── Headphone detection / HRTF profile selection ──────────────────────────────
+section "Headphone Detection & HRTF Profile"
+
+detect_headphone_profile() {
+    local profile="music"  # safe default
+
+    # Try PipeWire node names for connected sinks
+    if command -v pw-cli &>/dev/null; then
+        local nodes
+        nodes="$(pw-cli list-objects 2>/dev/null | grep -i 'node.description\|node.name' || true)"
+
+        if echo "${nodes}" | grep -qiE 'gaming|hyperx|steelseries|razer|arctis|blackshark|kraken'; then
+            profile="gaming"
+        elif echo "${nodes}" | grep -qiE 'home.?theater|surround|cinema|atmos'; then
+            profile="cinema"
+        fi
+    fi
+
+    # Also check ALSA card names
+    if [[ -f /proc/asound/cards ]]; then
+        local cards; cards="$(cat /proc/asound/cards)"
+        if echo "${cards}" | grep -qiE 'gaming|hyperx|steelseries|razer'; then
+            profile="gaming"
+        fi
+    fi
+
+    echo "${profile}"
+}
+
+if [[ -f "${HRTF_PROFILE_FILE}" ]]; then
+    HRTF_PROFILE="$(cat "${HRTF_PROFILE_FILE}")"
+    ok "Existing HRTF profile found: ${HRTF_PROFILE}"
+else
+    HRTF_PROFILE="$(detect_headphone_profile)"
+    echo "${HRTF_PROFILE}" > "${HRTF_PROFILE_FILE}"
+    ok "Auto-detected HRTF profile: ${HRTF_PROFILE}"
+fi
+
+# ── PipeWire HRTF configuration ───────────────────────────────────────────────
+section "PipeWire Spatial Audio Configuration"
+
+mkdir -p "${PIPEWIRE_CONF_DIR}"
+
+# Select HRTF filter coefficients path by profile
+case "${HRTF_PROFILE}" in
+    gaming)  HRTF_IR_FILENAME="hrtf-gaming-itu.wav";   HRTF_LABEL="Gaming (ITU-T BS.1116 reference)" ;;
+    cinema)  HRTF_IR_FILENAME="hrtf-cinema-wide.wav";  HRTF_LABEL="Cinema (wide-stage diffuse)" ;;
+    *)       HRTF_IR_FILENAME="hrtf-music-kemar.wav";  HRTF_LABEL="Music (KEMAR HRTF)" ;;
+esac
+
+# Only rewrite if content would change (idempotency)
+CONF_CONTENT="# SynthOS Spatial Audio — PipeWire configuration
+# Generated by setup.sh on $(date -Iseconds)
+# Profile: ${HRTF_LABEL}
+# DO NOT EDIT — regenerate with setup.sh
+
+context.modules = [
+    {   name = libpipewire-module-filter-chain
+        args = {
+            node.description = \"SynthEx HRTF Virtualizer (${HRTF_LABEL})\"
+            media.name       = \"SynthEx HRTF Virtualizer\"
+            filter.graph = {
+                nodes = [
+                    {
+                        type   = ladspa
+                        name   = hrtf_l
+                        plugin = \"/usr/lib/ladspa/bspatial.so\"
+                        label  = bspatial
+                        control = { \"Azimuth\" = -30.0  \"Elevation\" = 0.0  \"Spread\" = 0.2 }
+                    }
+                    {
+                        type   = ladspa
+                        name   = hrtf_r
+                        plugin = \"/usr/lib/ladspa/bspatial.so\"
+                        label  = bspatial
+                        control = { \"Azimuth\" = 30.0  \"Elevation\" = 0.0  \"Spread\" = 0.2 }
+                    }
+                    {
+                        type  = builtin
+                        name  = mix
+                        label = mixer
+                    }
+                ]
+                links = [
+                    { output = \"hrtf_l:Output\" input = \"mix:In 1\" }
+                    { output = \"hrtf_r:Output\" input = \"mix:In 2\" }
+                ]
+                inputs  = [ \"hrtf_l:Input\" \"hrtf_r:Input\" ]
+                outputs = [ \"mix:Out 1\"   \"mix:Out 2\"    ]
+            }
+            capture.props = {
+                node.name      = \"synthex_spatial_capture\"
+                media.class    = \"Audio/Sink\"
+                audio.channels = 2
+                audio.position = [ FL FR ]
+            }
+            playback.props = {
+                node.name   = \"synthex_spatial_playback\"
+                node.passive = true
+            }
+        }
+    }
+]
+"
+
+NEEDS_WRITE=true
+if [[ -f "${PIPEWIRE_CONF}" ]]; then
+    existing_profile="$(grep -oP '(?<=Profile: ).*' "${PIPEWIRE_CONF}" 2>/dev/null || true)"
+    [[ "${existing_profile}" == "${HRTF_LABEL}" ]] && NEEDS_WRITE=false
+fi
+
+if ${NEEDS_WRITE}; then
+    printf '%s' "${CONF_CONTENT}" > "${PIPEWIRE_CONF}"
+    ok "PipeWire HRTF config written: ${PIPEWIRE_CONF}"
+else
+    ok "PipeWire HRTF config already up-to-date."
+fi
+
+# ── EasyEffects preset installation ──────────────────────────────────────────
+section "EasyEffects Preset Installation"
+
+mkdir -p "${EASYEFFECTS_PRESET_DIR}"
+
+for preset_src in "${SCRIPT_DIR}/profiles/"*.json; do
+    preset_name="$(basename "${preset_src}")"
+    preset_dest="${EASYEFFECTS_PRESET_DIR}/synthex-${preset_name}"
+    if [[ ! -f "${preset_dest}" ]] || ! cmp -s "${preset_src}" "${preset_dest}"; then
+        cp "${preset_src}" "${preset_dest}"
+        ok "Installed preset: synthex-${preset_name}"
+    else
+        ok "Preset already current: synthex-${preset_name}"
+    fi
+done
+
+# ── D-Bus service registration ────────────────────────────────────────────────
+section "D-Bus Service Registration"
+
+mkdir -p "${DBUS_SERVICE_DIR}"
+DBUS_SERVICE_FILE="${DBUS_SERVICE_DIR}/org.synthex.SpatialAudio.service"
+
+DBUS_SERVICE_CONTENT="[D-BUS Service]
+Name=org.synthex.SpatialAudio
+Exec=${SYNTHEX_BIN_DIR}/synthex-spatial-audio-daemon
+SystemdService=synthex-spatial-audio.service
+"
+
+if [[ ! -f "${DBUS_SERVICE_FILE}" ]] || \
+   [[ "$(cat "${DBUS_SERVICE_FILE}")" != "${DBUS_SERVICE_CONTENT}" ]]; then
+    printf '%s' "${DBUS_SERVICE_CONTENT}" > "${DBUS_SERVICE_FILE}"
+    ok "D-Bus session service file written."
+else
+    ok "D-Bus service file already up-to-date."
+fi
+
+# ── Daemon binary symlink ─────────────────────────────────────────────────────
+section "Daemon Symlink"
+
+mkdir -p "${SYNTHEX_BIN_DIR}"
+DAEMON_LINK="${SYNTHEX_BIN_DIR}/synthex-spatial-audio-daemon"
+
+if [[ ! -L "${DAEMON_LINK}" ]] || [[ "$(readlink "${DAEMON_LINK}")" != "${DAEMON_SRC}" ]]; then
+    ln -sf "${DAEMON_SRC}" "${DAEMON_LINK}"
+    chmod +x "${DAEMON_SRC}"
+    ok "Daemon symlink created: ${DAEMON_LINK}"
+else
+    ok "Daemon symlink already correct."
+fi
+
+# ── systemd user service ──────────────────────────────────────────────────────
+section "systemd User Service"
+
+mkdir -p "$(dirname "${SERVICE_DEST}")"
+
+if [[ ! -f "${SERVICE_DEST}" ]] || ! cmp -s "${SERVICE_SRC}" "${SERVICE_DEST}"; then
+    cp "${SERVICE_SRC}" "${SERVICE_DEST}"
+    systemctl --user daemon-reload
+    ok "Service file installed and daemon reloaded."
+else
+    ok "Service file already current."
+fi
+
+# Enable but don't unconditionally restart (idempotent)
+if ! systemctl --user is-enabled synthex-spatial-audio.service &>/dev/null; then
+    systemctl --user enable synthex-spatial-audio.service
+    ok "Service enabled."
+fi
+
+if systemctl --user is-active synthex-spatial-audio.service &>/dev/null; then
+    systemctl --user restart synthex-spatial-audio.service
+    ok "Service restarted (was running)."
+else
+    systemctl --user start synthex-spatial-audio.service
+    ok "Service started."
+fi
+
+# ── Restart PipeWire to pick up new config ────────────────────────────────────
+section "PipeWire Reload"
+
+if systemctl --user is-active pipewire.service &>/dev/null; then
+    systemctl --user restart pipewire.service pipewire-pulse.service wireplumber.service
+    ok "PipeWire stack restarted."
+else
+    warn "PipeWire not running as a user service — start it manually or log out/in."
+fi
+
+# ── Summary ───────────────────────────────────────────────────────────────────
+section "Setup Complete"
+echo -e "${GREEN}${BOLD}"
+echo "  ╔═══════════════════════════════════════════════╗"
+echo "  ║   SynthOS Spatial Audio  ✓  Ready             ║"
+echo "  ║                                               ║"
+printf "  ║   HRTF profile : %-28s║\n" "${HRTF_PROFILE}"
+echo "  ║   D-Bus service : org.synthex.SpatialAudio   ║"
+echo "  ║   Log           : ~/.local/share/synthex/    ║"
+echo "  ╚═══════════════════════════════════════════════╝"
+echo -e "${RESET}"
+info "Run 'systemctl --user status synthex-spatial-audio' to verify."
+info "Setup log appended to: ${LOG_FILE}"

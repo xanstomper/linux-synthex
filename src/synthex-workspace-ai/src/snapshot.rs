@@ -235,20 +235,25 @@ fn enumerate_windows(
         // Skip unmapped windows.
         let attrs: GetWindowAttributesReply = match conn
             .get_window_attributes(win_id)
-            .and_then(|c| Ok(c.reply()?))
         {
-            Ok(a) => a,
+            Ok(c) => match c.reply() {
+                Ok(a) => a,
+                Err(_) => continue,
+            },
             Err(_) => continue,
         };
         let is_mapped = attrs.map_state == xproto::MapState::VIEWABLE;
 
         // Geometry.
-        let geo = match conn.get_geometry(win_id).and_then(|c| Ok(c.reply()?)) {
-            Ok(g) => WindowGeometry {
-                x: g.x,
-                y: g.y,
-                width: g.width,
-                height: g.height,
+        let geo = match conn.get_geometry(win_id) {
+            Ok(c) => match c.reply() {
+                Ok(g) => WindowGeometry {
+                    x: g.x,
+                    y: g.y,
+                    width: g.width,
+                    height: g.height,
+                },
+                Err(_) => continue,
             },
             Err(_) => continue,
         };
@@ -290,8 +295,11 @@ fn enumerate_windows(
     }
 
     // Mark the focused window.
-    if let Ok(focus_reply) = conn.get_input_focus().and_then(|c| Ok(c.reply()?)) {
-        let focused_id = focus_reply.focus as u64;
+    if let Ok(focus_reply) = conn.get_input_focus() {
+        let focused_id = match focus_reply.reply() {
+            Ok(r) => r.focus as u64,
+            Err(_) => return Ok(snapshots),
+        };
         for ws in &mut snapshots {
             if ws.window_id == focused_id {
                 ws.is_focused = true;

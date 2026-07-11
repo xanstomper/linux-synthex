@@ -34,3 +34,93 @@ help:
     just --list
 default:
     just --list
+
+# ── Brain OS / AI agent commands ─────────────────────────────────────────────
+
+# Show the Brain OS status dashboard (agents, memory, context)
+brain-status:
+    @echo "━━━ Brain OS Status ━━━"
+    @systemctl is-active synthex-brain.service     && echo "  🧠 Brain daemon:     RUNNING" || echo "  🧠 Brain daemon:     STOPPED"
+    @systemctl is-active synthex-neural-ipc.service && echo "  🔌 Neural IPC:       RUNNING" || echo "  🔌 Neural IPC:       STOPPED"
+    @systemctl is-active synthex-hermes.service     && echo "  🪽 Hermes router:    RUNNING" || echo "  🪽 Hermes router:    STOPPED"
+    @systemctl is-active synthex-workspace-ai.service && echo "  🖥️  Workspace AI:    RUNNING" || echo "  🖥️  Workspace AI:    STOPPED"
+    @echo ""
+    @echo "━━━ Agent Context ━━━"
+    @busctl call org.synthex.Brain /org/synthex/Brain org.synthex.Brain GetWorkspaceContext 2>/dev/null || echo "  (brain not reachable via D-Bus)"
+
+# Start all Brain OS daemons
+brain-start:
+    sudo systemctl start synthex-brain.service synthex-neural-ipc.service synthex-hermes.service synthex-workspace-ai.service
+    @echo "Brain OS started ✓"
+
+# Stop all Brain OS daemons
+brain-stop:
+    sudo systemctl stop synthex-workspace-ai.service synthex-hermes.service synthex-neural-ipc.service synthex-brain.service
+    @echo "Brain OS stopped ✓"
+
+# Restart brain daemon (hot-reload agent context)
+brain-restart:
+    sudo systemctl restart synthex-brain.service
+    @echo "Brain daemon restarted ✓"
+
+# Watch Brain OS logs (all daemons, interleaved)
+brain-logs:
+    journalctl -f --no-hostname -u synthex-brain -u synthex-neural-ipc -u synthex-hermes -u synthex-workspace-ai
+
+# Show current AI agent memory contents
+brain-memory:
+    @if [ -f "$HOME/.local/share/synthex/brain/memory.md" ]; then \
+        cat "$HOME/.local/share/synthex/brain/memory.md"; \
+    else \
+        echo "No memory file found at ~/.local/share/synthex/brain/memory.md"; \
+    fi
+
+# Wipe AI agent short-term memory (keeps long-term / project memory)
+brain-clear-stm:
+    @read -p "Clear short-term memory? [y/N] " confirm && [ "$$confirm" = "y" ] && \
+        busctl call org.synthex.Brain /org/synthex/Brain org.synthex.Brain ClearShortTermMemory 2>/dev/null && \
+        echo "Short-term memory cleared ✓" || echo "Aborted."
+
+# Rotate the Neural IPC HMAC key (requires restart)
+brain-rotate-key:
+    @read -p "Rotate neural-ipc HMAC key? This will restart all Brain OS services. [y/N] " confirm && \
+    [ "$$confirm" = "y" ] && { \
+        sudo rm -f /etc/synthex/neural-ipc.key; \
+        sudo /usr/lib/synthex/gen-ipc-key.sh; \
+        just brain-restart; \
+        echo "Neural IPC key rotated ✓"; \
+    } || echo "Aborted."
+
+# Launch a sandboxed AI agent repl (interactive)
+brain-agent name="researcher":
+    synthex-agent-sandbox --agent {{name}} --interactive
+
+# Show active agent windows on all virtual desktops
+brain-workspaces:
+    @busctl call org.synthex.WorkspaceAI /org/synthex/WorkspaceAI org.synthex.WorkspaceAI GetAllContexts 2>/dev/null \
+        || echo "(workspace-ai not running)"
+
+# Tile agent windows on current desktop (layout: columns|rows|grid|main-side)
+brain-tile layout="main-side":
+    qdbus org.kde.KWin /Scripting org.kde.kwin.Scripting.evalScript \
+        "tileAgentWindows(workspace.currentDesktop, '{{layout}}')" 2>/dev/null \
+        || echo "KWin script not loaded — run: systemctl --user start synthex-workspace-ai"
+
+# Open Brain OS memory palace visualizer
+brain-palace:
+    /usr/lib/synthex/synthex-memory-palace-daemon &
+    xdg-open http://localhost:7700/memory-palace
+
+# Run Brain OS self-test suite
+brain-test:
+    @echo "Running Brain OS integration tests..."
+    cargo test --workspace --manifest-path /home/jewboy420/linux-synthex/src/synthex-brain/Cargo.toml 2>&1 | tail -20
+
+# Enable Brain OS on startup
+brain-enable:
+    sudo systemctl enable --now synthex-brain.service synthex-neural-ipc.service synthex-hermes.service synthex-workspace-ai.service
+    @echo "Brain OS enabled at boot ✓"
+
+# Show inference stats (tokens/s, VRAM, CPU, latency)
+brain-stats:
+    curl -s http://localhost:7700/stats 2>/dev/null | python3 -m json.tool || echo "Brain IPC server not responding on :7700"

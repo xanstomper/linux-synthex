@@ -25,7 +25,7 @@ use serde::{Deserialize, Serialize};
 use tokio::sync::RwLock;
 use tracing::{error, info};
 use tracing_subscriber::{fmt, EnvFilter};
-use zbus::{connection, interface, SignalContext};
+use zbus::{connection, interface};
 
 use ai_context_sync::{
     AgentRegistry, IsolationLevel, WorkspaceContext, WorkspaceHistoryEntry, WorkspaceSnapshot,
@@ -360,8 +360,6 @@ impl WorkspaceAI {
     /// Restore a previously saved session.  Returns JSON array of restore results.
     async fn restore_workspace_session(&self, session_id: String) -> String {
         let kwin = self.state.read().await.kwin.clone();
-        let dummy_bridge;
-        let bridge_ref: Option<&KwinBridge>;
         // We need a bridge for restore; if KWin is unavailable the restore
         // still attempts launches but won't switch desktops.
         let bridge_owned: Option<KwinBridge>;

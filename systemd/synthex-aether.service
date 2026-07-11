@@ -1,0 +1,54 @@
+[Unit]
+Description=SynthOS AETHER — OS-level AI Consciousness Daemon
+Documentation=https://github.com/SynthOS-Linux/linux-synthex
+After=network.target
+# AETHER is the permanent cognition substrate; agent daemons should come up after it.
+Before=synthex-agent.service synthex-ai-daemon.service
+
+[Service]
+Type=simple
+# aetherd owns cognition; agents are ephemeral tenants that talk to it over the
+# JSON-line TCP API (default 127.0.0.1:8787) or the in-process DaemonApi trait.
+ExecStart=/usr/lib/synthex/aetherd \
+    --db-path /var/lib/synthex/aether/memory.db \
+    --listen 127.0.0.1:8787 \
+    --log-level info
+Restart=always
+RestartSec=3
+TimeoutStartSec=30
+
+# Dedicated unprivileged system user
+User=synthex-aether
+Group=synthex-aether
+
+# Filesystem hardening
+ProtectSystem=strict
+ProtectHome=read-only
+PrivateTmp=true
+PrivateDevices=true
+ProtectKernelTunables=true
+ProtectKernelModules=true
+ProtectControlGroups=true
+RestrictRealtime=true
+RestrictSUIDSGID=true
+LockPersonality=true
+MemoryDenyWriteExecute=true
+
+# Writable paths (memory DB + runtime socket dir)
+ReadWritePaths=/var/lib/synthex /run/synthex
+
+# Managed directories (created + chowned automatically by systemd)
+RuntimeDirectory=synthex
+RuntimeDirectoryMode=0750
+StateDirectory=synthex/aether
+StateDirectoryMode=0700
+
+NoNewPrivileges=yes
+
+# Resource limits
+LimitNOFILE=65536
+MemoryMax=512M
+CPUQuota=25%
+
+[Install]
+WantedBy=multi-user.target synthex.target

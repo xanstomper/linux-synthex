@@ -1,0 +1,2 @@
+#Type Name           ID GECOS                  Home directory               Shell
+u     synthex-aether  -  "SynthOS AETHER"       /var/lib/synthex/aether      /usr/sbin/nologin

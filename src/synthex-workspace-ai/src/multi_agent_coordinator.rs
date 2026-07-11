@@ -343,7 +343,10 @@ async fn coordinator_actor(mut rx: mpsc::Receiver<CoordCmd>, mut state: Coordina
             }
 
             CoordCmd::AcquireResource { resource, agent_id, reply } => {
-                let result = if let Some(existing) = state.resource_locks.get(&resource) {
+                // Clone out of the borrow before mutating — the presence check
+                // must not hold an immutable borrow across the .insert below.
+                let existing_lock = state.resource_locks.get(&resource).cloned();
+                let result = if let Some(existing) = existing_lock {
                     if existing.holder == agent_id {
                         // Re-entrant — same agent.
                         true

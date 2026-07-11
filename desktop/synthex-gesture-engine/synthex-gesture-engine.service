@@ -1,0 +1,41 @@
+[Unit]
+Description=SynthOS Brain OS Gesture Recognition Engine
+Documentation=https://github.com/synthex/linux-synthex
+PartOf=graphical-session.target
+After=graphical-session.target
+After=dbus.socket
+Requires=dbus.socket
+
+[Service]
+Type=simple
+ExecStart=%h/linux-synthex/desktop/synthex-gesture-engine/gestured.py
+ExecReload=/bin/kill -HUP $MAINPID
+Restart=on-failure
+RestartSec=3s
+TimeoutStopSec=10s
+
+# Give libinput access to /dev/input without running as root
+# The user must be in the 'input' group:  sudo usermod -aG input $USER
+SupplementaryGroups=input
+
+# Environment
+Environment=PYTHONUNBUFFERED=1
+Environment=XDG_RUNTIME_DIR=/run/user/1000
+
+# Logging goes to journald automatically; additionally the daemon
+# writes ~/.local/share/synthex/gesture-log.jsonl
+StandardOutput=journal
+StandardError=journal
+SyslogIdentifier=synthex-gesture-engine
+
+# Security hardening (compatible with needing /dev/input)
+NoNewPrivileges=true
+PrivateTmp=true
+ProtectSystem=strict
+ProtectHome=read-only
+ReadWritePaths=%h/.local/share/synthex %h/.config/synthex
+DeviceAllow=/dev/input/ rw
+DevicePolicy=closed
+
+[Install]
+WantedBy=graphical-session.target

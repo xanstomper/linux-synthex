@@ -4,6 +4,7 @@ Powers: taskbar assistant, codex IDE, knowledge base, agentic framework.
 No HTTP. No localhost. No browser.
 """
 import os, sys, json, signal, subprocess, threading, time, re, platform, hashlib, pickle
+from abc import ABC, abstractmethod
 from pathlib import Path
 from collections import defaultdict
 from typing import Optional
@@ -215,17 +216,38 @@ class ToolRegistry:
         except: return {"result": "Web search unavailable"}
 
 
-class BaseAgent:
-    """Base class for all agents."""
-    def __init__(self, name, description, provider, tools):
+class BaseAgent(ABC):
+    """Abstract base class for all Brain OS agents.
+
+    Subclasses MUST implement :meth:`run`.  Direct instantiation of
+    ``BaseAgent`` will raise ``TypeError`` at construction time (not at call
+    time), giving a clearer error message than ``NotImplementedError``.
+    """
+
+    def __init__(self, name: str, description: str, provider, tools):
         self.name = name
         self.description = description
         self.provider = provider
         self.tools = tools
-        self.system_prompt = ""
-    
-    def run(self, task, context=None):
-        raise NotImplementedError
+        self.system_prompt: str = ""
+
+    @abstractmethod
+    def run(self, task: str, context: Optional[dict] = None) -> str:
+        """Execute *task* and return the agent's response string.
+
+        Parameters
+        ----------
+        task:
+            Natural-language task description sent by the coordinator or user.
+        context:
+            Optional dict with keys such as ``"recent"`` (list of
+            ``{role, content}`` dicts from earlier in the session).
+
+        Returns
+        -------
+        str
+            The agent's response / result text.
+        """
 
 
 class CoordinatorAgent(BaseAgent):

@@ -1,16 +1,56 @@
 [Unit]
-Description=SynthOS Hermes AI Agent Runtime
-After=network.target dbus.service
+Description=SynthOS Hermes – AI agent router and natural-language gateway
+Documentation=https://github.com/SynthOS-Linux/linux-synthex
+After=network.target dbus.service synthex-brain.service synthex-neural-ipc.service
+Requires=dbus.service synthex-brain.service
+BindsTo=synthex-brain.service
 
 [Service]
 Type=dbus
 BusName=org.synthex.Hermes
 ExecStart=/usr/lib/synthex/synthex-hermes
+ExecReload=/bin/kill -HUP $MAINPID
 Restart=always
 RestartSec=5
+TimeoutStartSec=30
+TimeoutStopSec=15
+WatchdogSec=120
 Environment=RUST_LOG=info
+Environment=RUST_BACKTRACE=1
+
+# Dedicated unprivileged system user
+User=synthex-brain
+Group=synthex-brain
+
+# Filesystem hardening
+ProtectSystem=strict
+ProtectHome=read-only
+PrivateTmp=true
+PrivateDevices=true
+ProtectKernelTunables=true
+ProtectKernelModules=true
+ProtectControlGroups=true
+RestrictRealtime=true
+RestrictSUIDSGID=true
+LockPersonality=true
+MemoryDenyWriteExecute=true
+NoNewPrivileges=yes
+
+# Hermes calls external tools (web search, shell exec) — needs network + /tmp
+ReadWritePaths=/var/lib/synthex /var/log/synthex /run/synthex /tmp/synthex-hermes
+RuntimeDirectory=synthex/hermes
+RuntimeDirectoryMode=0750
 StateDirectory=synthex/hermes
+StateDirectoryMode=0700
 LogsDirectory=synthex
+LogsDirectoryMode=0750
+
+# Forward session env for tools that need display/clipboard access
+PassEnvironment=DISPLAY XAUTHORITY DBUS_SESSION_BUS_ADDRESS HOME XDG_RUNTIME_DIR
+
+LimitNOFILE=65536
+MemoryMax=512M
+CPUQuota=30%
 
 [Install]
-WantedBy=multi-user.target
+WantedBy=multi-user.target synthex.target

@@ -1,0 +1,372 @@
+# =============================================================================
+# SynthOS Brain OS — Global AI Agent Defaults
+# =============================================================================
+# All Brain OS agents inherit this configuration before their sandbox policy
+# is applied. Per-agent overrides live in [agents.<name>] sections below, and
+# per-session overrides are passed at launch via the Neural IPC payload.
+#
+# Format: TOML 1.0   |   Last updated: 2026-07-11
+# Doc: /home/jewboy420/linux-synthex/docs/AI-AGENT-GUIDE.md
+# =============================================================================
+
+
+# -----------------------------------------------------------------------------
+# [runtime]
+# Core inference parameters shared by every agent unless overridden.
+# -----------------------------------------------------------------------------
+[runtime]
+
+# Which provider profile (see [[providers]]) to use by default.
+# Agents can override this via their own [agents.<name>].provider field.
+default_provider = "anthropic"
+
+# Default model id sent to the provider.  Overridden per-agent or per-call.
+model = "claude-sonnet-4-6"
+
+# Sampling temperature: 0.0 = deterministic, 1.0 = creative.
+# Keep at 0.2 for code/tool agents; raise to 0.7+ for creative agents.
+temperature = 0.2
+
+# Hard cap on tokens the model may generate in a single response.
+max_tokens = 8192
+
+# Seconds before an inference call is aborted and retried or failed.
+timeout_secs = 120
+
+# Number of automatic retries on transient provider errors (429, 5xx).
+retry_count = 3
+
+# Exponential back-off base (seconds) between retries.
+retry_backoff_base = 2.0
+
+# When true, agents stream tokens to callers over Neural IPC rather than
+# waiting for the full response.  Disable for batch / background agents.
+stream_output = true
+
+# Inject a short system-clock timestamp into every system prompt so the
+# model knows the current date without the user having to say it.
+inject_current_date = true
+
+
+# -----------------------------------------------------------------------------
+# [memory]
+# Memory Palace integration — long-term contextual storage for agents.
+# -----------------------------------------------------------------------------
+[memory]
+
+# gRPC endpoint of the Memory Palace daemon.
+memory_palace_url = "unix:///run/synthos/memory-palace.sock"
+
+# Maximum number of memory fragments retrieved and injected into context
+# at the start of each agent session.
+max_context_memories = 40
+
+# How often (seconds) the agent refreshes its in-context memories during
+# a long-running session.  Set 0 to only fetch at session start.
+context_refresh_secs = 300
+
+# Gradually reduce the retrieval weight of memories that haven't been
+# accessed in a while, surfacing more relevant recent knowledge.
+decay_enabled = true
+
+# Half-life for memory decay in days.  A memory not accessed in this many
+# days has its score halved.
+decay_half_life_days = 14
+
+# When true, memories tagged [private] are never sent to remote providers;
+# they are only made available to local/on-device models.
+private_memories_local_only = true
+
+# Maximum size (bytes) of a single memory fragment stored in the Palace.
+max_fragment_bytes = 32768
+
+
+# -----------------------------------------------------------------------------
+# [hermes]
+# Hermes natural-language intent router configuration.
+# -----------------------------------------------------------------------------
+[hermes]
+
+# WebSocket endpoint of the Hermes routing daemon.
+hermes_url = "ws://127.0.0.1:5175/route"
+
+# Minimum confidence score (0.0–1.0) for Hermes to auto-route an intent
+# without asking for clarification.  Below this threshold the router
+# presents alternatives to the user.
+intent_confidence_threshold = 0.72
+
+# When confidence is below threshold AND no voice/UI interaction is
+# available, fall back to asking the user rather than picking blindly.
+fallback_to_user = true
+
+# Allow Hermes to route multi-step intents automatically (e.g. "research X
+# then write a report") without explicit user approval between steps.
+auto_route_intents = false
+
+# Maximum chain depth for auto-routed multi-step intents.
+max_intent_chain_depth = 5
+
+# Path to the custom intent definitions file.
+# Use TOML tables with [[intent]] entries to add project-specific routes.
+custom_intents_file = "~/.config/synthos/hermes-intents.toml"
+
+# Timeout (ms) for Hermes to return a routing decision before the
+# caller receives a "routing_timeout" error and handles the input itself.
+routing_timeout_ms = 2000
+
+
+# -----------------------------------------------------------------------------
+# [sandbox]
+# Default capability policy applied before per-agent overrides.
+# Capabilities not listed here default to DENY.
+# -----------------------------------------------------------------------------
+[sandbox]
+
+# Named policy profile to load as the starting point.
+# Profiles: "default" | "restricted" | "cline" | "research" | "open"
+default_policy = "default"
+
+# Memory ceiling for the agent worker process.
+max_memory_mb = 2048
+
+# CPU usage ceiling as a percentage of one logical core.
+# Set to 0 to disable CPU throttling.
+max_cpu_percent = 80
+
+# Wall-clock time limit for a single agent task (seconds).
+# The agent is SIGTERM'd after this, then SIGKILL'd after a 5-second grace.
+max_task_wall_secs = 600
+
+# Whether agents may open outbound network connections by default.
+# Per-agent and per-tool overrides can tighten or loosen this.
+# Values: "allow" | "deny" | "prompt"
+network_default = "prompt"
+
+# Whether agents may read files from the filesystem by default.
+allow_filesystem_read = true
+
+# Whether agents may write/create files by default.  Most agents should
+# be more conservative; set to false and enable per-agent.
+allow_filesystem_write = false
+
+# Glob patterns that are ALWAYS off-limits for read or write, regardless
+# of any agent or tool override.
+filesystem_deny_patterns = [
+    "/etc/shadow",
+    "/etc/passwd",
+    "~/.ssh/**",
+    "~/.gnupg/**",
+    "/run/secrets/**",
+]
+
+# Prevent agents from spawning child processes by default.
+allow_shell_exec = false
+
+# When an agent requests a capability not covered by its policy, prompt
+# the user via the tray notification rather than silently denying.
+prompt_on_unknown_capability = true
+
+
+# -----------------------------------------------------------------------------
+# [logging]
+# Audit and diagnostic logging for all agents.
+# -----------------------------------------------------------------------------
+[logging]
+
+# Base directory for agent log files.  Each agent writes to a subdirectory.
+log_dir = "/var/log/synthos/agents"
+
+# Log verbosity: "error" | "warn" | "info" | "debug" | "trace"
+log_level = "info"
+
+# Write a tamper-evident audit trail of every tool call, input/output hash,
+# and capability grant/deny event.  Required for compliance workloads.
+audit_trail = true
+
+# Audit trail format: "jsonl" | "cbor"
+audit_format = "jsonl"
+
+# Automatically redact strings that match common secret patterns
+# (API keys, tokens, passwords) from log output.
+redact_sensitive = true
+
+# Maximum size of a single rotated log file (MiB) before rotation.
+max_log_file_mb = 50
+
+# Number of rotated log files to keep per agent.
+log_rotation_keep = 7
+
+
+# -----------------------------------------------------------------------------
+# [[providers]]
+# AI provider pool.  Agents select a provider by name or by priority order.
+# Multiple providers may be listed; the runtime tries them in priority order.
+# -----------------------------------------------------------------------------
+
+[[providers]]
+name               = "anthropic"
+api_url            = "https://api.anthropic.com/v1"
+model_default      = "claude-sonnet-4-6"
+# Key is fetched from the system keychain at startup — never store plaintext.
+api_key_keychain_id = "synthos.anthropic.api_key"
+# Lower number = higher priority.
+priority           = 1
+# Requests per minute cap enforced client-side to avoid hitting provider limits.
+rate_limit_rpm     = 50
+# Enable Anthropic prompt-caching for repeated system prompts.
+prompt_caching     = true
+# Anthropic-specific beta headers (comma-separated feature flags).
+beta_features      = "interleaved-thinking-2025-05-14"
+
+[[providers]]
+name               = "openai-compat"
+# Point at any OpenAI-compatible endpoint (LM Studio, vLLM, etc.)
+api_url            = "http://127.0.0.1:1234/v1"
+model_default      = "local-model"
+api_key_keychain_id = "synthos.openai_compat.api_key"
+priority           = 2
+rate_limit_rpm     = 120
+prompt_caching     = false
+beta_features      = ""
+
+[[providers]]
+name               = "ollama"
+api_url            = "http://127.0.0.1:11434/api"
+model_default      = "llama3.2"
+# Ollama does not require a key; leave blank.
+api_key_keychain_id = ""
+priority           = 3
+rate_limit_rpm     = 0   # no cap for local inference
+prompt_caching     = false
+beta_features      = ""
+
+[[providers]]
+name               = "local"
+# On-device GGUF runner managed by the Brain daemon.
+api_url            = "unix:///run/synthos/local-llm.sock"
+model_default      = "synthos-nano-3b"
+api_key_keychain_id = ""
+priority           = 4
+rate_limit_rpm     = 0
+prompt_caching     = false
+beta_features      = ""
+
+
+# -----------------------------------------------------------------------------
+# [agents.coordinator]
+# The Coordinator orchestrates other agents and owns multi-step task plans.
+# -----------------------------------------------------------------------------
+[agents.coordinator]
+provider        = "anthropic"
+model           = "claude-sonnet-4-6"
+temperature     = 0.1      # low — coordinator decisions should be deterministic
+max_tokens      = 4096
+allow_shell_exec = false
+network_default = "deny"   # coordinator delegates networking to sub-agents
+# Coordinator may spawn sub-agents.
+can_spawn_agents = true
+max_subagents   = 8
+
+
+# -----------------------------------------------------------------------------
+# [agents.cline]
+# Cline coding agent — inherits generous filesystem and shell access.
+# -----------------------------------------------------------------------------
+[agents.cline]
+provider              = "anthropic"
+model                 = "claude-sonnet-4-6"
+temperature           = 0.15
+max_tokens            = 16000
+allow_filesystem_read  = true
+allow_filesystem_write = true
+allow_shell_exec       = true
+network_default        = "allow"
+# Cline works inside git repositories; restrict writes to the project root.
+filesystem_write_root  = "{{project_root}}"
+# Show inline diffs in the tray before applying writes.
+diff_preview           = true
+# Automatically run tests after making code changes when a test command
+# is detected in the project (package.json, Makefile, pyproject.toml, etc.).
+auto_run_tests         = true
+
+
+# -----------------------------------------------------------------------------
+# [agents.research]
+# Research agent — network-heavy, read-only on local filesystem.
+# -----------------------------------------------------------------------------
+[agents.research]
+provider               = "anthropic"
+model                  = "claude-sonnet-4-6"
+temperature            = 0.4   # slightly more creative for synthesis
+max_tokens             = 8192
+allow_filesystem_read  = true
+allow_filesystem_write = false
+allow_shell_exec       = false
+network_default        = "allow"
+# Cap web fetches per task to avoid runaway crawling.
+max_web_fetches        = 30
+# Follow redirects up to this depth.
+max_redirect_depth     = 5
+
+
+# -----------------------------------------------------------------------------
+# [agents.code_review]
+# Code-review agent — read-only, no network, outputs structured JSON findings.
+# -----------------------------------------------------------------------------
+[agents.code_review]
+provider               = "anthropic"
+model                  = "claude-sonnet-4-6"
+temperature            = 0.0   # fully deterministic review output
+max_tokens             = 8192
+allow_filesystem_read  = true
+allow_filesystem_write = false
+allow_shell_exec       = false
+network_default        = "deny"
+# Emit findings as JSON Lines (one finding object per line) for IDE plugins.
+structured_output      = true
+output_format          = "jsonl"
+
+
+# -----------------------------------------------------------------------------
+# [tools]
+# Global tool enable/disable flags.  Individual agent policies may further
+# restrict but cannot expand beyond what is enabled here.
+# -----------------------------------------------------------------------------
+[tools]
+web_search    = true
+file_read     = true
+file_write    = false   # must be explicitly enabled per-agent
+shell_exec    = false   # must be explicitly enabled per-agent
+browser       = true    # headless Chromium via Playwright
+memory_read   = true
+memory_write  = true
+# Allow agents to emit notifications to the tray.
+tray_notify   = true
+# Allow agents to call other registered agents via Neural IPC.
+agent_call    = true
+# Allow agents to read and write the clipboard.
+clipboard     = false
+
+
+# -----------------------------------------------------------------------------
+# [ui]
+# Desktop integration and notification settings.
+# -----------------------------------------------------------------------------
+[ui]
+# Pop a KDE/system tray notification when an agent completes a task.
+tray_notifications = true
+
+# Verbosity of tray notifications.
+# Values: "all" | "important" | "errors_only" | "none"
+notification_level = "important"
+
+# Display a live activity indicator in the system taskbar while an agent
+# is running.  Useful for long research or build tasks.
+show_agent_activity_in_taskbar = true
+
+# Seconds before a completed-task notification is auto-dismissed.
+notification_auto_dismiss_secs = 8
+
+# Show a brief inline preview of the agent's output in the notification
+# body (truncated to 200 chars).
+notification_preview = true

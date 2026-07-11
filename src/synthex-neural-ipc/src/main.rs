@@ -151,7 +151,7 @@ struct Conn {
 impl Conn {
     async fn run(mut self) {
         let (out_tx, mut out_rx) = mpsc::channel::<Arc<Message>>(1024);
-        let (mut reader, mut writer) = self.stream.split();
+        let (mut reader, mut writer) = self.stream.into_split();
 
         // Writer task: drain out_rx → socket.
         let write_task = tokio::spawn(async move {

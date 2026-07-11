@@ -180,7 +180,8 @@ async fn main() -> Result<()> {
 
         // Kill all running agents before exit
         let state = state_for_shutdown.read().await;
-        let map = state.registry.inner().read().await;
+        let registry = state.registry.inner();
+        let map = registry.read().await;
         for (id, sb) in map.iter() {
             if matches!(sb.status, sandbox::SandboxStatus::Running { .. }) {
                 warn!("Shutdown: forcibly killing running agent in sandbox {}", id);

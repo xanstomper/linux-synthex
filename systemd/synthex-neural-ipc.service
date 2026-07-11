@@ -1,0 +1,49 @@
+[Unit]
+Description=SynthOS Neural IPC – dual-layer agent message bus
+Documentation=https://github.com/SynthOS-Linux/linux-synthex
+# Must be up before any Brain OS component tries to publish/subscribe
+After=dbus.service
+Before=synthex-brain.service synthex-workspace-ai.service synthex-agent-sandbox.service synthex-hermes.service
+
+[Service]
+Type=notify
+ExecStart=/usr/lib/synthex/synthex-neural-ipc start
+ExecReload=/bin/kill -HUP $MAINPID
+Restart=always
+RestartSec=1
+TimeoutStartSec=10
+Environment=RUST_LOG=info
+
+# Dedicated system user — same group as brain so shared memory is accessible
+User=synthex-brain
+Group=synthex-brain
+
+# Shared memory ring-buffer lives in /dev/shm; needs access
+PrivateTmp=false
+PrivateDevices=true
+ProtectSystem=strict
+ProtectHome=true
+ProtectKernelTunables=true
+ProtectKernelModules=true
+ProtectControlGroups=true
+RestrictRealtime=true
+RestrictSUIDSGID=true
+LockPersonality=true
+MemoryDenyWriteExecute=false   # ring-buffer mmap needs W+X at setup
+NoNewPrivileges=yes
+
+ReadWritePaths=/run/synthex/neural /dev/shm /var/log/synthex
+RuntimeDirectory=synthex/neural
+RuntimeDirectoryMode=0750
+LogsDirectory=synthex
+LogsDirectoryMode=0750
+
+# HMAC key read at startup
+ReadOnlyPaths=/etc/synthex/neural-ipc.key
+
+LimitNOFILE=65536
+MemoryMax=128M
+CPUQuota=10%
+
+[Install]
+WantedBy=multi-user.target synthex.target
