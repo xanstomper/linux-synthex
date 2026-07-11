@@ -38,6 +38,7 @@ pub struct MemoryNode {
     pub tags: Vec<String>,
 }
 
+#[allow(dead_code)]
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct MemoryEdge {
     pub from_id: String,
@@ -173,6 +174,7 @@ impl MemoryStore {
     }
 
     /// Record a weighted edge between two memory nodes.
+    #[allow(dead_code)]
     pub async fn link(
         &self,
         from: &str,
@@ -282,6 +284,7 @@ impl MemoryStore {
     }
 
     /// Return edges originating from `from_id`, ordered by weight descending.
+    #[allow(dead_code)]
     pub async fn neighbours(&self, from_id: &str) -> Result<Vec<MemoryEdge>> {
         let from_id = from_id.to_string();
         let db = Arc::clone(&self.db);

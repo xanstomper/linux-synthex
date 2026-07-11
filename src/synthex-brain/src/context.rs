@@ -11,7 +11,6 @@
 
 use std::{
     collections::{HashMap, HashSet},
-    path::Path,
     time::Duration,
 };
 
@@ -19,7 +18,7 @@ use anyhow::Result;
 use chrono::{DateTime, Utc};
 use serde::{Deserialize, Serialize};
 use tokio::{sync::RwLock, time};
-use tracing::{trace, warn};
+use tracing::trace;
 
 // ── Public snapshot type ──────────────────────────────────────────────────────
 
