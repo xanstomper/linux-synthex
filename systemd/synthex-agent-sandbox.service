@@ -1,0 +1,96 @@
+# =============================================================================
+# synthex-agent-sandbox.service
+# SynthOS AI Agent Capability Broker & Sandbox Daemon
+# =============================================================================
+# Manages fine-grained capability control for AI agents running on SynthOS.
+# Exposes org.synthex.AgentSandbox on the D-Bus system bus.
+#
+# Install : systemctl --user enable synthex-agent-sandbox.service
+#         OR (system-wide):
+#           cp this file to /usr/lib/systemd/system/
+#           systemctl daemon-reload
+#           systemctl enable --now synthex-agent-sandbox.service
+# =============================================================================
+
+[Unit]
+Description=SynthOS AI Agent Capability Broker & Sandbox Daemon
+Documentation=https://github.com/getsynthex/linux-synthex/tree/master/src/synthex-agent-sandbox
+After=dbus.service synthex-system-daemon.service
+Wants=dbus.service
+# Wait for the main SynthOS target so policy files are in place
+After=synthex.target
+PartOf=synthex.target
+
+[Service]
+Type=dbus
+BusName=org.synthex.AgentSandbox
+
+# ── Binary & policy ───────────────────────────────────────────────────────────
+ExecStart=/usr/lib/synthex/synthex-agent-sandbox
+Restart=on-failure
+RestartSec=3s
+TimeoutStartSec=30s
+TimeoutStopSec=15s
+
+# ── Environment ───────────────────────────────────────────────────────────────
+Environment=RUST_LOG=synthex_agent_sandbox=info
+Environment=SYNTHEX_AGENT_POLICY_DIR=/etc/synthex/agent-policies
+Environment=SYNTHEX_DBUS_SESSION=false
+
+# ── Identity ──────────────────────────────────────────────────────────────────
+# Run as dedicated service user (created by package install scripts)
+User=synthex-agent
+Group=synthex-agent
+# Allow creating user namespaces on behalf of agents
+AmbientCapabilities=CAP_SYS_ADMIN CAP_NET_ADMIN CAP_SETUID CAP_SETGID
+CapabilityBoundingSet=CAP_SYS_ADMIN CAP_NET_ADMIN CAP_SETUID CAP_SETGID CAP_SYS_PTRACE
+
+# ── Sandboxing of the daemon itself ───────────────────────────────────────────
+# The sandbox daemon is itself hardened so a compromised broker cannot affect
+# the rest of the system even if an agent exploits a broker bug.
+NoNewPrivileges=no          # Must be no — the daemon needs to drop privs into child namespaces
+PrivateTmp=yes
+ProtectSystem=strict
+ProtectHome=read-only
+ReadWritePaths=/var/lib/synthex/agent-sandbox /var/log/synthex /run/synthex
+ProtectKernelTunables=yes
+ProtectKernelModules=yes
+ProtectKernelLogs=yes
+ProtectControlGroups=no     # Must access cgroups to set limits on agent processes
+ProtectClock=yes
+ProtectHostname=no          # Needs to set UTS namespace per sandbox
+RestrictNamespaces=no       # Explicitly needs namespace creation capability
+RestrictRealtime=yes
+RestrictSUIDSGID=yes
+LockPersonality=yes
+MemoryDenyWriteExecute=no   # JIT compilers (node, python, etc.) in agents need W^X exemption for seccomp BPF compilation
+SystemCallFilter=@system-service @privileged @process
+SystemCallErrorNumber=EPERM
+SystemCallArchitectures=native
+
+# ── Logging ───────────────────────────────────────────────────────────────────
+StandardOutput=journal
+StandardError=journal
+SyslogIdentifier=synthex-agent-sandbox
+
+# ── Audit log directory ───────────────────────────────────────────────────────
+LogsDirectory=synthex/agent-sandbox
+LogsDirectoryMode=0750
+
+# ── State & runtime ───────────────────────────────────────────────────────────
+StateDirectory=synthex/agent-sandbox
+RuntimeDirectory=synthex/agent-sandbox
+RuntimeDirectoryMode=0750
+
+# ── Resource limits for the broker itself (not the agents it spawns) ──────────
+LimitNOFILE=65536
+LimitNPROC=512
+MemoryMax=512M
+CPUQuota=20%
+
+# ── Watchdog ─────────────────────────────────────────────────────────────────
+WatchdogSec=60s
+NotifyAccess=main
+
+[Install]
+WantedBy=multi-user.target synthex.target
