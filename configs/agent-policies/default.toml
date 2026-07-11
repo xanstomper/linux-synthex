@@ -1,0 +1,81 @@
+# =============================================================================
+# SynthOS Agent Sandbox — Default Capability Policy
+# =============================================================================
+# This policy is applied to every sandbox whose SandboxConfig specifies
+# policy_profile = "default" (or omits the field entirely).
+#
+# Key concepts
+# ────────────
+#  auto_grant       – Capabilities granted immediately at sandbox creation,
+#                     no user interaction required.
+#  require_approval – Capability *kinds* that need a one-time user click
+#                     before they are granted.  The sandbox is blocked until
+#                     the user responds via the SynthOS notification tray.
+#  always_deny      – Capabilities that can NEVER be granted, regardless of
+#                     user approval or agent request.  Enforced in the
+#                     capability broker before any approval prompt is shown.
+#  max_memory_mb    – Hard cgroup v2 memory limit.
+#  max_cpu_percent  – CFS CPU quota (0-100).
+#  network_default  – Starting network scope: "None" | "LocalOnly" | "Internet"
+#
+# Capability string syntax (used in all three lists):
+#   "SystemInfo"
+#   "ReadFile(/home/**)"
+#   "WriteFile(/tmp/agent-*)"
+#   "ExecuteCommand(cargo,npm,python3)"
+#   "NetworkAccess(LocalOnly)"
+#   "WorkspaceControl(2,3)"
+#   "DBusCall(org.freedesktop.Notifications,Notify)"
+#   "SpawnProcess(/usr/bin/git)"
+#   "KeychainRead(api-key-openai)"
+
+[default_policy]
+# ── Auto-granted (no user prompt needed) ─────────────────────────────────────
+auto_grant = [
+    "SystemInfo",          # read /proc, /sys  (CPU/mem stats, process info)
+    "NotificationSend",    # libnotify — desktop toasts only
+    "ClipboardRead",       # read current clipboard content
+]
+
+# ── Require one-time user approval ───────────────────────────────────────────
+# The first time an agent requests one of these, the user sees a tray prompt.
+# Approval is cached for the lifetime of the sandbox.
+require_approval = [
+    "WriteFile",
+    "ExecuteCommand",
+    "ScreenWrite",
+    "KeychainRead",
+    "ClipboardWrite",
+    "AudioPlay",
+    "WorkspaceControl",
+]
+
+# ── Always denied — hard block, no override ───────────────────────────────────
+# These patterns match the beginning of a capability's audit string.
+always_deny = [
+    "SpawnProcess(/bin/sh)",
+    "SpawnProcess(/bin/bash)",
+    "SpawnProcess(/usr/bin/python3 -c",     # inline code execution
+    "SpawnProcess(/usr/bin/perl -e",
+    "SpawnProcess(/usr/bin/ruby -e",
+    "NetworkAccess(None)",                  # prevent downgrade to no-network (not needed here, but explicit)
+    "DBusCall(org.freedesktop.PolicyKit1",  # no polkit calls
+    "DBusCall(org.freedesktop.systemd1",    # no systemd manipulation
+    "DBusCall(org.freedesktop.login1",      # no session/seat control
+]
+
+# ── Resource limits ───────────────────────────────────────────────────────────
+max_memory_mb   = 4096   # 4 GiB hard limit via cgroup v2 memory.max
+max_cpu_percent = 80     # CFS quota — leaves 20 % headroom for the desktop
+max_open_files  = 1024   # RLIMIT_NOFILE
+max_processes   = 64     # RLIMIT_NPROC inside the PID namespace
+
+# ── Network ───────────────────────────────────────────────────────────────────
+# Sandboxes start in a separate network namespace with only loopback and LAN.
+# An agent may request Internet access; the broker checks require_approval first.
+network_default = "LocalOnly"
+
+# ── Capability expiry ─────────────────────────────────────────────────────────
+# How long (seconds) a user-approved capability remains valid.
+# 0 = indefinite (for the lifetime of the sandbox).
+# approval_ttl_secs = 3600

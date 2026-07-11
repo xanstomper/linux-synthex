@@ -45,6 +45,12 @@ members = [
     "src/synthex-deadman",
     "src/synthex-meshnet",
     "src/synthex-predictive",
+    # Brain OS — AI-native runtime layer
+    "src/synthex-brain",
+    "src/synthex-agent-sandbox",
+    "src/synthex-workspace-ai",
+    "src/synthex-neural-ipc",
+    "src/synthex-hermes",
 ]
 
 [workspace.package]

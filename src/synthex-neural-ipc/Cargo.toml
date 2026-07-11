@@ -2,27 +2,30 @@
 name = "synthex-neural-ipc"
 version = "2026.10.0"
 edition = "2021"
-description = "Ultra-fast shared-memory + Unix-socket IPC bus for SynthOS AI agent communication"
-license = "GPL-3.0-or-later"
-authors = ["SynthOS Team <team@synthex-os.org>"]
+description = "SynthOS Neural IPC — Ultra-fast shared-memory IPC bus for AI agent communication"
+license = "MIT OR Apache-2.0"
+authors = ["Synthex Project <dev@getsynthex.org>"]
 
 [[bin]]
 name = "synthex-neural-ipc"
 path = "src/main.rs"
 
+[lib]
+name = "neural_ipc"
+path = "src/lib.rs"
+
 [dependencies]
-tokio = { version = "1", features = ["full"] }
-serde = { version = "1", features = ["derive"] }
-serde_json = "1"
-anyhow = "1"
-tracing = "1"
-tracing-subscriber = "0.3"
-bytes = "1"
-pin-project = "1"
-futures = "0.3"
-tokio-util = { version = "0.7", features = ["codec"] }
-uuid = { version = "1", features = ["v4"] }
-hmac = "0.12"
-sha2 = "0.10"
-dashmap = "5"
-libc = "0.2"
+anyhow             = { workspace = true }
+clap               = { workspace = true }
+serde              = { workspace = true }
+serde_json         = { workspace = true }
+tokio              = { workspace = true }
+tracing            = { workspace = true }
+tracing-subscriber = { workspace = true }
+chrono             = { workspace = true }
+zbus               = "5.0"
+memmap2            = "0.9"
+byteorder          = "1.5"
+uuid               = { version = "1", features = ["v4"] }
+crossbeam          = "0.8"
+parking_lot        = "0.12"

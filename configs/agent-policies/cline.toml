@@ -1,0 +1,180 @@
+# =============================================================================
+# SynthOS Agent Sandbox — Cline / Claude Code Policy
+# =============================================================================
+# Pre-configured trust profile for Cline (the VSCode AI coding assistant).
+# Cline needs broad file access and common build-tool execution, but must
+# NOT have unrestricted shell spawning or keychain access by default.
+#
+# This profile is selected by passing policy_profile = "cline" in the
+# SandboxConfig, or by running:
+#
+#   synthex-agent-sandbox create --profile cline --label cline
+#
+# The [default_policy] section below is used as a base; per-agent overrides
+# in [agent.cline] are layered on top.
+
+# ── Base defaults (same safe floor as default.toml) ──────────────────────────
+[default_policy]
+auto_grant      = ["SystemInfo", "NotificationSend", "ClipboardRead"]
+require_approval = ["ScreenWrite", "KeychainRead", "WorkspaceControl", "AudioPlay"]
+always_deny     = [
+    "SpawnProcess(/bin/sh)",
+    "SpawnProcess(/bin/bash)",
+    "SpawnProcess(/usr/bin/python3 -c",
+    "DBusCall(org.freedesktop.PolicyKit1",
+    "DBusCall(org.freedesktop.systemd1",
+    "DBusCall(org.freedesktop.login1",
+]
+max_memory_mb   = 4096
+max_cpu_percent = 80
+network_default = "LocalOnly"
+
+# ── Cline-specific overrides ──────────────────────────────────────────────────
+[agent.cline]
+description = "Cline AI coding assistant (Claude backend)"
+
+# Auto-granted without user prompt — Cline needs these to function
+auto_grant = [
+    # File system — broad home access for coding work
+    "ReadFile(/home/**)",
+    "WriteFile(/home/**)",
+
+    # Build tools — explicitly whitelisted, not open-ended shell
+    "ExecuteCommand(cargo,npm,npx,yarn,pnpm,python3,pip,pip3,git,make,cmake,just,gradle,mvn)",
+
+    # Dev-environment helpers
+    "ExecuteCommand(node,deno,bun,rustc,rustfmt,clippy-driver,rg,fd,fzf,jq,yq,curl,wget)",
+
+    # Screen observation (read only — not control)
+    "ScreenRead",
+
+    # Always-on telemetry / notification for coding events
+    "SystemInfo",
+    "NotificationSend",
+
+    # Clipboard paste (reading code snippets)
+    "ClipboardRead",
+    "ClipboardWrite",   # needed to copy generated code back to editor
+]
+
+# These still require the user to approve once per sandbox lifetime
+require_approval = [
+    "ScreenWrite",       # mouse/keyboard control — rarely needed, always prompted
+    "KeychainRead",      # e.g. requesting an API key from the keychain
+    "AudioPlay",
+]
+
+# Workspace windows Cline is allowed to observe / manipulate (with ScreenRead)
+workspace_control = [2, 3, 4]   # Cline gets workspaces 2-4; desktop stays on 1
+
+# ── Resource limits ───────────────────────────────────────────────────────────
+max_memory_mb   = 8192   # 8 GiB — large projects / LSP servers need headroom
+max_cpu_percent = 90     # Cline can use most of the CPU during builds
+max_open_files  = 4096
+max_processes   = 128    # Node/cargo sub-processes can multiply quickly
+
+# ── Network ───────────────────────────────────────────────────────────────────
+# Cline needs outbound internet for the Anthropic API and package registries.
+# All other domains are blocked by the network namespace + DNS allowlist.
+[agent.cline.network]
+type = "Internet"
+allowed_domains = [
+    # Anthropic AI API
+    "api.anthropic.com",
+    "anthropic.com",
+
+    # Node / JS ecosystem
+    "registry.npmjs.org",
+    "npmjs.com",
+    "cdn.jsdelivr.net",
+    "unpkg.com",
+
+    # Rust ecosystem
+    "crates.io",
+    "static.crates.io",
+    "docs.rs",
+    "index.crates.io",
+
+    # Python ecosystem
+    "pypi.org",
+    "files.pythonhosted.org",
+
+    # Source control / issue tracking
+    "github.com",
+    "raw.githubusercontent.com",
+    "api.github.com",
+    "objects.githubusercontent.com",
+    "gitlab.com",
+
+    # Documentation
+    "doc.rust-lang.org",
+    "docs.python.org",
+    "developer.mozilla.org",
+    "stackoverflow.com",
+]
+
+# =============================================================================
+# Copilot profile (GitHub Copilot for JetBrains / VS Code)
+# =============================================================================
+[agent.copilot]
+description = "GitHub Copilot assistant"
+auto_grant = [
+    "ReadFile(/home/**)",
+    "WriteFile(/home/**)",
+    "ExecuteCommand(git,npm,cargo,python3,make)",
+    "ScreenRead",
+    "SystemInfo",
+    "NotificationSend",
+    "ClipboardRead",
+    "ClipboardWrite",
+]
+require_approval = ["ScreenWrite", "KeychainRead", "AudioPlay"]
+workspace_control = [2, 3]
+max_memory_mb   = 4096
+max_cpu_percent = 80
+max_open_files  = 2048
+max_processes   = 64
+
+[agent.copilot.network]
+type = "Internet"
+allowed_domains = [
+    "copilot.github.com",
+    "api.github.com",
+    "github.com",
+    "raw.githubusercontent.com",
+    "registry.npmjs.org",
+    "crates.io",
+    "pypi.org",
+]
+
+# =============================================================================
+# Restricted read-only profile — for untrusted / third-party agents
+# =============================================================================
+[agent.restricted]
+description = "Untrusted / third-party AI agent — read-only, no network"
+auto_grant = [
+    "ReadFile(/home/*/public/**)",
+    "SystemInfo",
+    "NotificationSend",
+    "ClipboardRead",
+]
+require_approval = []
+always_deny = [
+    "WriteFile",
+    "ExecuteCommand",
+    "SpawnProcess",
+    "NetworkAccess",
+    "ScreenWrite",
+    "ClipboardWrite",
+    "KeychainRead",
+    "WorkspaceControl",
+    "AudioPlay",
+]
+max_memory_mb   = 1024
+max_cpu_percent = 25
+max_open_files  = 256
+max_processes   = 16
+
+[agent.restricted.network]
+type = "None"
+allowed_domains = []

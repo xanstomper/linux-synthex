@@ -1,28 +1,16 @@
 [Unit]
-Description=Hermes OS Agent — Desktop AI Daemon
-Documentation=https://docs.synthex-project.org/hermes
-After=graphical-session.target
-PartOf=graphical-session.target
+Description=SynthOS Hermes AI Agent Runtime
+After=network.target dbus.service
 
 [Service]
 Type=dbus
 BusName=org.synthex.Hermes
-ExecStart=/usr/bin/hermesd
-Restart=on-failure
-RestartSec=3
-
-# Resource limits
-MemoryMax=384M
-CPUQuota=40%
-
-# Security
-ProtectSystem=full
-ProtectHome=read-only
-PrivateTmp=yes
-NoNewPrivileges=yes
-SystemCallArchitectures=native
-ProtectKernelTunables=yes
-ProtectControlGroups=yes
+ExecStart=/usr/lib/synthex/synthex-hermes
+Restart=always
+RestartSec=5
+Environment=RUST_LOG=info
+StateDirectory=synthex/hermes
+LogsDirectory=synthex
 
 [Install]
-WantedBy=graphical-session.target
+WantedBy=multi-user.target

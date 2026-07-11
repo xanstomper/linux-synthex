@@ -1,0 +1,20 @@
+[Unit]
+Description=SynthOS AI Performance Tuning
+Documentation=https://getsynthex.io/docs/ai-performance
+After=local-fs.target
+Before=synthex-brain.service
+
+[Service]
+Type=oneshot
+RemainAfterExit=yes
+# Apply AI/IPC kernel parameters
+ExecStart=/bin/sh -c 'sysctl -p /etc/synthex/sysctl-ai-performance.conf'
+# Set all CPU cores to performance governor for minimum inference latency
+ExecStart=/bin/sh -c 'echo performance | tee /sys/devices/system/cpu/cpu*/cpufreq/scaling_governor'
+# Prefer mq-deadline on NVMe for low-latency sequential I/O (model loading)
+ExecStart=/bin/sh -c 'echo mq-deadline > /sys/block/nvme*/queue/scheduler 2>/dev/null || true'
+# Increase NVMe read-ahead to 2 MiB for faster model weight streaming
+ExecStart=/bin/sh -c 'echo 2048 > /sys/block/nvme*/queue/read_ahead_kb 2>/dev/null || true'
+
+[Install]
+WantedBy=multi-user.target
