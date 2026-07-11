@@ -183,3 +183,120 @@ SynthOS is built by the community. Special thanks to:
 ---
 
 *© 2026 SynthOS Project — GPL-3.0+ Licensed*
+
+---
+
+## 🧠 Brain OS — AI-Native Runtime Layer (2026.10 New)
+
+SynthOS 2026.10 "Ignition" introduces **Brain OS** — a suite of tightly integrated AI
+daemons and secure execution primitives that make SynthOS the first Linux distribution
+with a genuine AI-native runtime as part of its core system layer.
+
+### synthex-brain — AI Consciousness Daemon
+The central AI orchestration daemon. Manages long-running inference sessions, routes
+requests from all other AI daemons, and exposes a D-Bus API
+(`org.synthex.Brain`) for query, streaming completions, and model lifecycle
+management. Connects to local Ollama, remote OpenAI-compatible endpoints, or both.
+Model switching is zero-downtime; hot-swappable from the Control Center.
+
+### synthex-agent-sandbox — Secure AI Execution Environment
+Sandboxed execution environment for AI-generated code and autonomous agent tasks.
+Uses Linux namespaces, seccomp-BPF filters, AppArmor profiles, and a custom
+capability whitelist (`ImplicitPolicyTarget`) to isolate agent processes from the
+host system. Compatible with the OpenAI tool-calling API surface.
+
+### synthex-workspace-ai — Multi-Workspace AI Coordinator
+Bridges the AI layer with KDE Plasma workspaces. Tracks per-workspace context,
+automatically switches AI personas (coding assistant, research mode, creative mode)
+based on the active workspace profile, and manages KWin integration for
+AI-triggered window arrangements.
+
+### synthex-hermes — AI Agent Daemon
+The outbound agent runner. Executes multi-step autonomous tasks delegated by
+`synthex-brain` — web search, file operations, API calls — inside the
+`synthex-agent-sandbox`. Exposes a D-Bus service (`org.synthex.Hermes`) and a
+REST gateway on `localhost:7430`.
+
+### synthex-neural-ipc — Ultra-Fast IPC Bus
+Zero-copy, lock-free shared-memory message bus (`/dev/shm/synthex-neural-bus`)
+for sub-microsecond latency communication between all Brain OS components.
+64 KiB × 256 slots ring buffer; D-Bus façade available for sandboxed consumers.
+Benchmark: >2 M msg/s on a modern desktop CPU.
+
+---
+
+## 🔒 Security Additions (2026.10)
+
+### Paranoid Mode (`synthex-paranoid`)
+Extreme-hardening toggle for high-security sessions:
+- Disables all USB ports except pre-approved serial numbers via `/sys/bus/usb/`
+- Full network packet logging to encrypted rotating logs (`/var/log/synthex/paranoid/`)
+- File integrity monitoring of critical system paths with SHA-256 baseline
+- Screenshot auditing — periodic screenshots saved for the session record
+- USB and network policy enforced with `iptables` + `usbguard`
+- Encrypted audit trail at `/var/log/synthex/paranoid/paranoid.log`
+- CLI: `synthex-paranoid [enable|disable|status|log|add-usb|add-ip]`
+- Desktop notification integration via `notify-send --urgency=critical`
+- Automatic threat response (lock screen, kill suspicious PIDs)
+
+### Encrypted Vault (`synthex-vault`)
+Auto-mounting LUKS2 encrypted container:
+- Creates `~/.synthex-vault.img` (configurable size, default 512 MiB)
+- LUKS2 with Argon2id KDF, AES-256-XTS cipher, 512-bit key
+- PAM hook: auto-mounts on login via `/etc/pam.d/common-session`
+- DBus watch on `org.freedesktop.ScreenSaver`: auto-unmounts on screen lock
+- `~/Vault/` symlink to mount point for seamless access
+- Idle auto-close after 600 s of no filesystem activity
+- CLI: `synthex-vault [create SIZE|open|close|status|install-pam]`
+
+---
+
+## 🎮 Gaming Additions (2026.10)
+
+### Game Optimizer (`synthex-game-optimizer`)
+Per-game automatic performance tuning daemon:
+- Monitors running processes every 2 s against a database of 60+ game profiles
+- On game launch: sets CPU governor to `performance`, enables GameMode, suspends
+  background services (baloo_file, tracker-miner-fs-3, synthex-update-manager),
+  applies GPU performance mode (NVIDIA/AMD auto-detected), sets network QoS via `tc`
+- On game exit: restores all settings automatically
+- Profile database: `gaming/game-profiles.json` — 60+ titles with per-game env vars,
+  Steam App IDs, and optimisation notes
+- CLI: `synthex-game-optimizer [start|stop|status|list-games|add-game]`
+
+### Game Profiles (`gaming/game-profiles.json`)
+Machine-readable profile database covering 60+ titles including CS2, Dota 2,
+Cyberpunk 2077, Elden Ring, Baldur's Gate 3, Path of Exile 2, Apex Legends,
+Satisfactory, Factorio, Minecraft, Valheim, and more — each with Steam App ID,
+recommended env vars (DXVK_ASYNC, __GL_THREADED_OPTIMIZATIONS, mesa_glthread, etc.),
+network QoS priority, and human-readable optimisation notes.
+
+---
+
+## 🎯 Focus Mode (`synthex-focus`)
+Distraction-free work environment with integrated binaural beats:
+- **Binaural beat generator** — pure Python, zero external deps:
+  - Focus: 40 Hz gamma (200 Hz / 240 Hz stereo)
+  - Relax: 10 Hz alpha (200 Hz / 210 Hz stereo)
+  - Sleep: 4 Hz theta (200 Hz / 204 Hz stereo)
+  - Writes WAV via `wave` + `struct`, plays via paplay/aplay/ffplay
+- **Do Not Disturb** — KDE Plasma inhibit API, GNOME banners off, dunst/mako SIGSTOP
+- **App suspension** — SIGSTOP configurable distracting apps on focus start, SIGCONT on end
+- **Pomodoro timer** — 25-min focus / 5-min break, `notify-send` countdown alerts, bell sound
+- **DBus service** — `org.synthex.FocusMode`: Start/Stop/GetStatus/TakeBreak
+- **Session log** — `~/.local/share/synthex/focus-history.json`
+- CLI: `synthex-focus [start MINS|stop|status|break] [--mode focus|relax|sleep] [--no-binaural]`
+
+---
+
+## 🔮 Predictive Launcher (`synthex-predict`)
+ML-based app pre-launching for instant application start:
+- Records every app launch: timestamp, day of week, hour, currently open apps
+- Trains a Markov chain model on usage history (pure Python, no ML frameworks)
+- State: (day_of_week, time_period, open_apps_set) → transition probabilities
+- Predictions with probability > threshold (default 0.6) are pre-forked with SIGSTOP
+- When user actually launches the predicted app: SIGCONT → instant start
+- Pre-forked apps auto-killed after 30 minutes if unused
+- **DBus**: `org.synthex.Predictive` — GetPredictions, RecordLaunch, SetThreshold, GetStats
+- **Accuracy tracking** — logs prediction hit rate to history
+- CLI: `synthex-predict [start|stop|status|predict|stats|clear-history]`

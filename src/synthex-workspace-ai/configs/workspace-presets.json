@@ -1,0 +1,116 @@
+{
+  "version": "2026.10.0",
+  "description": "Default SynthOS workspace layout — 10 virtual desktops, each with an AI context",
+  "workspaces": [
+    {
+      "n": 0,
+      "name": "coding",
+      "purpose": "Primary software development workspace",
+      "background_color": "#1e1e2e",
+      "icon": "applications-development",
+      "memory_tags": ["coding", "development", "git", "editor"],
+      "tools": ["editor", "terminal", "git", "debugger", "lsp"],
+      "auto_launch": ["code", "kitty"],
+      "isolation_level": "None"
+    },
+    {
+      "n": 1,
+      "name": "research",
+      "purpose": "Web research, documentation reading, AI queries",
+      "background_color": "#1e2030",
+      "icon": "applications-internet",
+      "memory_tags": ["research", "browser", "docs", "notes"],
+      "tools": ["browser", "pdf-viewer", "note-taking"],
+      "auto_launch": ["firefox"],
+      "isolation_level": "None"
+    },
+    {
+      "n": 2,
+      "name": "terminal",
+      "purpose": "Dedicated terminal / shell workspace",
+      "background_color": "#0d1117",
+      "icon": "utilities-terminal",
+      "memory_tags": ["terminal", "shell", "cli", "scripts"],
+      "tools": ["terminal", "multiplexer", "ssh"],
+      "auto_launch": ["kitty"],
+      "isolation_level": "None"
+    },
+    {
+      "n": 3,
+      "name": "build",
+      "purpose": "CI/CD, package builds, Rust compilation",
+      "background_color": "#1a1a2e",
+      "icon": "applications-engineering",
+      "memory_tags": ["build", "compile", "ci", "rpm", "cargo"],
+      "tools": ["build-tools", "terminal", "docker"],
+      "auto_launch": [],
+      "isolation_level": "Process"
+    },
+    {
+      "n": 4,
+      "name": "monitoring",
+      "purpose": "System health, logs, performance graphs",
+      "background_color": "#0f1923",
+      "icon": "utilities-system-monitor",
+      "memory_tags": ["monitoring", "logs", "metrics", "performance"],
+      "tools": ["htop", "journal", "grafana", "dbus-monitor"],
+      "auto_launch": ["synthex-control-center", "htop"],
+      "isolation_level": "None"
+    },
+    {
+      "n": 5,
+      "name": "creative",
+      "purpose": "Design, image editing, vector graphics, media",
+      "background_color": "#1a0a2e",
+      "icon": "applications-graphics",
+      "memory_tags": ["design", "creative", "graphics", "media"],
+      "tools": ["gimp", "inkscape", "blender", "kdenlive"],
+      "auto_launch": [],
+      "isolation_level": "None"
+    },
+    {
+      "n": 6,
+      "name": "communication",
+      "purpose": "Email, chat, video conferencing",
+      "background_color": "#0a1e2e",
+      "icon": "applications-internet",
+      "memory_tags": ["email", "chat", "communication", "calendar"],
+      "tools": ["email", "chat", "video-call"],
+      "auto_launch": ["thunderbird"],
+      "isolation_level": "None"
+    },
+    {
+      "n": 7,
+      "name": "ai-lab",
+      "purpose": "Local AI model testing, inference, fine-tuning",
+      "background_color": "#0d1a0d",
+      "icon": "applications-science",
+      "memory_tags": ["ai", "llm", "inference", "ollama", "gpu"],
+      "tools": ["open-webui", "ollama", "jupyter", "terminal"],
+      "auto_launch": ["open-webui"],
+      "isolation_level": "Process"
+    },
+    {
+      "n": 8,
+      "name": "sandbox",
+      "purpose": "Isolated testing, untrusted code, experiments",
+      "background_color": "#1a0d0d",
+      "icon": "applications-other",
+      "memory_tags": ["sandbox", "testing", "isolated", "experiment"],
+      "tools": ["terminal", "browser"],
+      "auto_launch": [],
+      "isolation_level": "Namespace"
+    },
+    {
+      "n": 9,
+      "name": "emergency",
+      "purpose": "Recovery workspace — system repair, rollback, emergency shell",
+      "background_color": "#1a0000",
+      "icon": "dialog-warning",
+      "memory_tags": ["recovery", "emergency", "repair", "grub", "initrd"],
+      "tools": ["terminal", "file-manager", "disk-utility"],
+      "auto_launch": [],
+      "isolation_level": "None"
+    }
+  ]
+}
