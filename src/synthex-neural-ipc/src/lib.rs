@@ -19,6 +19,10 @@
 //!  └─────────────────────────────────────────────────────┘
 //! ```
 
+// ─── Sub-modules (re-exported for downstream crates) ─────────────────────────
+pub mod protocol;
+pub mod shared_memory;
+
 use std::{
     fs::OpenOptions,
     path::{Path, PathBuf},

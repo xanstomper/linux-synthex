@@ -1,0 +1,1237 @@
+{
+  "version": "1.0",
+  "default_suspend_services": [
+    "snapd",
+    "cups",
+    "bluetooth",
+    "tracker-miner-fs",
+    "tracker-extract-3",
+    "apt-daily",
+    "apt-daily-upgrade",
+    "packagekit",
+    "update-notifier",
+    "gvfs-udisks2-volume-monitor",
+    "gvfs-metadata",
+    "zeitgeist-daemon",
+    "zeitgeist-datahub",
+    "evolution-addressbook-factory",
+    "evolution-calendar-factory",
+    "gnome-software",
+    "orca",
+    "speech-dispatcher"
+  ],
+  "default_restore_governor": "schedutil",
+  "profiles": {
+    "cs2": {
+      "name": "Counter-Strike 2",
+      "executables": ["cs2", "cs2_linux64"],
+      "steam_app_id": 730,
+      "cpu_governor": "performance",
+      "suspend_services": ["snapd", "cups", "tracker-miner-fs", "apt-daily", "gnome-software", "packagekit"],
+      "gpu_mode": "max_performance",
+      "network_qos_priority": 7,
+      "env": {
+        "__GL_THREADED_OPTIMIZATIONS": "1",
+        "mesa_glthread": "true",
+        "DXVK_ASYNC": "1",
+        "WINEDEBUG": "-all",
+        "PROTON_NO_ESYNC": "0",
+        "PROTON_NO_FSYNC": "0",
+        "SDL_AUDIODRIVER": "pipewire",
+        "PULSE_LATENCY_MSEC": "30"
+      },
+      "notes": "Disable HPET in BIOS for lower latency. Use Proton-GE latest. Set cpu_scheduler to FIFO via /proc/sys/kernel/sched_rt_runtime_us=-1 at your own risk. Launch with +exec autoexec.cfg. Disable unnecessary background apps. Enable GameMode (gamemoderun). Use mesa_glthread on AMD. Lock fps to monitor refresh with fps_max."
+    },
+    "dota2": {
+      "name": "Dota 2",
+      "executables": ["dota2", "dota2_linux"],
+      "steam_app_id": 570,
+      "cpu_governor": "performance",
+      "suspend_services": ["snapd", "cups", "tracker-miner-fs", "apt-daily", "gnome-software"],
+      "gpu_mode": "max_performance",
+      "network_qos_priority": 7,
+      "env": {
+        "__GL_THREADED_OPTIMIZATIONS": "1",
+        "mesa_glthread": "true",
+        "SDL_AUDIODRIVER": "pipewire",
+        "DXVK_ASYNC": "1",
+        "WINEDEBUG": "-all",
+        "PROTON_NO_ESYNC": "0",
+        "PROTON_NO_FSYNC": "0"
+      },
+      "notes": "Run natively on Linux with Vulkan renderer (-vulkan launch flag). Disable Steam Overlay for extra FPS. Use -high launch option to raise process priority. Set shadow quality to low in competitive settings. Enable Valve's GameNetworkingSockets for improved netcode. The Vulkan backend significantly outperforms OpenGL on modern drivers."
+    },
+    "cyberpunk2077": {
+      "name": "Cyberpunk 2077",
+      "executables": ["Cyberpunk2077.exe", "Cyberpunk2077"],
+      "steam_app_id": 1091500,
+      "cpu_governor": "performance",
+      "suspend_services": ["snapd", "cups", "tracker-miner-fs", "apt-daily", "gnome-software", "packagekit", "bluetooth"],
+      "gpu_mode": "max_performance",
+      "network_qos_priority": 3,
+      "env": {
+        "PROTON_USE_WINED3D": "0",
+        "DXVK_ASYNC": "1",
+        "DXVK_STATE_CACHE": "1",
+        "__GL_THREADED_OPTIMIZATIONS": "1",
+        "mesa_glthread": "true",
+        "PROTON_NO_ESYNC": "0",
+        "PROTON_NO_FSYNC": "0",
+        "WINE_FULLSCREEN_FSR": "1",
+        "WINE_FULLSCREEN_FSR_STRENGTH": "2",
+        "WINEDEBUG": "-all",
+        "STAGING_SHARED_MEMORY": "1",
+        "PROTON_ENABLE_NVAPI": "1",
+        "PROTON_HIDE_NVIDIA_GPU": "0",
+        "VKD3D_FEATURE_LEVEL": "12_2",
+        "RADV_PERFTEST": "sam"
+      },
+      "notes": "Use Proton-GE for best compatibility. Enable FSR 3 / DLSS in-game for massive performance gains. Ray tracing requires significant GPU overhead — disable for competitive framerates. Patch 2.0+ improved CPU usage substantially. Disable SMT on Ryzen for slightly lower 1% lows on some configs. VKD3D-Proton 2.11+ recommended. REDmod load order matters with mods."
+    },
+    "eldenring": {
+      "name": "Elden Ring",
+      "executables": ["eldenring.exe", "eldenring"],
+      "steam_app_id": 1245620,
+      "cpu_governor": "performance",
+      "suspend_services": ["snapd", "cups", "tracker-miner-fs", "apt-daily", "gnome-software", "bluetooth"],
+      "gpu_mode": "max_performance",
+      "network_qos_priority": 5,
+      "env": {
+        "PROTON_USE_WINED3D": "0",
+        "DXVK_ASYNC": "1",
+        "DXVK_STATE_CACHE": "1",
+        "__GL_THREADED_OPTIMIZATIONS": "1",
+        "mesa_glthread": "true",
+        "PROTON_NO_ESYNC": "0",
+        "PROTON_NO_FSYNC": "0",
+        "WINE_FULLSCREEN_FSR": "1",
+        "WINEDEBUG": "-all",
+        "STAGING_SHARED_MEMORY": "1",
+        "PROTON_FORCE_LARGE_ADDRESS_AWARE": "1"
+      },
+      "notes": "EasyAntiCheat on Linux requires Proton with EAC support (Valve Proton 7.0+ or Proton-GE). Use 'PROTON_EAC_RUNTIME=1' if available. The game engine has a built-in 60fps cap in some areas; use Seamless Coop mod for multiplayer without invasions. Disable in-game anti-aliasing and use FSR via WINE_FULLSCREEN_FSR. Known stutter on shader compilation — pre-compile cache by playing offline first."
+    },
+    "minecraft": {
+      "name": "Minecraft (Java Edition)",
+      "executables": ["java", "minecraft-launcher", "Minecraft"],
+      "steam_app_id": 0,
+      "cpu_governor": "performance",
+      "suspend_services": ["snapd", "cups", "tracker-miner-fs", "apt-daily"],
+      "gpu_mode": "balanced",
+      "network_qos_priority": 4,
+      "env": {
+        "mesa_glthread": "true",
+        "__GL_THREADED_OPTIMIZATIONS": "1",
+        "_JAVA_OPTIONS": "-XX:+UseG1GC -XX:+ParallelRefProcEnabled -XX:MaxGCPauseMillis=200 -XX:+UnlockExperimentalVMOptions -XX:+DisableExplicitGC -XX:+AlwaysPreTouch -XX:G1HeapWastePercent=5 -XX:G1MixedGCCountTarget=4 -XX:G1MixedGCLiveThresholdPercent=90 -XX:G1RSetUpdatingPauseTimePercent=5 -XX:SurvivorRatio=32 -XX:+PerfDisableSharedMem -XX:MaxTenuringThreshold=1",
+        "MESA_GL_VERSION_OVERRIDE": "4.6"
+      },
+      "notes": "Allocate 4-8GB RAM via JVM flags (-Xms4G -Xmx8G). Sodium + Iris shaders dramatically improves performance. Use Fabric mod loader over Forge for Java Edition. EntityCulling, FerriteCore, and Lithium mods reduce CPU/RAM usage. Enable VSync or cap FPS to prevent GPU overheating. OptiFine still viable but Sodium ecosystem now superior. Aikar's JVM flags recommended for reduced GC pauses."
+    },
+    "valheim": {
+      "name": "Valheim",
+      "executables": ["valheim.x86_64", "valheim"],
+      "steam_app_id": 892970,
+      "cpu_governor": "performance",
+      "suspend_services": ["snapd", "cups", "tracker-miner-fs", "apt-daily", "bluetooth"],
+      "gpu_mode": "max_performance",
+      "network_qos_priority": 5,
+      "env": {
+        "__GL_THREADED_OPTIMIZATIONS": "1",
+        "mesa_glthread": "true",
+        "UNITY_FORCE_JOBCOUNT": "4",
+        "SDL_AUDIODRIVER": "pipewire",
+        "DXVK_ASYNC": "1",
+        "PROTON_NO_ESYNC": "0"
+      },
+      "notes": "Runs natively on Linux. Unity engine — reduce draw distance and vegetation quality for major FPS gains in dense biomes. Dedicated server available for Linux. Use '-console' launch flag for developer console access. Ashlands update (2024) has higher GPU demands — upgrade to at least RX 6600 or GTX 1070. BepInEx modding framework works perfectly on Linux."
+    },
+    "stardewvalley": {
+      "name": "Stardew Valley",
+      "executables": ["StardewValley", "Stardew Valley"],
+      "steam_app_id": 413150,
+      "cpu_governor": "schedutil",
+      "suspend_services": ["snapd", "cups", "apt-daily"],
+      "gpu_mode": "auto",
+      "network_qos_priority": 2,
+      "env": {
+        "mesa_glthread": "true",
+        "SDL_AUDIODRIVER": "pipewire",
+        "MONO_GC_PARAMS": "nursery-size=64m,major=marksweep,cemetary-slots=4"
+      },
+      "notes": "Runs natively on Linux via MonoGame. Very low system requirements. SMAPI mod loader is fully Linux-compatible. Use the 64-bit branch (opt-in via Steam betas) for better mod compatibility. Multiplayer syncs well on local network. Co-op over Steam works on Linux. No special optimizations typically needed — even integrated graphics handle this game well."
+    },
+    "witcher3": {
+      "name": "The Witcher 3: Wild Hunt",
+      "executables": ["witcher3.exe", "witcher3"],
+      "steam_app_id": 292030,
+      "cpu_governor": "performance",
+      "suspend_services": ["snapd", "cups", "tracker-miner-fs", "apt-daily", "gnome-software", "bluetooth"],
+      "gpu_mode": "max_performance",
+      "network_qos_priority": 2,
+      "env": {
+        "PROTON_USE_WINED3D": "0",
+        "DXVK_ASYNC": "1",
+        "DXVK_STATE_CACHE": "1",
+        "__GL_THREADED_OPTIMIZATIONS": "1",
+        "mesa_glthread": "true",
+        "PROTON_NO_ESYNC": "0",
+        "PROTON_NO_FSYNC": "0",
+        "WINE_FULLSCREEN_FSR": "1",
+        "WINEDEBUG": "-all",
+        "STAGING_SHARED_MEMORY": "1",
+        "PROTON_FORCE_LARGE_ADDRESS_AWARE": "1",
+        "VKD3D_FEATURE_LEVEL": "12_1"
+      },
+      "notes": "Next-Gen update (DX12 path) performs well with VKD3D-Proton 2.10+. DX11 path via DXVK is also solid. Use Proton-GE for best results. Hairworks should be disabled on AMD cards. Script Merger required if using multiple mods. Enable DLSS/FSR in-game (Next-Gen). CPU is more of a bottleneck than GPU in crowded areas — high single-core performance matters."
+    },
+    "gta5": {
+      "name": "Grand Theft Auto V",
+      "executables": ["GTA5.exe", "PlayGTAV.exe"],
+      "steam_app_id": 271590,
+      "cpu_governor": "performance",
+      "suspend_services": ["snapd", "cups", "tracker-miner-fs", "apt-daily", "gnome-software", "packagekit", "bluetooth"],
+      "gpu_mode": "max_performance",
+      "network_qos_priority": 6,
+      "env": {
+        "PROTON_USE_WINED3D": "0",
+        "DXVK_ASYNC": "1",
+        "DXVK_STATE_CACHE": "1",
+        "__GL_THREADED_OPTIMIZATIONS": "1",
+        "PROTON_NO_ESYNC": "0",
+        "PROTON_NO_FSYNC": "0",
+        "WINE_LARGE_ADDRESS_AWARE": "1",
+        "WINEDEBUG": "-all",
+        "STAGING_SHARED_MEMORY": "1",
+        "PROTON_FORCE_LARGE_ADDRESS_AWARE": "1",
+        "PROTON_HIDE_NVIDIA_GPU": "0",
+        "PROTON_ENABLE_NVAPI": "1"
+      },
+      "notes": "Use Proton-GE for Rockstar Launcher compatibility. Social Club may require extra Proton configuration. Extended Distance Scaling and high-res textures are VRAM-hungry — reduce for stability. FiveM (multiplayer mod) has its own Linux client. Grass Quality and shader quality have the biggest FPS impact. Set Pause Game on Focus Loss to Off. Anti-aliasing MSAA x4 has large performance cost."
+    },
+    "rdr2": {
+      "name": "Red Dead Redemption 2",
+      "executables": ["RDR2.exe", "PlayRDR2.exe"],
+      "steam_app_id": 1174180,
+      "cpu_governor": "performance",
+      "suspend_services": ["snapd", "cups", "tracker-miner-fs", "apt-daily", "gnome-software", "packagekit", "bluetooth"],
+      "gpu_mode": "max_performance",
+      "network_qos_priority": 4,
+      "env": {
+        "PROTON_USE_WINED3D": "0",
+        "DXVK_ASYNC": "1",
+        "DXVK_STATE_CACHE": "1",
+        "__GL_THREADED_OPTIMIZATIONS": "1",
+        "PROTON_NO_ESYNC": "0",
+        "PROTON_NO_FSYNC": "0",
+        "WINE_LARGE_ADDRESS_AWARE": "1",
+        "WINEDEBUG": "-all",
+        "STAGING_SHARED_MEMORY": "1",
+        "PROTON_FORCE_LARGE_ADDRESS_AWARE": "1",
+        "VKD3D_FEATURE_LEVEL": "12_1",
+        "DXVK_FRAME_RATE": "0"
+      },
+      "notes": "Extremely CPU and RAM intensive — 16GB RAM minimum recommended, 32GB ideal. Use Proton-GE. Rockstar launcher requires specific Proton workarounds. Vulkan API performs better than DX12 via VKD3D on most Linux setups. Tree Tessellation and Water Quality are the biggest GPU hits. Advanced Settings > Graphics API > Vulkan recommended. Use DXVK_ASYNC to reduce shader stutter on first play."
+    },
+    "baldursgate3": {
+      "name": "Baldur's Gate 3",
+      "executables": ["bg3.exe", "bg3_dx11.exe", "bg3"],
+      "steam_app_id": 1086940,
+      "cpu_governor": "performance",
+      "suspend_services": ["snapd", "cups", "tracker-miner-fs", "apt-daily", "gnome-software", "bluetooth"],
+      "gpu_mode": "max_performance",
+      "network_qos_priority": 4,
+      "env": {
+        "__GL_THREADED_OPTIMIZATIONS": "1",
+        "mesa_glthread": "true",
+        "DXVK_ASYNC": "1",
+        "PROTON_NO_ESYNC": "0",
+        "PROTON_NO_FSYNC": "0",
+        "WINEDEBUG": "-all",
+        "WINE_FULLSCREEN_FSR": "1",
+        "PROTON_FORCE_LARGE_ADDRESS_AWARE": "1",
+        "VKD3D_FEATURE_LEVEL": "12_1"
+      },
+      "notes": "Has native Linux build — prefer it over Proton. Vulkan renderer is default and performs well. Act 3 (Baldur's Gate city) is very CPU-intensive due to NPC count — lower NPC count via settings if available, or reduce crowd density. 16GB RAM minimum; 32GB recommended for Act 3. Split-screen multiplayer supported. Use AMD FSR or DLSS Quality for significant performance gains with minimal visual loss."
+    },
+    "hollowknight": {
+      "name": "Hollow Knight",
+      "executables": ["hollow_knight.x86_64", "hollow_knight"],
+      "steam_app_id": 367520,
+      "cpu_governor": "schedutil",
+      "suspend_services": ["snapd", "cups", "apt-daily"],
+      "gpu_mode": "auto",
+      "network_qos_priority": 1,
+      "env": {
+        "mesa_glthread": "true",
+        "SDL_AUDIODRIVER": "pipewire",
+        "UNITY_FORCE_JOBCOUNT": "2"
+      },
+      "notes": "Native Linux build. Unity engine runs extremely well. Very low system requirements. Modding via Scarab mod manager works on Linux. No special optimizations needed. Cap framerate to 60fps as game physics is tied to framerate. The randomizer mod and other mods load flawlessly under Linux. Vsync recommended to prevent screen tearing on Unity builds."
+    },
+    "terraria": {
+      "name": "Terraria",
+      "executables": ["Terraria", "TerrariaServer"],
+      "steam_app_id": 105600,
+      "cpu_governor": "schedutil",
+      "suspend_services": ["snapd", "cups", "apt-daily"],
+      "gpu_mode": "auto",
+      "network_qos_priority": 3,
+      "env": {
+        "mesa_glthread": "true",
+        "SDL_AUDIODRIVER": "pipewire",
+        "FNA_OPENGL_FORCE_CORE_PROFILE": "1"
+      },
+      "notes": "Native Linux build via FNA/MonoGame. Excellent performance even on low-end hardware. tModLoader (which has its own Steam page) enables mods and is also native Linux. Dedicated server runs well on minimal hardware. For large modpacks, increase Java heap if using tModLoader on older versions. Lightning Effects can cause FPS drops — disable if needed."
+    },
+    "factorio": {
+      "name": "Factorio",
+      "executables": ["factorio"],
+      "steam_app_id": 427520,
+      "cpu_governor": "performance",
+      "suspend_services": ["snapd", "cups", "tracker-miner-fs", "apt-daily"],
+      "gpu_mode": "balanced",
+      "network_qos_priority": 4,
+      "env": {
+        "mesa_glthread": "true",
+        "__GL_THREADED_OPTIMIZATIONS": "1",
+        "SDL_AUDIODRIVER": "pipewire"
+      },
+      "notes": "Native Linux build with excellent optimization. Late-game megabases are CPU-bound on the update/logic thread — single-core performance is critical. Reduce pollution rendering and decoratives for UPS gains. Use 'show-fps' console command to monitor UPS vs FPS. Headless dedicated server available. Space Age DLC adds significant simulation complexity. Mod portal accessible in-game. Threading limited by design — fast single cores matter most."
+    },
+    "rimworld": {
+      "name": "RimWorld",
+      "executables": ["RimWorldLinux", "RimWorld.x86_64"],
+      "steam_app_id": 294100,
+      "cpu_governor": "performance",
+      "suspend_services": ["snapd", "cups", "tracker-miner-fs", "apt-daily"],
+      "gpu_mode": "balanced",
+      "network_qos_priority": 1,
+      "env": {
+        "mesa_glthread": "true",
+        "SDL_AUDIODRIVER": "pipewire",
+        "MONO_GC_PARAMS": "nursery-size=128m,major=marksweep",
+        "UNITY_FORCE_JOBCOUNT": "4"
+      },
+      "notes": "Native Linux build. Heavy late-game colony simulation is CPU-bound on main thread (Unity single-threaded). Reduce map size and colony count for better TPS. Performance Fish mod dramatically improves late-game TPS. Rimpy mod manager works on Linux. Anomaly DLC adds more simulation overhead. Disable expensive graphical mods in large colonies. 8GB+ RAM recommended with heavy mod lists."
+    },
+    "hades": {
+      "name": "Hades",
+      "executables": ["Hades", "Hades.x86_64"],
+      "steam_app_id": 1145360,
+      "cpu_governor": "schedutil",
+      "suspend_services": ["snapd", "cups", "apt-daily"],
+      "gpu_mode": "auto",
+      "network_qos_priority": 1,
+      "env": {
+        "mesa_glthread": "true",
+        "SDL_AUDIODRIVER": "pipewire",
+        "__GL_THREADED_OPTIMIZATIONS": "1"
+      },
+      "notes": "Native Linux build. Supergiant's engine runs flawlessly. Very low system requirements — runs on integrated graphics. Ultrawide support limited. No online features. Frame rate well above 60fps with any discrete GPU. Voice acting and music are high quality — use PipeWire for best audio. Save backups recommended before Heat runs."
+    },
+    "hades2": {
+      "name": "Hades II",
+      "executables": ["Hades2", "Hades2.x86_64"],
+      "steam_app_id": 1145350,
+      "cpu_governor": "schedutil",
+      "suspend_services": ["snapd", "cups", "apt-daily"],
+      "gpu_mode": "balanced",
+      "network_qos_priority": 1,
+      "env": {
+        "mesa_glthread": "true",
+        "SDL_AUDIODRIVER": "pipewire",
+        "__GL_THREADED_OPTIMIZATIONS": "1",
+        "UNITY_FORCE_JOBCOUNT": "4"
+      },
+      "notes": "Native Linux build in Early Access. Supergiant updated the engine — slightly higher requirements than Hades 1. Still runs very well on mid-range hardware. Check ProtonDB for any remaining compatibility notes. Save frequently during Early Access as updates can affect saves. Medium GPU requirements, light CPU requirements."
+    },
+    "deeprockgalactic": {
+      "name": "Deep Rock Galactic",
+      "executables": ["FSD-Win64-Shipping.exe", "FSD"],
+      "steam_app_id": 548430,
+      "cpu_governor": "performance",
+      "suspend_services": ["snapd", "cups", "tracker-miner-fs", "apt-daily"],
+      "gpu_mode": "max_performance",
+      "network_qos_priority": 6,
+      "env": {
+        "PROTON_USE_WINED3D": "0",
+        "DXVK_ASYNC": "1",
+        "__GL_THREADED_OPTIMIZATIONS": "1",
+        "mesa_glthread": "true",
+        "PROTON_NO_ESYNC": "0",
+        "PROTON_NO_FSYNC": "0",
+        "WINEDEBUG": "-all",
+        "VKD3D_FEATURE_LEVEL": "12_1"
+      },
+      "notes": "Runs very well under Proton. Unreal Engine 4 title. Use Proton Experimental or Proton-GE. Cave generation can cause brief CPU spikes — normal behavior. Anti-cheat (EAC) is Linux-compatible via Proton. Performance scales well with GPU. Deep Dive missions with particle-heavy enemies can stress mid-range GPUs. Rock and Stone!"
+    },
+    "pathofexile": {
+      "name": "Path of Exile",
+      "executables": ["PathOfExile.exe", "PathOfExile_x64.exe"],
+      "steam_app_id": 238960,
+      "cpu_governor": "performance",
+      "suspend_services": ["snapd", "cups", "tracker-miner-fs", "apt-daily", "gnome-software", "packagekit"],
+      "gpu_mode": "max_performance",
+      "network_qos_priority": 7,
+      "env": {
+        "PROTON_USE_WINED3D": "0",
+        "DXVK_ASYNC": "1",
+        "DXVK_STATE_CACHE": "1",
+        "__GL_THREADED_OPTIMIZATIONS": "1",
+        "PROTON_NO_ESYNC": "0",
+        "PROTON_NO_FSYNC": "0",
+        "WINEDEBUG": "-all",
+        "STAGING_SHARED_MEMORY": "1",
+        "PROTON_FORCE_LARGE_ADDRESS_AWARE": "1",
+        "WINE_LARGE_ADDRESS_AWARE": "1"
+      },
+      "notes": "Very CPU-intensive during endgame mapping with heavy delirium/legion encounters. Use the Vulkan renderer in-game for best performance on Linux. Standalone client may be more stable than Steam version. PoE is notorious for CPU spikes — reduce particle effects, dynamic culling, and ground effects. 16GB RAM strongly recommended for texture streaming. Disable Windows RPC calls via Proton tweaks."
+    },
+    "pathofexile2": {
+      "name": "Path of Exile 2",
+      "executables": ["PathOfExile2.exe", "PathOfExile2_x64.exe"],
+      "steam_app_id": 2694490,
+      "cpu_governor": "performance",
+      "suspend_services": ["snapd", "cups", "tracker-miner-fs", "apt-daily", "gnome-software", "packagekit", "bluetooth"],
+      "gpu_mode": "max_performance",
+      "network_qos_priority": 7,
+      "env": {
+        "PROTON_USE_WINED3D": "0",
+        "DXVK_ASYNC": "1",
+        "DXVK_STATE_CACHE": "1",
+        "__GL_THREADED_OPTIMIZATIONS": "1",
+        "mesa_glthread": "true",
+        "PROTON_NO_ESYNC": "0",
+        "PROTON_NO_FSYNC": "0",
+        "WINEDEBUG": "-all",
+        "STAGING_SHARED_MEMORY": "1",
+        "PROTON_FORCE_LARGE_ADDRESS_AWARE": "1",
+        "VKD3D_FEATURE_LEVEL": "12_2",
+        "RADV_PERFTEST": "sam"
+      },
+      "notes": "Early Access title with higher GPU demands than PoE1. DirectX 12 path available — use VKD3D-Proton 2.12+. Vulkan renderer is preferred. 32GB RAM recommended for endgame content. Boss arenas with heavy particle effects can drop below 60fps on mid-range GPUs. Check GGG's Linux known issues page. Proton-GE generally recommended over stable Proton for this title."
+    },
+    "warframe": {
+      "name": "Warframe",
+      "executables": ["Warframe.x64.exe", "Warframe.exe"],
+      "steam_app_id": 230410,
+      "cpu_governor": "performance",
+      "suspend_services": ["snapd", "cups", "tracker-miner-fs", "apt-daily", "packagekit"],
+      "gpu_mode": "max_performance",
+      "network_qos_priority": 6,
+      "env": {
+        "PROTON_USE_WINED3D": "0",
+        "DXVK_ASYNC": "1",
+        "DXVK_STATE_CACHE": "1",
+        "__GL_THREADED_OPTIMIZATIONS": "1",
+        "PROTON_NO_ESYNC": "0",
+        "PROTON_NO_FSYNC": "0",
+        "WINEDEBUG": "-all",
+        "STAGING_SHARED_MEMORY": "1",
+        "PROTON_FORCE_LARGE_ADDRESS_AWARE": "1",
+        "WINE_FULLSCREEN_FSR": "1"
+      },
+      "notes": "Use Proton-GE for best launcher compatibility. The Warframe launcher may need workarounds — consider using the standalone launcher with Lutris. Enable DirectX 12 in graphics settings for potentially better performance with VKD3D-Proton. Update/cache download can be slow on first launch. Reduce Shadow quality and Ambient Occlusion for significant FPS gains. P2P networking means host matters."
+    },
+    "destiny2": {
+      "name": "Destiny 2",
+      "executables": ["destiny2.exe", "destiny2launcher.exe"],
+      "steam_app_id": 1085660,
+      "cpu_governor": "performance",
+      "suspend_services": ["snapd", "cups", "tracker-miner-fs", "apt-daily", "gnome-software", "packagekit", "bluetooth"],
+      "gpu_mode": "max_performance",
+      "network_qos_priority": 7,
+      "env": {
+        "PROTON_USE_WINED3D": "0",
+        "DXVK_ASYNC": "1",
+        "DXVK_STATE_CACHE": "1",
+        "__GL_THREADED_OPTIMIZATIONS": "1",
+        "PROTON_NO_ESYNC": "0",
+        "PROTON_NO_FSYNC": "0",
+        "WINEDEBUG": "-all",
+        "PROTON_ENABLE_NVAPI": "1",
+        "PROTON_HIDE_NVIDIA_GPU": "0",
+        "VKD3D_FEATURE_LEVEL": "12_1"
+      },
+      "notes": "BattlEye anti-cheat is Linux-compatible via Proton. Use Proton 7.0+ or Proton-GE. The game uses a custom engine with DX11/DX12 — DX11 via DXVK often outperforms DX12/VKD3D. Enable DLSS or FSR in-game. High-refresh-rate monitors benefit from disabling render resolution cap. Raid environments are GPU-intensive. Network connection quality affects Crucible PvP heavily."
+    },
+    "apex_legends": {
+      "name": "Apex Legends",
+      "executables": ["r5apex.exe", "r5apex_dx12.exe"],
+      "steam_app_id": 1172470,
+      "cpu_governor": "performance",
+      "suspend_services": ["snapd", "cups", "tracker-miner-fs", "apt-daily", "gnome-software", "packagekit"],
+      "gpu_mode": "max_performance",
+      "network_qos_priority": 7,
+      "env": {
+        "PROTON_USE_WINED3D": "0",
+        "DXVK_ASYNC": "1",
+        "DXVK_STATE_CACHE": "1",
+        "__GL_THREADED_OPTIMIZATIONS": "1",
+        "PROTON_NO_ESYNC": "0",
+        "PROTON_NO_FSYNC": "0",
+        "WINEDEBUG": "-all",
+        "STAGING_SHARED_MEMORY": "1",
+        "PROTON_FORCE_LARGE_ADDRESS_AWARE": "1"
+      },
+      "notes": "EasyAntiCheat is Linux-compatible via Proton. Use Proton-GE or latest Proton Experimental. Source engine variant — very CPU-dependent for high FPS. Set +fps_max 0 in launch options for uncapped FPS. Model detail and Texture streaming budget have biggest quality/performance tradeoff. Shadow quality Low has significant FPS impact. Reduce Ragdolls for less CPU usage in large fights."
+    },
+    "overwatch2": {
+      "name": "Overwatch 2",
+      "executables": ["Overwatch.exe"],
+      "steam_app_id": 2357570,
+      "cpu_governor": "performance",
+      "suspend_services": ["snapd", "cups", "tracker-miner-fs", "apt-daily", "packagekit", "bluetooth"],
+      "gpu_mode": "max_performance",
+      "network_qos_priority": 7,
+      "env": {
+        "PROTON_USE_WINED3D": "0",
+        "DXVK_ASYNC": "1",
+        "DXVK_STATE_CACHE": "1",
+        "__GL_THREADED_OPTIMIZATIONS": "1",
+        "PROTON_NO_ESYNC": "0",
+        "PROTON_NO_FSYNC": "0",
+        "WINEDEBUG": "-all",
+        "PROTON_ENABLE_NVAPI": "1"
+      },
+      "notes": "Run via Battle.net launcher under Proton or use Lutris with Blizzard Battle.net helper. Not on Steam natively. Anti-cheat (Warden) requires careful Proton version selection. Proton-GE often most compatible. Proprietary engine is well-optimized — high FPS achievable. Reduce Render Scale to 75% for a 33% performance gain with minimal visual loss. Dynamic Render Scale available."
+    },
+    "fortnite": {
+      "name": "Fortnite",
+      "executables": ["FortniteClient-Win64-Shipping.exe", "FortniteLauncher.exe"],
+      "steam_app_id": 0,
+      "cpu_governor": "performance",
+      "suspend_services": ["snapd", "cups", "tracker-miner-fs", "apt-daily", "gnome-software", "packagekit", "bluetooth"],
+      "gpu_mode": "max_performance",
+      "network_qos_priority": 7,
+      "env": {
+        "PROTON_USE_WINED3D": "0",
+        "DXVK_ASYNC": "1",
+        "__GL_THREADED_OPTIMIZATIONS": "1",
+        "PROTON_NO_ESYNC": "0",
+        "PROTON_NO_FSYNC": "0",
+        "WINEDEBUG": "-all",
+        "VKD3D_FEATURE_LEVEL": "12_1",
+        "STAGING_SHARED_MEMORY": "1"
+      },
+      "notes": "EasyAntiCheat blocked native Linux for years; as of 2024 Epic has re-enabled Linux support via EAC. Use Heroic Games Launcher or Lutris with Epic Games Store. Unreal Engine 5 (Nanite/Lumen) demands high-end GPU. DX12 mode via VKD3D-Proton 2.11+ recommended. Performance Mode (lower visual fidelity) available for competitive play. 16GB RAM minimum for UE5 builds."
+    },
+    "rocketleague": {
+      "name": "Rocket League",
+      "executables": ["RocketLeague.exe", "RocketLeague"],
+      "steam_app_id": 252950,
+      "cpu_governor": "performance",
+      "suspend_services": ["snapd", "cups", "tracker-miner-fs", "apt-daily"],
+      "gpu_mode": "max_performance",
+      "network_qos_priority": 7,
+      "env": {
+        "PROTON_USE_WINED3D": "0",
+        "DXVK_ASYNC": "1",
+        "__GL_THREADED_OPTIMIZATIONS": "1",
+        "PROTON_NO_ESYNC": "0",
+        "PROTON_NO_FSYNC": "0",
+        "WINEDEBUG": "-all",
+        "STAGING_SHARED_MEMORY": "1"
+      },
+      "notes": "Epic Games removed from Steam — use Epic Games Store via Heroic or Lutris. Epic launcher compatible with Proton/Wine. Unreal Engine 3 — very well optimized. High FPS competitive play: disable VSync, uncap framerate. Game has great low-end scalability. Network latency is critical — prioritize wired Ethernet. BakkesMod plugin works via Proton for training and workshops."
+    },
+    "pubg": {
+      "name": "PUBG: Battlegrounds",
+      "executables": ["TslGame.exe", "TslGame-Win64-Shipping.exe"],
+      "steam_app_id": 578080,
+      "cpu_governor": "performance",
+      "suspend_services": ["snapd", "cups", "tracker-miner-fs", "apt-daily", "gnome-software", "packagekit", "bluetooth"],
+      "gpu_mode": "max_performance",
+      "network_qos_priority": 7,
+      "env": {
+        "PROTON_USE_WINED3D": "0",
+        "DXVK_ASYNC": "1",
+        "DXVK_STATE_CACHE": "1",
+        "__GL_THREADED_OPTIMIZATIONS": "1",
+        "PROTON_NO_ESYNC": "0",
+        "PROTON_NO_FSYNC": "0",
+        "WINEDEBUG": "-all",
+        "STAGING_SHARED_MEMORY": "1",
+        "VKD3D_FEATURE_LEVEL": "12_1"
+      },
+      "notes": "BattlEye anti-cheat is Linux-compatible via Proton. Use Proton-GE for best results. Unreal Engine 4 — DX11 via DXVK recommended over DX12/VKD3D for most setups. Erangel and other large maps are CPU-intensive during parachute drops. Post-Processing to Very Low has large FPS impact. Shadows on Medium. Anti-aliasing TAA recommended. 16GB RAM minimum."
+    },
+    "rust": {
+      "name": "Rust",
+      "executables": ["rust", "RustClient.exe"],
+      "steam_app_id": 252490,
+      "cpu_governor": "performance",
+      "suspend_services": ["snapd", "cups", "tracker-miner-fs", "apt-daily", "gnome-software", "bluetooth"],
+      "gpu_mode": "max_performance",
+      "network_qos_priority": 6,
+      "env": {
+        "__GL_THREADED_OPTIMIZATIONS": "1",
+        "mesa_glthread": "true",
+        "SDL_AUDIODRIVER": "pipewire",
+        "UNITY_FORCE_JOBCOUNT": "8"
+      },
+      "notes": "Native Linux build available. Unity engine. Oxide/uMod plugins work on Linux dedicated servers. Reduce graphics.shaderlod to 200 for significant FPS gains. Grass displacement off. Anisotropic filtering to 4. Terrain quality 50-75 is a good balance. Avoid high population servers if FPS is limiting factor. 16GB RAM recommended. AMD GPUs may see better performance than NVIDIA on native Linux builds."
+    },
+    "ark": {
+      "name": "ARK: Survival Evolved",
+      "executables": ["ShooterGame.exe", "ShooterGame"],
+      "steam_app_id": 346110,
+      "cpu_governor": "performance",
+      "suspend_services": ["snapd", "cups", "tracker-miner-fs", "apt-daily", "gnome-software", "packagekit", "bluetooth"],
+      "gpu_mode": "max_performance",
+      "network_qos_priority": 5,
+      "env": {
+        "__GL_THREADED_OPTIMIZATIONS": "1",
+        "mesa_glthread": "true",
+        "DXVK_ASYNC": "1",
+        "PROTON_NO_ESYNC": "0",
+        "PROTON_NO_FSYNC": "0",
+        "WINEDEBUG": "-all",
+        "STAGING_SHARED_MEMORY": "1",
+        "PROTON_FORCE_LARGE_ADDRESS_AWARE": "1"
+      },
+      "notes": "Native Linux build exists but Proton sometimes outperforms it. Extremely poorly optimized game — even high-end hardware struggles. Use -sm4 launch flag to force Shader Model 4 for FPS gains at visual cost. Disable foliage and shadows for significant FPS gains. 32GB RAM recommended. SSD required for acceptable load times. Base game is largely superseded by ARK: Survival Ascended (UE5)."
+    },
+    "satisfactory": {
+      "name": "Satisfactory",
+      "executables": ["FactoryGame-Win64-Shipping.exe", "FactoryGame"],
+      "steam_app_id": 526870,
+      "cpu_governor": "performance",
+      "suspend_services": ["snapd", "cups", "tracker-miner-fs", "apt-daily", "bluetooth"],
+      "gpu_mode": "max_performance",
+      "network_qos_priority": 4,
+      "env": {
+        "PROTON_USE_WINED3D": "0",
+        "DXVK_ASYNC": "1",
+        "DXVK_STATE_CACHE": "1",
+        "__GL_THREADED_OPTIMIZATIONS": "1",
+        "PROTON_NO_ESYNC": "0",
+        "PROTON_NO_FSYNC": "0",
+        "WINEDEBUG": "-all",
+        "VKD3D_FEATURE_LEVEL": "12_1",
+        "STAGING_SHARED_MEMORY": "1"
+      },
+      "notes": "Use Proton-GE for best compatibility. Unreal Engine 5 title — GPU-intensive. Late-game factories with thousands of machines become very CPU-bound. Disable Nanite/Lumen for significant FPS gains on mid-range hardware. Dedicated server available for Linux (standalone). Mods via ficsit.app (FICSIT Augmentation Database). 32GB RAM recommended for large factories."
+    },
+    "dysonspheresyndrome": {
+      "name": "Dyson Sphere Program",
+      "executables": ["DSPGAME.exe", "DSPGAME"],
+      "steam_app_id": 1366540,
+      "cpu_governor": "performance",
+      "suspend_services": ["snapd", "cups", "tracker-miner-fs", "apt-daily"],
+      "gpu_mode": "max_performance",
+      "network_qos_priority": 2,
+      "env": {
+        "__GL_THREADED_OPTIMIZATIONS": "1",
+        "mesa_glthread": "true",
+        "DXVK_ASYNC": "1",
+        "PROTON_NO_ESYNC": "0",
+        "PROTON_NO_FSYNC": "0",
+        "WINEDEBUG": "-all",
+        "UNITY_FORCE_JOBCOUNT": "8"
+      },
+      "notes": "Unity engine with native Linux build. Runs well on Linux. Late-game mega-factories with hundreds of assemblers become CPU-limited on the main simulation thread. Reduce item animation and vein rendering distance for FPS gains. BepInEx modding works natively. Nebula multiplayer mod is popular and Linux-compatible. The Dyson Sphere itself has GPU overhead when complex."
+    },
+    "noitamagic": {
+      "name": "Noita",
+      "executables": ["noita.exe", "noita"],
+      "steam_app_id": 881100,
+      "cpu_governor": "performance",
+      "suspend_services": ["snapd", "cups", "apt-daily"],
+      "gpu_mode": "balanced",
+      "network_qos_priority": 1,
+      "env": {
+        "PROTON_USE_WINED3D": "0",
+        "DXVK_ASYNC": "1",
+        "__GL_THREADED_OPTIMIZATIONS": "1",
+        "PROTON_NO_ESYNC": "0",
+        "PROTON_NO_FSYNC": "0",
+        "WINEDEBUG": "-all"
+      },
+      "notes": "Custom falling-sand engine — entirely single-threaded CPU simulation. High single-core clock speed is paramount. GPU is barely used. The pixel physics simulation can be very CPU-heavy in large liquid pools. Runs reasonably under Proton. Native build not available. Mods via Steam Workshop work via Proton. Reduce screen resolution for better simulation performance. Magic isn't real... or is it?"
+    },
+    "gunfirereborn": {
+      "name": "Gunfire Reborn",
+      "executables": ["Gunfire Reborn.exe", "GunfireReborn"],
+      "steam_app_id": 1217060,
+      "cpu_governor": "performance",
+      "suspend_services": ["snapd", "cups", "apt-daily"],
+      "gpu_mode": "max_performance",
+      "network_qos_priority": 5,
+      "env": {
+        "PROTON_USE_WINED3D": "0",
+        "DXVK_ASYNC": "1",
+        "__GL_THREADED_OPTIMIZATIONS": "1",
+        "PROTON_NO_ESYNC": "0",
+        "PROTON_NO_FSYNC": "0",
+        "WINEDEBUG": "-all",
+        "UNITY_FORCE_JOBCOUNT": "4"
+      },
+      "notes": "Runs well under Proton. Unity engine. Co-op FPS roguelite — network performance matters for co-op. Use Proton-GE for best compatibility. Particle effects in late-game rounds can be GPU-heavy. Relatively low system requirements overall. Chinese game — some launchers may require region-specific workarounds. Steam version works well on Proton with standard settings."
+    },
+    "deadcells": {
+      "name": "Dead Cells",
+      "executables": ["deadcells", "deadcells.x86_64"],
+      "steam_app_id": 588650,
+      "cpu_governor": "schedutil",
+      "suspend_services": ["snapd", "cups", "apt-daily"],
+      "gpu_mode": "auto",
+      "network_qos_priority": 1,
+      "env": {
+        "mesa_glthread": "true",
+        "SDL_AUDIODRIVER": "pipewire"
+      },
+      "notes": "Native Linux build. Runs perfectly on very low-end hardware. Hashlink/C# based engine. No online features. Excellent controller support. All DLC works natively. Frame rate well above 60 on any modern hardware. One of the most Linux-native experiences available — zero issues reported. Return to Castlevania and other DLC fully compatible."
+    },
+    "slay_the_spire": {
+      "name": "Slay the Spire",
+      "executables": ["SlayTheSpire", "SlayTheSpire.jar"],
+      "steam_app_id": 646570,
+      "cpu_governor": "schedutil",
+      "suspend_services": ["snapd", "cups", "apt-daily"],
+      "gpu_mode": "auto",
+      "network_qos_priority": 1,
+      "env": {
+        "mesa_glthread": "true",
+        "_JAVA_OPTIONS": "-XX:+UseG1GC -Xms512m -Xmx2G"
+      },
+      "notes": "Native Linux build via libGDX/Java. Extremely lightweight. ModTheSpire and BaseMod work natively on Linux for modding. Downfall and other major mods are Linux-compatible. No online features. Excellent for low-power hardware. Java runtime bundled. One of the highest-rated games on Steam — fully playable offline."
+    },
+    "cuphead": {
+      "name": "Cuphead",
+      "executables": ["Cuphead.exe", "Cuphead"],
+      "steam_app_id": 268910,
+      "cpu_governor": "schedutil",
+      "suspend_services": ["snapd", "cups", "apt-daily"],
+      "gpu_mode": "auto",
+      "network_qos_priority": 2,
+      "env": {
+        "mesa_glthread": "true",
+        "__GL_THREADED_OPTIMIZATIONS": "1",
+        "SDL_AUDIODRIVER": "pipewire"
+      },
+      "notes": "Native Linux build. Unity engine. Extremely well-optimized hand-drawn art style. Very low hardware requirements. 60fps locked (by design matching film animation). The Delicious Last Course DLC fully Linux-compatible. Excellent controller support. Co-op works locally. No online features. A showcase of art over tech — any Linux hardware handles it."
+    },
+    "ori_and_the_blind_forest": {
+      "name": "Ori and the Blind Forest",
+      "executables": ["OriDE.exe", "OriDE"],
+      "steam_app_id": 261570,
+      "cpu_governor": "schedutil",
+      "suspend_services": ["snapd", "cups", "apt-daily"],
+      "gpu_mode": "auto",
+      "network_qos_priority": 1,
+      "env": {
+        "PROTON_USE_WINED3D": "1",
+        "WINEDEBUG": "-all",
+        "PROTON_NO_ESYNC": "0"
+      },
+      "notes": "Runs under Proton. Unity engine. Some reports of DXVK issues — try wined3d if visual glitches occur. Very low system requirements. Beautiful art style. Definitive Edition recommended over original. Will of the Wisps (sequel) also on Steam and runs via Proton. Check ProtonDB for latest compatibility reports. 1080p60 achievable on any modern hardware."
+    },
+    "celeste": {
+      "name": "Celeste",
+      "executables": ["Celeste", "Celeste.bin.x86_64"],
+      "steam_app_id": 504230,
+      "cpu_governor": "schedutil",
+      "suspend_services": ["snapd", "cups", "apt-daily"],
+      "gpu_mode": "auto",
+      "network_qos_priority": 1,
+      "env": {
+        "mesa_glthread": "true",
+        "SDL_AUDIODRIVER": "pipewire",
+        "FNA_OPENGL_FORCE_CORE_PROFILE": "1"
+      },
+      "notes": "Native Linux build via FNA. Runs flawlessly. Very low system requirements — works on decade-old hardware. Everest mod loader is Linux-compatible and enables a vast modding ecosystem. Strawberry Jam and other community collabs work on Linux. 60fps locked engine. Controller or keyboard both work excellently. Assist Mode available for accessibility. One of the best platformers ever made."
+    },
+    "disco_elysium": {
+      "name": "Disco Elysium",
+      "executables": ["disco_elysium", "DiscoElysium.exe"],
+      "steam_app_id": 632470,
+      "cpu_governor": "schedutil",
+      "suspend_services": ["snapd", "cups", "apt-daily"],
+      "gpu_mode": "auto",
+      "network_qos_priority": 1,
+      "env": {
+        "__GL_THREADED_OPTIMIZATIONS": "1",
+        "mesa_glthread": "true",
+        "PROTON_NO_ESYNC": "0",
+        "WINEDEBUG": "-all"
+      },
+      "notes": "Native Linux build available. Unity engine. Low hardware requirements. The Final Cut version includes full voice acting. Some users report better stability with Proton over native — test both. Save often as the engine can occasionally crash on long sessions. Controller support adequate but mouse+keyboard preferred for text-heavy gameplay. Political RPG masterpiece — no action sequences to optimize for."
+    },
+    "divinity2": {
+      "name": "Divinity: Original Sin 2",
+      "executables": ["EoCApp.exe", "EoCApp", "DivinityOriginalSin2"],
+      "steam_app_id": 435150,
+      "cpu_governor": "performance",
+      "suspend_services": ["snapd", "cups", "tracker-miner-fs", "apt-daily"],
+      "gpu_mode": "balanced",
+      "network_qos_priority": 4,
+      "env": {
+        "__GL_THREADED_OPTIMIZATIONS": "1",
+        "mesa_glthread": "true",
+        "DXVK_ASYNC": "1",
+        "PROTON_NO_ESYNC": "0",
+        "PROTON_NO_FSYNC": "0",
+        "WINEDEBUG": "-all"
+      },
+      "notes": "Native Linux build available. Custom engine. Runs very well natively. Co-op multiplayer up to 4 players supported. The Definitive Edition improved performance significantly. Heavy combat scenes with many particle effects can reduce FPS. Reduce shadow distance for FPS gains. Mods via Steam Workshop mostly work. Full controller support. Excellent RPG with strong Linux compatibility history."
+    },
+    "xcom2": {
+      "name": "XCOM 2",
+      "executables": ["XCOM2", "XCOM2.sh", "XCOM2-Linux-Launcher"],
+      "steam_app_id": 268500,
+      "cpu_governor": "performance",
+      "suspend_services": ["snapd", "cups", "tracker-miner-fs", "apt-daily"],
+      "gpu_mode": "balanced",
+      "network_qos_priority": 1,
+      "env": {
+        "__GL_THREADED_OPTIMIZATIONS": "1",
+        "mesa_glthread": "true",
+        "SDL_AUDIODRIVER": "pipewire",
+        "UNITY_FORCE_JOBCOUNT": "4"
+      },
+      "notes": "Native Linux build available. Unity engine. War of the Chosen DLC fully Linux-compatible. Long turn calculation times in late campaign are CPU-bound. AML (Alternative Mod Launcher) works on Linux. Steam Workshop mods generally compatible. Disable Ambient Occlusion for FPS improvement. The game is notorious for long enemy turn animations — use the speed mod from Workshop. 8GB RAM+ recommended with WotC."
+    },
+    "civilizationvi": {
+      "name": "Sid Meier's Civilization VI",
+      "executables": ["CivilizationVI", "CivilizationVI_DX12"],
+      "steam_app_id": 289070,
+      "cpu_governor": "performance",
+      "suspend_services": ["snapd", "cups", "tracker-miner-fs", "apt-daily"],
+      "gpu_mode": "balanced",
+      "network_qos_priority": 3,
+      "env": {
+        "__GL_THREADED_OPTIMIZATIONS": "1",
+        "mesa_glthread": "true",
+        "DXVK_ASYNC": "1",
+        "PROTON_NO_ESYNC": "0",
+        "PROTON_NO_FSYNC": "0",
+        "WINEDEBUG": "-all"
+      },
+      "notes": "Native Linux build available. Late-game turn times become very slow as AI calculations grow — nothing to optimize on user end. Multiplayer via Steam works on Linux. Mods via Workshop mostly compatible. Reduce City Detail and Strategic View for minimal FPS gains. The bigger bottleneck is turn processing time. 16GB RAM+ recommended with multiple DLC packs loaded. FXAA preferred over MSAA."
+    },
+    "totalwarhammer3": {
+      "name": "Total War: Warhammer III",
+      "executables": ["Warhammer3.exe", "Warhammer3"],
+      "steam_app_id": 1142710,
+      "cpu_governor": "performance",
+      "suspend_services": ["snapd", "cups", "tracker-miner-fs", "apt-daily", "gnome-software", "bluetooth"],
+      "gpu_mode": "max_performance",
+      "network_qos_priority": 3,
+      "env": {
+        "PROTON_USE_WINED3D": "0",
+        "DXVK_ASYNC": "1",
+        "DXVK_STATE_CACHE": "1",
+        "__GL_THREADED_OPTIMIZATIONS": "1",
+        "PROTON_NO_ESYNC": "0",
+        "PROTON_NO_FSYNC": "0",
+        "WINEDEBUG": "-all",
+        "STAGING_SHARED_MEMORY": "1",
+        "VKD3D_FEATURE_LEVEL": "12_1"
+      },
+      "notes": "Use Proton-GE for best compatibility. Large battles with 40-unit armies are extremely GPU and CPU intensive. Unit detail and unit size have biggest performance impact. Shadows on Medium. Anti-aliasing to FXAA or Off for performance. Strategic map turn processing scales with faction count. 32GB RAM recommended for Immortal Empires with all DLC. The engine notoriously struggles with AMD CPUs."
+    },
+    "stellaris": {
+      "name": "Stellaris",
+      "executables": ["stellaris", "stellaris.exe"],
+      "steam_app_id": 281990,
+      "cpu_governor": "performance",
+      "suspend_services": ["snapd", "cups", "tracker-miner-fs", "apt-daily"],
+      "gpu_mode": "balanced",
+      "network_qos_priority": 3,
+      "env": {
+        "__GL_THREADED_OPTIMIZATIONS": "1",
+        "mesa_glthread": "true",
+        "SDL_AUDIODRIVER": "pipewire"
+      },
+      "notes": "Native Linux build available. Clausewitz engine runs well on Linux. Late-game slowdown is a fundamental engine limitation as galaxy entity count grows. Reduce galaxy size for better performance. Performance mods (Performance Enhancers) on Workshop help. Ironman mode saves are DLC-locked. Multiplayer desyncs can occur across OS builds. 16GB RAM+ recommended for large galaxy campaigns with many mods."
+    },
+    "crusaderkings3": {
+      "name": "Crusader Kings III",
+      "executables": ["ck3", "ck3.exe"],
+      "steam_app_id": 1158310,
+      "cpu_governor": "performance",
+      "suspend_services": ["snapd", "cups", "tracker-miner-fs", "apt-daily"],
+      "gpu_mode": "balanced",
+      "network_qos_priority": 3,
+      "env": {
+        "__GL_THREADED_OPTIMIZATIONS": "1",
+        "mesa_glthread": "true",
+        "SDL_AUDIODRIVER": "pipewire"
+      },
+      "notes": "Native Linux build. Clausewitz engine. One of the best-supported Paradox games on Linux. Mods via Workshop are mostly Linux-compatible. Royal Court and other DLC work natively. Late game year 1100+ causes simulation slowdown — reduce number of courtiers in game rules. Multiplayer works cross-platform. 16GB RAM for heavy modpacks. Disable portrait animations for slight FPS gain in late game."
+    },
+    "europa_universalis4": {
+      "name": "Europa Universalis IV",
+      "executables": ["eu4", "eu4.exe"],
+      "steam_app_id": 236850,
+      "cpu_governor": "performance",
+      "suspend_services": ["snapd", "cups", "tracker-miner-fs", "apt-daily"],
+      "gpu_mode": "balanced",
+      "network_qos_priority": 3,
+      "env": {
+        "__GL_THREADED_OPTIMIZATIONS": "1",
+        "mesa_glthread": "true",
+        "SDL_AUDIODRIVER": "pipewire"
+      },
+      "notes": "Native Linux build. Clausewitz engine. Largest DLC catalog of any Paradox game. Mods largely compatible via Workshop. Late game slowdown especially with many subjects and HRE nations active. Disable province nameplate rendering at low zoom for FPS. Reduce map detail modes. Java-based launcher can have issues — use direct executable launch if needed. 16GB RAM recommended."
+    },
+    "cities_skylines": {
+      "name": "Cities: Skylines",
+      "executables": ["Cities", "Cities.x86_64"],
+      "steam_app_id": 255710,
+      "cpu_governor": "performance",
+      "suspend_services": ["snapd", "cups", "tracker-miner-fs", "apt-daily", "bluetooth"],
+      "gpu_mode": "max_performance",
+      "network_qos_priority": 1,
+      "env": {
+        "__GL_THREADED_OPTIMIZATIONS": "1",
+        "mesa_glthread": "true",
+        "UNITY_FORCE_JOBCOUNT": "8",
+        "SDL_AUDIODRIVER": "pipewire"
+      },
+      "notes": "Native Linux build. Unity engine. Large cities with 100k+ population are heavily CPU-bound on single simulation thread. Use TM:PE traffic mod for better AI and performance. Reduce LOD bias. Asset-heavy modpacks can consume 16-32GB RAM. Loading time improves dramatically with NVMe SSD. Disable simulation layers not in use. Cities: Skylines Remastered DLC improved some performance. FPS Booster mod from Workshop helps."
+    },
+    "cities_skylines2": {
+      "name": "Cities: Skylines II",
+      "executables": ["Cities2.exe", "Cities2"],
+      "steam_app_id": 949230,
+      "cpu_governor": "performance",
+      "suspend_services": ["snapd", "cups", "tracker-miner-fs", "apt-daily", "gnome-software", "packagekit", "bluetooth"],
+      "gpu_mode": "max_performance",
+      "network_qos_priority": 2,
+      "env": {
+        "PROTON_USE_WINED3D": "0",
+        "DXVK_ASYNC": "1",
+        "DXVK_STATE_CACHE": "1",
+        "__GL_THREADED_OPTIMIZATIONS": "1",
+        "PROTON_NO_ESYNC": "0",
+        "PROTON_NO_FSYNC": "0",
+        "WINEDEBUG": "-all",
+        "VKD3D_FEATURE_LEVEL": "12_2",
+        "STAGING_SHARED_MEMORY": "1"
+      },
+      "notes": "Notoriously poorly optimized at launch. Use Proton-GE. Unity DOTS engine theoretically uses all CPU cores but implementation has issues. 32GB RAM minimum for large cities. Reduce Depth of Field, AO, and Shadow Distance significantly. Disable Global Illumination for huge FPS gains. Paradox Mods system replaced Workshop — download mods via in-game browser. Check ProtonDB for latest patches."
+    },
+    "planet_crafter": {
+      "name": "The Planet Crafter",
+      "executables": ["Planet Crafter.exe", "PlanetCrafter"],
+      "steam_app_id": 1284190,
+      "cpu_governor": "performance",
+      "suspend_services": ["snapd", "cups", "apt-daily"],
+      "gpu_mode": "balanced",
+      "network_qos_priority": 3,
+      "env": {
+        "PROTON_USE_WINED3D": "0",
+        "DXVK_ASYNC": "1",
+        "__GL_THREADED_OPTIMIZATIONS": "1",
+        "PROTON_NO_ESYNC": "0",
+        "PROTON_NO_FSYNC": "0",
+        "WINEDEBUG": "-all",
+        "UNITY_FORCE_JOBCOUNT": "4"
+      },
+      "notes": "Unity engine, runs via Proton. Terraforming progression causes the world to visually change significantly — later stages with dense vegetation can reduce FPS. Reduce vegetation density in settings. BepInEx mods available for Quality of Life improvements. Multiplayer added in 2024. Mid-range hardware handles late-game well with reduced shadow settings. Save frequently as this is an Early Access title."
+    },
+    "subnautica": {
+      "name": "Subnautica",
+      "executables": ["Subnautica.exe", "Subnautica"],
+      "steam_app_id": 264710,
+      "cpu_governor": "performance",
+      "suspend_services": ["snapd", "cups", "tracker-miner-fs", "apt-daily", "bluetooth"],
+      "gpu_mode": "max_performance",
+      "network_qos_priority": 1,
+      "env": {
+        "__GL_THREADED_OPTIMIZATIONS": "1",
+        "mesa_glthread": "true",
+        "DXVK_ASYNC": "1",
+        "PROTON_NO_ESYNC": "0",
+        "PROTON_NO_FSYNC": "0",
+        "WINEDEBUG": "-all",
+        "UNITY_FORCE_JOBCOUNT": "4"
+      },
+      "notes": "Native Linux build available. Unity engine. Deep sea environments with bioluminescence are GPU intensive. Reduce Shadow quality and water detail for significant FPS gains. The Degasi areas and Lost River are most demanding. Stutter during biome transitions is engine-level streaming — use SSD. Modding via Nexus works on Linux. Below Zero sequel also available natively. No online features."
+    },
+    "the_long_dark": {
+      "name": "The Long Dark",
+      "executables": ["TheLongDark", "TheLongDark.x86_64"],
+      "steam_app_id": 305620,
+      "cpu_governor": "schedutil",
+      "suspend_services": ["snapd", "cups", "apt-daily"],
+      "gpu_mode": "balanced",
+      "network_qos_priority": 1,
+      "env": {
+        "__GL_THREADED_OPTIMIZATIONS": "1",
+        "mesa_glthread": "true",
+        "SDL_AUDIODRIVER": "pipewire",
+        "UNITY_FORCE_JOBCOUNT": "4"
+      },
+      "notes": "Native Linux build. Unity engine. Blizzard conditions and aurora borealis have GPU overhead. Reduce shadow quality and draw distance for FPS in open areas. Story Mode (Wintermute) and Survival Mode both work perfectly. Very atmospheric audio — use PipeWire with low latency. Single-player only. Moose and other wildlife encounters can spike CPU briefly. Excellent survival experience on Linux."
+    },
+    "kenshi": {
+      "name": "Kenshi",
+      "executables": ["kenshi_x64.exe", "kenshi_x64"],
+      "steam_app_id": 233860,
+      "cpu_governor": "performance",
+      "suspend_services": ["snapd", "cups", "tracker-miner-fs", "apt-daily"],
+      "gpu_mode": "max_performance",
+      "network_qos_priority": 1,
+      "env": {
+        "PROTON_USE_WINED3D": "0",
+        "DXVK_ASYNC": "1",
+        "__GL_THREADED_OPTIMIZATIONS": "1",
+        "PROTON_NO_ESYNC": "0",
+        "PROTON_NO_FSYNC": "0",
+        "WINEDEBUG": "-all",
+        "PROTON_FORCE_LARGE_ADDRESS_AWARE": "1",
+        "STAGING_SHARED_MEMORY": "1"
+      },
+      "notes": "Runs via Proton. OGRE engine. Single-threaded simulation — fast single cores critical. Large squads (40+ characters) cause severe FPS drops. Reduce shadow distance and vegetation density. Interior detection optimization: reduce squad members in cities. 16GB RAM minimum; 32GB for large playthroughs. Mods via Steam Workshop work well. The game is notoriously demanding relative to its visual quality."
+    },
+    "outward": {
+      "name": "Outward",
+      "executables": ["Outward.exe", "Outward"],
+      "steam_app_id": 794260,
+      "cpu_governor": "performance",
+      "suspend_services": ["snapd", "cups", "apt-daily"],
+      "gpu_mode": "balanced",
+      "network_qos_priority": 4,
+      "env": {
+        "PROTON_USE_WINED3D": "0",
+        "DXVK_ASYNC": "1",
+        "__GL_THREADED_OPTIMIZATIONS": "1",
+        "PROTON_NO_ESYNC": "0",
+        "PROTON_NO_FSYNC": "0",
+        "WINEDEBUG": "-all",
+        "UNITY_FORCE_JOBCOUNT": "4"
+      },
+      "notes": "Unity engine, runs via Proton. Co-op splitscreen or online both work via Proton. The Definitive Edition improved performance. Reduce Ambient Occlusion and shadow cascades. Open world areas with weather effects are most demanding. Mods via Nexus and BepInEx compatible on Linux. Mid-range hardware handles it well. Unique survival RPG that respects player time investment."
+    },
+    "dungeon_of_the_endless": {
+      "name": "Dungeon of the Endless",
+      "executables": ["DungeonoftheEndless.exe", "DungeonoftheEndless"],
+      "steam_app_id": 249050,
+      "cpu_governor": "schedutil",
+      "suspend_services": ["snapd", "cups", "apt-daily"],
+      "gpu_mode": "auto",
+      "network_qos_priority": 3,
+      "env": {
+        "PROTON_USE_WINED3D": "1",
+        "WINEDEBUG": "-all",
+        "PROTON_NO_ESYNC": "0"
+      },
+      "notes": "Older title from Amplitude Studios. Runs via Proton with wined3d for better compatibility. Very low hardware requirements. Multiplayer co-op supported. Crystal Defenders DLC included. Check ProtonDB for specific Proton version recommendations. Simple 2D-ish art style means minimal GPU demand. Turn-based tower defense/roguelite hybrid — great on low-end hardware."
+    },
+    "shadow_of_mordor": {
+      "name": "Middle-earth: Shadow of Mordor",
+      "executables": ["ShadowOfMordor.exe", "ShadowOfMordor"],
+      "steam_app_id": 241930,
+      "cpu_governor": "performance",
+      "suspend_services": ["snapd", "cups", "tracker-miner-fs", "apt-daily"],
+      "gpu_mode": "max_performance",
+      "network_qos_priority": 1,
+      "env": {
+        "PROTON_USE_WINED3D": "0",
+        "DXVK_ASYNC": "1",
+        "__GL_THREADED_OPTIMIZATIONS": "1",
+        "PROTON_NO_ESYNC": "0",
+        "PROTON_NO_FSYNC": "0",
+        "WINEDEBUG": "-all",
+        "STAGING_SHARED_MEMORY": "1"
+      },
+      "notes": "Runs via Proton. DXVK provides good DX11 translation. Ultra textures require 6GB+ VRAM. The Nemesis system generates unique enemy hierarchies — CPU overhead during large combat encounters. GOTY Edition with all DLC recommended. Older title (2014) runs excellently on modern hardware under Proton. Reduce Fur Tech and God Rays for FPS improvements on mid-range."
+    },
+    "shadow_of_war": {
+      "name": "Middle-earth: Shadow of War",
+      "executables": ["ShadowOfWar.exe", "ShadowOfWar"],
+      "steam_app_id": 356190,
+      "cpu_governor": "performance",
+      "suspend_services": ["snapd", "cups", "tracker-miner-fs", "apt-daily", "bluetooth"],
+      "gpu_mode": "max_performance",
+      "network_qos_priority": 2,
+      "env": {
+        "PROTON_USE_WINED3D": "0",
+        "DXVK_ASYNC": "1",
+        "DXVK_STATE_CACHE": "1",
+        "__GL_THREADED_OPTIMIZATIONS": "1",
+        "PROTON_NO_ESYNC": "0",
+        "PROTON_NO_FSYNC": "0",
+        "WINEDEBUG": "-all",
+        "STAGING_SHARED_MEMORY": "1",
+        "VKD3D_FEATURE_LEVEL": "12_1"
+      },
+      "notes": "Runs via Proton. DX11 path via DXVK is most stable. Large fortress siege battles with many Uruks stress both CPU and GPU. Reduce Shadow Cascades and AO for significant FPS gain. 8GB VRAM+ for ultra textures. Nemesis system 2.0 has more CPU overhead than its predecessor. The online Nemesis features were removed by WB Games — game is now fully offline-capable."
+    },
+    "middle_earth": {
+      "name": "Middle-earth (Custom/Other)",
+      "executables": ["MiddleEarth.exe"],
+      "steam_app_id": 0,
+      "cpu_governor": "performance",
+      "suspend_services": ["snapd", "cups", "apt-daily"],
+      "gpu_mode": "balanced",
+      "network_qos_priority": 2,
+      "env": {
+        "PROTON_USE_WINED3D": "0",
+        "DXVK_ASYNC": "1",
+        "__GL_THREADED_OPTIMIZATIONS": "1",
+        "WINEDEBUG": "-all"
+      },
+      "notes": "Generic profile for unlisted Middle-earth titles or fan projects. Use Proton-GE for widest Windows game compatibility. Adjust env vars based on specific engine (DXVK for DX9-11, VKD3D for DX12). Check ProtonDB for specific title compatibility."
+    },
+    "batman_arkham_knight": {
+      "name": "Batman: Arkham Knight",
+      "executables": ["BatmanAK.exe", "BatmanAK"],
+      "steam_app_id": 208650,
+      "cpu_governor": "performance",
+      "suspend_services": ["snapd", "cups", "tracker-miner-fs", "apt-daily", "bluetooth"],
+      "gpu_mode": "max_performance",
+      "network_qos_priority": 1,
+      "env": {
+        "PROTON_USE_WINED3D": "0",
+        "DXVK_ASYNC": "1",
+        "DXVK_STATE_CACHE": "1",
+        "__GL_THREADED_OPTIMIZATIONS": "1",
+        "PROTON_NO_ESYNC": "0",
+        "PROTON_NO_FSYNC": "0",
+        "WINEDEBUG": "-all",
+        "STAGING_SHARED_MEMORY": "1",
+        "PROTON_FORCE_LARGE_ADDRESS_AWARE": "1",
+        "WINE_FULLSCREEN_FSR": "1"
+      },
+      "notes": "Infamously poorly optimized on PC at launch; patched significantly since. Runs via Proton with DXVK. Disable Nvidia-specific effects (Rain, Smoke Turbulence) even on AMD as they reduce FPS. Interactive Smoke and Geometry Detail have large GPU impact. The Batmobile sections are most demanding. 8GB+ VRAM for very high textures. Proton-GE recommended. DX11 only."
+    },
+    "batman_arkham_city": {
+      "name": "Batman: Arkham City GOTY",
+      "executables": ["BatmanAC.exe", "BatmanAC"],
+      "steam_app_id": 200260,
+      "cpu_governor": "performance",
+      "suspend_services": ["snapd", "cups", "apt-daily"],
+      "gpu_mode": "max_performance",
+      "network_qos_priority": 1,
+      "env": {
+        "PROTON_USE_WINED3D": "0",
+        "DXVK_ASYNC": "1",
+        "__GL_THREADED_OPTIMIZATIONS": "1",
+        "PROTON_NO_ESYNC": "0",
+        "PROTON_NO_FSYNC": "0",
+        "WINEDEBUG": "-all",
+        "STAGING_SHARED_MEMORY": "1",
+        "PROTON_FORCE_LARGE_ADDRESS_AWARE": "1"
+      },
+      "notes": "Older Unreal Engine 3 title. Runs excellently under Proton with DXVK. DirectX 11 mode has tessellation that significantly impacts performance — consider DX9 mode for better FPS. GOTY Edition includes all DLC. PhysX effects require NVIDIA or software emulation — disable for AMD. Excellent performance on any modern hardware. DX11 tessellation on Batman's suit is notorious GPU killer."
+    },
+    "portal2": {
+      "name": "Portal 2",
+      "executables": ["portal2_linux", "portal2"],
+      "steam_app_id": 620,
+      "cpu_governor": "schedutil",
+      "suspend_services": ["snapd", "cups", "apt-daily"],
+      "gpu_mode": "auto",
+      "network_qos_priority": 4,
+      "env": {
+        "__GL_THREADED_OPTIMIZATIONS": "1",
+        "mesa_glthread": "true",
+        "SDL_AUDIODRIVER": "pipewire"
+      },
+      "notes": "Native Linux build. Source engine. Runs on virtually any hardware made in the last 15 years. Co-op multiplayer fully supported cross-platform. Thousands of Workshop puzzle chambers available. Portal gun visual effects are the most demanding element. -novid launch option skips intro videos. Source SDK available for modding. PeTI (Puzzle Maker) works natively. Enable console with -console launch flag."
+    },
+    "left4dead2": {
+      "name": "Left 4 Dead 2",
+      "executables": ["left4dead2_linux", "left4dead2"],
+      "steam_app_id": 550,
+      "cpu_governor": "performance",
+      "suspend_services": ["snapd", "cups", "apt-daily"],
+      "gpu_mode": "max_performance",
+      "network_qos_priority": 6,
+      "env": {
+        "__GL_THREADED_OPTIMIZATIONS": "1",
+        "mesa_glthread": "true",
+        "SDL_AUDIODRIVER": "pipewire"
+      },
+      "notes": "Native Linux build. Source engine. Very well optimized — runs smoothly on decade-old hardware. Mutation modes and Workshop campaigns fully supported. The Last Stand community update added significant content. Versus mode is highly network-sensitive — use low-latency servers. Enable developer console: -console launch flag. Particle effects from explosions and Special Infected attacks are most GPU-intensive."
+    },
+    "team_fortress2": {
+      "name": "Team Fortress 2",
+      "executables": ["hl2_linux", "hl2"],
+      "steam_app_id": 440,
+      "cpu_governor": "performance",
+      "suspend_services": ["snapd", "cups", "apt-daily"],
+      "gpu_mode": "max_performance",
+      "network_qos_priority": 6,
+      "env": {
+        "__GL_THREADED_OPTIMIZATIONS": "1",
+        "mesa_glthread": "true",
+        "SDL_AUDIODRIVER": "pipewire"
+      },
+      "notes": "Native Linux build. Source engine. mastercomfig (community config) dramatically improves FPS and hitching. Use -nojoy if not using controller. Set mat_queue_mode 2 for threaded rendering. cl_interp and lerp settings critical for competitive play. Community maintained master server list after Valve abandoned updates. Bot problem in casual: community servers recommended. Free to play with cosmetics."
+    },
+    "counter_strike_global_offensive": {
+      "name": "Counter-Strike: Global Offensive (Legacy)",
+      "executables": ["csgo_linux64", "csgo"],
+      "steam_app_id": 730,
+      "cpu_governor": "performance",
+      "suspend_services": ["snapd", "cups", "tracker-miner-fs", "apt-daily", "gnome-software"],
+      "gpu_mode": "max_performance",
+      "network_qos_priority": 7,
+      "env": {
+        "__GL_THREADED_OPTIMIZATIONS": "1",
+        "mesa_glthread": "true",
+        "SDL_AUDIODRIVER": "pipewire",
+        "PULSE_LATENCY_MSEC": "30"
+      },
+      "notes": "CS:GO has been replaced by CS2 (also App ID 730). This profile covers the legacy build. Valve's Source engine. Launch options: -novid -nojoy -high -threads N +exec autoexec.cfg. Custom config files (autoexec.cfg) enable network and visual tweaks. FACEIT and ESEA anti-cheat have Linux limitations — use community servers or Valve's own matchmaking. Prefer CS2 for active development."
+    },
+    "half_life_alyx": {
+      "name": "Half-Life: Alyx",
+      "executables": ["hlvr", "hlvr_launcher"],
+      "steam_app_id": 546560,
+      "cpu_governor": "performance",
+      "suspend_services": ["snapd", "cups", "tracker-miner-fs", "apt-daily", "bluetooth"],
+      "gpu_mode": "max_performance",
+      "network_qos_priority": 2,
+      "env": {
+        "__GL_THREADED_OPTIMIZATIONS": "1",
+        "mesa_glthread": "true",
+        "SDL_AUDIODRIVER": "pipewire",
+        "VR_OVERRIDE_GPU_PROFILING": "1"
+      },
+      "notes": "Native Linux build with SteamVR. Requires OpenXR or SteamVR-compatible headset. SteamVR on Linux has improved significantly — Valve Index, Quest 2 via ALVR, and Vive all functional. GPU performance critical for comfortable VR (90fps+ target). RTX 3070 / RX 6700 XT minimum for full VR performance. Reduce supersampling if experiencing reprojection. Source 2 engine — excellent Vulkan backend. Check SteamVR Linux GitHub for known issues."
+    },
+    "blender_game": {
+      "name": "Blender Game Engine / UPBGE",
+      "executables": ["blender", "UPBGE", "upbge"],
+      "steam_app_id": 0,
+      "cpu_governor": "performance",
+      "suspend_services": ["snapd", "cups", "tracker-miner-fs", "apt-daily"],
+      "gpu_mode": "balanced",
+      "network_qos_priority": 2,
+      "env": {
+        "__GL_THREADED_OPTIMIZATIONS": "1",
+        "mesa_glthread": "true",
+        "__NV_PRIME_RENDER_OFFLOAD": "1",
+        "__GLX_VENDOR_LIBRARY_NAME": "nvidia",
+        "CYCLES_CUDA_ARCH": "sm_89",
+        "AMD_VULKAN_ICD": "RADV",
+        "MESA_GL_VERSION_OVERRIDE": "4.6",
+        "OPENCL_VENDOR_PATH": "/etc/OpenCL/vendors"
+      },
+      "notes": "Blender is a DCC tool, not a game. Profile applies to games made with Blender Game Engine (BGE/UPBGE). Native Linux application. GPU rendering with Cycles uses CUDA (NVIDIA), HIP (AMD), or oneAPI (Intel). Enable GPU compute in Blender Preferences > System. OptiX backend for NVIDIA RTX cards provides fastest rendering. RADV Vulkan driver recommended for AMD GPU compute. Balanced GPU mode to allow background GPU work."
+    },
+    "godot_game": {
+      "name": "Godot Engine Game",
+      "executables": ["godot", "godot.x86_64", "game.x86_64", "game.x86"],
+      "steam_app_id": 0,
+      "cpu_governor": "schedutil",
+      "suspend_services": ["snapd", "cups", "apt-daily"],
+      "gpu_mode": "balanced",
+      "network_qos_priority": 3,
+      "env": {
+        "mesa_glthread": "true",
+        "__GL_THREADED_OPTIMIZATIONS": "1",
+        "GODOT_RENDERING_DRIVER": "vulkan",
+        "SDL_AUDIODRIVER": "pipewire",
+        "MESA_GL_VERSION_OVERRIDE": "4.6"
+      },
+      "notes": "Godot Engine has excellent native Linux support. Godot 4.x uses Vulkan (Forward+ or Mobile renderer) or a compatibility OpenGL renderer. Vulkan renderer recommended for 3D games; OpenGL compatibility for broader device support or 2D. Exported Linux builds run without editor installed. GDExtension and GDScript both work natively. For 3D games, ensure Vulkan is the rendering backend. Steam export requires steamworks-godot plugin. Excellent open-source engine for Linux-first development."
+    }
+  }
+}

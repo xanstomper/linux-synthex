@@ -1,12 +1,60 @@
 [Unit]
-Description=SynthOS Brain AI Daemon
-After=dbus.service
+Description=SynthOS Brain – AI Consciousness Daemon
+Documentation=https://github.com/SynthOS-Linux/linux-synthex
+After=network.target dbus.service
+Wants=dbus.service
+# Brain must be up before agent daemons that call into it
+Before=synthex-agent.service synthex-ai-daemon.service
 
 [Service]
-Type=simple
+Type=dbus
+BusName=org.synthex.Brain
 ExecStart=/usr/lib/synthex/synthex-brain
 Restart=always
-User=root
+RestartSec=3
+TimeoutStartSec=30
+
+# Dedicated unprivileged system user
+User=synthex-brain
+Group=synthex-brain
+
+# CAP_SYS_PTRACE needed for /proc/*/fd open-file census; all else dropped.
+AmbientCapabilities=CAP_SYS_PTRACE
+CapabilityBoundingSet=CAP_SYS_PTRACE
+
+# Filesystem hardening
+ProtectSystem=strict
+ProtectHome=read-only
+PrivateTmp=true
+PrivateDevices=true
+ProtectKernelTunables=true
+ProtectKernelModules=true
+ProtectControlGroups=true
+RestrictRealtime=true
+RestrictSUIDSGID=true
+LockPersonality=true
+MemoryDenyWriteExecute=true
+
+# Writable paths
+ReadWritePaths=/var/lib/synthex /var/log/synthex /run/synthex
+
+# Managed directories (created + chowned automatically by systemd)
+RuntimeDirectory=synthex
+RuntimeDirectoryMode=0750
+StateDirectory=synthex/brain
+StateDirectoryMode=0700
+LogsDirectory=synthex
+LogsDirectoryMode=0750
+
+NoNewPrivileges=yes
+
+# Forward X11 env so xdotool can reach the user session
+PassEnvironment=DISPLAY XAUTHORITY HOME
+
+# Resource limits
+LimitNOFILE=65536
+MemoryMax=512M
+CPUQuota=25%
 
 [Install]
-WantedBy=multi-user.target
+WantedBy=multi-user.target synthex.target

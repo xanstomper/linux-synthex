@@ -29,3 +29,13 @@ byteorder          = "1.5"
 uuid               = { version = "1", features = ["v4"] }
 crossbeam          = "0.8"
 parking_lot        = "0.12"
+# Neural-IPC specific
+bytes              = "1"
+dashmap            = "5"
+libc               = "0.2"
+hmac               = "0.12"
+sha2               = "0.10"
+hex                = "0.4"
+futures            = "0.3"
+pin-project        = "1"
+tokio-util         = { version = "0.7", features = ["codec"] }
