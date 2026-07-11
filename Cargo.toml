@@ -3,6 +3,7 @@ resolver = "2"
 members = [
     # Core daemons
     "src/system-daemon",
+    "src/synthex-system-daemon",
     "src/hwdaemon",
     "src/desktopd",
     "src/gpu-setupd",
