@@ -1,0 +1,5 @@
+---
+type:      "python"
+name:      "synthexfde"
+interface: "python"
+script:    "main.py"
