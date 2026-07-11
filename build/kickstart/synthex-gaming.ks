@@ -1,296 +1,282 @@
-# =============================================================================
-# SynthOS Gaming Edition Kickstart
-# Builds a KDE Plasma ISO pre-loaded with the full gaming stack
-# =============================================================================
+# SynthOS Linux — Gaming Edition Kickstart
+# SPDX-License-Identifier: GPL-3.0-or-later
+# https://getsynthex.org
 
-# Language & locale
+url --mirrorlist="https://mirrors.fedoraproject.org/mirrorlist?repo=fedora-42&arch=x86_64"
+repo --name="updates" --mirrorlist="https://mirrors.fedoraproject.org/mirrorlist?repo=updates-released-f42&arch=x86_64"
+repo --name="synthex" --baseurl="https://packages.getsynthex.org/stable/x86_64/" --gpgcheck=0
+repo --name="synthex-updates" --baseurl="https://packages.getsynthex.org/updates/x86_64/" --gpgcheck=0
+repo --name="rpmfusion-free" --mirrorlist="https://mirrors.rpmfusion.org/mirrorlist?repo=free-fedora-42&arch=x86_64" --gpgcheck=0
+repo --name="rpmfusion-nonfree" --mirrorlist="https://mirrors.rpmfusion.org/mirrorlist?repo=nonfree-fedora-42&arch=x86_64" --gpgcheck=0
+
 lang en_US.UTF-8
-keyboard --vckeymap=us --xlayouts=us
+keyboard us
 timezone America/New_York --utc
-
-# Network
+authselect --useshadow --passalgo=sha512
+selinux --permissive
+firewall --enabled --service=mdns,ssh
+services --enabled=NetworkManager,sshd,chronyd,auditd,fstrim.timer,sddm,synthex-firstboot,synthex-system-daemon,synthex-gaming-mode
+services --disabled=lvm2-monitor,mdmonitor
+bootloader --location=mbr --append="rhgb quiet splash mitigations=auto rd.driver.blacklist=nouveau modprobe.blacklist=nouveau processor.max_cstate=5 idle=nomwait"
 network --bootproto=dhcp --device=link --activate
-network --hostname=synthos-gaming
+rootpw --lock
+firstboot --reconfig
+xconfig --startxonboot
 
-# Root & live user
-rootpw --iscrypted --lock *
-user --name=liveuser --groups=wheel,users,audio,video,storage,games \
-     --password=liveuser --iscrypted --lock
-
-# Boot & storage
-bootloader --location=mbr --driveorder=sda
 zerombr
 clearpart --all --initlabel
 autopart --type=btrfs
 
-# Services
-services --enabled=NetworkManager,sddm,bluetooth,fstrim.timer,gamemode,synthex-firstboot
-services --disabled=initial-setup,firewalld
-
-# SELinux (permissive in gaming edition for max compatibility)
-selinux --permissive
-
-# Firewall — open only Steam + Sunshine ports
-firewall --enabled --port=27036:tcp,27037:tcp,47984:tcp,47989:tcp,47990:tcp,48010:tcp
-
-# Display manager
-displaymanager --enable=sddm
-
-# =============================================================================
-# Repositories
-# =============================================================================
-
-repo --name=fedora        --mirrorlist=https://mirrors.fedoraproject.org/mirrorlist?repo=fedora-rawhide&arch=x86_64
-repo --name=updates       --mirrorlist=https://mirrors.fedoraproject.org/mirrorlist?repo=updates-released-rawhide&arch=x86_64
-repo --name=synthex       --baseurl=https://packages.synthex-os.org/unstable/x86_64/ --gpgcheck=0
-repo --name=synthex-nonfree --baseurl=https://packages.synthex-os.org/nonfree/x86_64/ --gpgcheck=0
-repo --name=rpmfusion-free --mirrorlist=https://mirrors.rpmfusion.org/mirrorlist?repo=free-rawhide&arch=x86_64
-repo --name=rpmfusion-nonfree --mirrorlist=https://mirrors.rpmfusion.org/mirrorlist?repo=nonfree-rawhide&arch=x86_64
-repo --name=copr-synthex  --baseurl=https://copr-be.cloud.fedorainfrastructure.org/results/synthex-linux/packages/rawhide-x86_64/
-
-# =============================================================================
-# Packages
-# =============================================================================
-
 %packages
-
-# Core system
-synthex-core
-synthex-base
-
-# Plymouth
-plymouth
-plymouth-theme-synthex
-plymouth-plugin-script
-# Base system
 @core
-@standard
 @hardware-support
+@fonts
+@multimedia
+@networkmanager-submodules
 
-# KDE Plasma desktop
+# KDE Plasma desktop (base for gaming)
 @kde-desktop
-@kde-apps
-plasma-workspace
 plasma-desktop
+plasma-workspace
 plasma-nm
 plasma-pa
 plasma-systemmonitor
-kscreen
-kpipewire
-spectacle
-kdeconnect
-kdialog
-filelight
-
-# SynthOS base
-synthex-desktop-gaming
-synthex-branding
-synthex-system-daemon
-synthex-hwdaemon
-synthex-kernel
-synthex-oobe
-synthex-firstboot
-synthex-control-center
-synthex-software-center
-synthex-update-manager
-synthex-gaming-mode
-synthex-gpu-setupd
-synthex-gaming-center
-
-# Themes
-sddm-theme-synthex
-plymouth-theme-synthex
-synthex-grub-theme
-synthex-cursors
-synthex-firmware
-
-# Full gaming stack
-%include synthex-gaming-packages.ksinc
-
-# Development tools (lite — for modding/scripting)
-git
-python3
-python3-pip
-nodejs
-gcc
-make
-
-# Terminal & shell
-konsole
-zsh
-bash-completion
-tmux
-htop
-btop
-neofetch
-fastfetch
-
-# File management
 dolphin
-ark
-p7zip
-unrar
-
-# Additional utilities
-flatpak
-discover
-xdg-desktop-portal
-xdg-desktop-portal-kde
+konsole
 spectacle
-ksnip
+sddm
+sddm-kcm
+breeze-icon-theme
+breeze-gtk
+
+# Gaming core stack
+gamemode
+gamescope
+mangohud
+vkbasalt
+
+# Wine / Proton
+wine
+wine-gecko
+wine-mono
+winetricks
+protontricks
+
+# Steam & launchers (Flatpak refs added in %post)
+steam
+lutris
+
+# Controller / input
+joystick
+jstest-gtk
+oversteer
+antimicrox
+
+# GPU drivers
+mesa-dri-drivers
+mesa-vulkan-drivers
+mesa-vdpau
+libvdpau-va-gl
+vulkan-loader
+vulkan-tools
+vulkan-validation-layers
+libva
+libva-utils
+vdpauinfo
+glxinfo
+
+# Media
+ffmpeg
+gstreamer1-plugins-good
+gstreamer1-plugins-bad-free
+gstreamer1-vaapi
+gstreamer1-plugin-openh264
+pipewire
+pipewire-pulseaudio
+wireplumber
+pavucontrol
+
+# Game streaming / recording
+obs-studio
+gstreamer1-plugins-ugly
+ffmpeg
+
+# Development / modding
+cmake
+make
+gcc
+gcc-c++
+python3
+python3-libs
 
 # Fonts
-google-noto-fonts-common
 google-noto-sans-fonts
 google-noto-emoji-fonts
-jetbrains-mono-fonts
+fontawesome-fonts
 
-# Plymouth
-plymouth
-plymouth-plugin-script
-plymouth-scripts
+# System essentials
+grub2-efi-x64
+grub2-pc
+grub2-common
+shim-unsigned-x64
+efibootmgr
+glibc-langpack-en
+bash
+bash-completion
+btrfs-progs
+util-linux
+coreutils
+NetworkManager
+NetworkManager-wifi
+NetworkManager-bluetooth
+wpa_supplicant
+bluez
+xorg-x11-server-Xwayland
+flatpak
+xdg-desktop-portal
+xdg-desktop-portal-kde
 
-# Dracut
-dracut
-dracut-config-rescue
+# Calamares installer
+calamares
 
-# Excluded (not needed in gaming edition)
--gnome-shell
--gnome-session
--gdm
--evolution
--rhythmbox
--totem
--cheese
--libreoffice*
+# SynthOS gaming packages
+synthex-core
+synthex-branding
+synthex-grub-theme
+synthex-plymouth-theme
+synthex-cursors
+synthex-sounds
+synthex-wallpapers
+synthex-system-daemon
+synthex-control-center
+synthex-gaming-center
+synthex-app-manager
+synthex-update-manager
+synthex-performance-benchmark
+synthex-cachu-tuning
+synthex-nvidia-installer
+synthex-codec-installer
 
-%end
-
-# =============================================================================
-# Pre-install
-# =============================================================================
-
-%pre
-#!/bin/bash
-# Detect GPU vendor early for driver pre-staging
-GPU_VENDOR="unknown"
-if lspci 2>/dev/null | grep -qi "NVIDIA"; then
-    GPU_VENDOR="nvidia"
-elif lspci 2>/dev/null | grep -qi "AMD\|ATI"; then
-    GPU_VENDOR="amd"
-elif lspci 2>/dev/null | grep -qi "Intel"; then
-    GPU_VENDOR="intel"
-fi
-echo "GPU_VENDOR=$GPU_VENDOR" > /tmp/synthex-hwdetect.env
-echo "EDITION=gaming" >> /tmp/synthex-hwdetect.env
-%end
-
-# =============================================================================
-# Post-install
-# =============================================================================
-
-%post --nochroot
-#!/bin/bash
-echo "=== SynthOS Gaming Edition Post-Install (nochroot) ==="
-
-# Copy hardware detection result into chroot
-[ -f /tmp/synthex-hwdetect.env ] && \
-    cp /tmp/synthex-hwdetect.env /mnt/sysimage/var/lib/synthex/hwdetect.env
-
+# Performance monitoring
+lm_sensors
+nvme-cli
+hdparm
+htop
+btop
+iotop
+inxi
+pciutils
+usbutils
+dmidecode
+wget
+curl
+git
+vim-minimal
+nano
+rsync
 %end
 
 %post
 #!/bin/bash
-set -euo pipefail
-LOG=/var/log/synthex-gaming-post.log
-exec > >(tee -a "$LOG") 2>&1
+set -e
 
-echo "=== SynthOS Gaming Edition Post-Install (chroot) ==="
-mkdir -p /var/lib/synthex
+cat > /etc/yum.repos.d/synthex.repo << 'REPOEOF'
+[synthex]
+name=SynthOS Linux - Stable
+baseurl=https://packages.getsynthex.org/stable/x86_64/
+enabled=1
+gpgcheck=0
+priority=10
 
-# ── Write gaming install profile ──────────────────────────────────────────────
-cat > /var/lib/synthex/install-profile.json << 'PROFILE'
-{
-  "edition":  "gaming",
-  "profile":  "gaming",
-  "version":  "2026.10",
-  "variant":  "v3",
-  "features": ["gaming", "steam", "proton", "mangohud", "gamescope", "bore-kernel"]
-}
-PROFILE
+[synthex-updates]
+name=SynthOS Linux - Updates
+baseurl=https://packages.getsynthex.org/updates/x86_64/
+enabled=1
+gpgcheck=0
+priority=10
+REPOEOF
 
-# ── Gaming-specific kernel parameters ─────────────────────────────────────────
-if [ -f /etc/default/grub ]; then
-    sed -i 's/^GRUB_CMDLINE_LINUX_DEFAULT=.*/GRUB_CMDLINE_LINUX_DEFAULT="quiet splash mitigations=off threadirqs preempt=full"/' \
-        /etc/default/grub
-fi
+# Install gaming-focused Flatpaks
+flatpak remote-add --if-not-exists flathub https://dl.flathub.org/repo/flatpak-repo.flatpakrepo 2>/dev/null || true
 
-# ── Enable gaming services ────────────────────────────────────────────────────
-systemctl enable gamemode.service   &>/dev/null || true
-systemctl enable irqbalance.service &>/dev/null || true
-systemctl enable bluetooth.service  &>/dev/null || true
-
-# ── Disable mitigations (user choice — warning in OOBE) ───────────────────────
-# Already set in GRUB above; also set in sysctl
-cat > /etc/sysctl.d/99-synthex-gaming.conf << 'SYSCTL'
+# Kernel gaming tweaks
+cat > /etc/sysctl.d/99-synthex-gaming.conf << 'SYSCTLEOF'
 # SynthOS Gaming Tweaks
-vm.swappiness = 1
-kernel.nmi_watchdog = 0
-net.core.netdev_max_backlog = 16384
-kernel.sched_autogroup_enabled = 1
-SYSCTL
+vm.swappiness=10
+vm.compressibility_hint=0
+kernel.sched_autogroup_enabled=1
+kernel.perf_event_paranoid=1
+net.ipv4.tcp_fastopen=3
+net.core.netdev_max_backlog=16384
+fs.file-max=524288
+SYSCTLEOF
 
-# ── Udev rules for controllers ────────────────────────────────────────────────
-cat > /etc/udev/rules.d/70-synthex-gaming-devices.rules << 'UDEV'
-# Steam controllers
-SUBSYSTEM=="usb", ATTRS{idVendor}=="28de", MODE="0660", TAG+="uaccess"
-# PS5 DualSense
-SUBSYSTEM=="hidraw", KERNEL=="hidraw*", ATTRS{idVendor}=="054c", ATTRS{idProduct}=="0ce6", MODE="0660", TAG+="uaccess"
-# Xbox controllers
-SUBSYSTEM=="input", ATTRS{idVendor}=="045e", MODE="0660", TAG+="uaccess"
-# Nintendo Switch Pro
-SUBSYSTEM=="hid", ATTRS{idVendor}=="057e", ATTRS{idProduct}=="2009", MODE="0660", TAG+="uaccess"
-UDEV
+# MangoHud global config
+mkdir -p /etc/MangoHud
+cat > /etc/MangoHud/MangoHud.conf << 'MHEOF'
+# SynthOS MangoHud Default Config
+legacy_layout=false
+position=top-left
+gpu_stats
+cpu_stats
+fps
+frametime
+ram
+cpu_temp
+gpu_temp
+wine
+MHEOF
 
-# ── Gamescope session for Big Picture mode ────────────────────────────────────
-cat > /usr/share/wayland-sessions/gamescope-steam.desktop << 'GSDTP'
-[Desktop Entry]
-Name=Gaming Mode (Gamescope + Steam)
-Comment=Full-screen Steam Big Picture via Gamescope
-Exec=/usr/bin/gamescope -e -f -W 1920 -H 1080 -- steam -gamepadui
-Type=Application
-GSDTP
+# GameMode config
+cat > /etc/gamemode.ini << 'GMEOF'
+[general]
+renice=10
+ioprio=0
 
-# ── Plymouth gaming theme (same as standard, gaming variant) ──────────────────
-if command -v plymouth-set-default-theme &>/dev/null; then
-    plymouth-set-default-theme synthex &>/dev/null || true
+[gpu]
+apply_gpu_optimisations=accept-responsibility
+gpu_device=0
+
+[cpu]
+park_cores=no
+pin_cores=yes
+
+[custom]
+start=synthex-gaming-mode-start
+end=synthex-gaming-mode-end
+GMEOF
+
+cat > /etc/default/grub << 'GRUBEOF'
+GRUB_TIMEOUT=5
+GRUB_TIMEOUT_STYLE=menu
+GRUB_DEFAULT=0
+GRUB_DISTRIBUTOR="SynthOS Gaming"
+GRUB_CMDLINE_LINUX_DEFAULT="rhgb quiet splash mitigations=auto rd.driver.blacklist=nouveau modprobe.blacklist=nouveau processor.max_cstate=5 idle=nomwait"
+GRUB_CMDLINE_LINUX="rd.luks=0 net.ifnames=0"
+GRUB_DISABLE_RECOVERY="false"
+GRUB_TERMINAL_OUTPUT="gfxterm"
+GRUB_GFXPAYLOAD_LINUX="keep"
+GRUBEOF
+
+mkdir -p /etc/synthex
+cat > /etc/synthex/synthex-release << 'RELEOF'
+NAME="SynthOS Linux"
+VERSION="2026.10"
+CODENAME="Ignition"
+EDITION="Gaming"
+ID="synthex"
+ID_LIKE="fedora"
+PRETTY_NAME="SynthOS Linux 2026.10 (Gaming)"
+HOME_URL="https://getsynthex.org"
+RELEOF
+
+if [ -d /usr/share/plymouth/themes/synthex ]; then
+    plymouth-set-default-theme synthex --rebuild-initrd 2>/dev/null || true
 fi
 
-# ── SDDM gaming config ────────────────────────────────────────────────────────
-mkdir -p /etc/sddm.conf.d
-cat > /etc/sddm.conf.d/synthex-gaming.conf << 'SDDMCFG'
-[Theme]
-Current=synthex
+systemctl enable NetworkManager sddm chronyd auditd fstrim.timer
+systemctl disable lvm2-monitor mdmonitor 2>/dev/null || true
+[ -f /usr/lib/systemd/system/synthex-firstboot.service ] && systemctl enable synthex-firstboot.service || true
 
-[Autologin]
-Session=gamescope-steam.desktop
-Relogin=false
-
-[General]
-DisplayServer=wayland
-GreeterEnvironment=QT_WAYLAND_SHELL_INTEGRATION=layer-shell
-SDDMCFG
-
-# ── Machine-ID reset (regenerated on first boot) ──────────────────────────────
-rm -f /etc/machine-id && touch /etc/machine-id
-rm -f /etc/ssh/ssh_host_*
-
-# ── Final cleanup ─────────────────────────────────────────────────────────────
-dnf clean all &>/dev/null || true
-
-echo "=== SynthOS Gaming Edition Post-Install Complete ==="
+echo "SynthOS Gaming Edition post-install complete."
 %end
-
-# =============================================================================
-# END OF GAMING KICKSTART
-# =============================================================================

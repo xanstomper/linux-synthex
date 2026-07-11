@@ -1,292 +1,151 @@
-# =============================================================================
-# SynthOS Minimal Edition Kickstart
-# CLI-only base (~900 MB) — no desktop, no DM, no bloat
-# Ideal for servers, containers, WSL, or as a base for custom builds
-# =============================================================================
+# SynthOS Linux — Minimal Edition Kickstart
+# SPDX-License-Identifier: GPL-3.0-or-later
+# https://getsynthex.org
+
+url --mirrorlist="https://mirrors.fedoraproject.org/mirrorlist?repo=fedora-42&arch=x86_64"
+repo --name="updates" --mirrorlist="https://mirrors.fedoraproject.org/mirrorlist?repo=updates-released-f42&arch=x86_64"
+repo --name="synthex" --baseurl="https://packages.getsynthex.org/stable/x86_64/" --gpgcheck=0
+repo --name="synthex-updates" --baseurl="https://packages.getsynthex.org/updates/x86_64/" --gpgcheck=0
+repo --name="rpmfusion-free" --mirrorlist="https://mirrors.rpmfusion.org/mirrorlist?repo=free-fedora-42&arch=x86_64" --gpgcheck=0
 
 lang en_US.UTF-8
-keyboard --vckeymap=us --xlayouts=us
-timezone UTC --utc
+keyboard us
+timezone America/New_York --utc
+authselect --useshadow --passalgo=sha512
+selinux --enforcing
+firewall --enabled --service=ssh
+services --enabled=NetworkManager,sshd,chronyd,auditd,fstrim.timer,synthex-firstboot
+services --disabled=lvm2-monitor,mdmonitor
+bootloader --location=mbr --append="rhgb quiet splash mitigations=auto"
 network --bootproto=dhcp --device=link --activate
-network --hostname=synthos-minimal
+rootpw --lock
+firstboot --reconfig
+skipx
 
-rootpw --iscrypted --lock *
-user --name=synthos --groups=wheel --password=changeme --plaintext
-
-bootloader --location=mbr
 zerombr
 clearpart --all --initlabel
-autopart --type=lvm --fstype=xfs
+autopart --type=btrfs
 
-selinux --enforcing
-firewall --enabled --ssh
-
-services --enabled=NetworkManager,sshd,chronyd,dnf-automatic-install.timer
-services --disabled=bluetooth,avahi-daemon,cups,ModemManager
-
-# =============================================================================
-# Repos
-# =============================================================================
-repo --name=fedora   --mirrorlist=https://mirrors.fedoraproject.org/mirrorlist?repo=fedora-rawhide&arch=x86_64
-repo --name=updates  --mirrorlist=https://mirrors.fedoraproject.org/mirrorlist?repo=updates-released-rawhide&arch=x86_64
-repo --name=synthex  --baseurl=https://packages.synthex-os.org/unstable/x86_64/ --gpgcheck=0
-
-# =============================================================================
-# Packages
-# =============================================================================
-%packages
-
-# Core system
-synthex-core
-synthex-base
-
-# Plymouth
-plymouth
-plymouth-theme-synthex
-plymouth-plugin-script
+%packages --excludedocs --instLangs=en
 @core
-@standard
 @hardware-support
+@networkmanager-submodules
 
-# SynthOS base (no desktop)
-synthex-system-daemon
-synthex-hwdaemon
-synthex-firmware
-synthex-branding
-synthex-kernel
-
-# Essentials
+# Minimal system packages
+grub2-efi-x64
+grub2-pc
+grub2-common
+shim-unsigned-x64
+efibootmgr
+glibc-langpack-en
 bash
-zsh
-fish
-git
-curl
-wget
-vim
-neovim
-tmux
-screen
-htop
-btop
-neofetch
-fastfetch
-rsync
+bash-completion
+btrfs-progs
+util-linux
+coreutils
+findutils
+grep
+sed
+gawk
 tar
 xz
-zstd
-gzip
 bzip2
-unzip
-
-# Network
+gzip
+systemd
+dbus
+polkit
+sudo
+passwd
+shadow-utils
 NetworkManager
-NetworkManager-tui
-iproute
-iputils
-nmap
-tcpdump
-net-tools
-bind-utils
-traceroute
-mtr
-iperf3
-wireguard-tools
-
-# Security
+NetworkManager-wifi
+wpa_supplicant
+iw
 openssh-server
 openssh-clients
-firewalld
-fail2ban
-aide
-dnf-automatic
-rkhunter
-chkrootkit
-
-# Python & scripting
-python3
-python3-pip
-python3-venv
-perl
-ruby
-lua
-
-# Rust (pre-built SynthOS tools only — full Rust toolchain optional)
-synthex-cli
-
-# System management
-systemd
-systemd-networkd
-dnf
-rpm
-flatpak
-
-# Containers
-podman
-podman-compose
-buildah
-skopeo
-crun
-
-# Editors
-vim-enhanced
-neovim
+curl
+wget
+vim-minimal
 nano
+python3
+python3-libs
 
-# Monitoring
-sysstat
-dstat
-iotop
+# SynthOS minimal
+synthex-core
+synthex-branding
+
+# Minimal tools
+htop
 lsof
-strace
-perf
-
-# Filesystem
-btrfs-progs
-e2fsprogs
-xfsprogs
-dosfstools
-ntfs-3g
-parted
-gdisk
-lvm2
-cryptsetup
-
-# Dev tools
-gcc
-make
-cmake
-autoconf
-automake
-patch
-
-# Excluded
--gnome-shell
--gnome-session
--gdm
--sddm
--kde-desktop*
--plasma*
--xorg-x11*
--wayland
--pulseaudio
--pipewire
--bluetooth*
-
+pciutils
+usbutils
+dmidecode
+inxi
+smartmontools
+nvme-cli
+-%kdeedu-common
+-%gnome-shell
+-%plasma-desktop
 %end
 
-# =============================================================================
-# Post-install
-# =============================================================================
 %post
 #!/bin/bash
-set -euo pipefail
-LOG=/var/log/synthex-minimal-post.log
-exec > >(tee -a "$LOG") 2>&1
+set -e
 
-echo "=== SynthOS Minimal Post-Install ==="
-mkdir -p /var/lib/synthex
+cat > /etc/yum.repos.d/synthex.repo << 'REPOEOF'
+[synthex]
+name=SynthOS Linux - Stable
+baseurl=https://packages.getsynthex.org/stable/x86_64/
+enabled=1
+gpgcheck=0
+priority=10
 
-# Write minimal edition marker
-cat > /var/lib/synthex/install-profile.json << 'PROFILE'
-{
-  "edition":  "minimal",
-  "profile":  "server",
-  "version":  "2026.10",
-  "variant":  "v3",
-  "features": ["cli-only", "containers", "security-hardened"]
-}
-PROFILE
+[synthex-updates]
+name=SynthOS Linux - Updates
+baseurl=https://packages.getsynthex.org/updates/x86_64/
+enabled=1
+gpgcheck=0
+priority=10
+REPOEOF
 
-# OS Release branding
-cat > /etc/os-release << 'OSREL'
-NAME="SynthOS Linux Minimal"
-VERSION="2026.10 (Ignition)"
-ID=synthos
-ID_LIKE=fedora
-VERSION_ID=2026.10
-PRETTY_NAME="SynthOS Linux Minimal 2026.10 (Ignition)"
-ANSI_COLOR="1;33"
-HOME_URL="https://synthex-os.org"
-SUPPORT_URL="https://discuss.synthex-os.org"
-BUG_REPORT_URL="https://github.com/synthex-linux/issues"
-DOCUMENTATION_URL="https://synthex-os.org/docs"
-LOGO=synthex
-OSREL
+cat > /etc/default/grub << 'GRUBEOF'
+GRUB_TIMEOUT=5
+GRUB_TIMEOUT_STYLE=menu
+GRUB_DEFAULT=0
+GRUB_DISTRIBUTOR="SynthOS Linux"
+GRUB_CMDLINE_LINUX_DEFAULT="rhgb quiet splash mitigations=auto"
+GRUB_CMDLINE_LINUX="rd.luks=0 net.ifnames=0"
+GRUB_DISABLE_RECOVERY="false"
+GRUB_TERMINAL_OUTPUT="console"
+GRUBEOF
 
-# Harden SSH
-cat >> /etc/ssh/sshd_config << 'SSHCFG'
-# SynthOS hardened SSH defaults
-PermitRootLogin no
-PasswordAuthentication no
-PubkeyAuthentication yes
-AuthorizedKeysFile .ssh/authorized_keys
-X11Forwarding no
-AllowTcpForwarding no
-MaxAuthTries 3
-LoginGraceTime 30
-ClientAliveInterval 300
-ClientAliveCountMax 2
-SSHCFG
+mkdir -p /etc/synthex
+cat > /etc/synthex/synthex-release << 'RELEOF'
+NAME="SynthOS Linux"
+VERSION="2026.10"
+CODENAME="Ignition"
+EDITION="Minimal"
+ID="synthex"
+ID_LIKE="fedora"
+PRETTY_NAME="SynthOS Linux 2026.10 (Minimal)"
+HOME_URL="https://getsynthex.org"
+RELEOF
 
-# Enable DNF automatic security updates
-cat > /etc/dnf/automatic.conf << 'DNFAUTO'
-[commands]
-upgrade_type = security
-random_sleep = 900
-network_online_timeout = 60
-download_updates = yes
-apply_updates = yes
-reboot = when-needed
-[email]
-email_from = root@localhost
-email_to = root
-[base]
-debuglevel = 1
-DNFAUTO
+cat > /etc/dnf/dnf.conf << 'DNFEOF'
+[main]
+gpgcheck=1
+installonly_limit=3
+clean_requirements_on_remove=True
+best=False
+skip_if_unavailable=True
+fastestmirror=True
+max_parallel_downloads=10
+defaultyes=True
+DNFEOF
 
-# Kernel hardening via sysctl
-cat > /etc/sysctl.d/99-synthex-hardening.conf << 'SYSCTL'
-# Network hardening
-net.ipv4.conf.all.rp_filter = 1
-net.ipv4.conf.default.rp_filter = 1
-net.ipv4.conf.all.accept_source_route = 0
-net.ipv4.conf.default.accept_source_route = 0
-net.ipv4.conf.all.accept_redirects = 0
-net.ipv4.conf.default.accept_redirects = 0
-net.ipv4.conf.all.send_redirects = 0
-net.ipv4.tcp_syncookies = 1
-net.ipv6.conf.all.accept_redirects = 0
-# Kernel hardening
-kernel.dmesg_restrict = 1
-kernel.kptr_restrict = 2
-kernel.randomize_va_space = 2
-fs.protected_hardlinks = 1
-fs.protected_symlinks = 1
-SYSCTL
+systemctl enable NetworkManager sshd chronyd auditd fstrim.timer
+systemctl disable lvm2-monitor mdmonitor 2>/dev/null || true
+[ -f /usr/lib/systemd/system/synthex-firstboot.service ] && systemctl enable synthex-firstboot.service || true
 
-# Fail2ban basic config
-cat > /etc/fail2ban/jail.d/synthex.conf << 'F2B'
-[sshd]
-enabled = true
-port = ssh
-filter = sshd
-logpath = /var/log/auth.log
-maxretry = 5
-bantime = 3600
-findtime = 600
-F2B
-
-# Machine ID reset
-rm -f /etc/machine-id && touch /etc/machine-id
-rm -f /etc/ssh/ssh_host_*
-
-# Clean
-dnf clean all &>/dev/null || true
-
-echo "=== SynthOS Minimal Post-Install Complete ==="
-echo "Edition: minimal | Security: hardened | Containers: podman"
+echo "SynthOS Minimal Edition post-install complete."
 %end
-
-# =============================================================================
-# END MINIMAL KICKSTART
-# =============================================================================

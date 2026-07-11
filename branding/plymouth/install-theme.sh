@@ -1,93 +1,117 @@
 #!/usr/bin/env bash
-# install-theme.sh — Install SynthOS Plymouth theme
-# Usage: sudo ./install-theme.sh [--uninstall]
+# SynthOS Plymouth Theme Installer
+# SPDX-License-Identifier: GPL-3.0-or-later
 set -euo pipefail
 
 THEME_NAME="synthex"
-THEME_SRC="$(cd "$(dirname "$0")/../.." && pwd)/desktop/plymouth/synthex-theme"
-THEME_DEST="/usr/share/plymouth/themes/$THEME_NAME"
-INITRD_CONFIG="/etc/dracut.conf.d/90-synthex-plymouth.conf"
+THEME_SRC="$(dirname "$(realpath "$0")")/theme"
+THEME_DEST="/usr/share/plymouth/themes/${THEME_NAME}"
 
-if [[ $EUID -ne 0 ]]; then
-    echo "Error: must run as root. Use: sudo $0" >&2
+usage() {
+    echo "Usage: $0 [--install|--uninstall|--preview|--rebuild]"
+    echo ""
+    echo "  --install    Install theme to system (requires root)"
+    echo "  --uninstall  Remove theme from system (requires root)"
+    echo "  --preview    Preview theme in a window (no root needed)"
+    echo "  --rebuild    Rebuild initrd with current default theme (requires root)"
     exit 1
-fi
-
-uninstall() {
-    echo "Removing SynthOS Plymouth theme..."
-    rm -rf "$THEME_DEST"
-    rm -f  "$INITRD_CONFIG"
-    # Restore OS default
-    if command -v plymouth-set-default-theme &>/dev/null; then
-        plymouth-set-default-theme details 2>/dev/null || true
-    fi
-    # Rebuild initramfs
-    if command -v dracut &>/dev/null; then
-        dracut --force 2>/dev/null || true
-    fi
-    echo "✓ Uninstalled"
-    exit 0
 }
 
-[[ "${1:-}" == "--uninstall" ]] && uninstall
+check_root() {
+    [[ $EUID -eq 0 ]] || { echo "Error: This operation requires root." >&2; exit 1; }
+}
 
-echo "Installing SynthOS Plymouth theme..."
+# Convert SVG → PNG if needed (build-time)
+generate_pngs() {
+    local src="$THEME_SRC"
+    echo "Generating Plymouth PNG assets..."
 
-# 1. Copy theme files
-mkdir -p "$THEME_DEST"
-cp -r "$THEME_SRC"/. "$THEME_DEST/"
-echo "  ✓ Theme files copied to $THEME_DEST"
+    for svg in logo spinner bullet bullet-highlight watermark; do
+        local svg_file="${src}/${svg}.svg"
+        local png_file="${src}/${svg}.png"
 
-# 2. Convert SVGs to PNGs if ImageMagick/rsvg available
-for svg in "$THEME_DEST"/*.svg; do
-    [[ -f "$svg" ]] || continue
-    base="${svg%.svg}"
-    if command -v rsvg-convert &>/dev/null; then
-        rsvg-convert -w 200 -h 200 "$svg" -o "${base}.png" 2>/dev/null && \
-            echo "  ✓ Converted $(basename "$svg") → $(basename "${base}.png")"
-    elif command -v convert &>/dev/null; then
-        convert "$svg" "${base}.png" 2>/dev/null && \
-            echo "  ✓ Converted $(basename "$svg") (ImageMagick)"
+        if [ ! -f "$png_file" ] && [ -f "$svg_file" ]; then
+            if command -v rsvg-convert &>/dev/null; then
+                rsvg-convert -w 400 "$svg_file" -o "$png_file" 2>/dev/null && echo "  ✓ ${svg}.png"
+            elif command -v inkscape &>/dev/null; then
+                inkscape --export-type=png --export-filename="$png_file" "$svg_file" &>/dev/null && echo "  ✓ ${svg}.png"
+            elif command -v convert &>/dev/null; then
+                convert -background none "$svg_file" "$png_file" 2>/dev/null && echo "  ✓ ${svg}.png"
+            else
+                echo "  ⚠ No SVG converter found — using placeholder for ${svg}.png"
+                convert -size 1x1 xc:'#0B0F1A' "$png_file" 2>/dev/null || true
+            fi
+        elif [ -f "$png_file" ]; then
+            echo "  ✓ ${svg}.png (exists)"
+        fi
+    done
+}
+
+do_install() {
+    check_root
+    generate_pngs
+    echo "Installing SynthOS Plymouth theme..."
+    install -d "$THEME_DEST"
+    install -m 644 "${THEME_SRC}/synthex.plymouth" "${THEME_DEST}/"
+    install -m 644 "${THEME_SRC}/synthex.script"   "${THEME_DEST}/"
+    # Install PNG assets
+    for png in logo spinner bullet bullet-highlight watermark; do
+        [ -f "${THEME_SRC}/${png}.png" ] && install -m 644 "${THEME_SRC}/${png}.png" "${THEME_DEST}/" || true
+    done
+    # Install SVG sources
+    for svg in logo spinner bullet bullet-highlight watermark; do
+        [ -f "${THEME_SRC}/${svg}.svg" ] && install -m 644 "${THEME_SRC}/${svg}.svg" "${THEME_DEST}/" || true
+    done
+    echo "✓ Theme installed to ${THEME_DEST}"
+    echo ""
+    echo "Setting ${THEME_NAME} as default Plymouth theme..."
+    plymouth-set-default-theme "${THEME_NAME}"
+    echo "✓ Default theme set"
+    echo ""
+    echo "Rebuilding initrd (this may take a moment)..."
+    plymouth-set-default-theme "${THEME_NAME}" --rebuild-initrd
+    echo "✓ initrd rebuilt"
+    echo ""
+    echo "SynthOS Plymouth theme installation complete."
+}
+
+do_uninstall() {
+    check_root
+    echo "Removing SynthOS Plymouth theme..."
+    if plymouth-get-default-theme 2>/dev/null | grep -q "${THEME_NAME}"; then
+        plymouth-set-default-theme bgrt 2>/dev/null || \
+        plymouth-set-default-theme spinner 2>/dev/null || true
+        plymouth-set-default-theme --rebuild-initrd 2>/dev/null || true
     fi
-done
+    rm -rf "$THEME_DEST"
+    echo "✓ Theme removed"
+}
 
-# 3. Ensure synthex-logo.png exists (ship fallback if not)
-if [[ ! -f "$THEME_DEST/synthex-logo.png" ]] && [[ ! -f "$THEME_DEST/synthex-logo.svg" ]]; then
-    echo "  ⚠ Warning: no logo image found, boot splash will use text only"
-fi
+do_preview() {
+    echo "Launching Plymouth preview for theme: ${THEME_NAME}"
+    if command -v plymouthd &>/dev/null; then
+        sudo plymouthd --no-daemon --debug 2>/dev/null &
+        PLYM_PID=$!
+        sleep 1
+        sudo plymouth --show-splash 2>/dev/null || true
+        sleep 5
+        sudo plymouth --quit 2>/dev/null || true
+        wait "$PLYM_PID" 2>/dev/null || true
+    else
+        echo "plymouthd not available — install plymouth package first"
+    fi
+}
 
-# 4. Set as default Plymouth theme
-if command -v plymouth-set-default-theme &>/dev/null; then
-    plymouth-set-default-theme "$THEME_NAME"
-    echo "  ✓ Set as default Plymouth theme"
-else
-    # Manual fallback
-    echo "Name=$THEME_NAME" > /etc/plymouth/plymouthd.conf
-    sed -i "s|^Theme=.*|Theme=$THEME_NAME|" /etc/plymouth/plymouthd.conf 2>/dev/null || \
-        printf "[Daemon]\nTheme=%s\n" "$THEME_NAME" > /etc/plymouth/plymouthd.conf
-fi
+do_rebuild() {
+    check_root
+    plymouth-set-default-theme --rebuild-initrd
+    echo "✓ initrd rebuilt"
+}
 
-# 5. Write dracut config so Plymouth is included in initramfs
-cat > "$INITRD_CONFIG" << DRACUT
-# SynthOS Plymouth dracut configuration
-# Generated by $0 on $(date -Iseconds)
-add_dracutmodules+=" plymouth "
-plymouth_theme="$THEME_NAME"
-DRACUT
-echo "  ✓ Dracut config written at $INITRD_CONFIG"
-
-# 6. Rebuild initramfs
-echo "  Rebuilding initramfs (this may take a minute)..."
-if command -v dracut &>/dev/null; then
-    dracut --force 2>&1 | tail -5
-    echo "  ✓ Initramfs rebuilt"
-elif command -v mkinitcpio &>/dev/null; then
-    mkinitcpio -P 2>&1 | tail -5
-    echo "  ✓ Initramfs rebuilt (mkinitcpio)"
-else
-    echo "  ⚠ No initramfs tool found (dracut/mkinitcpio). Rebuild manually."
-fi
-
-echo
-echo "✅ SynthOS Plymouth theme installed successfully."
-echo "   Reboot to see the boot splash."
+case "${1:---install}" in
+    --install)   do_install   ;;
+    --uninstall) do_uninstall ;;
+    --preview)   do_preview   ;;
+    --rebuild)   do_rebuild   ;;
+    *)           usage        ;;
+esac

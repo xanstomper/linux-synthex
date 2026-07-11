@@ -1,0 +1,21 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 120" width="400" height="120">
+  <defs>
+    <linearGradient id="logoGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" style="stop-color:#FFB300;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#FF8C00;stop-opacity:1" />
+    </linearGradient>
+  </defs>
+  <!-- Hexagon icon -->
+  <polygon points="50,10 80,27 80,62 50,79 20,62 20,27"
+           fill="none" stroke="url(#logoGrad)" stroke-width="3"/>
+  <polygon points="50,22 68,32 68,57 50,67 32,57 32,32"
+           fill="url(#logoGrad)" opacity="0.3"/>
+  <text x="50" y="51" font-family="Noto Sans" font-size="20" font-weight="bold"
+        fill="url(#logoGrad)" text-anchor="middle">S</text>
+  <!-- "SynthOS" wordmark -->
+  <text x="100" y="52" font-family="Noto Sans" font-size="32" font-weight="bold"
+        fill="white" opacity="0.95">SynthOS</text>
+  <!-- Tagline -->
+  <text x="100" y="74" font-family="Noto Sans" font-size="13"
+        fill="#8899BB" letter-spacing="3">ILLUMINATE YOUR DESKTOP</text>
+</svg>
