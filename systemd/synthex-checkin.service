@@ -1,0 +1,10 @@
+[Unit]
+Description=SynthOS Dead Man's Switch check-in
+Documentation=https://getsynthex.io/docs/deadman
+
+[Service]
+Type=oneshot
+ExecStart=/usr/bin/synthex-checkin
+
+[Install]
+WantedBy=multi-user.target

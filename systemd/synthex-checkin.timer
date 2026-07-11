@@ -1,0 +1,10 @@
+[Unit]
+Description=Periodic check-in for SynthOS Dead Man's Switch
+Documentation=https://getsynthex.io/docs/deadman
+
+[Timer]
+OnBootSec=1min
+OnUnitActiveSec=5min
+
+[Install]
+WantedBy=timers.target

@@ -73,7 +73,6 @@ SYNTHEX_CORE_CODENAME=Ignition
 EOF
 
 %files
-%license LICENSE
 %dir /etc/synthex
 %config(noreplace) /etc/synthex/core.conf
 %dir /usr/share/synthex

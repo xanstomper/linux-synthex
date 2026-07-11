@@ -28,24 +28,24 @@ validate_ks() {
 
     # 1. Required sections
     for section in "%packages" "%post" "%end"; do
-        grep -q "$section" "$ks" || { warn "$name: missing $section"; ((errors++)); }
+        grep -q "$section" "$ks" || { warn "$name: missing $section"; (( errors++ )) || true; }
     done
 
     # 2. Must have synthex-core
-    grep -q "^synthex-core" "$ks" || { warn "$name: missing synthex-core package"; ((errors++)); }
+    grep -q "^synthex-core" "$ks" || { warn "$name: missing synthex-core package"; (( errors++ )) || true; }
 
     # 3. Must have grub2 or bootloader
-    grep -qiE "^grub2|^bootloader" "$ks" || { warn "$name: no bootloader package"; ((errors++)); }
+    grep -qiE "^grub2|^bootloader" "$ks" || { warn "$name: no bootloader package"; (( errors++ )) || true; }
 
     # 4. Must have synthex-kernel
-    grep -q "^synthex-kernel" "$ks" || { warn "$name: missing synthex-kernel"; ((errors++)); }
+    grep -q "^synthex-kernel" "$ks" || { warn "$name: missing synthex-kernel"; (( errors++ )) || true; }
 
     # 5. Must have plymouth
-    grep -qE "^plymouth$|^plymouth-" "$ks" || { warn "$name: missing plymouth"; ((errors++)); }
+    grep -qE "^plymouth$|^plymouth-" "$ks" || { warn "$name: missing plymouth"; (( errors++ )) || true; }
 
     # 6. ksvalidate (if available)
     if command -v ksvalidate &>/dev/null; then
-        ksvalidate "$ks" 2>/dev/null || { warn "$name: ksvalidate reported errors"; ((errors++)); }
+        ksvalidate "$ks" 2>/dev/null || { warn "$name: ksvalidate reported errors"; (( errors++ )) || true; }
     fi
 
     return $errors
@@ -72,7 +72,7 @@ else
 fi
 
 for ks in "${ALL_KS[@]}"; do
-    [ -f "$ks" ] || { warn "Not found: $ks"; ((FAIL++)); continue; }
+    [ -f "$ks" ] || { warn "Not found: $ks"; (( FAIL++ )) || true; continue; }
     name=$(basename "$ks" .ks)
     dst="$OUTPUT_DIR/$name-$(date +%Y%m%d).ks"
 
@@ -84,10 +84,10 @@ for ks in "${ALL_KS[@]}"; do
 
     if [ $err_count -gt 0 ]; then
         warn "$name: $err_count validation errors"
-        ((FAIL++))
+        (( FAIL++ )) || true
     else
         log "  ✓ Validated"
-        ((PASS++))
+        (( PASS++ )) || true
     fi
 
     # Patch + stage (unless validate-only)

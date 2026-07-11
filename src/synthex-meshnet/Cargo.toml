@@ -1,0 +1,32 @@
+[package]
+name        = "synthex-meshnet"
+version     = "2026.10.0"
+edition     = "2021"
+description = "SynthOS LAN mesh daemon — mDNS discovery, encrypted relay, clipboard sync"
+license     = "GPL-3.0-or-later"
+authors     = ["SynthOS Team <team@synthex-os.org>"]
+
+[[bin]]
+name = "synthex-meshnet"
+path = "src/main.rs"
+
+[dependencies]
+anyhow             = "1"
+thiserror          = "1"
+serde              = { version = "1", features = ["derive"] }
+serde_json         = "1"
+toml               = "0.8"
+tokio              = { version = "1", features = ["full"] }
+tracing            = "0.1"
+tracing-subscriber = { version = "0.3", features = ["env-filter"] }
+chrono             = { version = "0.4", features = ["serde"] }
+dirs               = "6"
+uuid               = { version = "1", features = ["v4"] }
+rand               = "0.8"
+mdns-sd            = "0.11"
+
+[profile.release]
+opt-level     = 3
+lto           = true
+codegen-units = 1
+strip         = true

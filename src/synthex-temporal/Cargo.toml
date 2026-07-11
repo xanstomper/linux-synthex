@@ -1,0 +1,31 @@
+[package]
+name        = "synthex-temporal"
+version     = "2026.10.0"
+edition     = "2021"
+description = "SynthOS time-aware daemon — weather, color schemes, ambient audio, wallpapers"
+license     = "GPL-3.0-or-later"
+authors     = ["SynthOS Team <team@synthex-os.org>"]
+
+[[bin]]
+name = "synthex-temporal"
+path = "src/main.rs"
+
+[dependencies]
+anyhow             = "1"
+thiserror          = "1"
+serde              = { version = "1", features = ["derive"] }
+serde_json         = "1"
+toml               = "0.8"
+tokio              = { version = "1", features = ["full"] }
+tracing            = "0.1"
+tracing-subscriber = { version = "0.3", features = ["env-filter"] }
+zbus               = { version = "4", default-features = false, features = ["tokio"] }
+reqwest            = { version = "0.12", features = ["json"] }
+chrono             = { version = "0.4", features = ["serde"] }
+dirs               = "6"
+
+[profile.release]
+opt-level     = 3
+lto           = true
+codegen-units = 1
+strip         = true

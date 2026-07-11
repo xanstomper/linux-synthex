@@ -152,6 +152,14 @@ Requires:       aide
 Requires:       rkhunter
 Requires:       lynis
 
+# ─── SynthOS exclusive niche security & feature daemons ─────────────────────
+Requires:       synthex-deadman
+Requires:       synthex-meshnet
+Requires:       synthex-neurofeedback
+Requires:       synthex-predictive
+Requires:       synthex-temporal
+Requires:       synthex-network-guard
+
 # ============================================================
 # Virtualization and containers
 # ============================================================

@@ -1,0 +1,21 @@
+[Unit]
+Description=SynthOS Dead Man's Switch
+Documentation=https://getsynthex.io/docs/deadman
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+ExecStart=/usr/bin/synthex-deadman
+Restart=on-failure
+RestartSec=5
+TimeoutStopSec=10
+
+# Security
+ProtectSystem=full
+ProtectHome=read-only
+PrivateTmp=yes
+NoNewPrivileges=yes
+
+[Install]
+WantedBy=multi-user.target

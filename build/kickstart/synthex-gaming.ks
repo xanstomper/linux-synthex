@@ -141,6 +141,8 @@ calamares
 
 # SynthOS gaming packages
 synthex-core
+synthex-kernel
+plymouth
 synthex-branding
 synthex-grub-theme
 synthex-plymouth-theme

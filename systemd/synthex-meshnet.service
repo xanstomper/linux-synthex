@@ -1,0 +1,21 @@
+[Unit]
+Description=SynthOS LAN Mesh Daemon
+Documentation=https://getsynthex.io/docs/meshnet
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+ExecStart=/usr/bin/synthex-meshnet
+Restart=on-failure
+RestartSec=5
+TimeoutStopSec=10
+
+# Security
+ProtectSystem=full
+ProtectHome=read-only
+PrivateTmp=yes
+NoNewPrivileges=yes
+
+[Install]
+WantedBy=multi-user.target

@@ -72,6 +72,8 @@ python3-libs
 
 # SynthOS minimal
 synthex-core
+synthex-kernel
+plymouth
 synthex-branding
 
 # Minimal tools

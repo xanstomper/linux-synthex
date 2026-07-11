@@ -2,7 +2,6 @@
 resolver = "2"
 members = [
     # Core daemons
-    "src/system-daemon",
     "src/synthex-system-daemon",
     "src/hwdaemon",
     "src/desktopd",
@@ -40,6 +39,12 @@ members = [
     "src/synthex-rust-tools/synthex-pkg",
     "src/synthex-rust-tools/synthex-update-manager",
     "src/synthex-rust-tools/synthex-driver-manager",
+    # Niche feature daemons (packaged: deadman, meshnet, predictive)
+    # synthex-temporal ships via its Python spec (synthex-temporal.spec); the
+    # Rust crate remains an optional standalone build.
+    "src/synthex-deadman",
+    "src/synthex-meshnet",
+    "src/synthex-predictive",
 ]
 
 [workspace.package]
