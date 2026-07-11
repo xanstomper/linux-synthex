@@ -54,3 +54,4 @@ project-tree.txt
 *.img
 *.qcow2
 *.raw
+.claude/
