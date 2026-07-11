@@ -12,7 +12,7 @@ if os.path.exists(P):
             raw = json.load(f)
             history = raw if isinstance(raw, list) else []
     except (json.JSONDecodeError, OSError):
-        pass
+        pass  # boot history file absent on first boot
 
 result = subprocess.run(["systemd-analyze"], capture_output=True, text=True)
 output = result.stdout
@@ -23,7 +23,7 @@ if "=" in output:
         try:
             boot_time = float(tail.replace("s", ""))
         except ValueError:
-            pass
+            pass  # boot time parse failed — non-fatal
 
 entry = {
     "date": datetime.datetime.now().isoformat(),

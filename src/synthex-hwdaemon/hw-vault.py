@@ -51,7 +51,7 @@ def scan_hardware():
                     elif key == "vendor_id":
                         cpu_info["vendor"] = val
     except (OSError, json.JSONDecodeError):
-        pass
+        pass  # CPU info parse failed, continue
     
     if cpu_info:
         cpu_id = hashlib.md5(cpu_info.get("model", "").encode()).hexdigest()[:12]
@@ -76,7 +76,7 @@ def scan_hardware():
                     }
                     break
     except (OSError, json.JSONDecodeError):
-        pass
+        pass  # GPU lspci parse failed
     
     # GPU vendor from PCI IDs
     try:
@@ -91,7 +91,7 @@ def scan_hardware():
                     elif part.startswith("8086"):
                         hw.setdefault("gpu", {})["vendor"] = "Intel"
     except (OSError, json.JSONDecodeError):
-        pass
+        pass  # GPU vendor detection failed
     
     # RAM
     try:
@@ -105,7 +105,7 @@ def scan_hardware():
                     }
                     break
     except (OSError, json.JSONDecodeError):
-        pass
+        pass  # RAM detection failed
     
     # Storage
     try:
@@ -124,7 +124,7 @@ def scan_hardware():
                 })
         hw["storage"] = drives[:2]  # First 2 drives
     except (OSError, json.JSONDecodeError):
-        pass
+        pass  # storage lsblk failed
     
     # Network (WiFi)
     try:
@@ -135,7 +135,7 @@ def scan_hardware():
                 hw["wifi"] = parts[2].strip() if len(parts) >= 3 else line.strip()
                 break
     except (OSError, json.JSONDecodeError):
-        pass
+        pass  # WiFi detection failed
     
     # Chassis type (laptop/desktop)
     try:
@@ -153,7 +153,7 @@ def scan_hardware():
                     hw["os"] = line.split("=", 1)[1].strip().strip('"')
                     break
     except (OSError, json.JSONDecodeError):
-        pass
+        pass  # chassis type unknown
     
     hw["kernel"] = os.uname().release
     hw["timestamp"] = datetime.now().isoformat()
@@ -187,7 +187,7 @@ def load_db():
             with open(DB_PATH) as f:
                 return json.load(f)
         except (OSError, json.JSONDecodeError):
-            pass
+            pass  # load_db fallback on corrupt file
     return {"entries": {}, "last_scan": None, "version": 1}
 
 

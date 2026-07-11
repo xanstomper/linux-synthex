@@ -7,7 +7,8 @@ Usage:
     synthex-tray                    — Run tray daemon
     synthex-tray status            — Show current status
 """
-import os, sys, subprocess, json, signal, time
+import os, sys, subprocess, json, signal, time, logging
+log = logging.getLogger("synthex-tray")
 
 STATE_FILE = "/var/lib/synthex/tray-state.json"
 
@@ -18,7 +19,7 @@ def get_updates_count():
             with open(cache) as f:
                 data = json.load(f)
             return data.get("total", 0)
-        except: pass
+        except Exception as e: log.debug("tray: %s", e)
     return 0
 
 def get_gaming_mode():
@@ -59,7 +60,7 @@ def daemon_loop():
             time.sleep(30)
         except KeyboardInterrupt:
             break
-        except: pass
+        except Exception as e: log.debug("tray: %s", e)
 
 def show_status():
     status = get_tray_status()

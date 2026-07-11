@@ -164,7 +164,7 @@ def _get_wallpaper_path() -> Optional[Path]:
                         if Path(potential).exists():
                             return Path(potential)
     except Exception:
-        pass
+        pass  # wallpaper path not found, continue
     return None
 
 

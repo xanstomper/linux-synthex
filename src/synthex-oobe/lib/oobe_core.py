@@ -43,7 +43,7 @@ def setup_logging(verbose: bool = False) -> None:
     try:
         handlers.append(logging.FileHandler(OOBE_LOG))
     except (PermissionError, OSError):
-        pass
+        pass  # log file not writable, stderr only
     logging.basicConfig(
         level=level,
         format="%(asctime)s [%(levelname)s] %(name)s: %(message)s",
@@ -244,7 +244,7 @@ def apply_profile(profile: str) -> bool:
             try:
                 existing = json.loads(OOBE_PROFILE_JSON.read_text())
             except Exception:
-                pass
+                pass  # profile JSON corrupted, start fresh
         existing["profile"] = profile
         OOBE_PROFILE_JSON.write_text(json.dumps(existing, indent=2))
         return True

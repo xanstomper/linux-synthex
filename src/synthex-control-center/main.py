@@ -101,7 +101,7 @@ class AboutDialog(Adw.MessageDialog):
         try:
             info["kernel"] = subprocess.check_output(["uname","-r"], text=True).strip()
         except Exception:
-            pass
+            pass  # hardware detection is best-effort
         try:
             lines = open("/proc/cpuinfo").readlines()
             for l in lines:
@@ -109,12 +109,12 @@ class AboutDialog(Adw.MessageDialog):
                     info["cpu"] = l.split(":")[1].strip()
                     break
         except Exception:
-            pass
+            pass  # hardware detection is best-effort
         try:
             mem = int(open("/proc/meminfo").readline().split()[1])
             info["ram"] = f"{mem//1024//1024} GB"
         except Exception:
-            pass
+            pass  # hardware detection is best-effort
         try:
             gpu = subprocess.check_output(
                 ["lspci","-mm"], text=True, stderr=subprocess.DEVNULL
@@ -124,7 +124,7 @@ class AboutDialog(Adw.MessageDialog):
                     info["gpu"] = l.split('"')[5] if '"' in l else l
                     break
         except Exception:
-            pass
+            pass  # hardware detection is best-effort
         return info
 
 

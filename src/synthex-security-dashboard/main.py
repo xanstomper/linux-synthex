@@ -65,7 +65,7 @@ def _check_root_login_disabled() -> bool:
             shell = m.group(1).strip()
             return shell in ("/sbin/nologin", "/usr/sbin/nologin", "/bin/false")
     except Exception:
-        pass
+        pass  # service-check best-effort; UI continues
     return False
 
 

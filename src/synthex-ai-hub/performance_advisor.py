@@ -44,7 +44,7 @@ def ram_kb():
                 if line.startswith("MemTotal:"):
                     return int(line.split()[1])
     except Exception:
-        pass
+        pass  # performance profile load best-effort
     return 0
 
 

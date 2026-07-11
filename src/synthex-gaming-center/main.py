@@ -434,7 +434,7 @@ class GamingCenterWindow(Adw.ApplicationWindow):
                 subprocess.run(["pkexec", "tee", cpu], input=gov, text=True,
                                 capture_output=True, timeout=5)
             except Exception:
-                pass
+                pass  # preset apply is best-effort
         subprocess.Popen(["systemctl", "--user",
                           "start" if preset["mangohud"] else "stop",
                           "mangohud-helper.service"],

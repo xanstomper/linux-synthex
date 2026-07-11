@@ -105,12 +105,12 @@ def _detect_gpu_acceleration() -> Dict[str, bool]:
             subprocess.run(["nvidia-smi"], capture_output=True, timeout=5)
             gpu["cuda"] = True
         except Exception:
-            pass
+            pass  # CUDA detection best-effort — no NVIDIA GPU
     # Also check libcuda
     if not gpu["cuda"] and os.path.isdir("/usr/lib/cuda"):
         gpu["cuda"] = True
     if not gpu["cuda"] and shutil.which("nvidia-smi") is None:
-        pass
+        pass  # ROCm detection best-effort — no AMD GPU
 
     # AMD ROCm
     if os.path.exists("/dev/kfd"):
@@ -236,7 +236,7 @@ def _start_ollama() -> bool:
         )
         return True
     except Exception:
-        pass
+        pass  # fallback to direct ollama binary
     # Fallback: direct binary
     try:
         subprocess.Popen(
@@ -259,7 +259,7 @@ def _stop_ollama() -> bool:
         )
         return True
     except Exception:
-        pass
+        pass  # fallback to pkill ollama
     # Fallback: kill
     try:
         subprocess.run(["pkill", "ollama"], capture_output=True, timeout=5)

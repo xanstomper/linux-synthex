@@ -19,7 +19,7 @@ def detect_gpu_vendor():
                 elif "INTEL" in l:
                     return "intel"
     except Exception:
-        pass
+        pass  # lspci GPU vendor detection failed
     return "unknown"
 
 def setup_nvidia():
@@ -69,7 +69,7 @@ def create_shader_dirs():
             import stat
             os.chmod(d, stat.S_IRWXU | stat.S_IRWXG | stat.S_IRWXO)
         except Exception:
-            pass
+            pass  # shader dir chmod best-effort
 
 def main():
     log.info(f"SynthOS GPU Setup Daemon (pid={os.getpid()})")

@@ -107,7 +107,7 @@ if _HAVE_LIBDNF:
                     self._snapshotted = True
 
         def post_transaction(self):
-            pass
+            log.debug("post_transaction: snapshot complete")  # no-op on non-snapshotted runs
 
     def _dnf5_plugin_factory(base):
         return SynthexProtectPlugin(base)

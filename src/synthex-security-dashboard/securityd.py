@@ -271,7 +271,7 @@ def check_secure_boot() -> Dict[str, Any]:
                     result["healthy"] = data[-1] == 1 if len(data) > 4 else False
                     result["status"] = "enabled" if result["healthy"] else "disabled"
             except (OSError, IndexError):
-                pass
+                pass  # SecureBoot efivar unreadable — treat as disabled
         else:
             # Either not UEFI or Secure Boot not available
             if os.path.isdir("/sys/firmware/efi"):
@@ -513,7 +513,7 @@ def load_config() -> dict:
             merged.update(cfg)
             return merged
         except (json.JSONDecodeError, OSError):
-            pass
+            return dict(DEFAULT_CONFIG)  # corrupt config file — fall back to defaults
     return dict(DEFAULT_CONFIG)
 
 

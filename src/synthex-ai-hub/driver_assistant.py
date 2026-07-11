@@ -48,7 +48,7 @@ def load_profile():
                 with open(p) as fh:
                     return json.load(fh)
             except Exception:
-                pass
+                pass  # driver detection best-effort
     return None
 
 

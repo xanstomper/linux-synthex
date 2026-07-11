@@ -110,7 +110,7 @@ def _load_engine_config() -> dict:
             merged.update(cfg)
             return merged
         except (json.JSONDecodeError, OSError):
-            pass
+            pass  # config corrupt, use defaults
     return dict(DEFAULT_CONFIG)
 
 
@@ -152,7 +152,7 @@ def _list_apps() -> List[Dict]:
                 data["app_id"] = entry.name
                 apps.append(data)
             except (json.JSONDecodeError, OSError):
-                pass
+                pass  # skip corrupt app metadata
     return apps
 
 
@@ -164,7 +164,7 @@ def _get_app(app_id: str) -> Optional[Dict]:
             data["app_id"] = app_id
             return data
         except (json.JSONDecodeError, OSError):
-            pass
+            pass  # app metadata unreadable
     return None
 
 
@@ -355,7 +355,7 @@ class WebAppDaemon:
             else:
                 conn.sendall(json.dumps({"status": "error", "message": f"Unknown action: {action}"}).encode())
         except Exception:
-            pass
+            pass  # client connection error, close and continue
         finally:
             conn.close()
 

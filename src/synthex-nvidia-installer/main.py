@@ -34,7 +34,7 @@ def detect_gpu():
             if "NVIDIA" in line.upper() or "GeForce" in line or "Quadro" in line:
                 return line
     except Exception:
-        pass
+        pass  # GPU detection best-effort; non-NVIDIA paths handled below
     return "No NVIDIA GPU detected"
 
 def detect_best_branch(gpu_line: str) -> str:

@@ -79,7 +79,7 @@ def set_cpu_governor(governor="schedutil"):
                 with open(gov_path, "w") as f:
                     f.write(governor)
             except PermissionError:
-                pass
+                log.debug("Cannot set governor for %s: permission denied", gov_path)
 
 def set_irq_affinity():
     """Enable IRQ balancing for multi-core."""

@@ -330,7 +330,7 @@ class LogViewerWindow(Adw.ApplicationWindow):
                     GLib.idle_add(self._append_line, parsed)
             proc.terminate()
         except Exception:
-            pass
+            pass  # log follow terminated
 
     def _append_line(self, line: LogLine):
         self._lines.append(line)

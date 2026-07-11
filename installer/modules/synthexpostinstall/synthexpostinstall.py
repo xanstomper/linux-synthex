@@ -227,7 +227,7 @@ def enable_services():
             if result.returncode == 0:
                 enabled += 1
         except Exception:
-            pass
+            pass  # service enable best-effort — non-fatal
     debug(f"Enabled {enabled}/{len(services)} Synthex services")
 
 

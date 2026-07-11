@@ -127,7 +127,7 @@ def run():
     # ── 7. VPN clients (detect & enable if installed) ─────────────────────────
     for vpn_svc in ["openvpn@*.service", "wireguard@*.service"]:
         # Just ensure the services can start if configs exist
-        pass
+        pass  # no VPN config files found in this dir — skip
 
     # ── 8. Firewall ───────────────────────────────────────────────────────────
     chroot_run(root, ["systemctl","enable","firewalld.service"])

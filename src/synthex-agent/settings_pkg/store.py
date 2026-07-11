@@ -21,7 +21,7 @@ def load() -> dict:
         try:
             return {**DEFAULTS, **json.loads(_CFG.read_text())}
         except Exception:
-            pass
+            pass  # corrupt store file — fall back to defaults
     return dict(DEFAULTS)
 
 def save(cfg: dict) -> None:

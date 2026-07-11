@@ -151,7 +151,7 @@ def check_password_policy():
                 try:
                     minlen = int(line.split("=")[1].strip())
                 except (ValueError, IndexError):
-                    pass
+                    pass  # non-numeric value in password-policy field, skip
         if minlen >= 12:
             return {"status": "healthy", "message": f"Password minlen: {minlen}", "score": 10}
         return {"status": "warning", "message": f"Weak password policy (minlen={minlen})", "score": 5}
