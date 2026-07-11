@@ -14,16 +14,16 @@ Requires:       pipewire, pipewire-pulseaudio, wireplumber
 Requires:       mesa, mesa-vulkan-drivers
 Requires:       git, curl, wget, flatpak
 
-%%description
+%description
 SynthOS base meta-package.
 
-%%files
-%%dir /etc/synthex
+%files
+%dir /etc/synthex
 
-%%post
+%post
 mkdir -p /var/lib/synthex || :
 systemctl enable NetworkManager firewalld 2>/dev/null || :
 echo "SynthOS 2026.10" > /etc/synthex/synthex-release
 
-%%changelog
+%changelog
 * Mon Jul 06 2026 - Initial

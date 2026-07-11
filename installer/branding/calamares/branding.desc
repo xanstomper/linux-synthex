@@ -1,0 +1,35 @@
+# Calamares Branding Configuration for SynthOS
+# SPDX-License-Identifier: GPL-3.0-or-later
+
+componentName: synthex
+
+welcomeStyleCalamares: false
+welcomeExpandingLogo: true
+
+strings:
+  productName:          "SynthOS"
+  shortProductName:     "SynthOS"
+  version:              "2026.10"
+  shortVersion:         "2026.10"
+  versionedName:        "SynthOS 2026.10 Ignition"
+  shortVersionedName:   "SynthOS 2026.10"
+  bootloaderEntryName:  "SynthOS"
+  productUrl:           "https://getsynthex.org"
+  supportUrl:           "https://getsynthex.org/support"
+  knownIssuesUrl:       "https://getsynthex.org/issues"
+  releaseNotesUrl:      "https://getsynthex.org/releases/2026.10"
+  donateUrl:            "https://getsynthex.org/donate"
+
+images:
+  productLogo:          "synthex-logo.png"
+  productIcon:          "synthex-icon.png"
+  productWelcome:       "synthex-welcome.png"
+
+slideshow:              "show.qml"
+slideshowAPI:           2
+
+style:
+  sidebarBackground:    "#0B0F1A"
+  sidebarText:          "#E8E8E8"
+  sidebarTextSelect:    "#FFB300"
+  sidebarTextHighlight: "#FFB300"

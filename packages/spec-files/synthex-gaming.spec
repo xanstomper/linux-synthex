@@ -11,13 +11,13 @@ Requires:       gamescope, mangohud, gamemode
 Requires:       protontricks, protonup-qt, wine
 Suggests:       obs-studio, discord
 
-%%description
+%description
 Synthex gaming meta-package - Nobara-level gaming.
 
-%%files
-%%dir /etc/synthex
+%files
+%dir /etc/synthex
 
-%%post
+%post
 cat > /etc/sysctl.d/99-synthex-gaming.conf << 'EOF'
 kernel.sched_latency_ns = 3000000
 vm.max_map_count = 2147483642
@@ -25,5 +25,5 @@ EOF
 systemctl --global enable gamemoded 2>/dev/null || :
 echo "Synthex Gaming Stack installed"
 
-%%changelog
+%changelog
 * Mon Jul 06 2026 - Initial
