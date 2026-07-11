@@ -10,6 +10,12 @@ Requires:       python3
 %description
 Handheld gaming mode for ROG Ally, Steam Deck, Legion Go.
 
+%prep
+# No source archive — files installed directly from repo
+
+%build
+# Nothing to compile — noarch data/script package
+
 %install
 install -Dm755 src/synthex-handheld %{buildroot}%{_bindir}/synthex-handheld
 

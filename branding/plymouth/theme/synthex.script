@@ -31,6 +31,7 @@ spinner_sprite = Sprite(spinner_image);
 spinner_sprite.SetX(Window.GetWidth()  / 2 - spinner_image.GetWidth()  / 2);
 spinner_sprite.SetY(Window.GetHeight() / 2 + spinner_image.GetHeight() + 15);
 frame_count    = 0;
+spin_angle     = 0;
 
 # ── Password dialog ──────────────────────────────────────────────
 dialog_image   = Image("dialog-background.png");
@@ -43,7 +44,7 @@ msg_sprite     = Sprite();
 
 # ── Helpers ──────────────────────────────────────────────────────
 fun fade_in(alpha) {
-    alpha = Math.Clamp(Math.Int(500 * p), 0, 100) / 100;
+    alpha = Math.Clamp(Math.Int(alpha * 100), 0, 100) / 100;
     logo.sprite.SetOpacity(alpha);
     progress_bar_sprite.SetOpacity(alpha);
 }

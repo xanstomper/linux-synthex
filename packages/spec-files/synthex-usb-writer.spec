@@ -10,6 +10,12 @@ Requires:       python3
 %description
 Write ISOs to USB drives.
 
+%prep
+# No source archive — files installed directly from repo
+
+%build
+# Nothing to compile — noarch data/script package
+
 %install
 install -Dm755 src/synthex-usb-writer %{buildroot}%{_bindir}/synthex-usb-writer
 

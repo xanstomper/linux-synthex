@@ -10,6 +10,12 @@ Requires:       python3
 %description
 AppImage integration and management.
 
+%prep
+# No source archive — files installed directly from repo
+
+%build
+# Nothing to compile — noarch data/script package
+
 %install
 install -Dm755 src/synthex-appimage %{buildroot}%{_bindir}/synthex-appimage
 

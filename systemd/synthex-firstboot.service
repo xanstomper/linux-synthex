@@ -1,22 +1,13 @@
 [Unit]
-Description=Synthex First Boot Setup
-Documentation=https://synthex-linux.org/docs/firstboot
-After=network-online.target syslog.target systemd-udevd.service
-Wants=network-online.target
-ConditionPathExists=!/var/lib/synthex/firstboot-complete
+Description=SynthOS First Boot Setup
+ConditionPathExists=!/var/lib/synthex/firstboot-done
+After=display-manager.service
 
 [Service]
 Type=oneshot
-ExecStart=/usr/libexec/synthex/firstboot.sh
+ExecStart=/usr/lib/synthex/synthex-firstboot
+ExecStartPost=/usr/bin/touch /var/lib/synthex/firstboot-done
 RemainAfterExit=yes
-StandardOutput=journal+console
-
-# First boot needs full write access (user creation, package install, system config)
-PrivateTmp=yes
-NoNewPrivileges=yes
-SystemCallArchitectures=native
-MemoryMax=512M
-CPUQuota=50%
 
 [Install]
-WantedBy=multi-user.target
+WantedBy=graphical.target

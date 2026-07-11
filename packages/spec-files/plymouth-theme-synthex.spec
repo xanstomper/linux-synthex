@@ -16,6 +16,12 @@ Shows a spinning amber sun logo on a dark navy background with a progress bar.
 Supports encrypted disk password prompts and status messages.
 Includes dracut configuration for initramfs embedding.
 
+%prep
+# No source archive — files installed directly from repo
+
+%build
+# Nothing to compile — noarch data/script package
+
 %install
 install -d %{buildroot}%{_datadir}/plymouth/themes/synthex
 install -d %{buildroot}%{_sysconfdir}/dracut.conf.d

@@ -10,6 +10,12 @@ Requires:       python3
 %description
 Firewall profile switching (gaming/secure/dev/home).
 
+%prep
+# No source archive — files installed directly from repo
+
+%build
+# Nothing to compile — noarch data/script package
+
 %install
 install -Dm755 src/synthex-firewall %{buildroot}%{_bindir}/synthex-firewall
 

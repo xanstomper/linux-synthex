@@ -38,6 +38,9 @@ Provides the complete Calamares installer configuration for SynthOS, including:
 %prep
 %setup -q
 
+%build
+# Nothing to compile — noarch data/script package
+
 %install
 # Install Calamares config
 install -d %{buildroot}/etc/calamares

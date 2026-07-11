@@ -10,6 +10,12 @@ Requires:       python3
 %description
 Comprehensive system diagnostics.
 
+%prep
+# No source archive — files installed directly from repo
+
+%build
+# Nothing to compile — noarch data/script package
+
 %install
 install -Dm755 src/synthex-system-report %{buildroot}%{_bindir}/synthex-system-report
 

@@ -10,6 +10,12 @@ Requires:       python3
 %description
 Interactive desktop tour for new users.
 
+%prep
+# No source archive — files installed directly from repo
+
+%build
+# Nothing to compile — noarch data/script package
+
 %install
 install -Dm755 src/synthex-tour %{buildroot}%{_bindir}/synthex-tour
 

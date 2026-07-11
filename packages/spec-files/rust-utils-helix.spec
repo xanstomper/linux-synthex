@@ -35,6 +35,9 @@ Key features:
 %prep
 %setup -q -n helix-%{helix_version}-x86_64-linux
 
+%build
+# Nothing to compile — noarch data/script package
+
 %install
 install -D -m 0755 helix %{buildroot}%{_bindir}/hx
 install -D -m 0755 helix-term %{buildroot}%{_bindir}/helix-term 2>/dev/null || true

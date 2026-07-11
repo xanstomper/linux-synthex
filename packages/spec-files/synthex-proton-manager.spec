@@ -10,6 +10,12 @@ Requires:       python3
 %description
 Manage Proton-GE/Wine versions per game.
 
+%prep
+# No source archive — files installed directly from repo
+
+%build
+# Nothing to compile — noarch data/script package
+
 %install
 install -Dm755 src/synthex-proton-manager %{buildroot}%{_bindir}/synthex-proton-manager
 

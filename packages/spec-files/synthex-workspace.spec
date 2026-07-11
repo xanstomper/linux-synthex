@@ -10,6 +10,12 @@ Requires:       python3
 %description
 Switch between Gaming/Balanced/Battery/Developer modes.
 
+%prep
+# No source archive — files installed directly from repo
+
+%build
+# Nothing to compile — noarch data/script package
+
 %install
 install -Dm755 src/synthex-workspace %{buildroot}%{_bindir}/synthex-workspace
 

@@ -10,6 +10,12 @@ Requires:       python3
 %description
 Gamescope gaming session with performance optimizations.
 
+%prep
+# No source archive — files installed directly from repo
+
+%build
+# Nothing to compile — noarch data/script package
+
 %install
 install -Dm755 src/synthex-gaming-mode %{buildroot}%{_bindir}/synthex-gaming-mode
 

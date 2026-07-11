@@ -10,6 +10,12 @@ Requires:       python3
 %description
 NVIDIA Optimus GPU switching.
 
+%prep
+# No source archive — files installed directly from repo
+
+%build
+# Nothing to compile — noarch data/script package
+
 %install
 install -Dm755 src/synthex-gpu-switch %{buildroot}%{_bindir}/synthex-gpu-switch
 

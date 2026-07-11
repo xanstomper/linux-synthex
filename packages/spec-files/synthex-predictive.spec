@@ -40,7 +40,7 @@ The synthex-predictived daemon operates in three phases:
 
   PHASE 3 — PRE-LAUNCHING
     When confidence for the next predicted app exceeds a configurable
-    threshold (default 80%%), the daemon:
+    threshold (default 80%), the daemon:
       • Starts the application in the background with
         SYNTHEX_PRELAUNCH=1 in the environment
       • Registers a D-Bus object (io.synthex.Predictive1) that the
@@ -308,7 +308,7 @@ EOF
 - Initial release: ML-based predictive app launcher daemon
 - N-gram Markov chain trained on local launch history (SQLite)
 - Time-of-day frequency histogram fallback for sparse data
-- Auto pre-launch when confidence >= 80%% threshold
+- Auto pre-launch when confidence >= 80% threshold
 - Browser tab pre-warming hint via D-Bus
 - D-Bus interface io.synthex.Predictive1 for desktop integration
-- All learning 100%% local — no telemetry
+- All learning 100% local — no telemetry

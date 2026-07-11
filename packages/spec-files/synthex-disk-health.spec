@@ -10,6 +10,12 @@ Requires:       python3
 %description
 S.M.A.R.T. disk health checker.
 
+%prep
+# No source archive — files installed directly from repo
+
+%build
+# Nothing to compile — noarch data/script package
+
 %install
 install -Dm755 src/synthex-disk-health %{buildroot}%{_bindir}/synthex-disk-health
 

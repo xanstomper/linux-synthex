@@ -63,7 +63,7 @@ The synthex-neurofeedbackd daemon:
 
   4. DESKTOP INTEGRATION (via D-Bus io.synthex.Neurofeedback1):
      • Flow state  → suppress all desktop notifications (DoNotDisturb)
-     • Flow state  → dim all windows except the focused one to 40%% opacity
+     • Flow state  → dim all windows except the focused one to 40% opacity
      • Focus drops → gently restore notifications and window opacity
      • All thresholds and behaviours configurable in
        /etc/synthex/neurofeedback.conf

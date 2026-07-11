@@ -125,6 +125,15 @@ Editions are differentiated by additional profile packages:
   synthex-profile-focus    — Minimal tools, keyboard-driven workflow
   synthex-profile-classic  — Windows-like defaults for new users
 
+%prep
+# Meta-package — no source archive
+
+%build
+# Nothing to compile
+
+%install
+# Meta-package — no files to install directly
+
 %files
 %license LICENSE
 %doc README.md docs/RELEASE-NOTES-2026.10.md

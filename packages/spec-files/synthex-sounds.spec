@@ -17,6 +17,9 @@ All audio files use the XDG Sound Naming specification.
 %prep
 %setup -q
 
+%build
+# Nothing to compile — noarch data/script package
+
 %install
 install -d %{buildroot}/usr/share/sounds/synthex/stereo
 for wav in installer/sounds/*.wav installer/sounds/*.oga 2>/dev/null; do

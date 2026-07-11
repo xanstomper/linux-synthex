@@ -1,0 +1,12 @@
+[Unit]
+Description=SynthOS Brain AI Daemon
+After=dbus.service
+
+[Service]
+Type=simple
+ExecStart=/usr/lib/synthex/synthex-brain
+Restart=always
+User=root
+
+[Install]
+WantedBy=multi-user.target

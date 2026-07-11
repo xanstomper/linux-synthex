@@ -18,6 +18,12 @@ Requires:       wireguard-tools
 WireGuard VPN client configuration template for Synthex.
 Includes a ready-to-customise client config and helper scripts.
 
+%prep
+# No source archive — files installed directly from repo
+
+%build
+# Nothing to compile — noarch data/script package
+
 %install
 mkdir -p %{buildroot}/etc/wireguard
 install -m 0600 %{_sourcedir}/wireguard-client.conf \

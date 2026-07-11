@@ -10,6 +10,12 @@ Requires:       python3
 %description
 CPU power profile switching.
 
+%prep
+# No source archive — files installed directly from repo
+
+%build
+# Nothing to compile — noarch data/script package
+
 %install
 install -Dm755 src/synthex-power-profiles %{buildroot}%{_bindir}/synthex-power-profiles
 

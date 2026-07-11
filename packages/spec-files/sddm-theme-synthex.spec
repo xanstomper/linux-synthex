@@ -15,6 +15,12 @@ Features dark navy/midnight blue design with amber gold (#FFB300) accents,
 glassmorphism login card, session selector (Wayland/X11/Plasma/Hyprland/GNOME),
 keyboard layout picker, clock/date display, and power controls.
 
+%prep
+# No source archive — files installed directly from repo
+
+%build
+# Nothing to compile — noarch data/script package
+
 %install
 install -d %{buildroot}%{_datadir}/sddm/themes/synthex
 install -d %{buildroot}%{_datadir}/sddm/themes/synthex/components

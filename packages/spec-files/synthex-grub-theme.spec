@@ -24,6 +24,9 @@ Features:
 rsvg-convert -w 300 -h 75 %{_sourcedir}/synthex-logo.svg \
     -o %{_builddir}/logo.png 2>/dev/null || true
 
+%build
+# Nothing to compile — noarch data/script package
+
 %install
 install -d %{buildroot}%{_datadir}/grub/themes/synthex
 install -d %{buildroot}%{_datadir}/grub/themes/synthex/fonts

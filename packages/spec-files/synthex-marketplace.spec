@@ -10,6 +10,12 @@ Requires:       python3
 %description
 Synthex package marketplace browser.
 
+%prep
+# No source archive — files installed directly from repo
+
+%build
+# Nothing to compile — noarch data/script package
+
 %install
 install -Dm755 src/synthex-marketplace %{buildroot}%{_bindir}/synthex-marketplace
 

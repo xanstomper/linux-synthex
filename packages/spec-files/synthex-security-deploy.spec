@@ -26,6 +26,12 @@ References:
   - Kernel Self-Protection Project (KSPP)
   - NIST SP 800-53
 
+%prep
+# No source archive — files installed directly from repo
+
+%build
+# Nothing to compile — noarch data/script package
+
 %install
 mkdir -p %{buildroot}/usr/libexec/synthex
 install -m 0755 %{_sourcedir}/security-deploy.sh \

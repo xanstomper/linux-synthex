@@ -10,6 +10,12 @@ Requires:       python3
 %description
 Btrfs snapshot browser and manager.
 
+%prep
+# No source archive — files installed directly from repo
+
+%build
+# Nothing to compile — noarch data/script package
+
 %install
 install -Dm755 src/synthex-timeshift %{buildroot}%{_bindir}/synthex-timeshift
 

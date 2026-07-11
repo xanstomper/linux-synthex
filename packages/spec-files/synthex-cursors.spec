@@ -14,6 +14,12 @@ amber glow variant for selected/active states.
 Also installs a Bibata-Modern-Amber cursor variant for users who
 prefer a fully amber-accented cursor.
 
+%prep
+# No source archive — files installed directly from repo
+
+%build
+# Nothing to compile — noarch data/script package
+
 %install
 install -d %{buildroot}%{_datadir}/icons
 # Bundled cursor theme (pre-built)

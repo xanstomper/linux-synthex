@@ -10,6 +10,12 @@ Requires:       python3
 %description
 AUR package access bridge.
 
+%prep
+# No source archive — files installed directly from repo
+
+%build
+# Nothing to compile — noarch data/script package
+
 %install
 install -Dm755 src/synthex-aur %{buildroot}%{_bindir}/synthex-aur
 

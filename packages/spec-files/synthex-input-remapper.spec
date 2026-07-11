@@ -10,6 +10,12 @@ Requires:       python3
 %description
 Controller input remapping.
 
+%prep
+# No source archive — files installed directly from repo
+
+%build
+# Nothing to compile — noarch data/script package
+
 %install
 install -Dm755 src/synthex-input-remapper %{buildroot}%{_bindir}/synthex-input-remapper
 

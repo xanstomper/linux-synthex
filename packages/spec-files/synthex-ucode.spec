@@ -23,6 +23,9 @@ Early microcode loading is configured via dracut for maximum security.
 %prep
 # meta-package
 
+%build
+# Nothing to compile — noarch data/script package
+
 %install
 # dracut conf to force early microcode loading
 install -d %{buildroot}/etc/dracut.conf.d

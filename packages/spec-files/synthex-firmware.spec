@@ -22,6 +22,12 @@ Pulls in linux-firmware plus additional firmware files needed for:
 - GPU: AMD GFX11 (RDNA3/4), Intel Arc, NVIDIA (via COPR)
 - Storage: NVMe drives that need controller firmware
 
+%prep
+# No source archive — files installed directly from repo
+
+%build
+# Nothing to compile — noarch data/script package
+
 %install
 install -d %{buildroot}%{_datadir}/synthex-firmware
 echo "# SynthOS Firmware Manifest" > \

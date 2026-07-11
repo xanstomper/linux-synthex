@@ -20,6 +20,12 @@ Runs once on the very first system boot after installation to:
 - Apply hardware-specific optimizations
 - Configure GPU drivers if needed
 
+%prep
+# No source archive — files installed directly from repo
+
+%build
+# Nothing to compile — noarch data/script package
+
 %install
 install -d %{buildroot}%{_libexecdir}/synthex
 install -d %{buildroot}%{_unitdir}

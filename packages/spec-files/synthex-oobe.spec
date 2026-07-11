@@ -23,6 +23,12 @@ Runs automatically on first login to guide the user through:
   - Individual app picker (Firefox, Discord, Steam, VS Code, etc.)
 Writes selections to /var/lib/synthex/ for firstboot.service to apply.
 
+%prep
+# No source archive — files installed directly from repo
+
+%build
+# Nothing to compile — noarch data/script package
+
 %install
 install -d %{buildroot}/usr/bin
 install -d %{buildroot}/usr/share/synthex/oobe/ui/pages
