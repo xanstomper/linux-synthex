@@ -26,7 +26,7 @@ const SERVICE_NAME:     &str = "org.synthos.System";
 const OBJECT_PATH:      &str = "/org/synthos/System";
 const STATE_DIR:        &str = "/var/lib/synthex";
 const CONFIG_PATH:      &str = "/etc/synthex/system-daemon.toml";
-const POLL_INTERVAL_MS: u64  = 2000;
+const POLL_INTERVAL_MS: u64  = 500;   // 500 ms → snappier hw monitoring
 
 // ── Config ───────────────────────────────────────────────────────────────────
 #[derive(Debug, Clone, Deserialize)]

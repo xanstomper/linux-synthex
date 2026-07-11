@@ -6,7 +6,7 @@ import sys, os, signal, time, threading, subprocess, logging
 logging.basicConfig(level=logging.INFO, format="[desktopd] %(levelname)s %(message)s")
 log = logging.getLogger("desktopd")
 
-POLL_INTERVAL = 30  # seconds
+POLL_INTERVAL = 10  # seconds — compositor health check every 10 s (was 30)
 
 def run(cmd, timeout=5):
     try:

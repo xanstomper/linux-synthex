@@ -302,3 +302,153 @@ docs:
 ## Report a bug
 bug-report:
     xdg-open https://github.com/synthex-linux/issues/new &
+
+# ============================================================
+# BRAIN OS — AI / AGENT / MEMORY CONTROL
+# ============================================================
+
+## Start all Brain OS AI daemons (brain, neural-ipc, memory-palace, workspace-ai, hermes, sandbox)
+brain-start:
+    @echo "🧠 Starting Brain OS..."
+    systemctl --user start synthex-brain.service synthex-neural-ipc.service \
+        synthex-memory-palace.service synthex-workspace-ai.service \
+        synthex-hermes.service synthex-agent-sandbox.service
+    @echo "✅ Brain OS running"
+
+## Stop all Brain OS AI daemons
+brain-stop:
+    systemctl --user stop synthex-brain.service synthex-neural-ipc.service \
+        synthex-memory-palace.service synthex-workspace-ai.service \
+        synthex-hermes.service synthex-agent-sandbox.service || true
+    @echo "🛑 Brain OS stopped"
+
+## Restart all Brain OS AI daemons
+brain-restart:
+    @just brain-stop
+    @sleep 1
+    @just brain-start
+
+## Show live status of every Brain OS service
+brain-status:
+    @echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ BRAIN OS STATUS ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+    @for s in synthex-brain synthex-neural-ipc synthex-memory-palace \
+              synthex-workspace-ai synthex-hermes synthex-agent-sandbox; do \
+        st=$(systemctl --user is-active $$s 2>/dev/null || echo "inactive"); \
+        printf "  %-36s %s\n" "$$s" "$$st"; \
+    done
+    @echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+
+## Watch live journals for ALL Brain OS services (Ctrl-C to quit)
+brain-logs:
+    journalctl --user -f -n 80 \
+        -u synthex-brain \
+        -u synthex-neural-ipc \
+        -u synthex-memory-palace \
+        -u synthex-workspace-ai \
+        -u synthex-hermes \
+        -u synthex-agent-sandbox
+
+## Clear short-term memory (keeps long-term graph)
+memory-clear:
+    curl -sf -X DELETE http://localhost:7700/memory/short-term && \
+        echo "🧹 Short-term memory cleared" || \
+        echo "⚠  Brain daemon not running"
+
+## Show current memory context (top-20 weighted nodes)
+memory-context:
+    curl -sf http://localhost:7701/context | python3 -m json.tool 2>/dev/null || \
+        echo "⚠  Memory Palace not running"
+
+## Add a manual memory note
+memory-add NOTE:
+    curl -sf -X POST http://localhost:7701/ingest \
+        -H "Content-Type: application/json" \
+        -d "{\"type\":\"manual_note\",\"content\":\"{{NOTE}}\"}" | python3 -m json.tool
+
+## Search memory graph by keyword
+memory-search QUERY:
+    curl -sf "http://localhost:7701/search?q={{QUERY}}&limit=10" | python3 -m json.tool
+
+## Boost a memory node by tag (raises access-weight)
+memory-boost TAG:
+    curl -sf -X POST http://localhost:7701/boost -d "tag={{TAG}}" && \
+        echo "⬆  Boosted '{{TAG}}'"
+
+## Dump full memory graph to ~/memory-dump.json
+memory-dump:
+    curl -sf http://localhost:7701/graph > ~/memory-dump.json && \
+        echo "📦 Dumped to ~/memory-dump.json"
+
+## Show current Brain OS workspace context
+workspace-context:
+    curl -sf http://localhost:7700/workspace | python3 -m json.tool 2>/dev/null || \
+        echo "⚠  Brain daemon not running"
+
+## List active AI agents on the neural bus
+agent-list:
+    curl -sf http://localhost:7700/agents | python3 -m json.tool 2>/dev/null || \
+        echo "⚠  Brain daemon not running"
+
+## Launch a sandboxed AI agent shell (interactive bwrap+namespace)
+agent-sandbox:
+    synthex-agent-sandbox --interactive 2>/dev/null || \
+        bwrap --unshare-all --new-session --ro-bind /usr /usr \
+              --bind /tmp /tmp --dev /dev \
+              /usr/bin/bash --login
+
+## List running sandboxes
+sandbox-list:
+    synthex-agent-sandbox --list 2>/dev/null || \
+        systemctl --user status synthex-agent-sandbox --no-pager
+
+## Show/revoke capabilities of a sandbox (pass SANDBOX_ID)
+sandbox-caps SANDBOX_ID="":
+    synthex-agent-sandbox --caps {{SANDBOX_ID}} 2>/dev/null || \
+        echo "Usage: just sandbox-caps <id>"
+
+## Run Brain OS self-test suite
+brain-test:
+    @echo "🔬 Running Brain OS integration tests..."
+    python3 -m pytest desktop/synthex-memory-palace/tests/ -v 2>/dev/null || \
+    cargo test --manifest-path src/synthex-brain/Cargo.toml 2>&1 | tail -20
+
+## Show Hermes AI assistant status + loaded model
+hermes-status:
+    curl -sf http://localhost:7700/hermes/status | python3 -m json.tool 2>/dev/null || \
+        echo "⚠  Hermes not running — start with: just brain-start"
+
+## Pull/update all AI models (llama3.2, codellama, deepseek-coder)
+ai-models-update:
+    @echo "📥 Pulling AI models..."
+    ollama pull llama3.2
+    ollama pull codellama:7b
+    ollama pull deepseek-coder:6.7b 2>/dev/null || true
+    @echo "✅ Models updated"
+
+## Interactive Hermes chat (terminal session)
+hermes-chat:
+    ollama run llama3.2 2>/dev/null || \
+        curl -sf -X POST http://localhost:7700/hermes/chat \
+             -H "Content-Type: application/json" \
+             -d '{"message":"hello","stream":false}' | python3 -m json.tool
+
+## Show Neural IPC bus stats
+neural-ipc-stats:
+    curl -sf http://localhost:7700/ipc/stats 2>/dev/null | python3 -m json.tool || \
+        systemctl --user status synthex-neural-ipc --no-pager --lines=5
+
+## Reload brain config without restart
+brain-reload:
+    systemctl --user reload synthex-brain.service 2>/dev/null || \
+        systemctl --user kill -s HUP synthex-brain.service 2>/dev/null || \
+        echo "⚠  Brain daemon not running"
+
+## Show Brain OS version and build info
+brain-info:
+    @echo "━━━━━━━━━━━━━━━━━━━━━━━━ BRAIN OS INFO ━━━━━━━━━━━━━━━━━━━━━━━━"
+    @echo "  Distro  : SynthOS Linux 2026.10 (Ignition)"
+    @echo "  Brain   : $(cat src/synthex-brain/Cargo.toml | grep '^version' | head-1 | awk -F'"' '{print $$2}' 2>/dev/null || echo 'dev')"
+    @echo "  Models  : $(ollama list 2>/dev/null | tail -n +2 | awk '{print $$1}' | tr '\n' '  ' || echo 'none')"
+    @echo "  API     : http://localhost:7700 (brain)  http://localhost:7701 (memory)"
+    @echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+

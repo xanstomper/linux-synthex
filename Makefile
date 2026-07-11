@@ -124,3 +124,40 @@ clean:
 clean-iso:
 	@rm -f build/out/*.iso build/out/SHA256SUMS*
 	@echo -e "$(GREEN)[OK]$(RESET)    ISO files removed"
+
+# ── Brain OS: install Python daemons + config ─────────────────────────────────
+install-brain:
+	@echo -e "$(GREEN)[BRAIN]$(RESET) Installing Brain OS daemons..."
+	@install -Dm755 desktop/synthex-memory-palace/memory-palace-daemon.py \
+	    /usr/share/synthex/brain/memory-palace-daemon.py
+	@install -Dm755 src/synthex-agent-sandbox/synthbox-setup.sh \
+	    /usr/share/synthex/brain/synthbox-setup.sh
+	@install -Dm644 systemd/synthex-memory-palace.service \
+	    /usr/lib/systemd/system/synthex-memory-palace.service
+	@systemctl daemon-reload 2>/dev/null || true
+	@echo -e "$(GREEN)[OK]$(RESET)    Brain OS daemons installed"
+
+# ── Brain OS: start all AI services ───────────────────────────────────────────
+brain-start:
+	@echo -e "$(GREEN)[BRAIN]$(RESET) Starting Brain OS services..."
+	@systemctl --user start \
+	    synthex-brain.service \
+	    synthex-neural-ipc.service \
+	    synthex-memory-palace.service \
+	    synthex-workspace-ai.service \
+	    synthex-hermes.service \
+	    synthex-agent-sandbox.service 2>/dev/null || \
+	systemctl start \
+	    synthex-brain.service \
+	    synthex-neural-ipc.service 2>/dev/null || true
+	@echo -e "$(GREEN)[OK]$(RESET)    Brain OS running"
+
+# ── Brain OS: status overview ─────────────────────────────────────────────────
+brain-status:
+	@echo -e "$(BOLD)Brain OS Service Status$(RESET)"
+	@for s in synthex-brain synthex-neural-ipc synthex-memory-palace \
+	          synthex-workspace-ai synthex-hermes synthex-agent-sandbox; do \
+	    st=$$(systemctl --user is-active $$s 2>/dev/null || systemctl is-active $$s 2>/dev/null || echo "unknown"); \
+	    [ "$$st" = "active" ] && col="$(GREEN)" || col="$(YELLOW)"; \
+	    printf "  %s%-36s$(RESET) %s\n" "$$col" "$$s" "$$st"; \
+	done

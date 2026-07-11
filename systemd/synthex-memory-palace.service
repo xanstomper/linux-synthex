@@ -1,0 +1,38 @@
+[Unit]
+Description=SynthOS Memory Palace — Semantic Graph Memory Daemon
+Documentation=https://docs.getsynthex.org/brain-os/memory-palace
+After=synthex-neural-ipc.service synthex-brain.service
+Requires=synthex-neural-ipc.service
+PartOf=synthex-brain.service
+
+[Service]
+Type=simple
+ExecStart=/usr/bin/env python3 /usr/share/synthex/brain/memory-palace-daemon.py
+Restart=always
+RestartSec=3
+TimeoutStartSec=30
+
+# Resource guardrails
+MemoryMax=512M
+CPUWeight=90
+
+# Runtime security (non-privileged)
+DynamicUser=no
+User=jewboy420
+Group=jewboy420
+PrivateTmp=true
+NoNewPrivileges=true
+ProtectSystem=strict
+ReadWritePaths=%h/.local/share/synthex/memory-palace %h/.local/share/synthex
+
+# Allow aiohttp to open the REST port (localhost only)
+AmbientCapabilities=
+CapabilityBoundingSet=
+
+# Stdout logging through journal
+StandardOutput=journal
+StandardError=journal
+SyslogIdentifier=synthex-memory-palace
+
+[Install]
+WantedBy=synthex-brain.service
