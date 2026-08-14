@@ -365,7 +365,55 @@ class AegisEngine:
                         except Exception:
                             pass
 
-                    # 4. Supply Chain Pipe-to-Bash Obfuscated Execution
+                    # 4. Infostealer Credential Harvester Detection
+                    infostealer_targets = ["Login Data", "key4.db", "logins.json", "cookies.sqlite", "leveldb", "tdata", ".ssh/id_rsa", ".ssh/id_ed25519", "exodus.wallet", ".aws/credentials"]
+                    trusted_infostealer_parents = [
+                        "brave", "firefox", "google-chrome", "chromium", "discord",
+                        "telegram-desktop", "ssh", "ssh-agent", "systemd", "hermes",
+                        "antigravity", "agy", "code", "cursor", "opencode", "cargo",
+                        "git", "grep", "rg", "ag", "pytest", "unittest", "screen-stream"
+                    ]
+
+                    if any(target.lower() in cmdline.lower() for target in infostealer_targets):
+                        if not any(trusted in comm.lower() for trusted in trusted_infostealer_parents):
+                            inc = ThreatIncident(
+                                id=f"INFOSTEAL-{int(time.time())}-{pid}",
+                                timestamp=time.strftime("%Y-%m-%d %H:%M:%S"),
+                                category="Credential & Token Infostealer Access Attempt",
+                                severity="Critical",
+                                tactic="Credential Access / Exfiltration (T1555)",
+                                process_name=comm,
+                                pid=pid,
+                                cmdline=cmdline[:120],
+                                target=cmdline[:80],
+                                action_taken="Process Terminated & Credential Shielded (SIGKILL)",
+                                details=f"Untrusted process '{comm}' attempted unauthorized access to sensitive credential store."
+                            )
+                            self._handle_threat(inc)
+                            threats.append(inc)
+                            continue
+
+                    # 5. Cryptojacker & Background Mining Pool Detection
+                    miner_indicators = ["stratum+tcp://", "stratum+ssl://", "stratum2+tcp://", "pool.supportxmr.com", "nanopool.org", "nicehash.com", "minexmr.com", "--donate-level="]
+                    if any(ind in cmdline.lower() for ind in miner_indicators) or comm in ["xmrig", "minerd", "ccminer", "cpuminer", "xmr-stak", "kdevtmpfsi", "kinsing"]:
+                        inc = ThreatIncident(
+                            id=f"MINER-{int(time.time())}-{pid}",
+                            timestamp=time.strftime("%Y-%m-%d %H:%M:%S"),
+                            category="Unauthorized Cryptojacking Miner Detected",
+                            severity="High",
+                            tactic="Resource Hijacking / Impact (T1496)",
+                            process_name=comm,
+                            pid=pid,
+                            cmdline=cmdline[:120],
+                            target="Stratum Mining Protocol",
+                            action_taken="Cryptominer Process Terminated (SIGKILL)",
+                            details=f"Process '{comm}' launched with unauthorized cryptocurrency mining pool connection."
+                        )
+                        self._handle_threat(inc)
+                        threats.append(inc)
+                        continue
+
+                    # 6. Supply Chain Pipe-to-Bash Obfuscated Execution
                     if self.config.get("supply_chain_interceptor", True) and cmdline:
                         if ("curl " in cmdline or "wget " in cmdline) and ("| bash" in cmdline or "| sh" in cmdline) and ("base64" in cmdline or "eval" in cmdline or "xxd" in cmdline):
                             inc = ThreatIncident(
@@ -390,6 +438,57 @@ class AegisEngine:
             print(f"[Aegis] Process audit error: {e}")
 
         return threats
+
+    def scan_file_for_malware(self, fpath: str) -> Optional[ThreatIncident]:
+        """Inspects file for EICAR standard virus signature, dropper scripts, and packed shellcode."""
+        p = Path(fpath)
+        if not p.exists() or not p.is_file() or p.stat().st_size > 10 * 1024 * 1024:  # Skip >10MB
+            return None
+
+        try:
+            with open(p, "rb") as f:
+                content = f.read(65536)
+
+            # EICAR Standard Antivirus Test Signature
+            EICAR_SIG = b"X5O!P%@AP[4\\PZX54(P^)7CC)7}$EICAR-STANDARD-ANTIVIRUS-TEST-FILE!$H+H*"
+            if EICAR_SIG in content:
+                inc = ThreatIncident(
+                    id=f"EICAR-{int(time.time())}",
+                    timestamp=time.strftime("%Y-%m-%d %H:%M:%S"),
+                    category="EICAR Standard Antivirus Test Signature",
+                    severity="Critical",
+                    tactic="Malware Testing (EICAR.Standard)",
+                    process_name="file_scanner",
+                    pid=0,
+                    cmdline="",
+                    target=str(p),
+                    action_taken="Payload Quarantined (Mode 000)",
+                    details="Verified detection of industry standard EICAR antivirus test file."
+                )
+                self.quarantine_file(str(p))
+                return inc
+
+            # Obfuscated Dropper Script
+            if b"base64 -d" in content and (b"chmod +x" in content or b"/tmp/" in content) and b"eval" in content:
+                inc = ThreatIncident(
+                    id=f"DROPPER-{int(time.time())}",
+                    timestamp=time.strftime("%Y-%m-%d %H:%M:%S"),
+                    category="Obfuscated ELF Dropper Script",
+                    severity="High",
+                    tactic="Execution / Defense Evasion (T1027)",
+                    process_name="file_scanner",
+                    pid=0,
+                    cmdline="",
+                    target=str(p),
+                    action_taken="Dropper Quarantined (Mode 000)",
+                    details=f"File {p.name} contains obfuscated base64 payload unpacking directly into executable."
+                )
+                self.quarantine_file(str(p))
+                return inc
+
+        except Exception:
+            pass
+        return None
 
     # ── 3. SUID & Privilege Escalation Auditor ───────────────────────────────
 
