@@ -216,6 +216,15 @@ class BluetoothAdapter:
             ]
         return devices
 
+    @staticmethod
+    def toggle_device_connect(mac: str, connect: bool):
+        action = "connect" if connect else "disconnect"
+        return run_cmd(f"bluetoothctl {action} {mac}", timeout=10)[0]
+
+    @staticmethod
+    def unpair_device(mac: str):
+        return run_cmd(f"bluetoothctl remove {mac}")[0]
+
 
 # ── 3. Audio Integration (PipeWire / PulseAudio) ──────────────────────────────
 
@@ -663,6 +672,10 @@ class SystemAdapter:
             ok, out, _ = run_cmd(f"systemctl is-active {s}")
             res.append({"name": s, "active": out.strip() == "active"})
         return res
+
+    @staticmethod
+    def service_action(service_name: str, action: str):
+        return run_cmd(f"pkexec systemctl {action} {service_name}")[0]
 
     @staticmethod
     def get_printers():

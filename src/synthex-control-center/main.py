@@ -44,7 +44,9 @@ from synth_system_adapters import (
     StorageAdapter,
     SecurityAdapter,
     SystemAdapter,
-    get_gsettings
+    safe_set_gsetting,
+    get_gsettings,
+    run_cmd
 )
 from synth_settings_backend import SettingsDaemon, Setting
 
@@ -83,7 +85,7 @@ SIDEBAR_ITEMS = [
 class SettingsAppWindow(Gtk.Window):
     def __init__(self, initial_page="overview"):
         super().__init__(title="SynthOS System Settings")
-        self.set_default_size(1160, 820)
+        self.set_default_size(1180, 840)
         self.set_position(Gtk.WindowPosition.CENTER)
         self.connect("destroy", Gtk.main_quit)
 
@@ -452,6 +454,7 @@ class SettingsAppWindow(Gtk.Window):
             for s in ["100% (Standard)", "125% (Fractional)", "150%", "200% (HiDPI)"]:
                 sc_cb.append_text(s)
             sc_cb.set_active(0)
+            sc_cb.connect("changed", lambda cb: safe_set_gsetting("org.cinnamon.desktop.interface", "text-scaling-factor", 1.25 if "125" in cb.get_active_text() else (1.5 if "150" in cb.get_active_text() else (2.0 if "200" in cb.get_active_text() else 1.0))))
             dgrid.attach(sc_cb, 1, 3, 1, 1)
 
             frame.add(dgrid)
@@ -515,6 +518,7 @@ class SettingsAppWindow(Gtk.Window):
             for c in ["Bibata-Modern-Classic", "DMZ-Black", "Adwaita", "breeze_cursors"]:
                 cur_cb.append_text(c)
             cur_cb.set_active(0)
+            cur_cb.connect("changed", lambda cb: safe_set_gsetting("org.cinnamon.desktop.interface", "cursor-theme", cb.get_active_text()))
             tgrid.attach(cur_cb, 1, 2, 1, 1)
 
             frame.add(tgrid)
@@ -538,49 +542,30 @@ class SettingsAppWindow(Gtk.Window):
             pgrid.set_row_spacing(10)
             pgrid.set_border_width(16)
 
-            pgrid.attach(Gtk.Label(label="Panel Position:", xalign=0), 0, 0, 1, 1)
-            pos_cb = Gtk.ComboBoxText()
-            for p in ["Bottom (Standard)", "Top", "Left Dock", "Right Dock"]:
-                pos_cb.append_text(p)
-            pos_cb.set_active(0)
-            pgrid.attach(pos_cb, 1, 0, 1, 1)
+            pgrid.attach(Gtk.Label(label="Window Titlebar Layout:", xalign=0), 0, 0, 1, 1)
+            layout_cb = Gtk.ComboBoxText()
+            layout_cb.append_text("Right Side (menu:minimize,maximize,close)")
+            layout_cb.append_text("Left Side (close,minimize,maximize:menu)")
+            layout_cb.set_active(0)
+            layout_cb.connect("changed", lambda cb: safe_set_gsetting("org.cinnamon.desktop.wm.preferences", "button-layout", "menu:minimize,maximize,close" if cb.get_active() == 0 else "close,minimize,maximize:menu"))
+            pgrid.attach(layout_cb, 1, 0, 1, 1)
 
-            pgrid.attach(Gtk.Label(label="Panel Height (pixels):", xalign=0), 0, 1, 1, 1)
-            h_spin = Gtk.SpinButton.new_with_range(24, 80, 2)
-            h_spin.set_value(40)
-            pgrid.attach(h_spin, 1, 1, 1, 1)
+            pgrid.attach(Gtk.Label(label="Window Focus Mode:", xalign=0), 0, 1, 1, 1)
+            focus_cb = Gtk.ComboBoxText()
+            focus_cb.append_text("Click to Focus (Standard)")
+            focus_cb.append_text("Focus Follows Mouse (Sloppy)")
+            focus_cb.set_active(0)
+            focus_cb.connect("changed", lambda cb: safe_set_gsetting("org.cinnamon.desktop.wm.preferences", "focus-mode", "click" if cb.get_active() == 0 else "sloppy"))
+            pgrid.attach(focus_cb, 1, 1, 1, 1)
 
-            pgrid.attach(Gtk.Label(label="Autohide Behavior:", xalign=0), 0, 2, 1, 1)
-            ah_cb = Gtk.ComboBoxText()
-            for a in ["Never (Always Visible)", "Intelligently Autohide", "Always Autohide"]:
-                ah_cb.append_text(a)
-            ah_cb.set_active(0)
-            pgrid.attach(ah_cb, 1, 2, 1, 1)
+            pgrid.attach(Gtk.Label(label="Number of Workspaces:", xalign=0), 0, 2, 1, 1)
+            ws_spin = Gtk.SpinButton.new_with_range(1, 16, 1)
+            ws_spin.set_value(4)
+            ws_spin.connect("value-changed", lambda sp: safe_set_gsetting("org.cinnamon.desktop.wm.preferences", "num-workspaces", int(sp.get_value())))
+            pgrid.attach(ws_spin, 1, 2, 1, 1)
 
             frame.add(pgrid)
             self.content_box.pack_start(frame, False, False, 0)
-
-            # Hot corners
-            hc_frame = Gtk.Frame(label="Hot Corners & Workspaces")
-            hc_grid = Gtk.Grid()
-            hc_grid.set_column_spacing(16)
-            hc_grid.set_row_spacing(10)
-            hc_grid.set_border_width(16)
-
-            hc_grid.attach(Gtk.Label(label="Top-Left Corner Action:", xalign=0), 0, 0, 1, 1)
-            hc1 = Gtk.ComboBoxText()
-            for a in ["Show All Windows (Exposé)", "Show Desktop", "Workspace Switcher", "None"]:
-                hc1.append_text(a)
-            hc1.set_active(0)
-            hc_grid.attach(hc1, 1, 0, 1, 1)
-
-            hc_grid.attach(Gtk.Label(label="Number of Workspaces:", xalign=0), 0, 1, 1, 1)
-            ws_spin = Gtk.SpinButton.new_with_range(1, 16, 1)
-            ws_spin.set_value(4)
-            hc_grid.attach(ws_spin, 1, 1, 1, 1)
-
-            hc_frame.add(hc_grid)
-            self.content_box.pack_start(hc_frame, False, False, 0)
 
         # ── 8. Sound ────────────────────────────────────────────────────
         elif cat_id == "sound":
@@ -628,27 +613,21 @@ class SettingsAppWindow(Gtk.Window):
             vbox = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=10)
             vbox.set_border_width(16)
 
-            for lbl, st in [
-                ("Enable popup alerts & notifications", True),
-                ("Do Not Disturb Mode (Mute alerts)", False),
-                ("Play alert sounds for notifications", True),
-                ("Hide notification popups in full-screen games", True)
-            ]:
-                r = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=12)
-                r.pack_start(Gtk.Label(label=lbl, xalign=0), True, True, 0)
-                sw = Gtk.Switch()
-                sw.set_active(st)
-                r.pack_end(sw, False, False, 0)
-                vbox.pack_start(r, False, False, 0)
+            n_sw1 = Gtk.Switch()
+            n_sw1.set_active(True)
+            n_sw1.connect("state-set", lambda s, st: safe_set_gsetting("org.cinnamon.desktop.notifications", "display-notifications", st))
+            r1 = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=12)
+            r1.pack_start(Gtk.Label(label="Enable popup alerts & notifications", xalign=0), True, True, 0)
+            r1.pack_end(n_sw1, False, False, 0)
+            vbox.pack_start(r1, False, False, 0)
 
-            pos_row = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=12)
-            pos_row.pack_start(Gtk.Label(label="Notification Screen Placement:", xalign=0), True, True, 0)
-            pos_cb = Gtk.ComboBoxText()
-            for p in ["Top Right", "Top Left", "Bottom Right", "Bottom Left"]:
-                pos_cb.append_text(p)
-            pos_cb.set_active(2)
-            pos_row.pack_end(pos_cb, False, False, 0)
-            vbox.pack_start(pos_row, False, False, 4)
+            n_sw2 = Gtk.Switch()
+            n_sw2.set_active(True)
+            n_sw2.connect("state-set", lambda s, st: safe_set_gsetting("org.cinnamon.desktop.notifications", "fullscreen-notifications", not st))
+            r2 = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=12)
+            r2.pack_start(Gtk.Label(label="Hide notification popups in full-screen games", xalign=0), True, True, 0)
+            r2.pack_end(n_sw2, False, False, 0)
+            vbox.pack_start(r2, False, False, 0)
 
             frame.add(vbox)
             self.content_box.pack_start(frame, False, False, 0)
@@ -665,20 +644,21 @@ class SettingsAppWindow(Gtk.Window):
             del_scale = Gtk.Scale.new_with_range(Gtk.Orientation.HORIZONTAL, 100, 1000, 50)
             del_scale.set_value(400)
             del_scale.set_hexpand(True)
+            del_scale.connect("value-changed", lambda sc: safe_set_gsetting("org.cinnamon.desktop.peripherals.keyboard", "delay", int(sc.get_value())))
             kgrid.attach(del_scale, 1, 0, 1, 1)
 
             kgrid.attach(Gtk.Label(label="Repeat Speed (chars/sec):", xalign=0), 0, 1, 1, 1)
             spd_scale = Gtk.Scale.new_with_range(Gtk.Orientation.HORIZONTAL, 10, 100, 5)
             spd_scale.set_value(50)
             spd_scale.set_hexpand(True)
+            spd_scale.connect("value-changed", lambda sc: safe_set_gsetting("org.cinnamon.desktop.peripherals.keyboard", "repeat-interval", int(sc.get_value())))
             kgrid.attach(spd_scale, 1, 1, 1, 1)
 
-            kgrid.attach(Gtk.Label(label="Active Keyboard Layout:", xalign=0), 0, 2, 1, 1)
-            kl_cb = Gtk.ComboBoxText()
-            for l in ["English (US)", "English (UK)", "German (QWERTZ)", "French (AZERTY)", "Spanish", "Japanese"]:
-                kl_cb.append_text(l)
-            kl_cb.set_active(0)
-            kgrid.attach(kl_cb, 1, 2, 1, 1)
+            kgrid.attach(Gtk.Label(label="Cursor Blinking in Text Fields:", xalign=0), 0, 2, 1, 1)
+            blink_sw = Gtk.Switch()
+            blink_sw.set_active(True)
+            blink_sw.connect("state-set", lambda s, st: safe_set_gsetting("org.cinnamon.desktop.interface", "cursor-blink", st))
+            kgrid.attach(blink_sw, 1, 2, 1, 1)
 
             frame.add(kgrid)
             self.content_box.pack_start(frame, False, False, 0)
@@ -692,24 +672,22 @@ class SettingsAppWindow(Gtk.Window):
             mgrid.set_border_width(16)
 
             mgrid.attach(Gtk.Label(label="Pointer Speed:", xalign=0), 0, 0, 1, 1)
-            ps_scale = Gtk.Scale.new_with_range(Gtk.Orientation.HORIZONTAL, 1, 10, 1)
-            ps_scale.set_value(5)
+            ps_scale = Gtk.Scale.new_with_range(Gtk.Orientation.HORIZONTAL, -1.0, 1.0, 0.1)
+            ps_scale.set_value(0.0)
             ps_scale.set_hexpand(True)
+            ps_scale.connect("value-changed", lambda sc: safe_set_gsetting("org.cinnamon.desktop.peripherals.mouse", "speed", float(sc.get_value())))
             mgrid.attach(ps_scale, 1, 0, 1, 1)
 
             mgrid.attach(Gtk.Label(label="Natural Scrolling (Reverse direction):", xalign=0), 0, 1, 1, 1)
             nsw = Gtk.Switch()
+            nsw.connect("state-set", lambda s, st: safe_set_gsetting("org.cinnamon.desktop.peripherals.mouse", "natural-scroll", st))
             mgrid.attach(nsw, 1, 1, 1, 1)
 
             mgrid.attach(Gtk.Label(label="Touchpad Tap to Click:", xalign=0), 0, 2, 1, 1)
             tsw = Gtk.Switch()
             tsw.set_active(True)
+            tsw.connect("state-set", lambda s, st: safe_set_gsetting("org.cinnamon.desktop.peripherals.touchpad", "tap-to-click", st))
             mgrid.attach(tsw, 1, 2, 1, 1)
-
-            mgrid.attach(Gtk.Label(label="Two-finger Scrolling:", xalign=0), 0, 3, 1, 1)
-            tfs = Gtk.Switch()
-            tfs.set_active(True)
-            mgrid.attach(tfs, 1, 3, 1, 1)
 
             frame.add(mgrid)
             self.content_box.pack_start(frame, False, False, 0)
@@ -727,25 +705,28 @@ class SettingsAppWindow(Gtk.Window):
                     group = rb
                 if (p.startswith("Balanced") and cur_p == "balanced") or (p.startswith("Performance") and cur_p == "performance"):
                     rb.set_active(True)
+                rb.connect("toggled", lambda b, mode=p: PowerAdapter.set_power_profile("performance" if "Performance" in mode else ("power-saver" if "Power" in mode else "balanced")) if b.get_active() else None)
                 pbox.pack_start(rb, False, False, 0)
             frame.add(pbox)
             self.content_box.pack_start(frame, False, False, 0)
 
-            bat_frame = Gtk.Frame(label="Battery & Charging Status (UPower)")
-            bgrid = Gtk.Grid()
-            bgrid.set_column_spacing(16)
-            bgrid.set_row_spacing(8)
-            bgrid.set_border_width(16)
+            # Timeout frame
+            to_frame = Gtk.Frame(label="Sleep & Inactivity Timeouts")
+            to_grid = Gtk.Grid()
+            to_grid.set_column_spacing(16)
+            to_grid.set_row_spacing(10)
+            to_grid.set_border_width(16)
 
-            bat = PowerAdapter.get_battery_info()
-            bgrid.attach(Gtk.Label(label="Battery Percentage:", xalign=0), 0, 0, 1, 1)
-            bgrid.attach(Gtk.Label(label=f"{bat['percentage']}%", xalign=0), 1, 0, 1, 1)
+            to_grid.attach(Gtk.Label(label="Turn off screen after inactivity:", xalign=0), 0, 0, 1, 1)
+            to_cb = Gtk.ComboBoxText()
+            for t in ["5 minutes", "10 minutes", "15 minutes", "30 minutes", "1 hour", "Never"]:
+                to_cb.append_text(t)
+            to_cb.set_active(1)
+            to_cb.connect("changed", lambda cb: safe_set_gsetting("org.cinnamon.desktop.session", "idle-delay", 300 if "5" in cb.get_active_text() else (600 if "10" in cb.get_active_text() else (900 if "15" in cb.get_active_text() else 0))))
+            to_grid.attach(to_cb, 1, 0, 1, 1)
 
-            bgrid.attach(Gtk.Label(label="Power Source Status:", xalign=0), 0, 1, 1, 1)
-            bgrid.attach(Gtk.Label(label=bat["status"], xalign=0), 1, 1, 1, 1)
-
-            bat_frame.add(bgrid)
-            self.content_box.pack_start(bat_frame, False, False, 0)
+            to_frame.add(to_grid)
+            self.content_box.pack_start(to_frame, False, False, 0)
 
         # ── 13. Users & Accounts ────────────────────────────────────────
         elif cat_id == "users":
@@ -808,21 +789,16 @@ class SettingsAppWindow(Gtk.Window):
             vbox = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=10)
             vbox.set_border_width(16)
 
-            for lbl, st in [
-                ("Remember recently opened documents", True),
-                ("Location Services (GeoClue)", False),
-                ("Camera Access Permissions", True),
-                ("Microphone Access Permissions", True),
-                ("Diagnostic Telemetry (Disabled on SynthOS)", False),
-            ]:
-                r = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=12)
-                r.pack_start(Gtk.Label(label=lbl, xalign=0), True, True, 0)
-                sw = Gtk.Switch()
-                sw.set_active(st)
-                r.pack_end(sw, False, False, 0)
-                vbox.pack_start(r, False, False, 0)
+            r_sw = Gtk.Switch()
+            r_sw.set_active(True)
+            r_sw.connect("state-set", lambda s, st: safe_set_gsetting("org.cinnamon.desktop.privacy", "remember-recent-files", st))
+            r = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=12)
+            r.pack_start(Gtk.Label(label="Remember recently opened documents", xalign=0), True, True, 0)
+            r.pack_end(r_sw, False, False, 0)
+            vbox.pack_start(r, False, False, 0)
 
             btn_clr = Gtk.Button.new_with_label("Clear Activity History Now")
+            btn_clr.connect("clicked", lambda b: run_cmd("rm -f ~/.local/share/recently-used.xbel"))
             vbox.pack_start(btn_clr, False, False, 4)
 
             frame.add(vbox)
@@ -863,6 +839,7 @@ class SettingsAppWindow(Gtk.Window):
             u_row = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=12)
             u_row.pack_start(Gtk.Label(label="System Packages Status: 100% Up to Date", xalign=0), True, True, 0)
             btn_chk = Gtk.Button.new_with_label("Check for Updates")
+            btn_chk.connect("clicked", lambda b: subprocess.Popen(["pkexec", "apt", "update"]))
             u_row.pack_end(btn_chk, False, False, 0)
             vbox.pack_start(u_row, False, False, 0)
 
@@ -967,20 +944,19 @@ class SettingsAppWindow(Gtk.Window):
             vbox = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=10)
             vbox.set_border_width(16)
 
-            for lbl, st in [
-                ("High Contrast Display Mode", False),
-                ("Large Text Display", False),
-                ("Screen Reader (Orca)", False),
-                ("Sticky Keys (Sequential keypresses)", False),
-                ("Slow Keys (Typing acceptance delay)", False),
-                ("On-Screen Virtual Keyboard", False),
-            ]:
-                r = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=12)
-                r.pack_start(Gtk.Label(label=lbl, xalign=0), True, True, 0)
-                sw = Gtk.Switch()
-                sw.set_active(st)
-                r.pack_end(sw, False, False, 0)
-                vbox.pack_start(r, False, False, 0)
+            hc_sw = Gtk.Switch()
+            hc_sw.connect("state-set", lambda s, st: safe_set_gsetting("org.cinnamon.desktop.interface", "high-contrast", st))
+            r_hc = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=12)
+            r_hc.pack_start(Gtk.Label(label="High Contrast Display Mode", xalign=0), True, True, 0)
+            r_hc.pack_end(hc_sw, False, False, 0)
+            vbox.pack_start(r_hc, False, False, 0)
+
+            lt_sw = Gtk.Switch()
+            lt_sw.connect("state-set", lambda s, st: safe_set_gsetting("org.cinnamon.desktop.interface", "text-scaling-factor", 1.25 if st else 1.0))
+            r_lt = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=12)
+            r_lt.pack_start(Gtk.Label(label="Large Text Display", xalign=0), True, True, 0)
+            r_lt.pack_end(lt_sw, False, False, 0)
+            vbox.pack_start(r_lt, False, False, 0)
 
             frame.add(vbox)
             self.content_box.pack_start(frame, False, False, 0)
@@ -991,27 +967,28 @@ class SettingsAppWindow(Gtk.Window):
             vbox = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=10)
             vbox.set_border_width(16)
 
-            for lbl, st in [
-                ("Automatic Network Time Sync (NTP)", True),
-                ("Use 24-hour clock format", True),
-                ("Show date in taskbar", True),
-                ("Show seconds in clock", False),
-            ]:
-                r = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=12)
-                r.pack_start(Gtk.Label(label=lbl, xalign=0), True, True, 0)
-                sw = Gtk.Switch()
-                sw.set_active(st)
-                r.pack_end(sw, False, False, 0)
-                vbox.pack_start(r, False, False, 0)
+            sw_24h = Gtk.Switch()
+            sw_24h.set_active(True)
+            sw_24h.connect("state-set", lambda s, st: safe_set_gsetting("org.cinnamon.desktop.interface", "clock-use-24h", st))
+            r_24h = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=12)
+            r_24h.pack_start(Gtk.Label(label="Use 24-hour clock format", xalign=0), True, True, 0)
+            r_24h.pack_end(sw_24h, False, False, 0)
+            vbox.pack_start(r_24h, False, False, 0)
 
-            tz_row = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=12)
-            tz_row.pack_start(Gtk.Label(label="Timezone:", xalign=0), True, True, 0)
-            tz_cb = Gtk.ComboBoxText()
-            for tz in ["America/New_York (EST)", "America/Chicago (CST)", "America/Los_Angeles (PST)", "UTC / GMT", "Europe/London", "Asia/Tokyo"]:
-                tz_cb.append_text(tz)
-            tz_cb.set_active(0)
-            tz_row.pack_end(tz_cb, False, False, 0)
-            vbox.pack_start(tz_row, False, False, 4)
+            sw_sec = Gtk.Switch()
+            sw_sec.connect("state-set", lambda s, st: safe_set_gsetting("org.cinnamon.desktop.interface", "clock-show-seconds", st))
+            r_sec = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=12)
+            r_sec.pack_start(Gtk.Label(label="Show seconds in clock", xalign=0), True, True, 0)
+            r_sec.pack_end(sw_sec, False, False, 0)
+            vbox.pack_start(r_sec, False, False, 0)
+
+            sw_date = Gtk.Switch()
+            sw_date.set_active(True)
+            sw_date.connect("state-set", lambda s, st: safe_set_gsetting("org.cinnamon.desktop.interface", "clock-show-date", st))
+            r_date = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=12)
+            r_date.pack_start(Gtk.Label(label="Show date in taskbar", xalign=0), True, True, 0)
+            r_date.pack_end(sw_date, False, False, 0)
+            vbox.pack_start(r_date, False, False, 0)
 
             frame.add(vbox)
             self.content_box.pack_start(frame, False, False, 0)
@@ -1065,6 +1042,10 @@ class SettingsAppWindow(Gtk.Window):
                 vl.set_selectable(True)
                 grid.attach(vl, 1, i, 1, 1)
 
+            btn_copy = Gtk.Button.new_with_label("Copy System Specs to Clipboard")
+            btn_copy.connect("clicked", lambda b: Gtk.Clipboard.get(Gdk.SELECTION_CLIPBOARD).set_text("\n".join([f"{k}: {v}" for k, v in rows]), -1))
+            grid.attach(btn_copy, 0, len(rows), 2, 1)
+
             frame.add(grid)
             self.content_box.pack_start(frame, False, False, 0)
 
@@ -1083,12 +1064,14 @@ class SettingsAppWindow(Gtk.Window):
                 h.pack_start(Gtk.Label(label=f"service: <b>{s['name']}.service</b>", use_markup=True, xalign=0), True, True, 0)
                 st = "Active (Running)" if s["active"] else "Inactive / Stopped"
                 h.pack_end(Gtk.Label(label=st), False, False, 0)
+
+                btn_restart = Gtk.Button.new_with_label("Restart")
+                btn_restart.connect("clicked", lambda b, sname=s["name"]: SystemAdapter.service_action(sname, "restart"))
+                h.pack_end(btn_restart, False, False, 4)
+
                 r.add(h)
                 slist.add(r)
             vbox.pack_start(slist, False, False, 4)
-
-            btn_log = Gtk.Button.new_with_label("Inspect Journalctl Logs")
-            vbox.pack_start(btn_log, False, False, 4)
 
             frame.add(vbox)
             self.content_box.pack_start(frame, False, False, 0)
