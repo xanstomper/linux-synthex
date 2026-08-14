@@ -55,3 +55,4 @@ project-tree.txt
 *.qcow2
 *.raw
 .claude/
+.venv

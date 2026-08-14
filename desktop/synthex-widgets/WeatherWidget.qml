@@ -8,7 +8,7 @@ Rectangle {
     height: 110
     radius: 18
     color: "#141923"
-    border.color: "rgba(255, 255, 255, 0.08)"
+    border.color: "#14ffffff"
     border.width: 1
 
     property string location: "Ajmer"

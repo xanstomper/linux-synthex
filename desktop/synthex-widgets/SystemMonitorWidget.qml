@@ -8,7 +8,7 @@ Rectangle {
     height: 200
     radius: 18
     color: "#141923"
-    border.color: "rgba(255, 255, 255, 0.08)"
+    border.color: "#14ffffff"
     border.width: 1
 
     property int cpuPct: 32
@@ -201,7 +201,7 @@ Rectangle {
         Rectangle {
             Layout.fillWidth: true
             Layout.preferredHeight: 1
-            color: "rgba(255, 255, 255, 0.04)"
+            color: "#0affffff"
         }
 
         // ── 2. Bottom Row (Network / Uptime / Kernel) ─────────────────────

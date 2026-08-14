@@ -1,0 +1,856 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SynthOS Rice Live Interactive Preview</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg-surface: #141923;
+    --bg-dark: #10151B;
+    --bg-dock: rgba(18, 22, 31, 0.90);
+    --border-subtle: rgba(255, 255, 255, 0.08);
+    --border-hi: rgba(255, 255, 255, 0.16);
+    --accent-blue: #7AA2F7;
+    --accent-purple: #BB9AF7;
+    --accent-gold: #E5A84B;
+    --accent-teal: #73DACA;
+    --accent-cyan: #2AC3DE;
+    --accent-red: #F7768E;
+    --accent-green: #9ECE6A;
+    --text-primary: #FFFFFF;
+    --text-dim: #9AA1AB;
+    --text-mute: #67707D;
+    --radius-card: 18px;
+    --radius-pill: 9999px;
+  }
+
+  * {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+    user-select: none;
+  }
+
+  body {
+    font-family: 'Inter', sans-serif;
+    background: #0B0E14;
+    color: var(--text-primary);
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    overflow-x: hidden;
+  }
+
+  /* Desktop Canvas Frame */
+  .desktop-canvas {
+    position: relative;
+    width: 1440px;
+    height: 900px;
+    background: linear-gradient(180deg, rgba(13, 20, 32, 0.4) 0%, rgba(10, 14, 20, 0.65) 100%),
+                url('https://images.unsplash.com/photo-1506744038136-46273834b3fb?auto=format&fit=crop&w=2000&q=80') center/cover no-repeat;
+    border: 1px solid var(--border-subtle);
+    border-radius: 20px;
+    box-shadow: 0 30px 80px rgba(0, 0, 0, 0.7);
+    overflow: hidden;
+    margin: 20px auto;
+  }
+
+  /* Top Status Pill */
+  .top-status-pill {
+    position: absolute;
+    top: 16px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: var(--bg-dock);
+    backdrop-filter: blur(20px);
+    border: 1px solid var(--border-subtle);
+    border-radius: var(--radius-pill);
+    padding: 8px 24px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.4);
+    z-index: 10;
+  }
+
+  .status-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: var(--accent-blue);
+    box-shadow: 0 0 10px var(--accent-blue);
+  }
+
+  .pill-text {
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--text-primary);
+    letter-spacing: 0.3px;
+  }
+
+  /* Widgets Base */
+  .widget-card {
+    position: absolute;
+    background: var(--bg-surface);
+    border: 1px solid var(--border-subtle);
+    border-radius: var(--radius-card);
+    box-shadow: 0 16px 36px rgba(0, 0, 0, 0.45);
+    backdrop-filter: blur(16px);
+    padding: 18px;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+  }
+
+  .widget-card:hover {
+    box-shadow: 0 20px 48px rgba(0, 0, 0, 0.6);
+  }
+
+  /* Clock Widget */
+  .clock-widget {
+    top: 40px;
+    left: 40px;
+    width: 210px;
+  }
+  .clock-time {
+    font-size: 40px;
+    font-weight: 800;
+    color: var(--accent-blue);
+    line-height: 1;
+    letter-spacing: -1px;
+  }
+  .clock-ampm {
+    font-size: 18px;
+    font-weight: 700;
+    color: #56759B;
+    margin-left: 4px;
+  }
+  .clock-date {
+    font-size: 13px;
+    color: var(--text-dim);
+    margin-top: 8px;
+    font-weight: 500;
+  }
+
+  /* Weather Widget */
+  .weather-widget {
+    top: 170px;
+    left: 40px;
+    width: 310px;
+    display: flex;
+    align-items: center;
+    gap: 16px;
+  }
+  .weather-icon-temp {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .temp-val {
+    font-size: 34px;
+    font-weight: 700;
+    color: #FFF;
+  }
+  .weather-details {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+  }
+  .weather-headline {
+    font-size: 13px;
+    font-weight: 700;
+    color: #FFF;
+  }
+  .weather-sub {
+    font-size: 12px;
+    color: var(--text-dim);
+  }
+
+  /* Terminal Window Widget */
+  .terminal-widget {
+    top: 310px;
+    left: 40px;
+    width: 420px;
+    background: #12161F;
+    padding: 0;
+    font-family: 'JetBrains Mono', monospace;
+    overflow: hidden;
+  }
+  .term-header {
+    background: rgba(255, 255, 255, 0.02);
+    padding: 10px 14px;
+    display: flex;
+    align-items: center;
+    border-bottom: 1px solid var(--border-subtle);
+  }
+  .traffic-dots {
+    display: flex;
+    gap: 6px;
+  }
+  .traffic-dot {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+  }
+  .dot-red { background: #FF5F56; }
+  .dot-yellow { background: #FFBD2E; }
+  .dot-green { background: #27C93F; }
+  .term-title {
+    font-size: 11px;
+    color: var(--text-dim);
+    margin-left: 14px;
+  }
+  .term-body {
+    padding: 16px;
+    font-size: 11.5px;
+    line-height: 1.45;
+  }
+  .term-cmd {
+    color: var(--accent-blue);
+    font-weight: bold;
+    margin-bottom: 10px;
+  }
+  .fetch-grid {
+    display: grid;
+    grid-template-columns: 140px 1fr;
+    gap: 12px;
+    align-items: center;
+  }
+  .fetch-logo {
+    color: var(--accent-blue);
+    white-space: pre;
+    line-height: 1.2;
+    font-size: 10px;
+  }
+  .fetch-info {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+  }
+  .info-row {
+    display: flex;
+    gap: 8px;
+  }
+  .info-k {
+    width: 38px;
+    font-weight: 700;
+  }
+  .info-v {
+    color: #DDE3EB;
+  }
+  .color-bar {
+    display: flex;
+    height: 6px;
+    border-radius: 3px;
+    overflow: hidden;
+    margin-top: 8px;
+    width: 180px;
+  }
+  .cb-1 { background: #F7768E; flex: 1; }
+  .cb-2 { background: #FF9E64; flex: 1; }
+  .cb-3 { background: #E0AF68; flex: 1; }
+  .cb-4 { background: #9ECE6A; flex: 1; }
+  .cb-5 { background: #73DACA; flex: 1; }
+  .cb-6 { background: #7AA2F7; flex: 1; }
+  .cb-7 { background: #BB9AF7; flex: 1; }
+  .cb-8 { background: #C0CAF5; flex: 1; }
+
+  /* Center Application Launcher */
+  .launcher-widget {
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 480px;
+    height: 520px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    z-index: 20;
+  }
+  .launcher-search {
+    background: rgba(255, 255, 255, 0.04);
+    border: 1px solid var(--border-subtle);
+    border-radius: 12px;
+    padding: 10px 14px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    color: var(--text-dim);
+    font-size: 13px;
+  }
+  .launcher-body {
+    display: grid;
+    grid-template-columns: 140px 1fr;
+    gap: 14px;
+    flex: 1;
+    overflow: hidden;
+  }
+  .launcher-sidebar {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    border-right: 1px solid var(--border-subtle);
+    padding-right: 10px;
+  }
+  .cat-item {
+    padding: 6px 10px;
+    border-radius: 8px;
+    font-size: 12px;
+    color: var(--text-dim);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    transition: all 0.15s;
+  }
+  .cat-item.active {
+    background: rgba(108, 136, 168, 0.22);
+    color: var(--accent-blue);
+    font-weight: 600;
+  }
+  .cat-item:hover {
+    background: rgba(255, 255, 255, 0.05);
+    color: #FFF;
+  }
+  .user-footer {
+    margin-top: auto;
+    padding-top: 10px;
+    border-top: 1px solid var(--border-subtle);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    font-size: 12px;
+  }
+  .app-list {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    overflow-y: auto;
+  }
+  .app-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 8px 10px;
+    border-radius: 10px;
+    cursor: pointer;
+    background: rgba(255, 255, 255, 0.02);
+    border: 1px solid rgba(255, 255, 255, 0.04);
+    transition: background 0.15s;
+  }
+  .app-item:hover {
+    background: rgba(255, 255, 255, 0.08);
+  }
+  .app-icon {
+    width: 32px;
+    height: 32px;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 16px;
+  }
+  .app-meta {
+    display: flex;
+    flex-direction: column;
+  }
+  .app-name {
+    font-size: 13px;
+    font-weight: 600;
+    color: #FFF;
+  }
+  .app-desc {
+    font-size: 11px;
+    color: var(--text-dim);
+  }
+
+  /* Quick Settings Widget */
+  .quick-settings-widget {
+    top: 40px;
+    right: 40px;
+    width: 230px;
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+  }
+  .qs-row {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+  }
+  .qs-head {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .qs-icon {
+    font-size: 20px;
+  }
+  .qs-titles {
+    display: flex;
+    flex-direction: column;
+  }
+  .qs-title {
+    font-size: 12px;
+    font-weight: 700;
+    color: #FFF;
+  }
+  .qs-sub {
+    font-size: 10.5px;
+    color: var(--text-dim);
+  }
+  .qs-slider {
+    width: 100%;
+    height: 6px;
+    border-radius: 3px;
+    background: #1E2633;
+    overflow: hidden;
+  }
+  .qs-fill-gold {
+    height: 100%;
+    width: 52%;
+    background: var(--accent-gold);
+  }
+  .qs-fill-blue {
+    height: 100%;
+    width: 100%;
+    background: var(--accent-cyan);
+  }
+
+  /* Media Player Widget */
+  .media-widget {
+    top: 220px;
+    right: 40px;
+    width: 290px;
+    display: flex;
+    gap: 14px;
+  }
+  .media-cover {
+    width: 84px;
+    height: 84px;
+    border-radius: 10px;
+    background: radial-gradient(circle at center, #1E293B 0%, #0B111A 100%);
+    position: relative;
+    overflow: hidden;
+    border: 1px solid var(--border-subtle);
+  }
+  .media-moon {
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    background: #E2E8F0;
+    position: absolute;
+    top: 30px;
+    left: 30px;
+    box-shadow: 0 0 12px #93C5FD;
+  }
+  .media-details {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+  }
+  .media-title {
+    font-size: 13.5px;
+    font-weight: 700;
+    color: #FFF;
+  }
+  .media-artist {
+    font-size: 11px;
+    color: var(--text-dim);
+  }
+  .media-scrubber {
+    height: 3px;
+    background: #1E2633;
+    border-radius: 2px;
+    width: 100%;
+    position: relative;
+  }
+  .media-progress {
+    height: 100%;
+    width: 35%;
+    background: var(--accent-blue);
+  }
+  .media-controls {
+    display: flex;
+    justify-content: center;
+    gap: 16px;
+    font-size: 14px;
+    color: #DDE3EB;
+    cursor: pointer;
+  }
+
+  /* System Monitor Widget */
+  .sysmon-widget {
+    top: 380px;
+    right: 40px;
+    width: 380px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+  .sysmon-top-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 10px;
+  }
+  .spark-card {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+  }
+  .spark-header {
+    display: flex;
+    justify-content: space-between;
+    font-size: 11px;
+  }
+  .spark-k { font-weight: 700; color: #FFF; }
+  .spark-v { color: var(--text-dim); }
+  .spark-canvas {
+    width: 100%;
+    height: 32px;
+    border-radius: 4px;
+  }
+  .sysmon-bot-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-top: 1px solid rgba(255,255,255,0.04);
+    padding-top: 8px;
+    font-size: 10.5px;
+  }
+  .net-speed {
+    color: var(--accent-teal);
+    font-weight: 600;
+  }
+
+  /* Bottom Floating Dock */
+  .bottom-island-dock {
+    position: absolute;
+    bottom: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 860px;
+    height: 60px;
+    background: var(--bg-dock);
+    backdrop-filter: blur(24px);
+    border: 1px solid var(--border-subtle);
+    border-radius: var(--radius-pill);
+    box-shadow: 0 16px 40px rgba(0, 0, 0, 0.55);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 20px;
+    z-index: 10;
+  }
+
+  .dock-left-tools {
+    display: flex;
+    gap: 12px;
+    font-size: 16px;
+    color: var(--text-dim);
+    cursor: pointer;
+  }
+  .dock-left-tools span:hover {
+    color: #FFF;
+  }
+  .dock-apps {
+    display: flex;
+    gap: 14px;
+  }
+  .dock-app-icon {
+    width: 36px;
+    height: 36px;
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 18px;
+    cursor: pointer;
+    transition: transform 0.15s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+  .dock-app-icon:hover {
+    transform: scale(1.18);
+  }
+  .dock-right-status {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    font-size: 14px;
+    color: var(--text-dim);
+  }
+  .dock-time {
+    font-size: 12px;
+    font-weight: 700;
+    color: #DDE3EB;
+    margin-left: 6px;
+  }
+</style>
+</head>
+<body>
+
+<div class="desktop-canvas">
+  <!-- Top Status Pill -->
+  <div class="top-status-pill">
+    <div class="status-dot"></div>
+    <div class="pill-text" id="livePillTime">Tue, 09 August 2022 &nbsp; 04:44 PM</div>
+  </div>
+
+  <!-- Top Left: Clock -->
+  <div class="widget-card clock-widget">
+    <div style="display: flex; align-items: baseline;">
+      <span class="clock-time" id="liveClockTime">04:44</span>
+      <span class="clock-ampm" id="liveClockAmPm">PM</span>
+    </div>
+    <div class="clock-date" id="liveClockDate">Tue, 09 August 2022</div>
+  </div>
+
+  <!-- Top Left: Weather -->
+  <div class="widget-card weather-widget">
+    <div class="weather-icon-temp">
+      <span style="font-size: 32px;">⛅</span>
+      <span class="temp-val">34°</span>
+    </div>
+    <div class="weather-details">
+      <div class="weather-headline">Ajmer is now Clouds.</div>
+      <div class="weather-sub">Wind speed is 4.49 m/s</div>
+      <div class="weather-sub">And Humidity is 49%</div>
+    </div>
+  </div>
+
+  <!-- Middle Left: Terminal Rice -->
+  <div class="widget-card terminal-widget">
+    <div class="term-header">
+      <div class="traffic-dots">
+        <div class="traffic-dot dot-red"></div>
+        <div class="traffic-dot dot-yellow"></div>
+        <div class="traffic-dot dot-green"></div>
+      </div>
+      <div class="term-title">~ &nbsp; xanstomper@synth</div>
+    </div>
+    <div class="term-body">
+      <div class="term-cmd">rxfetch</div>
+      <div class="fetch-grid">
+        <div class="fetch-logo">
+       .---.       
+     /       \     
+    |   .--.  |    
+    `--'   / /     
+          / /      
+     .---' /       
+    |  .--'        
+     \       /     
+      `-----'      </div>
+        <div class="fetch-info">
+          <div class="info-row"><span class="info-k" style="color:#F7768E">os</span><span class="info-v">synth OS</span></div>
+          <div class="info-row"><span class="info-k" style="color:#FF9E64">ker</span><span class="info-v">6.3.9-synth</span></div>
+          <div class="info-row"><span class="info-k" style="color:#E0AF68">pkgs</span><span class="info-v">1247</span></div>
+          <div class="info-row"><span class="info-k" style="color:#9ECE6A">sh</span><span class="info-v">fish</span></div>
+          <div class="info-row"><span class="info-k" style="color:#73DACA">wm</span><span class="info-v">Hyprland</span></div>
+          <div class="info-row"><span class="info-k" style="color:#7AA2F7">term</span><span class="info-v">alacritty</span></div>
+          <div class="info-row"><span class="info-k" style="color:#BB9AF7">ram</span><span class="info-v">5.21G / 15.6G</span></div>
+          <div class="info-row"><span class="info-k" style="color:#F7768E">disk</span><span class="info-v">82G / 232G</span></div>
+        </div>
+      </div>
+      <div class="color-bar">
+        <div class="cb-1"></div><div class="cb-2"></div><div class="cb-3"></div><div class="cb-4"></div>
+        <div class="cb-5"></div><div class="cb-6"></div><div class="cb-7"></div><div class="cb-8"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Center: Application Launcher Menu -->
+  <div class="widget-card launcher-widget" id="launcherMenu">
+    <div class="launcher-search">
+      <span>🔍</span>
+      <span>Search apps, files, settings...</span>
+    </div>
+    <div class="launcher-body">
+      <div class="launcher-sidebar">
+        <div class="cat-item active">⭐ Favorites</div>
+        <div class="cat-item">🪟 All Applications</div>
+        <div class="cat-item">🛠 Development</div>
+        <div class="cat-item">🎨 Graphics</div>
+        <div class="cat-item">🌐 Internet</div>
+        <div class="cat-item">🎵 Multimedia</div>
+        <div class="cat-item">📄 Office</div>
+        <div class="cat-item">⚙️ Settings</div>
+        <div class="cat-item">💻 System</div>
+        <div class="cat-item">🧰 Utilities</div>
+        <div class="user-footer">
+          <span>👤 xanstomper</span>
+          <span>🔒 🔄 ⏻</span>
+        </div>
+      </div>
+      <div class="app-list">
+        <div class="app-item">
+          <div class="app-icon" style="background:#FF7139;">🦊</div>
+          <div class="app-meta"><span class="app-name">Firefox</span><span class="app-desc">Web Browser</span></div>
+        </div>
+        <div class="app-item">
+          <div class="app-icon" style="background:#007ACC;">💻</div>
+          <div class="app-meta"><span class="app-name">Visual Studio Code</span><span class="app-desc">Code Editor</span></div>
+        </div>
+        <div class="app-item">
+          <div class="app-icon" style="background:#1DB954;">🎵</div>
+          <div class="app-meta"><span class="app-name">Spotify</span><span class="app-desc">Music Player</span></div>
+        </div>
+        <div class="app-item">
+          <div class="app-icon" style="background:#4A90E2;">📁</div>
+          <div class="app-meta"><span class="app-name">Files</span><span class="app-desc">File Manager</span></div>
+        </div>
+        <div class="app-item">
+          <div class="app-icon" style="background:#333333;">⌨️</div>
+          <div class="app-meta"><span class="app-name">Terminal</span><span class="app-desc">System Terminal</span></div>
+        </div>
+        <div class="app-item">
+          <div class="app-icon" style="background:#5865F2;">💬</div>
+          <div class="app-meta"><span class="app-name">Discord</span><span class="app-desc">Internet Messenger</span></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Top Right: Quick Settings -->
+  <div class="widget-card quick-settings-widget">
+    <div class="qs-row">
+      <div class="qs-head">
+        <span class="qs-icon" style="color:var(--accent-gold)">☀️</span>
+        <div class="qs-titles">
+          <span class="qs-title">Backlight</span>
+          <span class="qs-sub">Brightness at 52%</span>
+        </div>
+      </div>
+      <div class="qs-slider"><div class="qs-fill-gold"></div></div>
+    </div>
+    <div style="height: 1px; background: rgba(255,255,255,0.04);"></div>
+    <div class="qs-row">
+      <div class="qs-head">
+        <span class="qs-icon" style="color:var(--accent-cyan)">🔊</span>
+        <div class="qs-titles">
+          <span class="qs-title">Volume</span>
+          <span class="qs-sub">Volume at 100%</span>
+        </div>
+      </div>
+      <div class="qs-slider"><div class="qs-fill-blue"></div></div>
+    </div>
+  </div>
+
+  <!-- Middle Right: Media Widget -->
+  <div class="widget-card media-widget">
+    <div class="media-cover">
+      <div class="media-moon"></div>
+    </div>
+    <div class="media-details">
+      <div>
+        <div class="media-title">After Dark</div>
+        <div class="media-artist">Sweater Weather</div>
+      </div>
+      <div>
+        <div style="display:flex; justify-content:space-between; font-size:10px; color:var(--text-dim); margin-bottom:4px;">
+          <span>1:24</span><span>4:01</span>
+        </div>
+        <div class="media-scrubber"><div class="media-progress"></div></div>
+      </div>
+      <div class="media-controls">
+        <span>⏮</span><span>⏸</span><span>⏭</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Bottom Right: System Monitor -->
+  <div class="widget-card sysmon-widget">
+    <div class="sysmon-top-row">
+      <div class="spark-card">
+        <div class="spark-header"><span class="spark-k">CPU</span><span class="spark-v">32%</span></div>
+        <canvas class="spark-canvas" id="canvasCpu"></canvas>
+      </div>
+      <div class="spark-card">
+        <div class="spark-header"><span class="spark-k">RAM</span><span class="spark-v">46%</span></div>
+        <canvas class="spark-canvas" id="canvasRam"></canvas>
+      </div>
+      <div class="spark-card">
+        <div class="spark-header"><span class="spark-k">DISK</span><span class="spark-v">61%</span></div>
+        <canvas class="spark-canvas" id="canvasDisk"></canvas>
+      </div>
+    </div>
+    <div class="sysmon-bot-row">
+      <div>
+        <span style="font-weight:700; color:#FFF;">NETWORK &nbsp;</span>
+        <span class="net-speed">↓ 128 KB/s &nbsp; ↑ 42 KB/s</span>
+      </div>
+      <div>
+        <span style="color:var(--text-dim);">UPTIME 2h 15m &nbsp; KERNEL 6.3.9</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Bottom Floating Island Dock -->
+  <div class="bottom-island-dock">
+    <div class="dock-left-tools">
+      <span onclick="toggleLauncher()" title="Toggle Launcher">⊞</span>
+      <span>🔍</span>
+      <span>🗔</span>
+      <span>🔔</span>
+    </div>
+    <div class="dock-apps">
+      <div class="dock-app-icon" style="background:#FF7139;">🦊</div>
+      <div class="dock-app-icon" style="background:#007ACC;">💻</div>
+      <div class="dock-app-icon" style="background:#24292E;">⌨️</div>
+      <div class="dock-app-icon" style="background:#4A90E2;">📁</div>
+      <div class="dock-app-icon" style="background:#30D158;">📊</div>
+      <div class="dock-app-icon" style="background:#1DB954;">🎵</div>
+      <div class="dock-app-icon" style="background:#5865F2;">💬</div>
+    </div>
+    <div class="dock-right-status">
+      <span>📶</span>
+      <span>󰂯</span>
+      <span>🔊</span>
+      <span>🔋</span>
+      <span class="dock-time" id="dockClock">04:44 PM</span>
+    </div>
+  </div>
+</div>
+
+<script>
+  function drawSpark(canvasId, points, color, fill) {
+    const cvs = document.getElementById(canvasId);
+    if (!cvs) return;
+    const ctx = cvs.getContext('2d');
+    const w = cvs.width = cvs.offsetWidth;
+    const h = cvs.height = cvs.offsetHeight;
+    const step = w / (points.length - 1);
+
+    ctx.beginPath();
+    ctx.moveTo(0, h);
+    points.forEach((p, i) => ctx.lineTo(i * step, h * (1 - p * 0.9)));
+    ctx.lineTo(w, h);
+    ctx.closePath();
+    ctx.fillStyle = fill;
+    ctx.fill();
+
+    ctx.beginPath();
+    points.forEach((p, i) => {
+      if (i === 0) ctx.moveTo(0, h * (1 - p * 0.9));
+      else ctx.lineTo(i * step, h * (1 - p * 0.9));
+    });
+    ctx.strokeStyle = color;
+    ctx.lineWidth = 2;
+    ctx.stroke();
+  }
+
+  drawSpark('canvasCpu', [0.2, 0.35, 0.28, 0.5, 0.32, 0.45, 0.6, 0.4, 0.32, 0.55, 0.32], '#7AA2F7', 'rgba(122, 162, 247, 0.25)');
+  drawSpark('canvasRam', [0.4, 0.42, 0.5, 0.46, 0.52, 0.48, 0.62, 0.45, 0.46, 0.5, 0.46], '#BB9AF7', 'rgba(187, 154, 247, 0.25)');
+  drawSpark('canvasDisk', [0.55, 0.6, 0.58, 0.61, 0.63, 0.6, 0.65, 0.62, 0.61, 0.61, 0.61], '#E5A84B', 'rgba(229, 168, 75, 0.25)');
+
+  function toggleLauncher() {
+    const l = document.getElementById('launcherMenu');
+    l.style.display = (l.style.display === 'none') ? 'flex' : 'none';
+  }
+</script>
+</body>
+</html>

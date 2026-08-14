@@ -8,7 +8,7 @@ Rectangle {
     height: 620
     radius: 20
     color: "#141923"
-    border.color: "rgba(255, 255, 255, 0.08)"
+    border.color: "#14ffffff"
     border.width: 1
 
     property int activeCategoryIndex: 0
@@ -24,8 +24,8 @@ Rectangle {
             Layout.fillWidth: true
             Layout.preferredHeight: 44
             radius: 12
-            color: "rgba(255, 255, 255, 0.04)"
-            border.color: searchInput.activeFocus ? "#7AA2F7" : "rgba(255, 255, 255, 0.06)"
+            color: "#0affffff"
+            border.color: searchInput.activeFocus ? "#7AA2F7" : "#0fffffff"
             border.width: 1
 
             RowLayout {
@@ -97,8 +97,8 @@ Rectangle {
                         width: categoryList.width
                         height: 36
                         radius: 8
-                        color: root.activeCategoryIndex === index ? "rgba(108, 136, 168, 0.22)" : "transparent"
-                        border.color: root.activeCategoryIndex === index ? "rgba(122, 162, 247, 0.3)" : "transparent"
+                        color: root.activeCategoryIndex === index ? "#386c88a8" : "transparent"
+                        border.color: root.activeCategoryIndex === index ? "#4d7aa2f7" : "transparent"
 
                         RowLayout {
                             anchors.fill: parent
@@ -134,7 +134,7 @@ Rectangle {
                 Rectangle {
                     Layout.fillWidth: true
                     Layout.preferredHeight: 1
-                    color: "rgba(255, 255, 255, 0.06)"
+                    color: "#0fffffff"
                     Layout.topMargin: 4
                     Layout.bottomMargin: 4
                 }
@@ -177,7 +177,7 @@ Rectangle {
             Rectangle {
                 Layout.preferredWidth: 1
                 Layout.fillHeight: true
-                color: "rgba(255, 255, 255, 0.06)"
+                color: "#0fffffff"
             }
 
             // Right Application Items List
@@ -209,8 +209,8 @@ Rectangle {
                         width: appsList.width
                         height: 52
                         radius: 12
-                        color: "rgba(255, 255, 255, 0.02)"
-                        border.color: "rgba(255, 255, 255, 0.04)"
+                        color: "#05ffffff"
+                        border.color: "#0affffff"
 
                         RowLayout {
                             anchors.fill: parent
@@ -256,8 +256,8 @@ Rectangle {
                             anchors.fill: parent
                             hoverEnabled: true
                             cursorShape: Qt.PointingHandCursor
-                            onEntered: parent.color = "rgba(255, 255, 255, 0.06)"
-                            onExited: parent.color = "rgba(255, 255, 255, 0.02)"
+                            onEntered: parent.color = "#0fffffff"
+                            onExited: parent.color = "#05ffffff"
                         }
                     }
                 }

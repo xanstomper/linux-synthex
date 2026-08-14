@@ -8,7 +8,7 @@ Rectangle {
     height: 140
     radius: 18
     color: "#141923"
-    border.color: "rgba(255, 255, 255, 0.08)"
+    border.color: "#14ffffff"
     border.width: 1
 
     property string trackTitle: "After Dark"
@@ -66,14 +66,14 @@ Rectangle {
             Rectangle {
                 width: 48
                 height: 2
-                color: "rgba(147, 197, 253, 0.4)"
+                color: "#6693c5fd"
                 anchors.horizontalCenter: parent.horizontalCenter
                 y: 84
             }
             Rectangle {
                 width: 28
                 height: 2
-                color: "rgba(147, 197, 253, 0.3)"
+                color: "#4d93c5fd"
                 anchors.horizontalCenter: parent.horizontalCenter
                 y: 90
             }

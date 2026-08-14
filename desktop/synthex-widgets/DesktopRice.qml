@@ -25,9 +25,9 @@ Window {
         Rectangle {
             anchors.fill: parent
             gradient: Gradient {
-                GradientStop { position: 0.0; color: "rgba(10, 14, 20, 0.40)" }
-                GradientStop { position: 0.5; color: "rgba(10, 14, 20, 0.25)" }
-                GradientStop { position: 1.0; color: "rgba(10, 14, 20, 0.65)" }
+                GradientStop { position: 0.0; color: "#660a0e14" }
+                GradientStop { position: 0.5; color: "#400a0e14" }
+                GradientStop { position: 1.0; color: "#a60a0e14" }
             }
         }
     }
@@ -38,8 +38,8 @@ Window {
         width: 320
         height: 38
         radius: 19
-        color: "rgba(18, 22, 31, 0.90)"
-        border.color: "rgba(255, 255, 255, 0.08)"
+        color: "#e612161f"
+        border.color: "#14ffffff"
         border.width: 1
         anchors.horizontalCenter: parent.horizontalCenter
         y: 18
@@ -126,8 +126,8 @@ Window {
         width: 1000
         height: 64
         radius: 32
-        color: "rgba(18, 22, 31, 0.90)"
-        border.color: "rgba(255, 255, 255, 0.08)"
+        color: "#e612161f"
+        border.color: "#14ffffff"
         border.width: 1
         anchors.horizontalCenter: parent.horizontalCenter
         anchors.bottom: parent.bottom
@@ -146,7 +146,7 @@ Window {
                     width: 36
                     height: 36
                     radius: 18
-                    color: root.showLauncher ? "rgba(122, 162, 247, 0.2)" : "transparent"
+                    color: root.showLauncher ? "#337aa2f7" : "transparent"
                     Text { text: "⊞"; font.pixelSize: 18; color: root.showLauncher ? "#7AA2F7" : "#9AA1AB"; anchors.centerIn: parent }
                     MouseArea {
                         anchors.fill: parent

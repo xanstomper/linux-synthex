@@ -8,7 +8,7 @@ Rectangle {
     height: 280
     radius: 18
     color: "#12161F"
-    border.color: "rgba(255, 255, 255, 0.08)"
+    border.color: "#14ffffff"
     border.width: 1
 
     ColumnLayout {
@@ -19,7 +19,7 @@ Rectangle {
         Rectangle {
             Layout.fillWidth: true
             Layout.preferredHeight: 34
-            color: "rgba(255, 255, 255, 0.02)"
+            color: "#08ffffff"
             radius: 18
 
             RowLayout {
