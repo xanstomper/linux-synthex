@@ -11,13 +11,21 @@ Rectangle {
     border.color: "#14ffffff"
     border.width: 1
 
-    property int cpuPct: 32
-    property int ramPct: 46
-    property int diskPct: 61
-    property string downSpeed: "128 KB/s"
-    property string upSpeed: "42 KB/s"
-    property string uptimeStr: "2h 15m"
-    property string kernelStr: "6.3.9-synth"
+    property int cpuPct: (typeof systemBridge !== "undefined" && systemBridge) ? systemBridge.cpuPct : 32
+    property int ramPct: (typeof systemBridge !== "undefined" && systemBridge) ? systemBridge.ramPct : 46
+    property int diskPct: (typeof systemBridge !== "undefined" && systemBridge) ? systemBridge.diskPct : 61
+    property string downSpeed: (typeof systemBridge !== "undefined" && systemBridge) ? systemBridge.netDownSpeed : "128 KB/s"
+    property string upSpeed: (typeof systemBridge !== "undefined" && systemBridge) ? systemBridge.netUpSpeed : "42 KB/s"
+    property string uptimeStr: (typeof systemBridge !== "undefined" && systemBridge) ? systemBridge.uptimeStr : "2h 15m"
+    property string kernelStr: (typeof systemBridge !== "undefined" && systemBridge) ? systemBridge.kernelStr : "6.3.9-synth"
+
+    Connections {
+        target: (typeof systemBridge !== "undefined") ? systemBridge : null
+        function onCpuChanged() { cpuCanvas.requestPaint() }
+        function onRamChanged() { ramCanvas.requestPaint() }
+        function onDiskChanged() { diskCanvas.requestPaint() }
+        function onNetChanged() { netCanvas.requestPaint() }
+    }
 
     ColumnLayout {
         anchors.fill: parent
@@ -59,10 +67,10 @@ Rectangle {
                     onPaint: {
                         var ctx = getContext("2d")
                         ctx.clearRect(0, 0, width, height)
-                        var points = [0.2, 0.35, 0.28, 0.5, 0.32, 0.45, 0.6, 0.4, 0.32, 0.55, 0.32]
+                        var points = (typeof systemBridge !== "undefined" && systemBridge) ? systemBridge.cpuHistory : [0.2, 0.35, 0.28, 0.5, 0.32, 0.45, 0.6, 0.4, 0.32, 0.55, 0.32]
+                        if (!points || points.length < 2) return
                         var step = width / (points.length - 1)
 
-                        // Fill area
                         ctx.beginPath()
                         ctx.moveTo(0, height)
                         for (var i = 0; i < points.length; i++) {
@@ -73,7 +81,6 @@ Rectangle {
                         ctx.fillStyle = "rgba(122, 162, 247, 0.25)"
                         ctx.fill()
 
-                        // Line stroke
                         ctx.beginPath()
                         for (var j = 0; j < points.length; j++) {
                             if (j === 0) ctx.moveTo(0, height * (1.0 - points[j] * 0.9))
@@ -116,7 +123,8 @@ Rectangle {
                     onPaint: {
                         var ctx = getContext("2d")
                         ctx.clearRect(0, 0, width, height)
-                        var points = [0.4, 0.42, 0.5, 0.46, 0.52, 0.48, 0.62, 0.45, 0.46, 0.5, 0.46]
+                        var points = (typeof systemBridge !== "undefined" && systemBridge) ? systemBridge.ramHistory : [0.4, 0.42, 0.5, 0.46, 0.52, 0.48, 0.62, 0.45, 0.46, 0.5, 0.46]
+                        if (!points || points.length < 2) return
                         var step = width / (points.length - 1)
 
                         ctx.beginPath()
@@ -171,7 +179,8 @@ Rectangle {
                     onPaint: {
                         var ctx = getContext("2d")
                         ctx.clearRect(0, 0, width, height)
-                        var points = [0.55, 0.6, 0.58, 0.61, 0.63, 0.6, 0.65, 0.62, 0.61, 0.61, 0.61]
+                        var points = (typeof systemBridge !== "undefined" && systemBridge) ? systemBridge.diskHistory : [0.55, 0.6, 0.58, 0.61, 0.63, 0.6, 0.65, 0.62, 0.61, 0.61, 0.61]
+                        if (!points || points.length < 2) return
                         var step = width / (points.length - 1)
 
                         ctx.beginPath()

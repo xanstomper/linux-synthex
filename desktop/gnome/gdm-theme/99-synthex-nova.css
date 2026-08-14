@@ -1,0 +1,23 @@
+/* SynthOS Nova — GDM login (applied to /etc/alternatives/gdm-theme/gnome-shell.css) */
+#lockDialogGroup {
+  background: #10151B;
+}
+.login-dialog {
+  background-color: rgba(23, 29, 36, 0.92);
+  border-radius: 18px;
+  border: 1px solid rgba(255,255,255,0.08);
+}
+.login-dialog .modal-dialog-button,
+.login-dialog-button {
+  background-color: #6C88A8;
+  color: #0C1116;
+  border-radius: 10px;
+  font-weight: 700;
+}
+.login-dialog-prompt-layout {
+  spacing: 12px;
+}
+#panel {
+  background-color: #141B24;
+  font-weight: 600;
+}

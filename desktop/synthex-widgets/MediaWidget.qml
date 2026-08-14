@@ -11,12 +11,13 @@ Rectangle {
     border.color: "#14ffffff"
     border.width: 1
 
-    property string trackTitle: "After Dark"
-    property string artistName: "Sweater Weather"
-    property string currentTime: "1:24"
-    property string totalTime: "4:01"
-    property real progressPct: 0.35
-    property bool isPlaying: true
+    property string trackTitle: (typeof systemBridge !== "undefined" && systemBridge) ? systemBridge.mediaTitle : "After Dark"
+    property string artistName: (typeof systemBridge !== "undefined" && systemBridge) ? systemBridge.mediaArtist : "Sweater Weather"
+    property string currentTime: (typeof systemBridge !== "undefined" && systemBridge) ? systemBridge.mediaPos : "1:24"
+    property string totalTime: (typeof systemBridge !== "undefined" && systemBridge) ? systemBridge.mediaDur : "4:01"
+    property real progressPct: (typeof systemBridge !== "undefined" && systemBridge) ? systemBridge.mediaProgress : 0.35
+    property bool isPlaying: (typeof systemBridge !== "undefined" && systemBridge) ? systemBridge.mediaPlaying : true
+    property string coverUrl: (typeof systemBridge !== "undefined" && systemBridge) ? systemBridge.mediaCover : ""
 
     RowLayout {
         anchors.fill: parent
@@ -31,51 +32,49 @@ Rectangle {
             color: "#0B0E14"
             clip: true
 
-            // Atmospheric Moon Artwork representation
+            Image {
+                anchors.fill: parent
+                source: root.coverUrl
+                fillMode: Image.PreserveAspectCrop
+                visible: root.coverUrl !== ""
+            }
+
+            // Fallback moon artwork representation if no MPRIS cover
             Rectangle {
                 anchors.fill: parent
+                visible: root.coverUrl === ""
                 gradient: Gradient {
                     GradientStop { position: 0.0; color: "#0D1117" }
                     GradientStop { position: 0.5; color: "#161B22" }
                     GradientStop { position: 1.0; color: "#0B1528" }
                 }
-            }
 
-            // Glowing moon
-            Rectangle {
-                width: 32
-                height: 32
-                radius: 16
-                color: "#E2E8F0"
-                anchors.centerIn: parent
-                border.color: "#93C5FD"
-                border.width: 2
-
-                // Inner glow / crater shadow
                 Rectangle {
-                    width: 26
-                    height: 26
-                    radius: 13
-                    color: "#0D1117"
-                    x: 6
-                    y: 2
-                }
-            }
+                    width: 32
+                    height: 32
+                    radius: 16
+                    color: "#E2E8F0"
+                    anchors.centerIn: parent
+                    border.color: "#93C5FD"
+                    border.width: 2
 
-            // Water reflection lines
-            Rectangle {
-                width: 48
-                height: 2
-                color: "#6693c5fd"
-                anchors.horizontalCenter: parent.horizontalCenter
-                y: 84
-            }
-            Rectangle {
-                width: 28
-                height: 2
-                color: "#4d93c5fd"
-                anchors.horizontalCenter: parent.horizontalCenter
-                y: 90
+                    Rectangle {
+                        width: 26
+                        height: 26
+                        radius: 13
+                        color: "#0D1117"
+                        x: 6
+                        y: 2
+                    }
+                }
+
+                Rectangle {
+                    width: 48
+                    height: 2
+                    color: "#6693c5fd"
+                    anchors.horizontalCenter: parent.horizontalCenter
+                    y: 84
+                }
             }
         }
 
@@ -138,7 +137,7 @@ Rectangle {
                     color: "#1E2633"
 
                     Rectangle {
-                        width: parent.width * root.progressPct
+                        width: parent.width * Math.max(0.0, Math.min(1.0, root.progressPct))
                         height: parent.height
                         radius: 2
                         color: "#7AA2F7"
@@ -150,7 +149,7 @@ Rectangle {
                         height: 8
                         radius: 4
                         color: "#FFFFFF"
-                        x: parent.width * root.progressPct - 4
+                        x: parent.width * Math.max(0.0, Math.min(1.0, root.progressPct)) - 4
                         y: -2
                     }
                 }
@@ -162,33 +161,44 @@ Rectangle {
                 spacing: 20
 
                 Text {
-                    text: "⏮"
-                    font.pixelSize: 16
+                    text: "󰒮"
+                    font.family: "Symbols Nerd Font"
+                    font.pixelSize: 18
                     color: "#DDE3EB"
                     MouseArea {
                         anchors.fill: parent
                         cursorShape: Qt.PointingHandCursor
+                        onClicked: {
+                            if (typeof systemBridge !== "undefined" && systemBridge) systemBridge.mediaPrevious()
+                        }
                     }
                 }
 
                 Text {
-                    text: root.isPlaying ? "⏸" : "▶"
-                    font.pixelSize: 18
+                    text: root.isPlaying ? "󰏤" : "󰐊"
+                    font.family: "Symbols Nerd Font"
+                    font.pixelSize: 22
                     color: "#FFFFFF"
                     MouseArea {
                         anchors.fill: parent
                         cursorShape: Qt.PointingHandCursor
-                        onClicked: root.isPlaying = !root.isPlaying
+                        onClicked: {
+                            if (typeof systemBridge !== "undefined" && systemBridge) systemBridge.mediaPlayPause()
+                        }
                     }
                 }
 
                 Text {
-                    text: "⏭"
-                    font.pixelSize: 16
+                    text: "󰒭"
+                    font.family: "Symbols Nerd Font"
+                    font.pixelSize: 18
                     color: "#DDE3EB"
                     MouseArea {
                         anchors.fill: parent
                         cursorShape: Qt.PointingHandCursor
+                        onClicked: {
+                            if (typeof systemBridge !== "undefined" && systemBridge) systemBridge.mediaNext()
+                        }
                     }
                 }
             }

@@ -1,0 +1,5 @@
+[Theme]
+name=synthex-nova
+
+[PlasmaToolbars]
+ToolButtonStyle=TextUnderIcon

@@ -11,8 +11,8 @@ Rectangle {
     border.color: "#14ffffff"
     border.width: 1
 
-    property int brightnessPct: 52
-    property int volumePct: 100
+    property int brightnessPct: (typeof systemBridge !== "undefined" && systemBridge) ? systemBridge.brightness : 52
+    property int volumePct: (typeof systemBridge !== "undefined" && systemBridge) ? systemBridge.volume : 100
 
     ColumnLayout {
         anchors.fill: parent
@@ -31,7 +31,7 @@ Rectangle {
                 Text {
                     text: "󰃠"
                     font.family: "Symbols Nerd Font"
-                    font.pixelSize: 24
+                    font.pixelSize: 22
                     color: "#E5A84B"
                     Layout.alignment: Qt.AlignVCenter
                 }
@@ -74,9 +74,17 @@ Rectangle {
                 MouseArea {
                     anchors.fill: parent
                     cursorShape: Qt.PointingHandCursor
+                    onPositionChanged: {
+                        if (pressed) {
+                            var pct = Math.max(5, Math.min(100, Math.round((mouse.x / width) * 100)))
+                            if (typeof systemBridge !== "undefined" && systemBridge) systemBridge.setBrightness(pct)
+                            else root.brightnessPct = pct
+                        }
+                    }
                     onClicked: {
                         var pct = Math.max(5, Math.min(100, Math.round((mouse.x / width) * 100)))
-                        root.brightnessPct = pct
+                        if (typeof systemBridge !== "undefined" && systemBridge) systemBridge.setBrightness(pct)
+                        else root.brightnessPct = pct
                     }
                 }
             }
@@ -101,7 +109,7 @@ Rectangle {
                 Text {
                     text: "󰕾"
                     font.family: "Symbols Nerd Font"
-                    font.pixelSize: 24
+                    font.pixelSize: 22
                     color: "#2AC3DE"
                     Layout.alignment: Qt.AlignVCenter
                 }
@@ -144,9 +152,17 @@ Rectangle {
                 MouseArea {
                     anchors.fill: parent
                     cursorShape: Qt.PointingHandCursor
+                    onPositionChanged: {
+                        if (pressed) {
+                            var pct = Math.max(0, Math.min(100, Math.round((mouse.x / width) * 100)))
+                            if (typeof systemBridge !== "undefined" && systemBridge) systemBridge.setVolume(pct)
+                            else root.volumePct = pct
+                        }
+                    }
                     onClicked: {
                         var pct = Math.max(0, Math.min(100, Math.round((mouse.x / width) * 100)))
-                        root.volumePct = pct
+                        if (typeof systemBridge !== "undefined" && systemBridge) systemBridge.setVolume(pct)
+                        else root.volumePct = pct
                     }
                 }
             }

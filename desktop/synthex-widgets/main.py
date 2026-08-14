@@ -62,10 +62,14 @@ def main():
     app.setApplicationName("SynthOS Desktop Rice")
     app.setOrganizationName("SynthOS")
 
+    from system_bridge import SystemBridge
+    bridge = SystemBridge()
+
     engine = QQmlApplicationEngine()
 
     script_dir = Path(__file__).resolve().parent
     engine.addImportPath(str(script_dir))
+    engine.rootContext().setContextProperty("systemBridge", bridge)
 
     qml_file = script_dir / "DesktopRice.qml"
     engine.load(QUrl.fromLocalFile(str(qml_file)))

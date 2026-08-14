@@ -1,0 +1,19 @@
+[AdaptiveTransparency]
+enabled=true
+
+[Desktop]
+Color=#10151B
+
+[General]
+ColorScheme=SynthexFocus
+Name=SynthOS Nova
+ShadowsEnabled=true
+ThemeVersion=2026.10
+X-KDE-PluginInfo-Author=SynthOS Team
+X-KDE-PluginInfo-Name=synthex-nova
+
+[Panel]
+Thickness=44
+
+[Wallpaper]
+defaultWallpaper=/usr/share/wallpapers/synthex-nova

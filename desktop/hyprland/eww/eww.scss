@@ -1,0 +1,199 @@
+// ╔══════════════════════════════════════════════════════════════╗
+// ║  SynthOS Nova — Eww Widgets SCSS Styling                     ║
+// ╚══════════════════════════════════════════════════════════════╝
+
+* {
+  all: unset;
+  font-family: "Inter", "JetBrains Mono", "Symbols Nerd Font", sans-serif;
+}
+
+$bg-surface: #141923;
+$bg-dock: rgba(18, 22, 31, 0.90);
+$border-subtle: rgba(255, 255, 255, 0.08);
+$accent-blue: #7AA2F7;
+$accent-purple: #BB9AF7;
+$accent-gold: #E5A84B;
+$accent-teal: #73DACA;
+$accent-cyan: #2AC3DE;
+$text-primary: #FFFFFF;
+$text-dim: #9AA1AB;
+
+// ── Top Status Pill ──────────────────────────────────────────
+.top-pill-box {
+  background-color: $bg-dock;
+  border: 1px solid $border-subtle;
+  border-radius: 9999px;
+  padding: 8px 22px;
+}
+
+.dot-indicator {
+  color: $accent-blue;
+  font-size: 10px;
+  text-shadow: 0 0 8px rgba(122, 162, 247, 0.6);
+}
+
+.pill-datetime {
+  color: $text-primary;
+  font-size: 13px;
+  font-weight: 600;
+}
+
+// ── Cards Base ───────────────────────────────────────────────
+.widget-card {
+  background-color: $bg-surface;
+  border: 1px solid $border-subtle;
+  border-radius: 18px;
+  padding: 16px 18px;
+  box-shadow: 0 16px 36px rgba(0, 0, 0, 0.45);
+}
+
+.separator-h {
+  background-color: rgba(255, 255, 255, 0.04);
+  min-height: 1px;
+}
+
+// ── Clock Card ───────────────────────────────────────────────
+.time-big {
+  font-size: 38px;
+  font-weight: 800;
+  color: $accent-blue;
+  letter-spacing: -1px;
+}
+
+.time-ampm {
+  font-size: 16px;
+  font-weight: 700;
+  color: #56759B;
+  margin-top: 14px;
+}
+
+.date-sub {
+  font-size: 13px;
+  color: $text-dim;
+  font-weight: 500;
+  margin-top: 4px;
+}
+
+// ── Weather Card ─────────────────────────────────────────────
+.weather-icon {
+  font-size: 34px;
+  color: $accent-gold;
+}
+
+.weather-temp {
+  font-size: 32px;
+  font-weight: 700;
+  color: $text-primary;
+}
+
+.weather-city {
+  font-size: 13px;
+  font-weight: 700;
+  color: $text-primary;
+}
+
+.weather-sub {
+  font-size: 12px;
+  color: $text-dim;
+}
+
+// ── Quick Settings ───────────────────────────────────────────
+.qs-icon {
+  font-size: 20px;
+  &.gold { color: $accent-gold; }
+  &.blue { color: $accent-cyan; }
+}
+
+.qs-title {
+  font-size: 12px;
+  font-weight: 700;
+  color: $text-primary;
+}
+
+.qs-sub {
+  font-size: 11px;
+  color: $text-dim;
+}
+
+scale {
+  trough {
+    background-color: #1E2633;
+    border-radius: 4px;
+    min-height: 8px;
+  }
+  highlight {
+    border-radius: 4px;
+  }
+}
+
+.slider-gold highlight { background-color: $accent-gold; }
+.slider-blue highlight { background-color: $accent-cyan; }
+
+// ── Media Card ───────────────────────────────────────────────
+.media-art-cover {
+  background-color: #0B0E14;
+  border-radius: 10px;
+  min-width: 70px;
+  min-height: 70px;
+  border: 1px solid $border-subtle;
+}
+
+.moon-glyph {
+  font-size: 28px;
+  color: #93C5FD;
+}
+
+.media-title {
+  font-size: 14px;
+  font-weight: 700;
+  color: $text-primary;
+}
+
+.media-artist {
+  font-size: 12px;
+  color: $text-dim;
+}
+
+// ── System Monitor ───────────────────────────────────────────
+.metric-box {
+  padding: 0 4px;
+}
+
+.metric-k {
+  font-size: 11px;
+  font-weight: 700;
+  color: $text-primary;
+}
+
+.metric-v {
+  font-size: 11px;
+  color: $text-dim;
+  margin-left: 8px;
+}
+
+progress {
+  trough {
+    background-color: #1E2633;
+    border-radius: 3px;
+    min-height: 6px;
+  }
+  progress {
+    border-radius: 3px;
+  }
+}
+
+.prog-blue progress { background-color: $accent-blue; }
+.prog-purple progress { background-color: $accent-purple; }
+.prog-gold progress { background-color: $accent-gold; }
+
+.net-label {
+  font-size: 11px;
+  color: $accent-teal;
+  font-weight: 600;
+}
+
+.uptime-label {
+  font-size: 11px;
+  color: $text-dim;
+  margin-left: auto;
+}

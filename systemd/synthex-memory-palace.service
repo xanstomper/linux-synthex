@@ -16,10 +16,9 @@ TimeoutStartSec=30
 MemoryMax=512M
 CPUWeight=90
 
-# Runtime security (non-privileged)
+# Runtime security — runs as the logged-in user (user session service).
+# Installed to ~/.config/systemd/user/ — %h resolves to the user's home.
 DynamicUser=no
-User=jewboy420
-Group=jewboy420
 PrivateTmp=true
 NoNewPrivileges=true
 ProtectSystem=strict
@@ -35,4 +34,4 @@ StandardError=journal
 SyslogIdentifier=synthex-memory-palace
 
 [Install]
-WantedBy=synthex-brain.service
+WantedBy=default.target

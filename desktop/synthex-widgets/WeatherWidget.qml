@@ -11,11 +11,12 @@ Rectangle {
     border.color: "#14ffffff"
     border.width: 1
 
-    property string location: "Ajmer"
-    property string condition: "Clouds"
-    property string temperature: "34°"
-    property string windSpeed: "4.49 m/s"
-    property string humidity: "49%"
+    property string location: (typeof systemBridge !== "undefined" && systemBridge) ? systemBridge.weatherCity : "Ajmer"
+    property string condition: (typeof systemBridge !== "undefined" && systemBridge) ? systemBridge.weatherCond : "Clouds"
+    property string temperature: (typeof systemBridge !== "undefined" && systemBridge) ? systemBridge.weatherTemp : "34°"
+    property string windSpeed: (typeof systemBridge !== "undefined" && systemBridge) ? systemBridge.weatherWind : "4.49 m/s"
+    property string humidity: (typeof systemBridge !== "undefined" && systemBridge) ? systemBridge.weatherHumidity : "49%"
+    property string weatherIcon: (typeof systemBridge !== "undefined" && systemBridge) ? systemBridge.weatherIcon : "󰖐"
 
     RowLayout {
         anchors.fill: parent
@@ -24,42 +25,15 @@ Rectangle {
 
         // Weather Icon & Temp
         RowLayout {
-            spacing: 8
+            spacing: 10
             Layout.alignment: Qt.AlignVCenter
 
-            // Cloud with sun icon representation
-            Item {
-                width: 44
-                height: 44
+            Text {
+                text: root.weatherIcon
+                font.family: "Symbols Nerd Font"
+                font.pixelSize: 36
+                color: "#E5A84B"
                 Layout.alignment: Qt.AlignVCenter
-
-                // Sun glow
-                Rectangle {
-                    width: 22
-                    height: 22
-                    radius: 11
-                    color: "#E5A84B"
-                    x: 20
-                    y: 2
-                }
-
-                // Cloud body
-                Rectangle {
-                    width: 36
-                    height: 24
-                    radius: 12
-                    color: "#DDE3EB"
-                    x: 2
-                    y: 16
-                }
-                Rectangle {
-                    width: 20
-                    height: 20
-                    radius: 10
-                    color: "#DDE3EB"
-                    x: 10
-                    y: 8
-                }
             }
 
             Text {

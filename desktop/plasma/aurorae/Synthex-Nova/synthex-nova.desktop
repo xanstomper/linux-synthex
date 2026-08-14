@@ -1,0 +1,13 @@
+[General]
+Name=SynthOS Nova
+Comment=Calm charcoal decoration, thin borders, slate accent
+X-KDE-PluginInfo-Name=SynthOS-Nova
+X-KDE-PluginInfo-Version=2026.10
+X-KDE-PluginInfo-Author=SynthOS Team
+X-KDE-PluginInfo-License=GPL-3.0+
+BorderSize=1
+ButtonSize=22
+TitleEdgeTop=4
+TitleEdgeBottom=4
+TitleHeight=26
+Animation=0

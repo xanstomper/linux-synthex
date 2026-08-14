@@ -1,0 +1,30 @@
+[ KDE ]
+widgetStyle=Breeze
+
+[ kdeglobals ]
+KDE\widgetStyle=Breeze
+ColorScheme=SynthexFocus
+
+[ plasmarc ]
+Theme=synthex-nova
+
+[ kwinrc ]
+org.kde.kdecoration2/BorderSize=None
+org.kde.kdecoration2/ButtonsOnRight=XIA
+[org.kde.kwin]
+NightColorActive=false
+NightColorMode=TimingsFixed
+NightColorTemperature=4200
+
+[ plasma-desktop-appletsrc ]
+Containment/Plugin=org.kde.plasma.fancytaskmanager
+
+[ Icons ]
+Theme=Papirus-Dark
+
+[kcminputrc][Mouse]
+cursorTheme=Synthex-Cursor
+cursorSize=24
+
+[ krunnerrc ]
+General\freezeLevel=70

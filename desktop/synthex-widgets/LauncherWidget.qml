@@ -12,7 +12,7 @@ Rectangle {
     border.width: 1
 
     property int activeCategoryIndex: 0
-    property string username: "xanstomper"
+    property string username: (typeof systemBridge !== "undefined" && systemBridge) ? systemBridge.username : "user"
 
     ColumnLayout {
         anchors.fill: parent
@@ -35,8 +35,9 @@ Rectangle {
                 spacing: 10
 
                 Text {
-                    text: "🔍"
-                    font.pixelSize: 14
+                    text: "󰍉"
+                    font.family: "Symbols Nerd Font"
+                    font.pixelSize: 16
                     color: "#9AA1AB"
                 }
 
@@ -47,6 +48,13 @@ Rectangle {
                     font.pixelSize: 14
                     color: "#FFFFFF"
                     clip: true
+                    onAccepted: {
+                        if (text.length > 0) {
+                            if (typeof systemBridge !== "undefined" && systemBridge) {
+                                systemBridge.launchApp(text)
+                            }
+                        }
+                    }
 
                     Text {
                         text: "Search apps, files, settings..."
@@ -73,16 +81,16 @@ Rectangle {
 
                 ListModel {
                     id: categoriesModel
-                    ListElement { name: "Favorites"; icon: "⭐" }
-                    ListElement { name: "All Applications"; icon: "🪟" }
-                    ListElement { name: "Development"; icon: "🛠" }
-                    ListElement { name: "Graphics"; icon: "🎨" }
-                    ListElement { name: "Internet"; icon: "🌐" }
-                    ListElement { name: "Multimedia"; icon: "🎵" }
-                    ListElement { name: "Office"; icon: "📄" }
-                    ListElement { name: "Settings"; icon: "⚙️" }
-                    ListElement { name: "System"; icon: "💻" }
-                    ListElement { name: "Utilities"; icon: "🧰" }
+                    ListElement { name: "Favorites"; icon: "󰓎" }
+                    ListElement { name: "All Applications"; icon: "󰀻" }
+                    ListElement { name: "Development"; icon: "󰅩" }
+                    ListElement { name: "Graphics"; icon: "󰹑" }
+                    ListElement { name: "Internet"; icon: "󰖟" }
+                    ListElement { name: "Multimedia"; icon: "󰝚" }
+                    ListElement { name: "Office"; icon: "󰈙" }
+                    ListElement { name: "Settings"; icon: "󰒓" }
+                    ListElement { name: "System"; icon: "󰍹" }
+                    ListElement { name: "Utilities"; icon: "󰆍" }
                 }
 
                 ListView {
@@ -108,7 +116,9 @@ Rectangle {
 
                             Text {
                                 text: model.icon
-                                font.pixelSize: 13
+                                font.family: "Symbols Nerd Font"
+                                font.pixelSize: 14
+                                color: root.activeCategoryIndex === index ? "#7AA2F7" : "#9AA1AB"
                             }
 
                             Text {
@@ -150,8 +160,10 @@ Rectangle {
                         Layout.fillWidth: true
 
                         Text {
-                            text: "👤"
+                            text: "󰄬"
+                            font.family: "Symbols Nerd Font"
                             font.pixelSize: 14
+                            color: "#7AA2F7"
                         }
 
                         Text {
@@ -165,10 +177,37 @@ Rectangle {
                     }
 
                     RowLayout {
-                        spacing: 8
-                        Text { text: "🔒"; font.pixelSize: 13; color: "#9AA1AB" }
-                        Text { text: "🔄"; font.pixelSize: 13; color: "#9AA1AB" }
-                        Text { text: "⏻"; font.pixelSize: 13; color: "#D97C82" }
+                        spacing: 10
+                        Text {
+                            text: "󰌾"
+                            font.family: "Symbols Nerd Font"
+                            font.pixelSize: 15
+                            color: "#9AA1AB"
+                            MouseArea {
+                                anchors.fill: parent; cursorShape: Qt.PointingHandCursor
+                                onClicked: { if (typeof systemBridge !== "undefined" && systemBridge) systemBridge.powerAction("lock") }
+                            }
+                        }
+                        Text {
+                            text: "󰜉"
+                            font.family: "Symbols Nerd Font"
+                            font.pixelSize: 15
+                            color: "#9AA1AB"
+                            MouseArea {
+                                anchors.fill: parent; cursorShape: Qt.PointingHandCursor
+                                onClicked: { if (typeof systemBridge !== "undefined" && systemBridge) systemBridge.powerAction("reboot") }
+                            }
+                        }
+                        Text {
+                            text: "󰐥"
+                            font.family: "Symbols Nerd Font"
+                            font.pixelSize: 15
+                            color: "#D97C82"
+                            MouseArea {
+                                anchors.fill: parent; cursorShape: Qt.PointingHandCursor
+                                onClicked: { if (typeof systemBridge !== "undefined" && systemBridge) systemBridge.powerAction("poweroff") }
+                            }
+                        }
                     }
                 }
             }
@@ -187,14 +226,14 @@ Rectangle {
 
                 ListModel {
                     id: appsModel
-                    ListElement { name: "Firefox"; category: "Web Browser"; icon: "🌐"; color: "#FF7139" }
-                    ListElement { name: "Visual Studio Code"; category: "Code Editor"; icon: "💻"; color: "#007ACC" }
-                    ListElement { name: "Spotify"; category: "Music Player"; icon: "🎵"; color: "#1DB954" }
-                    ListElement { name: "Files"; category: "File Manager"; icon: "📁"; color: "#4A90E2" }
-                    ListElement { name: "Terminal"; category: "System Terminal"; icon: "⌨️"; color: "#333333" }
-                    ListElement { name: "Discord"; category: "Internet Messenger"; icon: "💬"; color: "#5865F2" }
-                    ListElement { name: "Settings"; category: "System Settings"; icon: "⚙️"; color: "#8E8E93" }
-                    ListElement { name: "System Monitor"; category: "Resource Monitor"; icon: "📊"; color: "#30D158" }
+                    ListElement { name: "Firefox"; category: "Web Browser"; icon: "󰈹"; color: "#FF7139"; cmd: "firefox" }
+                    ListElement { name: "Visual Studio Code"; category: "Code Editor"; icon: "󰨞"; color: "#007ACC"; cmd: "code" }
+                    ListElement { name: "Spotify"; category: "Music Player"; icon: "󰓇"; color: "#1DB954"; cmd: "spotify" }
+                    ListElement { name: "Files"; category: "File Manager"; icon: "󰉋"; color: "#4A90E2"; cmd: "dolphin || nautilus || thunar" }
+                    ListElement { name: "Terminal"; category: "System Terminal"; icon: "󰆍"; color: "#333333"; cmd: "kitty || alacritty" }
+                    ListElement { name: "Discord"; category: "Internet Messenger"; icon: "󰙯"; color: "#5865F2"; cmd: "discord || vesktop" }
+                    ListElement { name: "Settings"; category: "System Settings"; icon: "󰒓"; color: "#8E8E93"; cmd: "synthex-control-center || systemsettings" }
+                    ListElement { name: "System Monitor"; category: "Resource Monitor"; icon: "󰍹"; color: "#30D158"; cmd: "plasma-systemmonitor || btop" }
                 }
 
                 ListView {
@@ -226,7 +265,9 @@ Rectangle {
 
                                 Text {
                                     text: model.icon
+                                    font.family: "Symbols Nerd Font"
                                     font.pixelSize: 18
+                                    color: "#FFFFFF"
                                     anchors.centerIn: parent
                                 }
                             }
@@ -258,6 +299,11 @@ Rectangle {
                             cursorShape: Qt.PointingHandCursor
                             onEntered: parent.color = "#0fffffff"
                             onExited: parent.color = "#05ffffff"
+                            onClicked: {
+                                if (typeof systemBridge !== "undefined" && systemBridge) {
+                                    systemBridge.launchApp(model.cmd)
+                                }
+                            }
                         }
                     }
                 }

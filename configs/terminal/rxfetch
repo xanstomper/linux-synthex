@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # SPDX-License-Identifier: MIT OR Apache-2.0
 """
-rxfetch — Fast, aesthetic SynthOS system info fetcher
+rxfetch — Ultra-fast, aesthetic SynthOS system info fetcher
 Matches the reference terminal screenshot layout and color scheme.
 """
 
@@ -16,15 +16,14 @@ def get_ram():
     try:
         with open("/proc/meminfo") as f:
             lines = f.readlines()
-        mem_total = 0
-        mem_avail = 0
+        mem_total, mem_avail = 0, 0
         for line in lines:
             if line.startswith("MemTotal:"):
                 mem_total = int(line.split()[1])
             elif line.startswith("MemAvailable:"):
                 mem_avail = int(line.split()[1])
-        used = (mem_total - mem_avail) / 1024 / 1024
-        total = mem_total / 1024 / 1024
+        used = (mem_total - mem_avail) / (1024 * 1024)
+        total = mem_total / (1024 * 1024)
         return f"{used:.2f}G / {total:.1f}G"
     except Exception:
         return "5.21G / 15.6G"
@@ -33,36 +32,72 @@ def get_ram():
 def get_disk():
     try:
         usage = shutil.disk_usage("/")
-        used = usage.used / 1024 / 1024 / 1024
-        total = usage.total / 1024 / 1024 / 1024
+        used = usage.used / (1024**3)
+        total = usage.total / (1024**3)
         return f"{int(used)}G / {int(total)}G"
     except Exception:
         return "82G / 232G"
 
 
 def get_pkgs():
+    count = 0
+    # Try rpm
     try:
-        # Check rpm
         out = subprocess.check_output(["rpm", "-qa"], stderr=subprocess.DEVNULL)
-        return str(len(out.strip().splitlines()))
+        count += len(out.strip().splitlines())
     except Exception:
-        return "1247"
+        pass
+    # Try dpkg
+    if count == 0:
+        try:
+            out = subprocess.check_output(["dpkg-query", "-f", ".\n", "-W"], stderr=subprocess.DEVNULL)
+            count += len(out.strip().splitlines())
+        except Exception:
+            pass
+    # Try pacman
+    if count == 0:
+        try:
+            out = subprocess.check_output(["pacman", "-Qq"], stderr=subprocess.DEVNULL)
+            count += len(out.strip().splitlines())
+        except Exception:
+            pass
+    # Try flatpak
+    try:
+        out = subprocess.check_output(["flatpak", "list"], stderr=subprocess.DEVNULL)
+        count += len(out.strip().splitlines())
+    except Exception:
+        pass
+    return str(count) if count > 0 else "1247"
 
 
 def get_wm():
-    wm = os.environ.get("XDG_CURRENT_DESKTOP") or os.environ.get("DESKTOP_SESSION") or "Hyprland"
+    wm = os.environ.get("XDG_CURRENT_DESKTOP") or os.environ.get("DESKTOP_SESSION") or os.environ.get("HYPRLAND_INSTANCE_SIGNATURE") and "Hyprland"
+    if wm:
+        wm = wm.split(":")[-1]
     return wm.capitalize() if wm else "Hyprland"
 
 
 def get_term():
-    return os.environ.get("TERM_PROGRAM") or os.environ.get("TERM") or "alacritty"
+    t = os.environ.get("TERM_PROGRAM") or os.environ.get("TERM") or "alacritty"
+    if t in ("xterm-256color", "xterm", "dumb"):
+        # try parent process name
+        try:
+            ppid = os.getppid()
+            with open(f"/proc/{ppid}/comm") as f:
+                comm = f.read().strip()
+                if comm:
+                    return comm
+        except Exception:
+            pass
+        return "alacritty"
+    return t
 
 
 def main():
     user = os.environ.get("USER", "xanstomper")
     host = platform.node() or "synth"
 
-    # Color definitions (ANSI)
+    # Color definitions (TrueColor ANSI)
     RST = "\033[0m"
     BOLD = "\033[1m"
     C_BLUE = "\033[38;2;122;162;247m"
@@ -72,12 +107,8 @@ def main():
     C_GREEN = "\033[38;2;158;206;106m"
     C_YELLOW = "\033[38;2;224;175;104m"
     C_ORANGE = "\033[38;2;255;158;100m"
-    C_DIM = "\033[38;2;154;161;171m"
 
-    kernel = platform.release()
-    if not kernel or "generic" in kernel:
-        kernel = "6.3.9-synth"
-
+    kernel = platform.release() or "6.3.9-synth"
     shell = os.path.basename(os.environ.get("SHELL", "fish"))
 
     # ASCII Art Lines (synthOS S Logo with gradient dots)

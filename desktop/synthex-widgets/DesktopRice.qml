@@ -147,7 +147,7 @@ Window {
                     height: 36
                     radius: 18
                     color: root.showLauncher ? "#337aa2f7" : "transparent"
-                    Text { text: "⊞"; font.pixelSize: 18; color: root.showLauncher ? "#7AA2F7" : "#9AA1AB"; anchors.centerIn: parent }
+                    Text { text: "󰀻"; font.family: "Symbols Nerd Font"; font.pixelSize: 18; color: root.showLauncher ? "#7AA2F7" : "#9AA1AB"; anchors.centerIn: parent }
                     MouseArea {
                         anchors.fill: parent
                         cursorShape: Qt.PointingHandCursor
@@ -155,9 +155,9 @@ Window {
                     }
                 }
 
-                Text { text: "🔍"; font.pixelSize: 16; color: "#9AA1AB" }
-                Text { text: "🗔"; font.pixelSize: 16; color: "#9AA1AB" }
-                Text { text: "🔔"; font.pixelSize: 16; color: "#9AA1AB" }
+                Text { text: "󰍉"; font.family: "Symbols Nerd Font"; font.pixelSize: 16; color: "#9AA1AB" }
+                Text { text: "󰹟"; font.family: "Symbols Nerd Font"; font.pixelSize: 16; color: "#9AA1AB" }
+                Text { text: "󰂚"; font.family: "Symbols Nerd Font"; font.pixelSize: 16; color: "#9AA1AB" }
             }
 
             Item { Layout.fillWidth: true }
@@ -168,13 +168,13 @@ Window {
 
                 Repeater {
                     model: [
-                        { name: "Firefox", icon: "🌐", bg: "#FF7139" },
-                        { name: "VS Code", icon: "💻", bg: "#007ACC" },
-                        { name: "Terminal", icon: "⌨️", bg: "#333333" },
-                        { name: "Files", icon: "📁", bg: "#4A90E2" },
-                        { name: "SysMon", icon: "📊", bg: "#30D158" },
-                        { name: "Spotify", icon: "🎵", bg: "#1DB954" },
-                        { name: "Discord", icon: "💬", bg: "#5865F2" }
+                        { name: "Firefox", icon: "󰈹", bg: "#FF7139", cmd: "firefox" },
+                        { name: "VS Code", icon: "󰨞", bg: "#007ACC", cmd: "code" },
+                        { name: "Terminal", icon: "󰆍", bg: "#24292E", cmd: "kitty || alacritty" },
+                        { name: "Files", icon: "󰉋", bg: "#4A90E2", cmd: "dolphin || nautilus || thunar" },
+                        { name: "SysMon", icon: "󰍹", bg: "#30D158", cmd: "plasma-systemmonitor || btop" },
+                        { name: "Spotify", icon: "󰓇", bg: "#1DB954", cmd: "spotify" },
+                        { name: "Discord", icon: "󰙯", bg: "#5865F2", cmd: "discord || vesktop" }
                     ]
 
                     Rectangle {
@@ -185,7 +185,9 @@ Window {
 
                         Text {
                             text: modelData.icon
+                            font.family: "Symbols Nerd Font"
                             font.pixelSize: 20
+                            color: "#FFFFFF"
                             anchors.centerIn: parent
                         }
 
@@ -195,6 +197,11 @@ Window {
                             hoverEnabled: true
                             onEntered: parent.scale = 1.15
                             onExited: parent.scale = 1.0
+                            onClicked: {
+                                if (typeof systemBridge !== "undefined" && systemBridge) {
+                                    systemBridge.launchApp(modelData.cmd)
+                                }
+                            }
                         }
 
                         Behavior on scale { NumberAnimation { duration: 120 } }
@@ -208,13 +215,13 @@ Window {
             RowLayout {
                 spacing: 14
 
-                Text { text: "📶"; font.pixelSize: 15; color: "#9AA1AB" }
-                Text { text: "󰂯"; font.pixelSize: 15; color: "#9AA1AB" }
-                Text { text: "🔊"; font.pixelSize: 15; color: "#9AA1AB" }
-                Text { text: "🔋"; font.pixelSize: 15; color: "#9AA1AB" }
+                Text { text: "󰤨"; font.family: "Symbols Nerd Font"; font.pixelSize: 16; color: "#9AA1AB" }
+                Text { text: "󰂯"; font.family: "Symbols Nerd Font"; font.pixelSize: 16; color: "#9AA1AB" }
+                Text { text: "󰕾"; font.family: "Symbols Nerd Font"; font.pixelSize: 16; color: "#9AA1AB" }
+                Text { text: "󰁹"; font.family: "Symbols Nerd Font"; font.pixelSize: 16; color: "#9AA1AB" }
 
                 Text {
-                    text: "04:44 PM"
+                    text: (typeof systemBridge !== "undefined" && systemBridge) ? (new Date().toLocaleTimeString(Qt.locale(), "hh:mm AP")) : "04:44 PM"
                     font.family: "Inter"
                     font.pixelSize: 13
                     font.bold: true

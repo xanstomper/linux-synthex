@@ -1,0 +1,10 @@
+[General]
+ColorScheme=SynthexFocus
+font=Inter,10,-1,5,50,0,0,0,0,0
+fixed=JetBrains Mono,10,-1,5,50,0,0,0,0,0
+
+[Icons]
+Theme=Papirus-Dark
+
+[KDE]
+widgetStyle=Breeze

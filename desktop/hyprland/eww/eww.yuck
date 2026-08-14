@@ -1,0 +1,140 @@
+;; ╔══════════════════════════════════════════════════════════════╗
+;; ║  SynthOS Nova — Eww Desktop Widgets (yuck definition)       ║
+;; ╚══════════════════════════════════════════════════════════════╝
+
+;; ─── Variables & Pollers ──────────────────────────────────────────────────────
+(defpoll clock_time :interval "1s" "date '+%I:%M'")
+(defpoll clock_ampm :interval "1s" "date '+%p'")
+(defpoll clock_date :interval "1s" "date '+%a, %d %B %Y'")
+
+(defpoll weather_temp :interval "15m" "curl -s 'wttr.in/?format=%t' | tr -d '+' || echo '34°C'")
+(defpoll weather_desc :interval "15m" "curl -s 'wttr.in/?format=%C' || echo 'Clouds'")
+
+(defpoll cpu_pct :interval "2s" "grep 'cpu ' /proc/stat | awk '{usage=($2+$4)*100/($2+$4+$5)} END {printf \"%d\", usage}'")
+(defpoll ram_pct :interval "2s" "free | grep Mem | awk '{printf \"%d\", $3/$2 * 100.0}'")
+(defpoll disk_pct :interval "1m" "df -h / | awk 'NR==2 {print $5}' | tr -d '%'")
+(defpoll uptime_str :interval "1m" "uptime -p | sed 's/up //'")
+
+(defpoll brightness_pct :interval "1s" "brightnessctl -m | awk -F, '{print $4}' | tr -d '%' || echo '52'")
+(defpoll volume_pct :interval "1s" "wpctl get-volume @DEFAULT_AUDIO_SINK@ | awk '{print int($2*100)}' || echo '100'")
+
+(defpoll media_title :interval "2s" "playerctl metadata title || echo 'After Dark'")
+(defpoll media_artist :interval "2s" "playerctl metadata artist || echo 'Sweater Weather'")
+(defpoll media_status :interval "2s" "playerctl status || echo 'Playing'")
+
+;; ─── Top Status Pill ──────────────────────────────────────────────────────────
+(defwidget top_pill []
+  (box :class "top-pill-box" :orientation "h" :space-evenly false :spacing 10
+    (label :class "dot-indicator" :text "●")
+    (label :class "pill-datetime" :text "${clock_date}   ${clock_time} ${clock_ampm}")))
+
+(defwindow top_status
+  :monitor 0
+  :geometry (geometry :x "0%" :y "16px" :width "340px" :height "38px" :anchor "top center")
+  :stacking "fg"
+  :exclusive false
+  (top_pill))
+
+;; ─── Clock Widget (Top Left) ──────────────────────────────────────────────────
+(defwidget clock_card []
+  (box :class "widget-card clock-card" :orientation "v" :space-evenly false
+    (box :orientation "h" :space-evenly false :spacing 4
+      (label :class "time-big" :text clock_time)
+      (label :class "time-ampm" :text clock_ampm))
+    (label :class "date-sub" :text clock_date :halign "start")))
+
+(defwindow clock_widget
+  :monitor 0
+  :geometry (geometry :x "40px" :y "40px" :width "220px" :height "110px" :anchor "top left")
+  :stacking "bg"
+  (clock_card))
+
+;; ─── Weather Widget (Top Left Below Clock) ────────────────────────────────────
+(defwidget weather_card []
+  (box :class "widget-card weather-card" :orientation "h" :space-evenly false :spacing 14
+    (box :orientation "h" :space-evenly false :spacing 8 :valign "center"
+      (label :class "weather-icon" :text "󰖐")
+      (label :class "weather-temp" :text weather_temp))
+    (box :orientation "v" :space-evenly false :spacing 2 :valign "center"
+      (label :class "weather-city" :text "Ajmer is now ${weather_desc}." :halign "start")
+      (label :class "weather-sub" :text "Wind speed is 4.49 m/s" :halign "start")
+      (label :class "weather-sub" :text "And Humidity is 49%" :halign "start"))))
+
+(defwindow weather_widget
+  :monitor 0
+  :geometry (geometry :x "40px" :y "165px" :width "320px" :height "110px" :anchor "top left")
+  :stacking "bg"
+  (weather_card))
+
+;; ─── Quick Settings Widget (Top Right) ────────────────────────────────────────
+(defwidget quick_settings_card []
+  (box :class "widget-card qs-card" :orientation "v" :space-evenly false :spacing 12
+    ;; Brightness
+    (box :orientation "v" :space-evenly false :spacing 6
+      (box :orientation "h" :space-evenly false :spacing 10
+        (label :class "qs-icon gold" :text "󰃠")
+        (box :orientation "v" :space-evenly false
+          (label :class "qs-title" :text "Backlight" :halign "start")
+          (label :class "qs-sub" :text "Brightness at ${brightness_pct}%" :halign "start")))
+      (scale :class "slider-gold" :min 5 :max 100 :value brightness_pct :onchange "brightnessctl set {}%"))
+    
+    (box :class "separator-h")
+
+    ;; Volume
+    (box :orientation "v" :space-evenly false :spacing 6
+      (box :orientation "h" :space-evenly false :spacing 10
+        (label :class "qs-icon blue" :text "󰕾")
+        (box :orientation "v" :space-evenly false
+          (label :class "qs-title" :text "Volume" :halign "start")
+          (label :class "qs-sub" :text "Volume at ${volume_pct}%" :halign "start")))
+      (scale :class "slider-blue" :min 0 :max 100 :value volume_pct :onchange "wpctl set-volume @DEFAULT_AUDIO_SINK@ {}%"))))
+
+(defwindow quick_settings
+  :monitor 0
+  :geometry (geometry :x "40px" :y "40px" :width "240px" :height "180px" :anchor "top right")
+  :stacking "bg"
+  (quick_settings_card))
+
+;; ─── Media Widget (Middle Right) ──────────────────────────────────────────────
+(defwidget media_card []
+  (box :class "widget-card media-card" :orientation "h" :space-evenly false :spacing 14
+    (box :class "media-art-cover" :valign "center"
+      (label :class "moon-glyph" :text "󰽥"))
+    (box :orientation "v" :space-evenly true
+      (box :orientation "v" :space-evenly false :spacing 2
+        (label :class "media-title" :text media_title :halign "start" :limit-width 20)
+        (label :class "media-artist" :text media_artist :halign "start" :limit-width 20))
+      (box :orientation "h" :space-evenly true
+        (button :onclick "playerctl previous" (label :text "󰒮"))
+        (button :onclick "playerctl play-pause" (label :text "${media_status == 'Playing' ? '󰏤' : '󰐊'}"))
+        (button :onclick "playerctl next" (label :text "󰒭"))))))
+
+(defwindow media_widget
+  :monitor 0
+  :geometry (geometry :x "40px" :y "235px" :width "300px" :height "130px" :anchor "top right")
+  :stacking "bg"
+  (media_card))
+
+;; ─── System Monitor Widget (Bottom Right) ─────────────────────────────────────
+(defwidget sysmon_card []
+  (box :class "widget-card sysmon-card" :orientation "v" :space-evenly false :spacing 10
+    (box :orientation "h" :space-evenly true
+      (box :class "metric-box" :orientation "v"
+        (box :orientation "h" (label :class "metric-k" :text "CPU") (label :class "metric-v" :text "${cpu_pct}%"))
+        (progress :class "prog-blue" :value cpu_pct))
+      (box :class "metric-box" :orientation "v"
+        (box :orientation "h" (label :class "metric-k" :text "RAM") (label :class "metric-v" :text "${ram_pct}%"))
+        (progress :class "prog-purple" :value ram_pct))
+      (box :class "metric-box" :orientation "v"
+        (box :orientation "h" (label :class "metric-k" :text "DISK") (label :class "metric-v" :text "${disk_pct}%"))
+        (progress :class "prog-gold" :value disk_pct)))
+    (box :class "separator-h")
+    (box :orientation "h" :space-evenly false
+      (label :class "net-label" :text "NETWORK  ↓ 128 KB/s  ↑ 42 KB/s")
+      (label :class "uptime-label" :text "UPTIME ${uptime_str}"))))
+
+(defwindow sysmon_widget
+  :monitor 0
+  :geometry (geometry :x "40px" :y "380px" :width "400px" :height "160px" :anchor "top right")
+  :stacking "bg"
+  (sysmon_card))

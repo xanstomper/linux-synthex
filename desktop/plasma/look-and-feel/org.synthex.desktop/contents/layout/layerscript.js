@@ -1,0 +1,21 @@
+// SynthOS Nova — panel layout applied by the look-and-feel package
+var panel = new Panel("org.kde.plasma.panel");
+panel.location = "bottom";
+panel.height = 44;
+panel.floating = true;
+panel.addWidget("org.kde.plasma.kickoff");
+panel.addWidget("org.kde.plasma.marginsseparator");
+var tasks = panel.addWidget("org.kde.plasma.icontasks");
+tasks.currentConfigGroup = ["General"];
+tasks.writeConfig("launchers", "applications:org.kde.konsole.desktop,applications:org.kde.dolphin.desktop,applications:firefox.desktop,applications:systemsettings.desktop");
+panel.addSpacer();
+panel.addWidget("org.kde.plasma.mediacontroller");
+panel.addSpacer();
+var tray = panel.addWidget("org.kde.plasma.systemtray");
+tray.currentConfigGroup = ["General"];
+tray.writeConfig("pin", "org.kde.plasma.volume,org.kde.plasma.networkmanagement,org.kde.plasma.battery,org.kde.plasma.bluetooth,org.kde.plasma.nightcolor");
+var clock = panel.addWidget("org.kde.plasma.digitalclock");
+clock.currentConfigGroup = ["Appearance"];
+clock.writeConfig("showDate", "true");
+clock.writeConfig("dateFormat", "custom");
+clock.writeConfig("customDateFormat", "ddd  d  HH:mm");
