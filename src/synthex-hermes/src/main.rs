@@ -5,7 +5,7 @@ mod tools;
 use anyhow::{Context, Result};
 use chrono::Duration as ChronoDuration;
 use providers::{AutoProvider, ChatRequest, Message};
-use serde::{Deserialize, Serialize};
+use serde::Serialize;
 use session::{Session, SessionStore};
 use std::collections::HashMap;
 use std::sync::Arc;
@@ -13,7 +13,7 @@ use tokio::io::AsyncWriteExt;
 use tokio::signal::unix::{signal, SignalKind};
 use tokio::sync::RwLock;
 use tools::{ToolCall, ToolRegistry};
-use tracing::{error, info, warn};
+use tracing::{info, warn};
 use zbus::{connection, interface};
 
 // ── Audit logging ─────────────────────────────────────────────────────────────

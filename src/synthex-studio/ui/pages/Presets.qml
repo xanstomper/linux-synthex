@@ -3,10 +3,10 @@ import QtQuick.Controls 2.15
 import QtQuick.Layouts 1.15
 
 Item {
-    readonly property color accentColor: "#FFB300"
-    readonly property color surfaceColor: "#1A1A2E"
+    readonly property color accentColor: "#6C88A8"
+    readonly property color surfaceColor: "#171D24"
     readonly property color textColor: "#FFFFFF"
-    readonly property color mutedText: "#8899AA"
+    readonly property color mutedText: "#9AA1AB"
 
     ColumnLayout {
         anchors.fill: parent
@@ -60,9 +60,9 @@ Item {
                     ListElement {
                         name: "Dark Pro"
                         icon: "\u{2B1B}"
-                        color1: "#1A1A2E"
+                        color1: "#171D24"
                         color2: "#0D1117"
-                        color3: "#FFB300"
+                        color3: "#6C88A8"
                         description: "Sleek dark gradients \u2022 Professional finish"
                     }
                     ListElement {
@@ -150,7 +150,7 @@ Item {
                                     text: "\u{1F3A8} Apply Preset"
                                     font.pixelSize: 12
                                     font.bold: true
-                                    color: "#0B0F1A"
+                                    color: "#0C1016"
                                     horizontalAlignment: Text.AlignHCenter
                                     verticalAlignment: Text.AlignVCenter
                                 }
@@ -217,7 +217,7 @@ Item {
                     Layout.preferredHeight: 36
                     Layout.preferredWidth: 100
                     background: Rectangle { color: accentColor; radius: 6 }
-                    contentItem: Text { text: "Apply"; color: "#0B0F1A"; font.pixelSize: 13; font.bold: true; horizontalAlignment: Text.AlignHCenter; verticalAlignment: Text.AlignVCenter }
+                    contentItem: Text { text: "Apply"; color: "#0C1016"; font.pixelSize: 13; font.bold: true; horizontalAlignment: Text.AlignHCenter; verticalAlignment: Text.AlignVCenter }
                     onClicked: {
                         console.log("Preset applied with snapshot");
                         presetDialog.close();

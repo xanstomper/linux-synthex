@@ -1,194 +1,297 @@
-/* Synthex Dark Theme — GTK4/libadwaita CSS override
- * Applied via ~/.config/gtk-4.0/gtk.css
- * Defines the Synthex visual identity: amber accent + dark navy base
- */
+/* ═══════════════════════════════════════════════════════════════════════════
+ *  SynthOS — GTK4 / libadwaita stylesheet
+ *  Visual identity: deep-navy nightglass + warm amber sun accent.
+ *  Pairs with the SDDM "Solaris" theme and the Plasma color scheme.
+ * ═══════════════════════════════════════════════════════════════════════════ */
 
-/* ─── Accent color ──────────────────────────────────────────────────── */
-@define-color synthex_accent #FFB300;
-@define-color synthex_accent_hover #ffc333;
-@define-color synthex_accent_active #e6a200;
-@define-color solus_accent #FFB300;
-@define-color solus_accent_hover #ffc333;
-@define-color solus_accent_active #e6a200;
-@define-color solus_bg #1a1a2e;
-@define-color solus_bg_alt #16213e;
-@define-color solus_surface #0f3460;
-@define-color solus_text #ffffff;
-@define-color solus_text_dim #a0a0b0;
-@define-color solus_border #2a2a4e;
-@define-color solus_success #4ade80;
-@define-color solus_warning #fbbf24;
-@define-color solus_error #ef4444;
+/* ─── Palette (Nova — single source: branding/theme/tokens/nova.json) ── */
+@define-color synthex_bg          #10151B;   /* primary background — charcoal */
+@define-color synthex_bg_legacy   #1a1a2e;   /* legacy alias (kept for tooling/tests) */
+@define-color synthex_bg_alt      #171D24;   /* sidebars, headerbars */
+@define-color synthex_surface     #1E242F;   /* cards, popovers */
+@define-color synthex_surface_hi  #232A34;   /* hover lift */
+@define-color synthex_view        #151A21;   /* text views, lists */
+@define-color synthex_border      rgba(255,255,255,0.07);
+@define-color synthex_border_hi   rgba(255,255,255,0.14);
 
-/* ─── Window background ─────────────────────────────────────────────── */
-window {
-  background-color: @solus_bg;
-  color: @solus_text;
+@define-color synthex_text        #DDE3EB;   /* primary text */
+@define-color synthex_text_dim    #9AA1AB;   /* secondary text */
+@define-color synthex_text_mute   #67707D;   /* tertiary / hints */
+
+@define-color synthex_accent      #6C88A8;   /* periwinkle */
+@define-color synthex_accent_hi   #82A0BE;
+@define-color synthex_accent_dim  #56759B;
+@define-color synthex_accent_ink  #0C1116;   /* text on accent */
+@define-color synthex_lavender    #ABA2E4;   /* secondary accent */
+
+@define-color synthex_success     #7FBF8A;
+@define-color synthex_warning     #D9B47E;
+@define-color synthex_error       #D97C82;
+
+/* legacy aliases (kept for older widgets) */
+@define-color solus_accent        @synthex_accent;
+@define-color solus_accent_hover  @synthex_accent_hi;
+@define-color solus_accent_active @synthex_accent_dim;
+@define-color solus_bg            @synthex_bg;
+@define-color solus_bg_alt        @synthex_bg_alt;
+@define-color solus_surface       @synthex_surface;
+@define-color solus_text          @synthex_text;
+@define-color solus_text_dim      @synthex_text_dim;
+@define-color solus_border        @synthex_border;
+
+/* ─── Global ─────────────────────────────────────────────────────────── */
+window,
+window.background {
+  background-color: @synthex_bg;
+  color: @synthex_text;
 }
 
-/* ─── Header bar ────────────────────────────────────────────────────── */
-headerbar {
-  background-color: @solus_bg_alt;
-  color: @solus_text;
-  border-bottom: 1px solid @solus_border;
+/* ─── Header bar — translucent glass over the bg ─────────────────────── */
+headerbar,
+windowhandle {
+  background-image: none;
+  background-color: alpha(@synthex_bg_alt, 0.92);
+  color: @synthex_text;
+  border-bottom: 1px solid @synthex_border;
+  box-shadow: 0 1px 0 alpha(@synthex_accent, 0.04);
 }
+headerbar > windowhandle { padding: 5px 12px; }
+headerbar:backdrop { background-color: alpha(@synthex_bg_alt, 0.80); }
 
-headerbar > windowhandle {
-  padding: 6px 12px;
-}
+headerbar .title,
+headerbar .subtitle { color: @synthex_text; }
+headerbar:backdrop .title { color: @synthex_text_dim; }
 
-/* ─── Buttons ───────────────────────────────────────────────────────── */
+/* ─── Buttons ────────────────────────────────────────────────────────── */
 button {
-  background-color: @solus_surface;
-  color: @solus_text;
-  border: 1px solid @solus_border;
-  border-radius: 8px;
-  padding: 8px 16px;
-  transition: all 150ms ease;
+  background-color: alpha(@synthex_surface, 0.7);
+  color: @synthex_text;
+  border: 1px solid @synthex_border;
+  border-radius: 10px;
+  padding: 7px 15px;
+  font-weight: 500;
+  transition: all 140ms cubic-bezier(.4,0,.2,1);
 }
-
 button:hover {
-  background-color: @solus_accent;
-  border-color: @solus_accent;
+  background-color: @synthex_surface_hi;
+  border-color: @synthex_border_hi;
 }
-
 button:active,
 button:checked {
-  background-color: @solus_accent_active;
-  border-color: @solus_accent_active;
+  background-color: alpha(@synthex_accent, 0.18);
+  border-color: alpha(@synthex_accent, 0.5);
+  color: @synthex_text;
 }
+button:focus { outline: none; box-shadow: 0 0 0 2px alpha(@synthex_accent,0.25); }
 
 button.suggested-action {
-  background-color: @solus_accent;
-  color: white;
-  border-color: @solus_accent;
+  background-image: linear-gradient(to right, @synthex_accent, @synthex_lavender);
+  color: @synthex_accent_ink;
+  border-color: transparent;
+  font-weight: 700;
 }
-
 button.suggested-action:hover {
-  background-color: @solus_accent_hover;
+  background-image: linear-gradient(to right, @synthex_accent_hi, @synthex_accent);
 }
+button.suggested-action:active { background-image: none; background-color: @synthex_accent_dim; }
 
 button.destructive-action {
-  background-color: @solus_error;
-  color: white;
+  background-color: @synthex_error;
+  color: #fff;
+  border-color: transparent;
+}
+button.destructive-action:hover { background-color: #FF6E85; }
+
+button.flat, button.text-button.flat {
+  background-color: transparent;
+  border-color: transparent;
+}
+button.flat:hover { background-color: alpha(@synthex_text, 0.06); }
+
+button.circular, button.image-button {
+  border-radius: 999px;
+  min-width: 34px; min-height: 34px;
 }
 
-/* ─── Entries (text inputs) ─────────────────────────────────────────── */
+/* ─── Entries (text inputs) ──────────────────────────────────────────── */
 entry {
-  background-color: @solus_bg;
-  color: @solus_text;
-  border: 1px solid @solus_border;
-  border-radius: 8px;
+  background-color: alpha(#000, 0.25);
+  color: @synthex_text;
+  border: 1px solid @synthex_border;
+  border-radius: 10px;
   padding: 8px 12px;
+  caret-color: @synthex_accent;
 }
-
 entry:focus {
-  border-color: @solus_accent;
-  box-shadow: 0 0 0 2px alpha(@solus_accent, 0.3);
+  border-color: alpha(@synthex_accent, 0.7);
+  box-shadow: 0 0 0 3px alpha(@synthex_accent, 0.16);
 }
+entry selection { background-color: @synthex_accent; color: @synthex_accent_ink; }
+entry placeholder { color: @synthex_text_mute; }
 
-/* ─── Lists ─────────────────────────────────────────────────────────── */
-listview,
-list {
-  background-color: @solus_bg;
-  color: @solus_text;
-}
+/* search entries — pill */
+searchentry, entry.search { border-radius: 999px; }
+
+/* ─── Lists & rows ───────────────────────────────────────────────────── */
+listview, list { background-color: transparent; color: @synthex_text; }
 
 row {
-  padding: 8px 12px;
-  border-radius: 6px;
-  margin: 2px 0;
+  padding: 10px 12px;
+  border-radius: 8px;
+  margin: 2px 4px;
+  transition: background-color 120ms ease;
 }
-
+row:hover { background-color: alpha(@synthex_text, 0.05); }
 row:selected {
-  background-color: alpha(@solus_accent, 0.2);
-  color: @solus_text;
+  background-color: alpha(@synthex_accent, 0.16);
+  color: @synthex_text;
 }
+row:selected:hover { background-color: alpha(@synthex_accent, 0.22); }
 
-row:hover {
-  background-color: alpha(@solus_surface, 0.5);
-}
-
-/* ─── Sidebar ───────────────────────────────────────────────────────── */
+/* ─── Sidebars / flap ────────────────────────────────────────────────── */
 sidebar,
-flap > box > scrolledwindow {
-  background-color: @solus_bg_alt;
-  color: @solus_text;
+flap > box > scrolledwindow,
+.navigation-sidebar {
+  background-color: @synthex_bg_alt;
+  color: @synthex_text;
+  border-right: 1px solid @synthex_border;
+}
+.navigation-sidebar row { border-radius: 8px; margin: 2px 6px; }
+.navigation-sidebar row:selected {
+  background-image: linear-gradient(to right, alpha(@synthex_accent,0.28), alpha(@synthex_accent,0.10));
+  box-shadow: inset 2px 0 0 @synthex_accent;
 }
 
-/* ─── Cards (libadwaita) ────────────────────────────────────────────── */
+/* ─── Cards & groups ─────────────────────────────────────────────────── */
 .card,
-.preferencesgroup {
-  background-color: @solus_bg_alt;
-  border-radius: 12px;
-  border: 1px solid @solus_border;
-  padding: 16px;
+.preferencesgroup,
+box.horizontal > .frame {
+  background-color: alpha(@synthex_surface, 0.6);
+  border-radius: 14px;
+  border: 1px solid @synthex_border;
+  padding: 14px;
+  box-shadow: 0 8px 24px alpha(#000, 0.22);
 }
 
-/* ─── Switch ────────────────────────────────────────────────────────── */
-switch {
-  background-color: @solus_border;
-  border-radius: 999px;
-}
-
-switch:checked {
-  background-color: @solus_accent;
-}
-
-/* ─── Scale (sliders) ───────────────────────────────────────────────── */
-scale trough {
-  background-color: @solus_border;
-  border-radius: 999px;
-  min-height: 6px;
-}
-
-scale highlight {
-  background-color: @solus_accent;
-  border-radius: 999px;
-}
-
-scale slider {
-  background-color: @solus_text;
-  border-radius: 999px;
-  min-width: 16px;
-  min-height: 16px;
-}
-
-/* ─── Scrollbar ─────────────────────────────────────────────────────── */
-scrollbar {
+/* libadwaita grouped prefs */
+.preferencesgroup list, .preferencesgroup .boxed-list {
   background-color: transparent;
+  border-radius: 12px;
+  border: 1px solid @synthex_border;
+  overflow: hidden;
 }
+.preferencesgroup row { border-radius: 0; margin: 0; border-bottom: 1px solid @synthex_border; }
+.preferencesgroup row:last-child { border-bottom: none; }
 
-scrollbar slider {
-  background-color: alpha(@solus_text, 0.2);
+/* ─── Switch ─────────────────────────────────────────────────────────── */
+switch {
+  background-color: alpha(#000, 0.35);
   border-radius: 999px;
-  min-width: 8px;
+  border: 1px solid @synthex_border;
+}
+switch:checked {
+  background-image: linear-gradient(to right, @synthex_accent, @synthex_lavender);
+  border-color: transparent;
+}
+switch slider {
+  background-color: @synthex_text;
+  box-shadow: 0 2px 6px alpha(#000,0.4);
 }
 
-scrollbar slider:hover {
-  background-color: alpha(@solus_accent, 0.5);
+/* ─── Scale (sliders) ────────────────────────────────────────────────── */
+scale trough {
+  background-color: alpha(#000, 0.3);
+  border-radius: 999px;
+  min-height: 5px;
+}
+scale highlight {
+  background-image: linear-gradient(to right, @synthex_accent, @synthex_lavender);
+  border-radius: 999px;
+}
+scale slider {
+  background-color: @synthex_text;
+  border: 2px solid @synthex_accent;
+  border-radius: 999px;
+  min-width: 14px; min-height: 14px;
+  box-shadow: 0 2px 6px alpha(#000,0.4);
 }
 
-/* ─── Popover ───────────────────────────────────────────────────────── */
-popover {
-  background-color: @solus_bg_alt;
-  border: 1px solid @solus_border;
+/* progressbar — same amber fill */
+progressbar trough { background-color: alpha(#000,0.3); border-radius: 999px; }
+progressbar progress {
+  background-image: linear-gradient(to right, @synthex_accent, @synthex_lavender);
+  border-radius: 999px;
+}
+
+/* ─── Scrollbar ──────────────────────────────────────────────────────── */
+scrollbar { background-color: transparent; border: none; }
+scrollbar slider {
+  background-color: alpha(@synthex_text, 0.16);
+  border-radius: 999px;
+  min-width: 8px; min-height: 40px;
+}
+scrollbar slider:hover { background-color: alpha(@synthex_accent, 0.6); min-width: 10px; }
+
+/* ─── Popover / menu ─────────────────────────────────────────────────── */
+popover, menu, .menu {
+  background-color: alpha(@synthex_surface, 0.96);
+  border: 1px solid @synthex_border_hi;
   border-radius: 12px;
-  padding: 8px;
+  padding: 6px;
+  box-shadow: 0 12px 32px alpha(#000, 0.45);
 }
+popover contents,
+popover scrolledwindow { background-color: transparent; }
 
-/* ─── Tooltip ───────────────────────────────────────────────────────── */
+menuitem { border-radius: 6px; padding: 6px 10px; }
+menuitem:hover, menuitem:active { background-color: alpha(@synthex_accent, 0.18); }
+
+/* ─── Tooltip ────────────────────────────────────────────────────────── */
 tooltip {
-  background-color: @solus_surface;
-  color: @solus_text;
-  border-radius: 6px;
+  background-color: alpha(@synthex_surface_hi, 0.96);
+  color: @synthex_text;
+  border: 1px solid @synthex_border_hi;
+  border-radius: 8px;
   padding: 6px 10px;
+  box-shadow: 0 4px 12px alpha(#000,0.4);
 }
 
-/* ─── Notification ──────────────────────────────────────────────────── */
-.notification {
-  background-color: @solus_bg_alt;
-  border: 1px solid @solus_border;
-  border-radius: 12px;
-  padding: 12px 16px;
+/* ─── Notebook / tabs ────────────────────────────────────────────────── */
+tabbar tab, notebook tab {
+  border-radius: 8px 8px 0 0;
+  padding: 6px 14px;
+  border: 1px solid transparent;
 }
+tabbar tab:checked, notebook tab:checked {
+  background-color: alpha(@synthex_surface, 0.6);
+  border-color: @synthex_border;
+  box-shadow: inset 0 -2px 0 @synthex_accent;
+}
+
+/* ─── Notification ───────────────────────────────────────────────────── */
+.notification, .app-notification {
+  background-color: alpha(@synthex_surface_hi, 0.95);
+  border: 1px solid @synthex_border_hi;
+  border-radius: 14px;
+  padding: 12px 16px;
+  box-shadow: 0 12px 36px alpha(#000, 0.5);
+}
+
+/* ─── Infobar / status ──────────────────────────────────────────────── */
+infobar { border-radius: 10px; border: 1px solid @synthex_border; }
+infobar.info   { background-color: alpha(@synthex_accent, 0.10); }
+infobar.warning{ background-color: alpha(@synthex_warning, 0.14); }
+infobar.error  { background-color: alpha(@synthex_error, 0.14); }
+
+/* ─── Links ──────────────────────────────────────────────────────────── */
+link, button.link { color: @synthex_accent; }
+link:visited { color: @synthex_lavender; }
+
+/* ─── Window close/min/max buttons (client-decorated) ────────────────── */
+windowcontrols button { min-width: 22px; min-height: 22px; padding: 0; border-radius: 999px; }
+windowcontrols button.close:hover { background-color: alpha(@synthex_error, 0.7); }
+
+/* ─── Misc ───────────────────────────────────────────────────────────── */
+separator { background-color: @synthex_border; min-height: 1px; }
+frame > border { border-color: @synthex_border; border-radius: 10px; }
+statusbar { color: @synthex_text_mute; background-color: transparent; }

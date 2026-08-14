@@ -69,7 +69,7 @@ use seccomp_filter::{SeccompFilter, log_filter_summary};
 use std::path::PathBuf;
 use std::sync::Arc;
 use tokio::sync::RwLock;
-use tracing::{error, info, warn};
+use tracing::{info, warn};
 use tracing_subscriber::{EnvFilter, fmt};
 
 /// CLI / environment configuration

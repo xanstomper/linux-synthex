@@ -79,7 +79,7 @@ async fn run_relay(port: u16, peers: Arc<Mutex<Peers>>) -> Result<()> {
         match listener.accept().await {
             Ok((mut stream, addr)) => {
                 info!("peer connection from {}", addr);
-                let buf = Arc::clone(&peers);
+                let _peers = Arc::clone(&peers);
                 tokio::spawn(async move {
                     use tokio::io::{AsyncBufReadExt, AsyncWriteExt, BufReader};
                     let (rd, mut wr) = stream.split();
@@ -167,7 +167,7 @@ async fn main() -> Result<()> {
         return send_to(&args[2], &msg).await;
     }
     if args.get(1).map(|s| s.as_str()) == Some("peers") {
-        let p = Peers::default();
+        let _p = Peers::default();
         println!("(run the daemon to populate peers)");
         return Ok(());
     }

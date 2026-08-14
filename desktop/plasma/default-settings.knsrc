@@ -98,7 +98,7 @@ DoNotDisturb=false
 
 [Wallpaper]
 plugin=image
-DefaultWallpaper=/usr/share/wallpapers/synthex-default.jpg
+DefaultWallpaper=/usr/share/wallpapers/synthex-nova.png
 FillMode=2
 
 [Task Manager]

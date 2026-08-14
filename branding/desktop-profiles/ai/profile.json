@@ -2,7 +2,7 @@
   "name": "Synthex AI",
   "tagline": "AI-first desktop. Assistant everywhere. Smart workspace.",
   "theme": "synthex-midnight",
-  "accent": "#9BBD5C",
+  "accent": "#6C88A8",
   "panels": {
     "top": {
       "type": "panel",

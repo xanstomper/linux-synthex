@@ -8,20 +8,20 @@ Color=#F5F5F7
 Color=#F5F5F7
 
 [Foreground]
-Color=#1A1A2E
+Color=#171D24
 
 [ForegroundFaint]
-Color=#1A1A2E66
+Color=#171D2466
 
 [ForegroundIntense]
-Color=#1A1A2E
+Color=#171D24
 
 [Color0]
 Color=2E3440
 [Color1]
 Color=BF616A
 [Color2]
-Color=#1A1A2E
+Color=#171D24
 [Color3]
 Color=EBCB8B
 [Color4]
@@ -37,7 +37,7 @@ Color=4C566A
 [Color9]
 Color=BF616A
 [Color10]
-Color=#1A1A2E
+Color=#171D24
 [Color11]
 Color=EBCB8B
 [Color12]

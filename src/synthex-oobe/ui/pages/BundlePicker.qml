@@ -12,10 +12,10 @@ Rectangle {
 
     signal finished()
 
-    readonly property color accent: "#FFB300"
-    readonly property color surface: "#1A1A2E"
+    readonly property color accent: "#6C88A8"
+    readonly property color surface: "#171D24"
     readonly property color text: "#FFFFFF"
-    readonly property color muted: "#8899AA"
+    readonly property color muted: "#9AA1AB"
     readonly property color ok: "#43A047"
 
     ColumnLayout {
@@ -84,7 +84,7 @@ Rectangle {
                         Text {
                             anchors.centerIn: parent
                             text: model.checked ? "\u2713" : ""
-                            color: "#0B0F1A"
+                            color: "#0C1016"
                             font.pixelSize: 16
                             font.bold: true
                         }
@@ -110,7 +110,7 @@ Rectangle {
                 Layout.preferredHeight: 44
                 Layout.preferredWidth: 200
                 background: Rectangle { color: accent; radius: 8 }
-                contentItem: Text { text: "Install Selected"; color: "#0B0F1A"; font.bold: true; font.pixelSize: 14; horizontalAlignment: Text.AlignHCenter; verticalAlignment: Text.AlignVCenter }
+                contentItem: Text { text: "Install Selected"; color: "#0C1016"; font.bold: true; font.pixelSize: 14; horizontalAlignment: Text.AlignHCenter; verticalAlignment: Text.AlignVCenter }
                 onClicked: {
                     var cmds = [];
                     for (var i = 0; i < bundleList.model.count; i++) {

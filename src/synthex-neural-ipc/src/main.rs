@@ -22,10 +22,6 @@ use tokio::sync::{broadcast, mpsc};
 use tracing::{debug, error, info, warn};
 use tracing_subscriber::EnvFilter;
 
-mod protocol_bridge {
-    pub use neural_ipc::protocol;
-    pub use neural_ipc::shared_memory;
-}
 use neural_ipc::protocol;
 
 // ─── Constants ────────────────────────────────────────────────────────────────
@@ -83,6 +79,7 @@ struct Broker {
     hmac_key: Vec<u8>,
 }
 
+#[allow(dead_code)]
 impl Broker {
     fn new(inbox: mpsc::Receiver<Arc<Message>>, hmac_key: Vec<u8>) -> Self {
         let channels: ChannelMap = Arc::new(DashMap::new());
@@ -149,7 +146,7 @@ struct Conn {
 }
 
 impl Conn {
-    async fn run(mut self) {
+    async fn run(self) {
         let (out_tx, mut out_rx) = mpsc::channel::<Arc<Message>>(1024);
         let (mut reader, mut writer) = self.stream.into_split();
 

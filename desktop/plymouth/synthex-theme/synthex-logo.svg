@@ -2,19 +2,19 @@
   <defs>
     <radialGradient id="glow" cx="50%" cy="50%" r="50%">
       <stop offset="0%"   stop-color="#FFD700" stop-opacity="1"/>
-      <stop offset="60%"  stop-color="#FFB300" stop-opacity="1"/>
-      <stop offset="100%" stop-color="#FF8C00" stop-opacity="0.8"/>
+      <stop offset="60%"  stop-color="#6C88A8" stop-opacity="1"/>
+      <stop offset="100%" stop-color="#56759B" stop-opacity="0.8"/>
     </radialGradient>
     <filter id="blur" x="-50%" y="-50%" width="200%" height="200%">
       <feGaussianBlur stdDeviation="4"/>
     </filter>
   </defs>
   <!-- Outer glow -->
-  <circle cx="100" cy="100" r="72" fill="#FFB300" opacity="0.18" filter="url(#blur)"/>
+  <circle cx="100" cy="100" r="72" fill="#6C88A8" opacity="0.18" filter="url(#blur)"/>
   <!-- Sun circle -->
   <circle cx="100" cy="100" r="44" fill="url(#glow)"/>
   <!-- Rays (8 rays) -->
-  <g stroke="#FFB300" stroke-linecap="round" stroke-width="5" opacity="0.9">
+  <g stroke="#6C88A8" stroke-linecap="round" stroke-width="5" opacity="0.9">
     <line x1="100" y1="18"  x2="100" y2="6"/>
     <line x1="100" y1="182" x2="100" y2="194"/>
     <line x1="18"  y1="100" x2="6"   y2="100"/>
@@ -27,6 +27,6 @@
   <!-- Inner core -->
   <circle cx="100" cy="100" r="22" fill="#FFF8DC" opacity="0.9"/>
   <!-- "S" letter -->
-  <text x="100" y="110" font-size="26" font-weight="900" fill="#0B0F1A"
+  <text x="100" y="110" font-size="26" font-weight="900" fill="#10151B"
         text-anchor="middle" font-family="sans-serif">S</text>
 </svg>

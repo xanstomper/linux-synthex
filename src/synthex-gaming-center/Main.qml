@@ -16,10 +16,10 @@ Kirigami.ApplicationWindow {
     // ── Theming ──────────────────────────────────────────────────────────────
     readonly property color bgBase:    "#08080F"
     readonly property color bgCard:    "#111118"
-    readonly property color accent:    "#FFB300"
+    readonly property color accent:    "#6C88A8"
     readonly property color accentDim: "#99700A"
     readonly property color textPrim:  "#FFFFFF"
-    readonly property color textMuted: "#8899AA"
+    readonly property color textMuted: "#9AA1AB"
     readonly property color green:     "#00EE88"
     readonly property color red:       "#FF4444"
 

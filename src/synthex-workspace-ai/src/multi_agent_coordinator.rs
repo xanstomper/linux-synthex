@@ -13,20 +13,18 @@
 //! The coordinator runs as a long-lived async actor.  External callers interact
 //! with it through an [`CoordinatorHandle`] which is backed by an mpsc channel.
 
+#![allow(dead_code)]
+
 use std::{
-    collections::{HashMap, VecDeque},
+    collections::HashMap,
     sync::Arc,
-    time::Duration,
 };
 
 use anyhow::{Context, Result};
 use chrono::{DateTime, Utc};
 use serde::{Deserialize, Serialize};
-use tokio::{
-    sync::{broadcast, mpsc, Mutex, RwLock},
-    time::timeout,
-};
-use tracing::{debug, info, warn, error};
+use tokio::sync::{broadcast, mpsc};
+use tracing::info;
 use uuid::Uuid;
 use zbus::Connection;
 

@@ -2,7 +2,7 @@
   "name": "Synthex Gaming",
   "tagline": "Console-like. Big Picture. Zero distractions.",
   "theme": "synthex-midnight",
-  "accent": "#FFB300",
+  "accent": "#6C88A8",
   "panels": {
     "bottom": {
       "type": "dock",

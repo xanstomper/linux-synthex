@@ -20,9 +20,3 @@ tracing             = "0.1"
 tracing-subscriber  = { version = "0.3", features = ["env-filter"] }
 zbus                = { version = "4", default-features = false, features = ["tokio"] }
 hostname            = "0.4"
-
-[profile.release]
-opt-level    = 3
-lto          = true
-codegen-units= 1
-strip        = true

@@ -6,13 +6,13 @@ Rectangle {
     property string label: ""
     property string value: ""
     property string icon: ""
-    property color iconColor: "#9BBD5C"
+    property color iconColor: "#6C88A8"
 
     Layout.preferredWidth: 180
     Layout.preferredHeight: 100
-    color: "#1A1A2E"
+    color: "#171D24"
     radius: 10
-    border.color: "#2A2A3E"
+    border.color: "#12FFFFFF"
     border.width: 1
 
     RowLayout {
@@ -24,13 +24,13 @@ Rectangle {
             width: 40; height: 40
             radius: 8
             color: iconColor
-            Text { anchors.centerIn: parent; text: icon; font.pixelSize: 20; color: "#0B0F1A" }
+            Text { anchors.centerIn: parent; text: icon; font.pixelSize: 20; color: "#0C1116" }
         }
 
         ColumnLayout {
             spacing: 2
             Text { text: value; font.pixelSize: 18; font.bold: true; color: "#FFFFFF" }
-            Text { text: label; font.pixelSize: 11; color: "#8899AA" }
+            Text { text: label; font.pixelSize: 11; color: "#9AA1AB" }
         }
     }
 }

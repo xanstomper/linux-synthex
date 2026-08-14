@@ -78,7 +78,7 @@ Synthex Hyprland merges three design pillars:
 | Token | Light Theme | Dark Theme | Used For |
 |-------|-------------|------------|----------|
 | Background | #F8F9FA | #0F0F1A | Wallpaper background |
-| Surface | #FFFFFF | #1A1A2E | Windows |
+| Surface | #FFFFFF | #181B21 | Windows |
 | SurfaceVariant | #F0F0F5 | #242438 | Waybar, notifications |
 | Primary | #3B82F6 | #60A5FA | Active borders, accent |
 | OnSurface | #1F2937 | #E4E4E7 | Text |

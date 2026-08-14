@@ -1,187 +1,174 @@
-/* Synthex Waybar CSS — Hyprland status bar theme
- * Matches the Synthex visual identity: dark navy + amber accent
- */
+/* ═══════════════════════════════════════════════════════════════════════════
+ *  SynthOS Nova — Waybar dock theme
+ *  MATCHES REFERENCE: tall centered floating icon dock at the bottom.
+ *  Bar bg #161C22 · thin hairline border · NO per-module pills (icons sit
+ *  directly on the dock) · large evenly-spaced icons · slate-blue accent.
+ *  Tokens: branding/theme/tokens/nova.json
+ * ═══════════════════════════════════════════════════════════════════════════ */
 
 * {
-    font-family: "Inter", "Symbols Nerd Font";
-    font-size: 14px;
-    border-radius: 8px;
-    transition: all 150ms ease;
+    font-family: "Inter", "Noto Sans", "Symbols Nerd Font";
+    font-size: 13px;
+    min-height: 0;
 }
 
-/* ─── Main bar ──────────────────────────────────────────────────────── */
+/* ─── The dock (floating, bottom, centered) ──────────────────────────── */
 window#waybar {
-    background-color: rgba(26, 26, 46, 0.95);
-    color: #ffffff;
-    border-bottom: 1px solid rgba(42, 42, 78, 0.8);
+    background-color: #161C22;                            /* extracted bar bg */
+    color: #DDE3EB;
+    border: 1px solid rgba(255, 255, 255, 0.06);
+    border-radius: 18px;
+    box-shadow: 0 12px 32px rgba(0, 0, 0, 0.45);
 }
+window#waybar.hidden { opacity: 0; transition: opacity 200ms ease; }
 
-/* ─── Modules ───────────────────────────────────────────────────────── */
-#workspaces button {
-    padding: 0 12px;
+/* Modules: transparent on the dock (no pills), generous internal padding
+   so icons are evenly spaced like the reference. */
+#workspaces, #clock, #pulseaudio, #network, #bluetooth, #battery,
+#tray, #custom-media, #custom-launcher, #idle_inhibitor,
+#wlr/taskbar {
+    padding: 0 14px;
+    margin: 0;
+    border-radius: 12px;
     background-color: transparent;
-    color: #a0a0b0;
-    border-radius: 8px;
-    margin: 4px 2px;
+    border: none;
+    transition: background-color 140ms cubic-bezier(.4,0,.2,1),
+                color 140ms cubic-bezier(.4,0,.2,1);
 }
 
+/* ─── Workspaces ─────────────────────────────────────────────────────── */
+#workspaces button {
+    padding: 0 6px;
+    min-width: 30px;
+    margin: 10px 2px;
+    background: transparent;
+    color: #67707D;
+    border-radius: 9px;
+    font-weight: 600;
+    transition: all 140ms cubic-bezier(.4,0,.2,1);
+}
 #workspaces button:hover {
-    background-color: rgba(233, 69, 96, 0.2);
-    color: #ffffff;
+    background: rgba(255, 255, 255, 0.06);
+    color: #DDE3EB;
 }
-
 #workspaces button.active {
-    background-color: #e94560;
-    color: #ffffff;
+    background: rgba(108, 136, 168, 0.18);                /* accent @ 18% */
+    color: #6C88A8;
+    box-shadow: inset 0 -2px 0 #6C88A8;
 }
-
 #workspaces button.urgent {
-    background-color: #ef4444;
-    color: #ffffff;
+    background: rgba(217, 124, 130, 0.18);
+    color: #D97C82;
 }
 
-/* ─── Clock ─────────────────────────────────────────────────────────── */
+/* ─── Running-app icons (the centerpiece of the reference dock) ──────── */
+#wlr/taskbar {
+    padding: 0 6px;
+}
+#wlr/taskbar button {
+    padding: 0 12px;
+    margin: 10px 3px;
+    background: transparent;
+    border: none;
+    border-radius: 12px;
+    transition: background-color 140ms cubic-bezier(.4,0,.2,1);
+}
+#wlr/taskbar button:hover {
+    background: rgba(255, 255, 255, 0.06);
+}
+#wlr/taskbar button.active {
+    background: rgba(108, 136, 168, 0.16);
+    box-shadow: inset 0 -2px 0 #6C88A8;
+}
+#wlr/taskbar button.urgent {
+    background: rgba(217, 124, 130, 0.16);
+}
+
+/* ─── Clock ──────────────────────────────────────────────────────────── */
 #clock {
-    background-color: rgba(15, 52, 96, 0.6);
-    color: #ffffff;
-    padding: 4px 14px;
-    margin: 4px 4px;
-    border-radius: 8px;
-    font-weight: bold;
-    font-size: 15px;
+    color: #DDE3EB;
+    font-weight: 600;
+    padding: 0 18px;
 }
+#clock:hover { background-color: rgba(255,255,255,0.06); }
 
-/* ─── PulseAudio ────────────────────────────────────────────────────── */
-#pulseaudio {
-    background-color: rgba(15, 52, 96, 0.6);
-    color: #ffffff;
-    padding: 4px 12px;
-    margin: 4px 2px;
-    border-radius: 8px;
-}
+/* ─── Audio ──────────────────────────────────────────────────────────── */
+#pulseaudio { color: #DDE3EB; padding: 0 12px; }
+#pulseaudio:hover { background-color: rgba(255,255,255,0.06); }
+#pulseaudio.muted { color: #D97C82; }
 
-#pulseaudio.muted {
-    background-color: rgba(239, 68, 68, 0.3);
-    color: #ef4444;
-}
+/* ─── Network ────────────────────────────────────────────────────────── */
+#network { color: #7FBF8A; padding: 0 12px; }
+#network:hover { background-color: rgba(255,255,255,0.06); }
+#network.disconnected { color: #D97C82; }
 
-/* ─── Network ───────────────────────────────────────────────────────── */
-#network {
-    background-color: rgba(15, 52, 96, 0.6);
-    color: #4ade80;
-    padding: 4px 12px;
-    margin: 4px 2px;
-    border-radius: 8px;
-}
+/* ─── Bluetooth ──────────────────────────────────────────────────────── */
+#bluetooth { color: #6C88A8; padding: 0 12px; }
+#bluetooth:hover { background-color: rgba(108,136,168,0.12); }
+#bluetooth.connected { color: #ABA2E4; }
+#bluetooth.disabled { color: #67707D; }
 
-#network.disconnected {
-    background-color: rgba(239, 68, 68, 0.3);
-    color: #ef4444;
-}
-
-/* ─── Battery ───────────────────────────────────────────────────────── */
-#battery {
-    background-color: rgba(15, 52, 96, 0.6);
-    color: #4ade80;
-    padding: 4px 12px;
-    margin: 4px 2px;
-    border-radius: 8px;
-}
-
-#battery.charging {
-    color: #4ade80;
-}
-
-#battery.warning {
-    color: #fbbf24;
-}
-
+/* ─── Battery ────────────────────────────────────────────────────────── */
+#battery { color: #7FBF8A; padding: 0 12px; }
+#battery:hover { background-color: rgba(255,255,255,0.06); }
+#battery.charging { color: #7FBF8A; box-shadow: inset 0 -2px 0 #7FBF8A; }
+#battery.warning { color: #D9B47E; }
 #battery.critical {
-    color: #ef4444;
-    animation: blink 1s infinite;
+    color: #D97C82;
+    animation: battery-blink 1.2s ease-in-out infinite;
+}
+@keyframes battery-blink {
+    50% { background-color: rgba(217, 124, 130, 0.16); }
 }
 
-@keyframes blink {
-    to { background-color: rgba(239, 68, 68, 0.5); }
+/* ─── Tray ───────────────────────────────────────────────────────────── */
+#tray { padding: 0 10px; }
+#tray menu {
+    background: #1E242F; border: 1px solid rgba(255,255,255,0.10);
+    border-radius: 10px;
 }
+#tray > .passive { -gtk-icon-effect: dim; }
+#tray > .needs-attention { -gtk-icon-effect: highlight; }
 
-/* ─── CPU / Memory ──────────────────────────────────────────────────── */
-#cpu, #memory {
-    background-color: rgba(15, 52, 96, 0.6);
-    color: #ffffff;
-    padding: 4px 12px;
-    margin: 4px 2px;
-    border-radius: 8px;
-}
+/* ─── Idle inhibitor ─────────────────────────────────────────────────── */
+#idle_inhibitor { color: #67707D; padding: 0 12px; }
+#idle_inhibitor.activated { color: #D9B47E; box-shadow: inset 0 -2px 0 #D9B47E; }
 
-#cpu.high-load {
-    color: #fbbf24;
-}
-
-#memory.high-usage {
-    color: #ef4444;
-}
-
-/* ─── Tray ──────────────────────────────────────────────────────────── */
-#tray {
-    background-color: rgba(15, 52, 96, 0.6);
-    padding: 4px 8px;
-    margin: 4px 2px;
-    border-radius: 8px;
-}
-
-#tray > .passive {
-    -gtk-icon-effect: dim;
-}
-
-#tray > .needs-attention {
-    -gtk-icon-effect: highlight;
-}
-
-/* ─── Backlight ─────────────────────────────────────────────────────── */
-#backlight {
-    background-color: rgba(15, 52, 96, 0.6);
-    color: #ffffff;
-    padding: 4px 12px;
-    margin: 4px 2px;
-    border-radius: 8px;
-}
-
-/* ─── Gamemode indicator ────────────────────────────────────────────── */
-#gamemode {
-    background-color: #e94560;
-    color: #ffffff;
-    padding: 4px 12px;
-    margin: 4px 2px;
-    border-radius: 8px;
-    font-weight: bold;
-}
-
+/* ─── Gamemode (real Feral gamemode) ─────────────────────────────────── */
+#gamemode { color: #67707D; padding: 0 12px; }
 #gamemode.running {
-    background-color: #4ade80;
-    color: #1a1a2e;
+    background-color: rgba(127, 191, 138, 0.16);
+    color: #7FBF8A;
+    font-weight: 700;
 }
 
-/* ─── Custom modules ────────────────────────────────────────────────── */
+/* ─── Media (MPRIS) ──────────────────────────────────────────────────── */
+#custom-media {
+    color: #ABA2E4;                                       /* lavender */
+    font-style: italic;
+    max-width: 220px;
+    padding: 0 12px;
+}
+#custom-media:hover { background-color: rgba(171, 162, 228, 0.10); }
+#custom-media.paused { color: #67707D; }
+
+/* ─── Launcher ───────────────────────────────────────────────────────── */
 #custom-launcher {
-    background-color: #e94560;
-    color: #ffffff;
-    padding: 4px 14px;
-    margin: 4px 4px;
-    border-radius: 8px;
-    font-size: 18px;
-    font-weight: bold;
+    color: #6C88A8;
+    font-size: 22px;
+    font-weight: 800;
+    padding: 0 18px;
+}
+#custom-launcher:hover {
+    background-color: rgba(108, 136, 168, 0.14);
+    color: #82A0BE;
 }
 
-#custom-power {
-    background-color: rgba(15, 52, 96, 0.6);
-    color: #ef4444;
-    padding: 4px 12px;
-    margin: 4px 2px;
-    border-radius: 8px;
-}
-
-#custom-power:hover {
-    background-color: #ef4444;
-    color: #ffffff;
+/* ─── Tooltip ────────────────────────────────────────────────────────── */
+tooltip {
+    background: #1E242F;
+    border: 1px solid rgba(255, 255, 255, 0.10);
+    border-radius: 10px;
+    color: #DDE3EB;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.40);
 }

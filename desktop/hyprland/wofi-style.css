@@ -1,0 +1,93 @@
+/* ═══════════════════════════════════════════════════════════════════════════
+ *  SynthOS Nova — Wofi launcher theme
+ *  Installed to: /usr/share/wofi/style.css  (override: ~/.config/wofi/style.css)
+ *  Floating charcoal surface · periwinkle selection · clean rows
+ * ═══════════════════════════════════════════════════════════════════════════ */
+
+* {
+    font-family: "Inter", "Noto Sans", "Symbols Nerd Font";
+}
+
+window {
+    background-color: rgba(17, 19, 24, 0.92);
+    border: 1px solid rgba(255, 255, 255, 0.10);
+    border-radius: 18px;
+    box-shadow: 0 16px 48px rgba(0, 0, 0, 0.45);
+}
+
+/* ─── Search / input ─────────────────────────────────────────────────── */
+#input {
+    margin: 12px;
+    padding: 12px 16px;
+    border: none;
+    border-radius: 12px;
+    background-color: rgba(255, 255, 255, 0.05);
+    color: #DDE3EB;
+    font-size: 15px;
+}
+#input:focus {
+    border: 1px solid rgba(126, 166, 244, 0.55);
+    box-shadow: 0 0 0 3px rgba(126, 166, 244, 0.14);
+}
+#input placeholder {
+    color: #67707D;
+}
+
+/* ─── Results ────────────────────────────────────────────────────────── */
+#inner-box {
+    margin: 0 8px 8px 8px;
+    background-color: transparent;
+}
+
+#outer-box {
+    background-color: transparent;
+}
+
+#scroll {
+    margin: 0;
+    padding: 0 4px;
+}
+
+#text {
+    margin: 4px 8px;
+    color: #DDE3EB;
+    font-size: 14px;
+}
+
+#entry {
+    padding: 8px 10px;
+    border-radius: 10px;
+    background-color: transparent;
+    transition: background-color 120ms cubic-bezier(.4,0,.2,1);
+}
+#entry:hover {
+    background-color: rgba(255, 255, 255, 0.05);
+}
+#entry:selected {
+    background-color: rgba(126, 166, 244, 0.18);
+    box-shadow: inset 2px 0 0 #6C88A8;
+}
+#entry:selected #text {
+    color: #82A0BE;
+}
+
+/* app icons */
+#img {
+    margin-right: 10px;
+    background-size: contain;
+    background-repeat: no-repeat;
+    background-position: center;
+}
+
+/* ─── Power menu mode ────────────────────────────────────────────────── */
+#mode {
+    margin: 12px 16px 4px 16px;
+    padding: 8px 12px;
+    border-radius: 10px;
+    background-color: rgba(183, 164, 247, 0.12);
+    color: #ABA2E4;
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+}

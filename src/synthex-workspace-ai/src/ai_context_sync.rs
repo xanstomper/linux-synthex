@@ -23,7 +23,7 @@ use anyhow::{Context, Result};
 use chrono::{DateTime, Utc};
 use serde::{Deserialize, Serialize};
 use tokio::fs;
-use tracing::{debug, info, warn};
+use tracing::{debug, warn};
 use zbus::Connection;
 
 // ─── Types ────────────────────────────────────────────────────────────────────
@@ -224,6 +224,7 @@ impl AgentRegistry {
         self.map.insert(agent_id.to_string(), workspace_n);
     }
 
+    #[allow(dead_code)]
     pub fn get(&self, agent_id: &str) -> Option<u32> {
         self.map.get(agent_id).copied()
     }

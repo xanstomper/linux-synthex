@@ -615,7 +615,27 @@ async fn main() -> Result<()> {
         }
 
         Commands::Daemon => {
-            info!("Integration Engine daemon starting (hourly scans)");
+            // Privacy gate: this daemon makes outbound HTTP requests to
+            // upstream project APIs (GitHub, kernel.org, archlinux.org, ...).
+            // It is an opt-in *maintainer / contributor* tool and must NOT
+            // silently phone home on end-user systems.  Enable explicitly with
+            //   SYNTHEX_INTEGRATION_ENGINE=1
+            // or  integration_engine=true in /etc/synthex/privacy.conf
+            let enabled = std::env::var("SYNTHEX_INTEGRATION_ENGINE")
+                .map(|v| v == "1" || v.eq_ignore_ascii_case("true"))
+                .unwrap_or(false)
+                || std::fs::read_to_string("/etc/synthex/privacy.conf")
+                    .ok()
+                    .and_then(|c| c.lines().find(|l| l.trim_start().starts_with("integration_engine")).map(str::to_string))
+                    .map(|l| l.contains("true"))
+                    .unwrap_or(false);
+            if !enabled {
+                info!("Integration Engine daemon DISABLED by default (privacy). Set SYNTHEX_INTEGRATION_ENGINE=1 to enable hourly upstream scans.");
+                // Exit cleanly; systemd will not restart a process that exits 0
+                // with Restart=on-failure.
+                return Ok(());
+            }
+            info!("Integration Engine daemon starting (hourly scans) — network enabled");
             let mut interval = tokio::time::interval(std::time::Duration::from_secs(3600));
             loop {
                 interval.tick().await;

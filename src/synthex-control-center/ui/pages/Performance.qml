@@ -4,12 +4,12 @@ import QtQuick.Layouts 1.15
 
 Rectangle {
     color: "transparent"; anchors.fill: parent
-    readonly property color accentColor: "#9BBD5C"
+    readonly property color accentColor: "#6C88A8"
     readonly property color textColor: "#FFFFFF"
-    readonly property color mutedText: "#8899AA"
-    readonly property color okColor: "#43A047"
-    readonly property color warnColor: "#FB8C00"
-    readonly property color surfaceColor: "#1A1A2E"
+    readonly property color mutedText: "#9AA1AB"
+    readonly property color okColor: "#7FBF8A"
+    readonly property color warnColor: "#D9B47E"
+    readonly property color surfaceColor: "#171D24"
     property int activeMode: 1
 
     ColumnLayout {
@@ -31,7 +31,7 @@ Rectangle {
                 Rectangle {
                     Layout.fillWidth: true; Layout.preferredHeight: 70; radius: 10
                     color: index === activeMode ? Qt.rgba(0.608,0.741,0.361,0.1) : surfaceColor
-                    border.color: index === activeMode ? accentColor : "#2A2A3E"; border.width: index === activeMode ? 2 : 1
+                    border.color: index === activeMode ? accentColor : "#12FFFFFF"; border.width: index === activeMode ? 2 : 1
                     MouseArea { anchors.fill: parent; onClicked: activeMode = index; cursorShape: Qt.PointingHandCursor }
                     RowLayout { anchors.centerIn: parent; spacing: 12
                         Text { text: modelData.icon; font.pixelSize: 22 }
@@ -49,7 +49,7 @@ Rectangle {
             Layout.fillWidth: true; spacing: 16
 
             Rectangle {
-                Layout.fillWidth: true; color: surfaceColor; radius: 12; border.color: "#2A2A3E"; border.width: 1
+                Layout.fillWidth: true; color: surfaceColor; radius: 12; border.color: "#12FFFFFF"; border.width: 1
                 ColumnLayout { anchors.fill: parent; anchors.margins: 16; spacing: 8
                     Text { text: "⚡ CPU"; font.pixelSize: 14; font.bold: true; color: textColor }
                     GridLayout { columns: 2; columnSpacing: 24
@@ -64,7 +64,7 @@ Rectangle {
             }
 
             Rectangle {
-                Layout.fillWidth: true; color: surfaceColor; radius: 12; border.color: "#2A2A3E"; border.width: 1
+                Layout.fillWidth: true; color: surfaceColor; radius: 12; border.color: "#12FFFFFF"; border.width: 1
                 ColumnLayout { anchors.fill: parent; anchors.margins: 16; spacing: 8
                     Text { text: "🧠 Memory"; font.pixelSize: 14; font.bold: true; color: textColor }
                     GridLayout { columns: 2; columnSpacing: 24
@@ -79,7 +79,7 @@ Rectangle {
             }
 
             Rectangle {
-                Layout.fillWidth: true; color: surfaceColor; radius: 12; border.color: "#2A2A3E"; border.width: 1
+                Layout.fillWidth: true; color: surfaceColor; radius: 12; border.color: "#12FFFFFF"; border.width: 1
                 ColumnLayout { anchors.fill: parent; anchors.margins: 16; spacing: 8
                     Text { text: "🎮 Gaming"; font.pixelSize: 14; font.bold: true; color: textColor }
                     GridLayout { columns: 2; columnSpacing: 24
@@ -98,14 +98,14 @@ Rectangle {
         RowLayout {
             Layout.fillWidth: true; spacing: 16
             Rectangle {
-                Layout.fillWidth: true; color: surfaceColor; radius: 12; border.color: "#2A2A3E"; border.width: 1
+                Layout.fillWidth: true; color: surfaceColor; radius: 12; border.color: "#12FFFFFF"; border.width: 1
                 ColumnLayout { anchors.fill: parent; anchors.margins: 16
                     Text { text: "💾 I/O Scheduler"; font.pixelSize: 14; font.bold: true; color: textColor }
                     Text { text: "mq-deadline (NVMe) / bfq (HDD)"; font.pixelSize: 12; color: okColor }
                 }
             }
             Rectangle {
-                Layout.fillWidth: true; color: surfaceColor; radius: 12; border.color: "#2A2A3E"; border.width: 1
+                Layout.fillWidth: true; color: surfaceColor; radius: 12; border.color: "#12FFFFFF"; border.width: 1
                 ColumnLayout { anchors.fill: parent; anchors.margins: 16
                     Text { text: "🔋 TDP"; font.pixelSize: 14; font.bold: true; color: textColor }
                     Text { text: "65W (auto-managed)"; font.pixelSize: 12; color: okColor }

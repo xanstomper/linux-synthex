@@ -25,7 +25,7 @@
   "splash": "none",
   "plug": "Maximum performance on old hardware - no effects",
   "id": "lite",
-  "bg_color": "#0B0F1A",
+  "bg_color": "#10151B",
   "fg_color": "#8899AA",
   "widget_theme": "breeze",
   "color_scheme_ref": "BreezeDark",

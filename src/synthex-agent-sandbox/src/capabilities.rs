@@ -155,6 +155,7 @@ impl Capability {
     }
 
     /// Returns true if this capability allows spawning the given executable
+    #[allow(dead_code)]
     pub fn allows_spawn(&self, exe: &str) -> bool {
         if let Capability::SpawnProcess(exes) = self {
             return exes.iter().any(|e| e == exe);

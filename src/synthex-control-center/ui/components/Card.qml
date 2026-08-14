@@ -5,9 +5,9 @@ import QtQuick.Layouts 1.15
 Rectangle {
     property alias title: titleText.text
     property alias content: contentCol
-    color: "#1A1A2E"
+    color: "#171D24"
     radius: 12
-    border.color: "#2A2A3E"
+    border.color: "#12FFFFFF"
     border.width: 1
 
     ColumnLayout {

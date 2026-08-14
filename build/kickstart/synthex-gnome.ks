@@ -130,6 +130,12 @@ synthex-control-center
 synthex-app-manager
 synthex-update-manager
 
+# SynthOS platform bundles (meta-groups from synthex-comps.xml)
+@synthex-safety
+@synthex-essentials
+@synthex-creator-platform
+@synthex-gaming-platform
+
 # Utilities
 htop
 neofetch

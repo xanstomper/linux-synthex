@@ -147,11 +147,11 @@ class ControlCenterWindow(Adw.ApplicationWindow):
             background: alpha(white, 0.10);
             border-color: alpha(white, 0.18);
         }
-        .tile-icon { color: #B0CCEE; }
+        .tile-icon { color: #6C88A8; }
         .tile-label { font-weight: bold; font-size: 13px; }
         .tile-subtitle { font-size: 10px; color: #888899; }
-        .section-header { font-size: 11px; font-weight: bold; color: #6688AA;
-                          letter-spacing: 1px; margin-top: 8px; margin-bottom: 2px; }
+        .section-header { font-size: 11px; font-weight: bold; color: #67707D;
+                          letter-spacing: 2px; margin-top: 8px; margin-bottom: 2px; }
         """
         provider = Gtk.CssProvider()
         provider.load_from_string(css)

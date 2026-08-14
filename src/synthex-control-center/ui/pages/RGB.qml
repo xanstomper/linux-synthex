@@ -12,7 +12,7 @@ Kirigami.ScrollablePage {
 
     property var detectedDevices: []
     property string openrgbStatus: SynthexBackend.isServiceActive("openrgb.service") ? "running" : "stopped"
-    property color selectedColor: "#FFB300"
+    property color selectedColor: "#6C88A8"
 
     Timer {
         interval: 3000; running: true; repeat: true
@@ -135,7 +135,7 @@ Kirigami.ScrollablePage {
             Label { text: "#" }
             TextField {
                 id: colorHex
-                text: "FFB300"
+                text: "6C88A8"
                 maximumLength: 6
                 Layout.preferredWidth: 80
                 validator: RegularExpressionValidator { regularExpression: /[0-9A-Fa-f]{0,6}/ }

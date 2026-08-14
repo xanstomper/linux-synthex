@@ -7,13 +7,13 @@ Rectangle {
     property string title: ""
     property string value: ""
     property string icon: ""
-    property string color: "#4CAF50"
+    property string color: "#7FBF8A"
     
     width: 140
     height: 100
     radius: 12
-    color: "#1A1A2E"
-    border.color: "#3A3A4A"
+    color: "#171D24"
+    border.color: "#1E242F"
     border.width: 1
     
     ColumnLayout {

@@ -36,9 +36,14 @@ use zbus::interface;
 mod context;
 mod memory;
 mod security;
+mod lazy_chameleon;
+mod synthetic_params;
+mod token_saver;
 
 use context::ContextMonitor;
 use memory::{MemoryNode, MemoryStore};
+use lazy_chameleon::{LazyChameleon, run_scout_loop};
+use token_saver::{TokenSaver, ContextSection, DistilledSnapshot};
 
 // ── Shared brain state ────────────────────────────────────────────────────────
 
@@ -46,21 +51,37 @@ use memory::{MemoryNode, MemoryStore};
 /// IPC socket handler.  Cheap to `Arc::clone`.
 #[derive(Debug)]
 struct BrainState {
-    memory:  Arc<MemoryStore>,
-    context: Arc<ContextMonitor>,
-    agents:  RwLock<HashMap<String, AgentInfo>>,
-    tasks:   RwLock<HashMap<String, TaskHandle>>,
-    enc_key: [u8; 32],
+    memory:         Arc<MemoryStore>,
+    context:        Arc<ContextMonitor>,
+    agents:         RwLock<HashMap<String, AgentInfo>>,
+    tasks:          RwLock<HashMap<String, TaskHandle>>,
+    enc_key:        [u8; 32],
+    /// Lazy Chameleon reasoning controller — synthetic param engine.
+    lazy_chameleon: Arc<LazyChameleon>,
+    /// Token saver for context window compression.
+    token_saver:    Arc<TokenSaver>,
 }
 
 impl BrainState {
-    fn new(memory: Arc<MemoryStore>, context: Arc<ContextMonitor>, enc_key: [u8; 32]) -> Self {
+    fn new(
+        memory:  Arc<MemoryStore>,
+        context: Arc<ContextMonitor>,
+        enc_key: [u8; 32],
+    ) -> Self {
+        let lazy_chameleon = Arc::new(LazyChameleon::new(
+            Arc::clone(&memory),
+            8_192, // token budget per stall cycle
+        ));
+        let token_saver = Arc::new(TokenSaver::new(32_768));
+
         Self {
             memory,
             context,
-            agents:  RwLock::new(HashMap::new()),
-            tasks:   RwLock::new(HashMap::new()),
+            agents:         RwLock::new(HashMap::new()),
+            tasks:          RwLock::new(HashMap::new()),
             enc_key,
+            lazy_chameleon,
+            token_saver,
         }
     }
 }
@@ -274,6 +295,131 @@ impl BrainDbus {
     /// Set clipboard text.
     async fn set_clipboard(&self, content: String) -> zbus::fdo::Result<()> {
         clipboard_set(&content).await.map_err(dbus_err)
+    }
+
+    // ── Lazy Chameleon — Synthetic Parameter Engine ───────────────────────────
+
+    /// Run a full Lazy Chameleon stall cycle for `request`.
+    /// Optionally pass a `domain_hint` (e.g. "gpu", "security", "network").
+    /// Returns an EnrichedContext JSON with the synthetic injection prepended.
+    async fn get_enriched_context(
+        &self,
+        request:     String,
+        domain_hint: String,
+    ) -> zbus::fdo::Result<String> {
+        let hint = if domain_hint.is_empty() { None } else { Some(domain_hint.as_str()) };
+        let enriched = self
+            .0
+            .lazy_chameleon
+            .stall_and_enrich(&request, hint)
+            .await
+            .map_err(dbus_err)?;
+        json_ok(enriched)
+    }
+
+    /// Build and return the full enriched prompt (synthetic injections + original).
+    /// This is what you pass to the AI backend instead of the bare request.
+    async fn build_enriched_prompt(
+        &self,
+        request:     String,
+        domain_hint: String,
+    ) -> zbus::fdo::Result<String> {
+        let hint = if domain_hint.is_empty() { None } else { Some(domain_hint.as_str()) };
+        let enriched = self
+            .0
+            .lazy_chameleon
+            .stall_and_enrich(&request, hint)
+            .await
+            .map_err(dbus_err)?;
+        Ok(enriched.build_enriched_prompt())
+    }
+
+    /// Return Lazy Chameleon runtime statistics (scout counts, token savings, etc).
+    async fn chameleon_stats(&self) -> zbus::fdo::Result<String> {
+        let stats = self.0.lazy_chameleon.stats_snapshot().await;
+        json_ok(stats)
+    }
+
+    /// Return current adaptive scale factor (1.0–2.0).
+    async fn chameleon_scale(&self) -> zbus::fdo::Result<f64> {
+        Ok(self.0.lazy_chameleon.current_scale().await as f64)
+    }
+
+    /// Return token saver lifetime stats as JSON: {original, saved, ratio}.
+    async fn token_saver_stats(&self) -> zbus::fdo::Result<String> {
+        let (orig, saved, ratio) = self.0.token_saver.lifetime_stats();
+        json_ok(serde_json::json!({
+            "original_chars": orig,
+            "saved_chars":    saved,
+            "ratio":          ratio,
+            "budget_tokens":  self.0.token_saver.budget(),
+        }))
+    }
+
+    /// Compress `text` to fit within `max_tokens` using the token saver.
+    async fn compress_text(
+        &self,
+        text:       String,
+        max_tokens: u32,
+    ) -> zbus::fdo::Result<String> {
+        let max_chars = max_tokens as usize * 4;
+        let result = self.0.token_saver
+            .compress(&text, max_chars)
+            .unwrap_or(text);
+        Ok(result)
+    }
+
+    /// Build a distilled snapshot from current brain state (for session handoff).
+    /// Returns a DistilledSnapshot JSON — maximally compressed session state.
+    async fn distilled_snapshot(&self, task: String) -> zbus::fdo::Result<String> {
+        // Pull top memories.
+        let nodes = self
+            .0
+            .memory
+            .recall("recent context goals tasks", 10)
+            .await
+            .unwrap_or_default();
+        let memories: Vec<(String, String)> = nodes
+            .into_iter()
+            .map(|n| (n.key.clone(), security::decrypt_value(&self.0.enc_key, &n.value_enc).unwrap_or_default()))
+            .collect();
+
+        // Compress current context snapshot.
+        let snap     = self.0.context.snapshot().await;
+        let snap_str = serde_json::to_string(&snap).unwrap_or_default();
+
+        let snapshot = DistilledSnapshot::build(
+            &self.0.token_saver,
+            &task,
+            &memories,
+            &snap_str,
+        );
+        json_ok(snapshot)
+    }
+
+    /// Assemble a context window from multiple labeled sections,
+    /// applying token saver compression to fit within `token_budget`.
+    async fn assemble_context_window(
+        &self,
+        sections_json: String,
+        token_budget:  u32,
+    ) -> zbus::fdo::Result<String> {
+        #[derive(serde::Deserialize)]
+        struct SectionInput { label: String, content: String, priority: f32 }
+
+        let inputs: Vec<SectionInput> = serde_json::from_str(&sections_json)
+            .map_err(|e| zbus::fdo::Error::InvalidArgs(e.to_string()))?;
+
+        let sections: Vec<ContextSection> = inputs
+            .into_iter()
+            .map(|s| ContextSection::new(s.label, s.content, s.priority))
+            .collect();
+
+        let window = self
+            .0
+            .token_saver
+            .assemble_context_window(&sections, token_budget as usize);
+        Ok(window)
     }
 }
 
@@ -623,6 +769,14 @@ async fn main() -> Result<()> {
 
     // ── Background tasks ──────────────────────────────────────────────────────
     tokio::spawn(consolidation_loop(Arc::clone(&memory)));
+
+    // ── Lazy Chameleon background scout loop (proactive enrichment every 30 s) ──
+    {
+        let lc = Arc::clone(&state.lazy_chameleon);
+        tokio::spawn(async move {
+            run_scout_loop(lc, 30).await;
+        });
+    }
 
     {
         let st = Arc::clone(&state);

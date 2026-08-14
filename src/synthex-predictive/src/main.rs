@@ -24,6 +24,7 @@ const NGRAM: usize = 3;
 const CONF_THRESHOLD: f64 = 0.80;
 const TRAIN_EVERY: Duration = Duration::from_secs(3600);
 const PRELAUNCH_EVERY: Duration = Duration::from_secs(60);
+#[allow(dead_code)]
 const STALE_SECS: u64 = 300;
 
 #[derive(Debug, Serialize, Deserialize, Clone)]
@@ -43,6 +44,7 @@ struct Db {
 struct Model {
     transitions: HashMap<Vec<String>, HashMap<String, u64>>,
     by_hour: HashMap<u32, HashMap<String, u64>>,
+    #[allow(dead_code)]
     total: usize,
 }
 

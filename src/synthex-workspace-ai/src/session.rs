@@ -25,7 +25,7 @@ use anyhow::{Context, Result};
 use chrono::{DateTime, Utc};
 use serde::{Deserialize, Serialize};
 use tokio::{process::Command, time::sleep};
-use tracing::{debug, error, info, warn};
+use tracing::{debug, error, info};
 use uuid::Uuid;
 
 use crate::kwin_bridge::KwinBridge;
@@ -37,6 +37,7 @@ const SESSIONS_BASE: &str = "/var/lib/synthex/sessions";
 const AUTOSAVE_ID: &str = "__autosave__";
 const AUTOSAVE_INTERVAL: Duration = Duration::from_secs(5 * 60);
 /// How long to wait for a relaunched app to map a window before giving up.
+#[allow(dead_code)]
 const LAUNCH_TIMEOUT: Duration = Duration::from_secs(10);
 
 // ─── Data model ───────────────────────────────────────────────────────────────
@@ -365,6 +366,7 @@ pub async fn list_sessions() -> Result<Vec<SessionMeta>> {
     Ok(sessions)
 }
 
+#[allow(dead_code)]
 pub async fn delete_session(session_id: &str) -> Result<()> {
     // Disallow deleting the autosave unless explicitly named.
     let dir = session_dir(session_id);

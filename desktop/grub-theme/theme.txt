@@ -1,48 +1,69 @@
-# Synthex GRUB Theme
+# ═══════════════════════════════════════════════════════════════════════════
+#  SynthOS GRUB2 Theme — "Solaris"
+#  Deep navy background, amber selection, minimal & legible.
+# ═══════════════════════════════════════════════════════════════════════════
 
-# Global settings
-grub_background_color=#0B0F1A
+# Global background — deep navy night
+grub_background_color=#0C1016
 
-# Global title and text styling
-title-text: "☀️ SynthOS"
-desktop-color: "#0B0F1A"
+# Title
+title-text: "SynthOS"
+title-color: "#F4F6FB"
+
+# Desktop (panel behind everything)
+desktop-color: "#0C1016"
+
+# Top status bar
 top-bar: true
-top-bar-text-color: "#8899AA"
+top-bar-color: "#10151B"
+top-bar-text-color: "#9AA1AB"
 top-bar-text-align: center
 
-# Menu styling
+# Menu panel
 menu_border=all
-menu_border_color=#2A2A3E
-menu_p_margin=30
-menu_c_margin=30
+menu_border_color=#232A34
+menu_p_margin=40
+menu_c_margin=40
 
-menu_pw=500
-menu_ph=360
-menu_padding=20
-menu_spacing=8
-menu_radius=12
-menu_color_normal=#FFFFFF
-menu_color_highlight=#0B0F1A
-menu_color_help=#8899AA
+menu_pw=520
+menu_ph=380
+menu_padding=24
+menu_spacing=6
+menu_radius=16
+
+# Normal / highlighted entries. Highlight = amber bar, navy ink.
+menu_color_normal=#9AA1AB
+menu_color_highlight=#0C1016
+menu_color_help=#8A93AD
 
 menu_entry_padding=14
-menu_entry_margin=6
-menu_entry_radius=8
+menu_entry_margin=4
+menu_entry_radius=10
 
 # Boot command styling
 terminal_box=true
-terminal_color=#FFFFFF
+terminal_color=#F4F6FB
 
-# Progress bar
+# Progress bar (amber fill)
 progress_bar=true
+progress_bar_color=#6C88A8
 
 # Submenu styling
-submenu_color_normal=#FFFFFF
-submenu_color_highlight=#0B0F1A
+submenu_color_normal=#9AA1AB
+submenu_color_highlight=#0C1016
 
-# Image
+# Centered logo above the menu
 + bitmap {
-    left = 50%-200
-    top = 60%-150
+    left = 50%-160
+    top = 16%
     file = /boot/grub/synthex-logo.png
+}
+
+# Footer hint
++ label {
+    left = 50%
+    top = 96%
+    text = "Up/Down select - Enter boot - E edit"
+    color = "#5A6480"
+    align = center
 }

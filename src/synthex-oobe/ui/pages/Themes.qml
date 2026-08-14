@@ -4,13 +4,13 @@ import QtQuick.Layouts 1.15
 
 Rectangle {
     id: oobeThemes
-    color: "#0B0F1A"
+    color: "#0C1016"
     anchors.fill: parent
 
-    readonly property color accentColor: "#FFB300"
-    readonly property color surfaceColor: "#1A1A2E"
+    readonly property color accentColor: "#6C88A8"
+    readonly property color surfaceColor: "#171D24"
     readonly property color textColor: "#FFFFFF"
-    readonly property color mutedText: "#8899AA"
+    readonly property color mutedText: "#9AA1AB"
 
     property int selectedTheme: 0
 
@@ -44,16 +44,16 @@ Rectangle {
                 model: ListModel {
                     ListElement {
                         name: "Synthex Dark"
-                        preview1: "#0B0F1A"
-                        preview2: "#1A1A2E"
-                        preview3: "#FFB300"
+                        preview1: "#0C1016"
+                        preview2: "#171D24"
+                        preview3: "#6C88A8"
                         description: "Dark theme with Amber accents \u2022 Default"
                     }
                     ListElement {
                         name: "Synthex Light"
                         preview1: "#F5F5F5"
                         preview2: "#FFFFFF"
-                        preview3: "#FFB300"
+                        preview3: "#6C88A8"
                         description: "Clean light theme for bright environments"
                     }
                     ListElement {
@@ -168,7 +168,7 @@ Rectangle {
                 text: "\u{1F3A8}  Apply and Preview"
                 font.pixelSize: 13
                 font.bold: true
-                color: "#0B0F1A"
+                color: "#0C1016"
                 horizontalAlignment: Text.AlignHCenter
                 verticalAlignment: Text.AlignVCenter
             }

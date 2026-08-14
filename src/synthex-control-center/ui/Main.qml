@@ -12,17 +12,17 @@ Window {
     minimumWidth: 960
     minimumHeight: 640
     title: "Synthex Control Center"
-    color: "#0B0F1A"
+    color: "#0C1116"
 
     property int activeNavIndex: 0
     property string currentPage: "Dashboard"
 
     // Accent color
-    readonly property color accentColor: "#9BBD5C"
-    readonly property color bgColor: "#0B0F1A"
-    readonly property color surfaceColor: "#1A1A2E"
+    readonly property color accentColor: "#6C88A8"
+    readonly property color bgColor: "#0C1116"
+    readonly property color surfaceColor: "#171D24"
     readonly property color textColor: "#FFFFFF"
-    readonly property color mutedText: "#8899AA"
+    readonly property color mutedText: "#9AA1AB"
 
     RowLayout {
         anchors.fill: parent
@@ -31,9 +31,9 @@ Window {
         // Sidebar
         Rectangle {
             id: sidebar
-            Layout.preferredWidth: 240
+            Layout.preferredWidth: 64
             Layout.fillHeight: true
-            color: "#121624"
+            color: "#161C22"
             anchors.top: parent.top
             anchors.bottom: parent.bottom
 
@@ -61,11 +61,12 @@ Window {
                                 text: "S"
                                 font.pixelSize: 22
                                 font.bold: true
-                                color: "#0B0F1A"
+                                color: "#0C1116"
                             }
                         }
 
                         ColumnLayout {
+                            visible: false
                             spacing: 2
                             Text {
                                 text: "Synthex"
@@ -86,7 +87,7 @@ Window {
                 Rectangle {
                     Layout.fillWidth: true
                     Layout.preferredHeight: 1
-                    color: "#2A2A3E"
+                    color: "#12FFFFFF"
                     Layout.leftMargin: 16
                     Layout.rightMargin: 16
                 }
@@ -117,13 +118,13 @@ Window {
 
                     delegate: ItemDelegate {
                         width: parent.width
-                        height: 48
+                        height: 44
                         highlighted: ListView.isCurrentItem
-                        leftPadding: 20
-                        rightPadding: 16
+                        leftPadding: 0
+                        rightPadding: 0
 
                         background: Rectangle {
-                            color: highlighted ? Qt.rgba(0.608, 0.741, 0.361, 0.12) : (hovered ? "#1E2030" : "transparent")
+                            color: highlighted ? Qt.rgba(0.42, 0.53, 0.66, 0.16) : (hovered ? "#1E2030" : "transparent")
                             radius: 8
                             anchors.leftMargin: 8
                             anchors.rightMargin: 8
@@ -142,12 +143,13 @@ Window {
                         }
 
                         contentItem: RowLayout {
-                            spacing: 14
+                            spacing: 0
                             Text {
                                 text: model.icon
                                 font.pixelSize: 18
                             }
                             Text {
+                                visible: false
                                 text: model.name
                                 font.pixelSize: 14
                                 color: highlighted ? textColor : mutedText
@@ -156,6 +158,9 @@ Window {
                             Item { Layout.fillWidth: true }
                         }
 
+                        ToolTip.visible: hovered
+                        ToolTip.text: model.name
+                        ToolTip.delay: 350
                         onClicked: {
                             navList.currentIndex = index;
                             activeNavIndex = index;
@@ -169,7 +174,7 @@ Window {
                 Rectangle {
                     Layout.fillWidth: true
                     Layout.preferredHeight: 1
-                    color: "#2A2A3E"
+                    color: "#12FFFFFF"
                     Layout.leftMargin: 16
                     Layout.rightMargin: 16
                 }
@@ -232,7 +237,7 @@ Window {
         anchors.left: sidebar.right
         anchors.right: parent.right
         height: 60
-        color: "#0D1117"
+        color: "#161C22"
         z: 10
 
         Text {

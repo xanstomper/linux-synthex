@@ -10,8 +10,7 @@
 /// method is accepted.
 use crate::capabilities::Capability;
 use crate::policy::{load_policy, parse_capability_string, is_always_denied};
-use crate::sandbox::{SandboxConfig, SandboxRegistry, SandboxStatus};
-use crate::audit::AuditEvent;
+use crate::sandbox::{SandboxConfig, SandboxRegistry};
 
 use anyhow::Result;
 use std::collections::HashMap;
@@ -19,7 +18,7 @@ use std::path::PathBuf;
 use std::sync::Arc;
 use tokio::sync::RwLock;
 use tracing::{error, info, warn};
-use zbus::{connection, interface, Connection};
+use zbus::{connection, interface};
 
 /// Shared service state threaded through every D-Bus call
 pub struct AgentSandboxState {

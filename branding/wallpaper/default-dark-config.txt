@@ -11,15 +11,15 @@
 #
 # The default-dark.png wallpaper features:
 #
-# 1. Background: Deep dark gradient from #1A1A2E (top) to #16213E (bottom)
-# 2. Glow Effect: Large soft amber (#FFB300) radial glow emanating from
+# 1. Background: Deep dark gradient from #171D24 (top) to #1E242F (bottom)
+# 2. Glow Effect: Large soft amber (#6C88A8) radial glow emanating from
 #    centre-right, blended with screen mode → gives a warm sunrise effect
 # 3. Secondary Glow: Deep purple (#6A1B9A) soft glow in upper-right quadrant,
 #    creating the signature Synthex amber→purple gradient feel
 # 4. Vignette: Subtle dark overlay at the bottom edge for icon readability
 # 5. Branding Text:
 #    - "Synthex" in Inter Bold, centred, sized proportionally to resolution
-#      (approx. 80px at 1080p), coloured in Synthex Amber (#FFB300)
+#      (approx. 80px at 1080p), coloured in Synthex Amber (#6C88A8)
 #    - "Illuminate Your Desktop" tagline in Inter Regular, 40px,
 #      coloured in soft grey (#C0C0D0), positioned below main title
 # 6. Accent Line: Thin amber underline beneath the tagline as a subtle
@@ -31,9 +31,9 @@
 # --- Generation Parameters (for ImageMagick) ---
 
 COLORS:
-  base:           "#1A1A2E"
-  surface:        "#16213E"
-  accent:         "#FFB300"
+  base:           "#171D24"
+  surface:        "#1E242F"
+  accent:         "#6C88A8"
   accent_dark:    "#E6A000"
   secondary:      "#6A1B9A"
   text_primary:   "#E8E8F0"
@@ -44,11 +44,11 @@ GRADIENT:
   type: linear
   direction: south (top → bottom)
   stops:
-    - "#1A1A2E" at 0%
-    - "#16213E" at 100%
+    - "#171D24" at 0%
+    - "#1E242F" at 100%
 
 GLOW_RADIAL:
-  - colour:  "#FFB300"
+  - colour:  "#6C88A8"
     opacity: 0.30
     centre:  65%, 50%
     radius:  40% of width
@@ -60,7 +60,7 @@ GLOW_RADIAL:
     blend:   screen
 
 VIGNETTE:
-  colour:    "#1A1A2E"
+  colour:    "#171D24"
   opacity:   0.60
   position:  bottom 15%
   gradient:  transparent → solid bottom
@@ -70,7 +70,7 @@ TYPOGRAPHY:
     text:      "Synthex"
     font:      Inter Bold
     size:      80px (at 1920x1080)
-    colour:    "#FFB300"
+    colour:    "#6C88A8"
     position:  centre, offset -40px vertical
   tagline:
     text:      "Illuminate Your Desktop"
@@ -81,7 +81,7 @@ TYPOGRAPHY:
   accent_line:
     width:     60px
     height:    2px
-    colour:    "#FFB300"
+    colour:    "#6C88A8"
     opacity:   0.40
     position:  centre, 20px below tagline
 

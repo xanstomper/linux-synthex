@@ -25,7 +25,7 @@
   "splash": "synthex",
   "plug": "Developer cockpit with terminal-first workflow",
   "id": "pro",
-  "bg_color": "#0B0F1A",
+  "bg_color": "#10151B",
   "fg_color": "#5B9BD5",
   "widget_theme": "breeze",
   "color_scheme_ref": "BreezeDark",

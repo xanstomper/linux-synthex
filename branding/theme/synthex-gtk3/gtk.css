@@ -1,67 +1,168 @@
-/* Synthex Dark Theme — GTK3 CSS
- * Applied via ~/.config/gtk-3.0/gtk.css
- * Matches the GTK4 theme for consistent appearance
- */
+/* ═══════════════════════════════════════════════════════════════════════════
+ *  SynthOS — GTK3 stylesheet
+ *  Matches the GTK4 / libadwaita theme: deep navy nightglass + amber accent.
+ * ═══════════════════════════════════════════════════════════════════════════ */
 
-@define-color solus_accent #e94560;
-@define-color solus_bg #1a1a2e;
-@define-color solus_bg_alt #16213e;
-@define-color solus_surface #0f3460;
-@define-color solus_text #ffffff;
-@define-color solus_border #2a2a4e;
+@define-color synthex_bg          #10151B;
+@define-color synthex_bg_legacy   #1a1a2e;
+@define-color synthex_bg_alt      #171D24;
+@define-color synthex_surface     #1E242F;
+@define-color synthex_surface_hi  #232A34;
+@define-color synthex_border      rgba(255,255,255,0.07);
+@define-color synthex_border_hi   rgba(255,255,255,0.14);
+@define-color synthex_text        #DDE3EB;
+@define-color synthex_text_dim    #9AA1AB;
+@define-color synthex_text_mute   #67707D;
+@define-color synthex_accent      #6C88A8;
+@define-color synthex_accent_hi   #82A0BE;
+@define-color synthex_accent_dim  #56759B;
+@define-color synthex_accent_ink  #0C1116;
+@define-color synthex_lavender    #ABA2E4;
+@define-color synthex_success     #7FBF8A;
+@define-color synthex_warning     #D9B47E;
+@define-color synthex_error       #D97C82;
 
-window {
-  background-color: @solus_bg;
-  color: @solus_text;
+/* legacy aliases */
+@define-color solus_accent       @synthex_accent;
+@define-color solus_accent_hover @synthex_accent_hi;
+@define-color solus_bg           @synthex_bg;
+@define-color solus_bg_alt       @synthex_bg_alt;
+@define-color solus_surface      @synthex_surface;
+@define-color solus_text         @synthex_text;
+@define-color solus_text_dim     @synthex_text_dim;
+@define-color solus_border       @synthex_border;
+
+* { transition: all 140ms cubic-bezier(.4,0,.2,1); }
+
+window, .background {
+  background-color: @synthex_bg;
+  color: @synthex_text;
 }
 
-headerbar,
-.header-bar {
-  background-color: @solus_bg_alt;
-  color: @solus_text;
-  border-bottom: 1px solid @solus_border;
+headerbar, .header-bar, .titlebar {
+  background-color: alpha(@synthex_bg_alt, 0.92);
+  color: @synthex_text;
+  border-bottom: 1px solid @synthex_border;
+  padding: 5px 10px;
+}
+headerbar:backdrop { background-color: alpha(@synthex_bg_alt, 0.80); }
+
+button, .button {
+  background-color: alpha(@synthex_surface, 0.7);
+  color: @synthex_text;
+  border: 1px solid @synthex_border;
+  border-radius: 10px;
+  padding: 7px 15px;
+  font-weight: 500;
+}
+button:hover, .button:hover {
+  background-color: @synthex_surface_hi;
+  border-color: @synthex_border_hi;
+}
+button:active, button:checked, .button:active, .button:checked {
+  background-color: alpha(@synthex_accent, 0.18);
+  border-color: alpha(@synthex_accent, 0.5);
+}
+button.suggested-action, .suggested-action {
+  background-image: linear-gradient(to right, @synthex_accent, @synthex_lavender);
+  color: @synthex_accent_ink;
+  border-color: transparent;
+  font-weight: 700;
+}
+button.destructive-action, .destructive-action {
+  background-color: @synthex_error; color: #fff; border-color: transparent;
 }
 
-button {
-  background-color: @solus_surface;
-  color: @solus_text;
-  border: 1px solid @solus_border;
-  border-radius: 8px;
+entry, .entry {
+  background-color: alpha(#000, 0.25);
+  color: @synthex_text;
+  border: 1px solid @synthex_border;
+  border-radius: 10px;
+  padding: 8px 12px;
+  caret-color: @synthex_accent;
+}
+entry:focus, .entry:focus {
+  border-color: alpha(@synthex_accent, 0.7);
+  box-shadow: 0 0 0 3px alpha(@synthex_accent, 0.16);
+}
+entry selection { background-color: @synthex_accent; color: @synthex_accent_ink; }
+entry:disabled { color: @synthex_text_mute; }
+
+treeview, list, .list {
+  background-color: transparent;
+  color: @synthex_text;
+}
+treeview:selected, list row:selected, .list-row:selected {
+  background-color: alpha(@synthex_accent, 0.18);
+  color: @synthex_text;
+}
+
+sidebar, .sidebar, placessidebar {
+  background-color: @synthex_bg_alt;
+  color: @synthex_text;
+  border-right: 1px solid @synthex_border;
+}
+.sidebar row:selected, placessidebar row:selected {
+  background-color: alpha(@synthex_accent, 0.16);
+  box-shadow: inset 2px 0 0 @synthex_accent;
+}
+
+.menu, popover, popover.background {
+  background-color: alpha(@synthex_surface, 0.96);
+  color: @synthex_text;
+  border: 1px solid @synthex_border_hi;
+  border-radius: 12px;
+  padding: 6px;
+}
+.menuitem:hover, menuitem:hover {
+  background-color: alpha(@synthex_accent, 0.18);
+  border-radius: 6px;
+}
+
+switch, switch slider { border-radius: 999px; }
+switch { background-color: alpha(#000, 0.35); border: 1px solid @synthex_border; }
+switch:checked {
+  background-image: linear-gradient(to right, @synthex_accent, @synthex_lavender);
+  border-color: transparent;
+}
+
+scale trough, progressbar trough {
+  background-color: alpha(#000, 0.3); border-radius: 999px; min-height: 5px;
+}
+scale highlight, progressbar progress {
+  background-image: linear-gradient(to right, @synthex_accent, @synthex_lavender);
+  border-radius: 999px;
+}
+scale slider {
+  background-color: @synthex_text;
+  border: 2px solid @synthex_accent;
+  border-radius: 999px;
+}
+
+scrollbar { background-color: transparent; border: none; }
+scrollbar slider {
+  background-color: alpha(@synthex_text, 0.16);
+  border-radius: 999px; min-width: 8px; min-height: 40px;
+}
+scrollbar slider:hover { background-color: alpha(@synthex_accent, 0.6); }
+
+.notebook tab, notebook tab {
+  border-radius: 8px 8px 0 0;
   padding: 6px 14px;
+  border: 1px solid transparent;
+}
+.notebook tab:checked, notebook tab:checked {
+  background-color: alpha(@synthex_surface, 0.6);
+  box-shadow: inset 0 -2px 0 @synthex_accent;
 }
 
-button:hover {
-  background-color: @solus_accent;
-}
-
-button:active,
-button:checked {
-  background-color: darker(@solus_accent, 20%);
-}
-
-entry {
-  background-color: @solus_bg;
-  color: @solus_text;
-  border: 1px solid @solus_border;
+tooltip {
+  background-color: alpha(@synthex_surface_hi, 0.96);
+  color: @synthex_text;
+  border: 1px solid @synthex_border_hi;
   border-radius: 8px;
   padding: 6px 10px;
 }
 
-entry:focus {
-  border-color: @solus_accent;
-}
-
-.menu,
-.popup {
-  background-color: @solus_bg_alt;
-  color: @solus_text;
-}
-
-menuitem:hover {
-  background-color: @solus_accent;
-}
-
-scrolledwindow scrollbar slider {
-  background-color: alpha(@solus_text, 0.2);
-  border-radius: 999px;
-}
+separator { background-color: @synthex_border; }
+.frame, frame > border { border-color: @synthex_border; border-radius: 10px; }

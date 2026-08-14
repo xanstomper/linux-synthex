@@ -767,7 +767,7 @@ for f in ["waybar-style.css", "wlogout-layout", "wlogout-style.css"]:
 waybar_css = open(os.path.join(ROOT, "desktop/hyprland/waybar-style.css")).read()
 check("waybar has workspaces", "workspaces" in waybar_css)
 check("waybar has gamemode", "gamemode" in waybar_css)
-check("waybar has accent", "#e94560" in waybar_css)
+check("waybar has accent", "#6C88A8" in waybar_css)
 
 wlogout = open(os.path.join(ROOT, "desktop/hyprland/wlogout-layout")).read()
 check("wlogout has lock", "lock" in wlogout)

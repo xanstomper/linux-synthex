@@ -1,0 +1,94 @@
+# ╔══════════════════════════════════════════════════════════════╗
+# ║  SynthOS Nova — Starship prompt configuration                 ║
+# ║  ~/.config/starship.toml                                      ║
+# ╚══════════════════════════════════════════════════════════════╝
+
+# Two-line prompt, left block only (calm, terminal-native)
+format = """
+$username$hostname$directory$git_branch$git_status$cmd_duration$line_break$character"""
+
+# Nova palette
+palette = "nova"
+
+[palettes.nova]
+bg      = "#10151B"
+fg      = "#DDE3EB"
+dim     = "#67707D"
+accent  = "#6C88A8"
+lavender= "#ABA2E4"
+green   = "#7FBF8A"
+yellow  = "#D9B47E"
+red     = "#D97C82"
+
+# ─── Segments ──────────────────────────────────────────────────────────
+
+[username]
+show_always = false
+style_user  = "accent"
+format      = "[$user]($style) "
+
+[hostname]
+ssh_only    = true
+style       = "dim"
+format      = "at [$hostname]($style) "
+
+[directory]
+style           = "fg"
+truncation_length = 3
+truncate_to_repo  = true
+home_symbol       = "~"
+format            = "in [$path]($style)[$read_only](red) "
+
+[git_branch]
+symbol  = ""
+style   = "lavender"
+format  = "on [$symbol$branch]($style) "
+
+[git_status]
+style   = "yellow"
+format  = "([\\[$all_status$ahead_behind\\]]($style)) "
+
+[cmd_duration]
+min_time        = 2000
+style           = "dim"
+format          = "took [$duration]($style) "
+show_milliseconds = false
+
+[character]
+success_symbol   = "[❯](accent)"
+error_symbol     = "[❯](red)"
+vimcmd_symbol    = "[❮](green)"
+
+# ─── Language segments (only when relevant — quiet by default) ─────────
+
+[python]
+symbol  = "py "
+style   = "yellow"
+format  = "[$symbol$version]($style) "
+
+[nodejs]
+symbol  = "node "
+style   = "green"
+format  = "[$symbol$version]($style) "
+
+[rust]
+symbol  = "rs "
+style   = "red"
+format  = "[$symbol$version]($style) "
+
+[golang]
+symbol  = "go "
+style   = "accent"
+format  = "[$symbol$version]($style) "
+
+# Disable noisy segments
+[package]
+disabled = true
+[java]
+disabled = true
+[battery]
+disabled = true
+[time]
+disabled = true
+[memory_usage]
+disabled = true

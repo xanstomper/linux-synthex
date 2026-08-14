@@ -13,12 +13,12 @@ Window {
     minimumWidth: 800; minimumHeight: 500
     title: "Synthex Codex — AI Agent IDE"
 
-    readonly property color accent: "#9BBD5C"
-    readonly property color bg: "#1A1A2E"
+    readonly property color accent: "#6C88A8"
+    readonly property color bg: "#171D24"
     readonly property color panel: "#16162A"
     readonly property color card: "#222240"
     readonly property color text: "#FFFFFF"
-    readonly property color muted: "#8899AA"
+    readonly property color muted: "#9AA1AB"
     readonly property color border: "#3A3A5E"
 
     // ─── Main Split ────────────────────────────────────────────────

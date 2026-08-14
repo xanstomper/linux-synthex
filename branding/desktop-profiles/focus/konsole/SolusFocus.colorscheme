@@ -1,11 +1,11 @@
 [Background]
-Color=#0B0F1A
+Color=#10151B
 
 [BackgroundFaint]
-Color=#0B0F1A
+Color=#10151B
 
 [BackgroundIntense]
-Color=#0B0F1A
+Color=#10151B
 
 [Foreground]
 Color=#FFFFFF
@@ -21,7 +21,7 @@ Color=2E3440
 [Color1]
 Color=BF616A
 [Color2]
-Color=#9BBD5C
+Color=#6C88A8
 [Color3]
 Color=EBCB8B
 [Color4]
@@ -37,7 +37,7 @@ Color=4C566A
 [Color9]
 Color=BF616A
 [Color10]
-Color=#9BBD5C
+Color=#6C88A8
 [Color11]
 Color=EBCB8B
 [Color12]

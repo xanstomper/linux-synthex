@@ -1,20 +1,20 @@
 <svg xmlns="http://www.w3.org/2000/svg" width="3840" height="2160" viewBox="0 0 3840 2160">
   <defs>
     <radialGradient id="bg" cx="50%" cy="40%" r="70%">
-      <stop offset="0%" style="stop-color:#1A1A2E"/>
-      <stop offset="60%" style="stop-color:#0B0F1A"/>
+      <stop offset="0%" style="stop-color:#171D24"/>
+      <stop offset="60%" style="stop-color:#10151B"/>
       <stop offset="100%" style="stop-color:#050812"/>
     </radialGradient>
     <linearGradient id="amberglow" x1="50%" y1="0%" x2="50%" y2="100%">
-      <stop offset="0%" style="stop-color:#FFB300;stop-opacity:0.1"/>
-      <stop offset="50%" style="stop-color:#FFB300;stop-opacity:0.03"/>
-      <stop offset="100%" style="stop-color:#FFB300;stop-opacity:0"/>
+      <stop offset="0%" style="stop-color:#6C88A8;stop-opacity:0.1"/>
+      <stop offset="50%" style="stop-color:#6C88A8;stop-opacity:0.03"/>
+      <stop offset="100%" style="stop-color:#6C88A8;stop-opacity:0"/>
     </linearGradient>
   </defs>
   <rect width="3840" height="2160" fill="url(#bg)"/>
   <rect width="3840" height="2160" fill="url(#amberglow)"/>
   <!-- Subtle amber hexagon watermark -->
-  <g transform="translate(1920, 800)" stroke="#FFB300" fill="none" opacity="0.04">
+  <g transform="translate(1920, 800)" stroke="#6C88A8" fill="none" opacity="0.04">
     <polygon points="0,-200 173,-100 173,100 0,200 -173,100 -173,-100" stroke-width="2"/>
     <polygon points="0,-150 130,-75 130,75 0,150 -130,75 -130,-75" stroke-width="1.5"/>
     <polygon points="0,-100 87,-50 87,50 0,100 -87,50 -87,-50" stroke-width="1"/>

@@ -29,6 +29,7 @@ const CONFIG_PATH:      &str = "/etc/synthex/system-daemon.toml";
 const POLL_INTERVAL_MS: u64  = 500;   // 500 ms → snappier hw monitoring
 
 // ── Config ───────────────────────────────────────────────────────────────────
+#[allow(dead_code)]
 #[derive(Debug, Clone, Deserialize)]
 struct Config {
     #[serde(default = "default_poll_ms")]
@@ -99,6 +100,7 @@ struct ProfileState {
 }
 
 // ── D-Bus interface ───────────────────────────────────────────────────────────
+#[allow(dead_code)]
 struct SynthOSSystemIface {
     config:   Config,
     snapshot: Arc<Mutex<HwSnapshot>>,

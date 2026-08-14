@@ -14,7 +14,7 @@ ApplicationWindow {
     visible: true
     title: qsTr("Welcome to SynthOS")
     Material.theme: Material.Dark
-    Material.accent: "#FFB300"
+    Material.accent: "#6C88A8"
 
     // Page model
     readonly property var pages: [
@@ -69,7 +69,7 @@ ApplicationWindow {
             Text {
                 text: "SynthOS"
                 font { pixelSize: 20; bold: true; family: "Noto Sans" }
-                color: "#FFB300"
+                color: "#6C88A8"
                 anchors.horizontalCenter: parent.horizontalCenter
                 topPadding: 8
             }
@@ -99,7 +99,7 @@ ApplicationWindow {
 
                     Rectangle {
                         width: 3; height: parent.height
-                        color: index === root.currentPage ? "#FFB300" : "transparent"
+                        color: index === root.currentPage ? "#6C88A8" : "transparent"
                         anchors.left: parent.left
                     }
 
@@ -110,7 +110,7 @@ ApplicationWindow {
                         Text {
                             text: modelData.label
                             font.pixelSize: 13
-                            color: index === root.currentPage ? "#FFFFFF" : "#8899AA"
+                            color: index === root.currentPage ? "#FFFFFF" : "#9AA1AB"
                         }
                     }
 
@@ -132,7 +132,7 @@ ApplicationWindow {
                 delegate: Rectangle {
                     width: index === root.currentPage ? 16 : 6
                     height: 6; radius: 3
-                    color: index === root.currentPage ? "#FFB300" : "#2A3550"
+                    color: index === root.currentPage ? "#6C88A8" : "#2A3550"
                     Behavior on width { NumberAnimation { duration: 200 } }
                 }
             }
@@ -186,7 +186,7 @@ ApplicationWindow {
 
             Button {
                 text: root.currentPage === root.pages.length - 1 ? qsTr("Get Started!") : qsTr("Next →")
-                Material.background: "#FFB300"
+                Material.background: "#6C88A8"
                 Material.foreground: "#0A0C14"
                 onClicked: {
                     if (root.currentPage < root.pages.length - 1)

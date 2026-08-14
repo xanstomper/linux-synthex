@@ -6,7 +6,7 @@ import Qt.labs.platform 1.1
 
 // ═══ Synthex Hermes — Native Desktop AI Agent ═══════════════════════════
 // Full native Qt6/QML app. Taskbar integration. State icons. Distro-aware.
-// Design: Synthex Mint (#9BBD5C), frameless, dark glass, native OS feel.
+// Design: Synthex Mint (#6C88A8), frameless, dark glass, native OS feel.
 
 Window {
     id: hermes
@@ -16,13 +16,13 @@ Window {
     color: "transparent"
 
     // ═══ Color palette (Synthex Mint) ═══════════════════════════════════════
-    readonly property color accent: "#9BBD5C"
+    readonly property color accent: "#6C88A8"
     readonly property color accentHover: "#A8CC6A"
-    readonly property color bg: "#1A1A2E"
+    readonly property color bg: "#171D24"
     readonly property color card: "#222240"
-    readonly property color inputBg: "#2A2A4E"
+    readonly property color inputBg: "#12FFFFFF"
     readonly property color text: "#FFFFFF"
-    readonly property color textSec: "#8899AA"
+    readonly property color textSec: "#9AA1AB"
     readonly property color textMuted: "#667788"
     readonly property color border: "#3A3A5E"
     readonly property color success: "#4CAF50"

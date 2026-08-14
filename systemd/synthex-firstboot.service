@@ -9,5 +9,32 @@ ExecStart=/usr/lib/synthex/synthex-firstboot
 ExecStartPost=/usr/bin/touch /var/lib/synthex/firstboot-done
 RemainAfterExit=yes
 
+# ── Hardening ──────────────────────────────────────────────────────────────
+# First-boot runs as root to set up the user session; it writes state to
+# /var/lib/synthex only.
+NoNewPrivileges=yes
+PrivateTmp=yes
+PrivateDevices=yes
+ProtectSystem=strict
+ProtectClock=yes
+ProtectControlGroups=yes
+ProtectHome=yes
+ProtectHostname=yes
+ProtectKernelTunables=yes
+ProtectKernelModules=yes
+ProtectKernelLogs=yes
+ProtectProc=invisible
+ProtectRoot=yes
+RestrictRealtime=yes
+RestrictSUIDSGID=yes
+LockPersonality=yes
+RemoveIPC=yes
+RestrictAddressFamilies=AF_UNIX AF_NETLINK
+SystemCallArchitectures=native
+SystemCallFilter=@system-service
+CapabilityBoundingSet=CAP_DAC_OVERRIDE CAP_CHOWN CAP_FOWNER CAP_SETGID CAP_SETUID
+UMask=0077
+ReadWritePaths=/var/lib/synthex /etc/synthex -/var/log
+
 [Install]
 WantedBy=graphical.target

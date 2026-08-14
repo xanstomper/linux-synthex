@@ -15,8 +15,8 @@ use std::{
     collections::HashMap,
     fs,
     io::Write as _,
-    path::{Path, PathBuf},
-    time::{SystemTime, UNIX_EPOCH},
+    path::PathBuf,
+    time::UNIX_EPOCH,
 };
 
 use anyhow::{Context, Result};
@@ -28,11 +28,8 @@ use tracing::{debug, info, warn};
 use uuid::Uuid;
 use x11rb::{
     connection::Connection,
-    protocol::{
-        randr::ConnectionExt as _,
-        xproto::{
-            self, AtomEnum, ConnectionExt as _, GetWindowAttributesReply, Screen,
-        },
+    protocol::xproto::{
+        self, AtomEnum, ConnectionExt as _, GetWindowAttributesReply, Screen,
     },
     rust_connection::RustConnection,
 };
@@ -449,6 +446,7 @@ fn decompress_maybe(data: &[u8]) -> Vec<u8> {
 }
 
 /// List all snapshot IDs for a workspace, newest first.
+#[allow(dead_code)]
 pub async fn list_snapshots(n: u32) -> Result<Vec<String>> {
     let dir = workspace_snapshot_dir(n);
     let mut entries = tokio::fs::read_dir(&dir).await.context("read snapshot dir")?;
@@ -473,6 +471,7 @@ pub async fn list_snapshots(n: u32) -> Result<Vec<String>> {
 }
 
 /// Prune snapshots older than `keep_count` for a workspace.
+#[allow(dead_code)]
 pub async fn prune_snapshots(n: u32, keep_count: usize) -> Result<()> {
     let all = list_snapshots(n).await?;
     if all.len() <= keep_count {

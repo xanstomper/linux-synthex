@@ -11,13 +11,13 @@ Window {
     minimumWidth: 960
     minimumHeight: 640
     title: "Synthex Studio"
-    color: "#0B0F1A"
+    color: "#0C1016"
 
-    readonly property color accentColor: "#FFB300"
-    readonly property color bgColor: "#0B0F1A"
-    readonly property color surfaceColor: "#1A1A2E"
+    readonly property color accentColor: "#6C88A8"
+    readonly property color bgColor: "#0C1016"
+    readonly property color surfaceColor: "#171D24"
     readonly property color textColor: "#FFFFFF"
-    readonly property color mutedText: "#8899AA"
+    readonly property color mutedText: "#9AA1AB"
 
     property int activeTab: 0
 
@@ -60,7 +60,7 @@ Window {
                                     text: modelData
                                     font.pixelSize: 12
                                     font.bold: activeTab === index
-                                    color: activeTab === index ? "#0B0F1A" : mutedText
+                                    color: activeTab === index ? "#0C1016" : mutedText
                                 }
 
                                 MouseArea {
@@ -285,7 +285,7 @@ Window {
                             Layout.preferredHeight: 40
                             Layout.preferredWidth: 200
                             background: Rectangle { color: accentColor; radius: 8 }
-                            contentItem: Text { text: "\u{1F504} Apply & Create Snapshot"; color: "#0B0F1A"; font.pixelSize: 13; font.bold: true; horizontalAlignment: Text.AlignHCenter; verticalAlignment: Text.AlignVCenter }
+                            contentItem: Text { text: "\u{1F504} Apply & Create Snapshot"; color: "#0C1016"; font.pixelSize: 13; font.bold: true; horizontalAlignment: Text.AlignHCenter; verticalAlignment: Text.AlignVCenter }
                             onClicked: { console.log("Theme applied, snapshot created"); }
                         }
                     }
@@ -316,7 +316,7 @@ Window {
                     Layout.fillWidth: true
                     Layout.fillHeight: true
                     radius: 12
-                    color: "#1A1A2E"
+                    color: "#171D24"
                     border.color: "#2A2A3E"
                     border.width: 1
 
@@ -349,7 +349,7 @@ Window {
                         Rectangle {
                             Layout.fillWidth: true
                             Layout.fillHeight: true
-                            color: "#0B0F1A"
+                            color: "#0C1016"
 
                             ColumnLayout {
                                 anchors.fill: parent
@@ -359,7 +359,7 @@ Window {
                                 Rectangle {
                                     Layout.fillWidth: true
                                     Layout.preferredHeight: 60
-                                    radius: 8; color: "#1A1A2E"
+                                    radius: 8; color: "#171D24"
                                     Rectangle { width: 40; height: 40; radius: 8; color: accentColor; anchors.left: parent.left; anchors.leftMargin: 10; anchors.verticalCenter: parent.verticalCenter }
                                     Text { text: "Sample Window"; font.pixelSize: 13; color: "#FFFFFF"; anchors.left: parent.left; anchors.leftMargin: 60; anchors.verticalCenter: parent.verticalCenter }
                                 }
@@ -367,7 +367,7 @@ Window {
                                 Rectangle {
                                     Layout.fillWidth: true
                                     Layout.preferredHeight: 80
-                                    radius: 8; color: "#1A1A2E"
+                                    radius: 8; color: "#171D24"
                                     RowLayout { anchors.fill: parent; anchors.margins: 12; spacing: 8
                                         Repeater {
                                             model: ["#E53935", "#1E88E5", "#43A047", accentColor]
@@ -379,7 +379,7 @@ Window {
                                 Rectangle {
                                     Layout.fillWidth: true
                                     Layout.preferredHeight: 40
-                                    radius: 8; color: "#1A1A2E"
+                                    radius: 8; color: "#171D24"
                                     Rectangle { width: 120; height: 16; radius: 4; color: "#3A3A4E"; anchors.verticalCenter: parent.verticalCenter; anchors.left: parent.left; anchors.leftMargin: 12 }
                                 }
                             }

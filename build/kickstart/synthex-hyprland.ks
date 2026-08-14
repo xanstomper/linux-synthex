@@ -159,6 +159,12 @@ synthex-control-center
 synthex-app-manager
 synthex-update-manager
 
+# SynthOS platform bundles (meta-groups from synthex-comps.xml)
+@synthex-safety
+@synthex-essentials
+@synthex-creator-platform
+@synthex-gaming-platform
+
 # Utilities
 htop
 neofetch
@@ -172,11 +178,46 @@ rsync
 smartmontools
 pciutils
 usbutils
+
+# SynthOS Nova shell & terminal stack (real packages)
+fish
+starship
+zoxide
+eza
+bat
+ripgrep
+wlsunset
+swayidle
+wl-clipboard
+cliphist
 %end
 
 %post
 #!/bin/bash
 set -e
+
+# ── SynthOS Nova shell & terminal configs → /etc/skel (new users) ─────
+SRCTOP=/usr/share/synthex
+install_shell_configs() {
+    local DSTROOT=$1
+    mkdir -p "$DSTROOT/.config/kitty" \
+             "$DSTROOT/.config/fish/conf.d" \
+             "$DSTROOT/.config/starship" \
+             "$DSTROOT/.config/fastfetch" \
+             "$DSTROOT/.config/wofi" \
+             "$DSTROOT/.config/mako"
+    [ -f $SRCTOP/terminal/kitty/kitty.conf ] && cp $SRCTOP/terminal/kitty/kitty.conf "$DSTROOT/.config/kitty/"
+    [ -f $SRCTOP/terminal/kitty/nova.conf ] && cp $SRCTOP/terminal/kitty/nova.conf "$DSTROOT/.config/kitty/"
+    [ -f $SRCTOP/terminal/fish/30-synthex.fish ] && cp $SRCTOP/terminal/fish/30-synthex.fish "$DSTROOT/.config/fish/conf.d/"
+    [ -f $SRCTOP/terminal/starship/starship.toml ] && cp $SRCTOP/terminal/starship/starship.toml "$DSTROOT/.config/starship/"
+    [ -f $SRCTOP/terminal/fastfetch/config.jsonc ] && cp $SRCTOP/terminal/fastfetch/config.jsonc "$DSTROOT/.config/fastfetch/"
+    [ -f $SRCTOP/hyprland/wofi-style.css ] && cp $SRCTOP/hyprland/wofi-style.css "$DSTROOT/.config/wofi/style.css"
+    [ -f $SRCTOP/hyprland/wofi-config ] && cp $SRCTOP/hyprland/wofi-config "$DSTROOT/.config/wofi/config"
+    [ -f $SRCTOP/hyprland/mako.conf ] && cp $SRCTOP/hyprland/mako.conf "$DSTROOT/.config/mako/config"
+}
+# Copy for new users; also apply for the live session user if present
+install_shell_configs /etc/skel
+id liveuser >/dev/null 2>&1 && install_shell_configs /home/liveuser || true
 
 cat > /etc/yum.repos.d/synthex.repo << 'REPOEOF'
 [synthex]

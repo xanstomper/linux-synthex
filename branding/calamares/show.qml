@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: GPL-3.0+
 // SynthOS Calamares Installer Slideshow — show.qml
 // Displayed during installation. Uses calamares.slideshow API v2.
-// Colors: Navy #0B0F1A, Amber #FFB300, Lime #9BBD5C
+// Colors: Navy #10151B, Amber #6C88A8, Lime #6C88A8
 
 import QtQuick 2.15
 import QtQuick.Controls 2.15
@@ -27,7 +27,7 @@ Presentation {
             anchors.fill: parent
             gradient: Gradient {
                 orientation: Gradient.Vertical
-                GradientStop { position: 0.0; color: "#0B0F1A" }
+                GradientStop { position: 0.0; color: "#10151B" }
                 GradientStop { position: 1.0; color: "#111827" }
             }
 
@@ -43,11 +43,11 @@ Presentation {
                     gradient: Gradient {
                         orientation: Gradient.Vertical
                         GradientStop { position: 0.0; color: "#FFD700" }
-                        GradientStop { position: 1.0; color: "#FF8C00" }
+                        GradientStop { position: 1.0; color: "#56759B" }
                     }
                     Text {
                         anchors.centerIn: parent
-                        text: "☀"; font.pixelSize: 52; color: "#0B0F1A"
+                        text: "☀"; font.pixelSize: 52; color: "#10151B"
                     }
                 }
 
@@ -62,12 +62,12 @@ Presentation {
                     Layout.alignment: Qt.AlignHCenter
                     text: "Illuminate Your Desktop"
                     font { pixelSize: 18; family: "Noto Sans" }
-                    color: "#FFB300"
+                    color: "#6C88A8"
                 }
 
                 Rectangle {
                     Layout.alignment: Qt.AlignHCenter
-                    width: 200; height: 2; radius: 1; color: "#FFB300"; opacity: 0.4
+                    width: 200; height: 2; radius: 1; color: "#6C88A8"; opacity: 0.4
                 }
 
                 Text {
@@ -90,7 +90,7 @@ Presentation {
         anchors.fill: parent
 
         Rectangle {
-            anchors.fill: parent; color: "#0B0F1A"
+            anchors.fill: parent; color: "#10151B"
 
             ColumnLayout {
                 anchors { fill: parent; margins: 48 }
@@ -99,7 +99,7 @@ Presentation {
                 Text {
                     text: "Choose Your Desktop Profile"
                     font { pixelSize: 28; weight: Font.Bold; family: "Noto Sans" }
-                    color: "#FFB300"
+                    color: "#6C88A8"
                     Layout.alignment: Qt.AlignHCenter
                 }
 
@@ -124,7 +124,7 @@ Presentation {
                         ]
                         delegate: Rectangle {
                             width: 160; height: 82; radius: 12
-                            color: "#1A1A2E"; border.color: "#2A2A4E"; border.width: 1
+                            color: "#171D24"; border.color: "#2A2A4E"; border.width: 1
 
                             ColumnLayout {
                                 anchors { fill: parent; margins: 14 }
@@ -151,7 +151,7 @@ Presentation {
         anchors.fill: parent
 
         Rectangle {
-            anchors.fill: parent; color: "#0B0F1A"
+            anchors.fill: parent; color: "#10151B"
 
             RowLayout {
                 anchors { fill: parent; margins: 48 }
@@ -164,7 +164,7 @@ Presentation {
                     Text {
                         text: "Built for Gamers"
                         font { pixelSize: 32; weight: Font.Bold; family: "Noto Sans" }
-                        color: "#FFB300"
+                        color: "#6C88A8"
                         wrapMode: Text.WordWrap; Layout.fillWidth: true
                     }
                     Text {
@@ -210,7 +210,7 @@ Presentation {
         anchors.fill: parent
 
         Rectangle {
-            anchors.fill: parent; color: "#0B0F1A"
+            anchors.fill: parent; color: "#10151B"
 
             RowLayout {
                 anchors { fill: parent; margins: 48 }
@@ -249,7 +249,7 @@ Presentation {
                     Text {
                         text: "A Hacker's Playground"
                         font { pixelSize: 32; weight: Font.Bold; family: "Noto Sans" }
-                        color: "#9BBD5C"
+                        color: "#6C88A8"
                         wrapMode: Text.WordWrap; Layout.fillWidth: true
                     }
                     Text {
@@ -269,7 +269,7 @@ Presentation {
         anchors.fill: parent
 
         Rectangle {
-            anchors.fill: parent; color: "#0B0F1A"
+            anchors.fill: parent; color: "#10151B"
 
             ColumnLayout {
                 anchors { fill: parent; margins: 48 }
@@ -281,7 +281,7 @@ Presentation {
                     Text {
                         text: "AI-Native Desktop"
                         font { pixelSize: 32; weight: Font.Bold; family: "Noto Sans" }
-                        color: "#FFB300"
+                        color: "#6C88A8"
                     }
                 }
 
@@ -304,7 +304,7 @@ Presentation {
                         ]
                         delegate: Rectangle {
                             width: 280; height: 96; radius: 12
-                            color: "#1A1A2E"; border.color: "#2A2A4E"; border.width: 1
+                            color: "#171D24"; border.color: "#2A2A4E"; border.width: 1
 
                             RowLayout {
                                 anchors { fill: parent; margins: 16 }
@@ -331,7 +331,7 @@ Presentation {
         anchors.fill: parent
 
         Rectangle {
-            anchors.fill: parent; color: "#0B0F1A"
+            anchors.fill: parent; color: "#10151B"
 
             RowLayout {
                 anchors { fill: parent; margins: 48 }
@@ -343,7 +343,7 @@ Presentation {
                     Text {
                         text: "Secure by Default"
                         font { pixelSize: 32; weight: Font.Bold; family: "Noto Sans" }
-                        color: "#9BBD5C"; wrapMode: Text.WordWrap; Layout.fillWidth: true
+                        color: "#6C88A8"; wrapMode: Text.WordWrap; Layout.fillWidth: true
                     }
                     Text {
                         text: "SynthOS ships hardened out of the box.\nNo compromises on your security."
@@ -391,7 +391,7 @@ Presentation {
             anchors.fill: parent
             gradient: Gradient {
                 orientation: Gradient.Vertical
-                GradientStop { position: 0.0; color: "#0B0F1A" }
+                GradientStop { position: 0.0; color: "#10151B" }
                 GradientStop { position: 1.0; color: "#0D1A0D" }
             }
 
@@ -405,7 +405,7 @@ Presentation {
                     Text {
                         text: "Almost There!"
                         font { pixelSize: 36; weight: Font.Bold; family: "Noto Sans" }
-                        color: "#9BBD5C"
+                        color: "#6C88A8"
                     }
                 }
 
@@ -441,7 +441,7 @@ Presentation {
                         delegate: RowLayout {
                             spacing: 12; Layout.alignment: Qt.AlignHCenter
                             Text { text: modelData[0]; font.pixelSize: 16 }
-                            Text { text: modelData[1]; font.pixelSize: 13; color: "#FFB300" }
+                            Text { text: modelData[1]; font.pixelSize: 13; color: "#6C88A8" }
                             Text { text: "·"; color: "#2A2A4E" }
                             Text { text: modelData[2]; font.pixelSize: 12; color: "#8899AA" }
                         }
@@ -451,7 +451,7 @@ Presentation {
                 Text {
                     Layout.alignment: Qt.AlignHCenter
                     text: "SynthOS 2026.10 · Built with ❤ by the community"
-                    font { pixelSize: 13; weight: Font.Bold }; color: "#9BBD5C"
+                    font { pixelSize: 13; weight: Font.Bold }; color: "#6C88A8"
                     topPadding: 10
                 }
             }

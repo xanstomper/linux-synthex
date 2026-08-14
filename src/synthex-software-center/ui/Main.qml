@@ -21,7 +21,7 @@ ApplicationWindow {
         Rectangle {
             Layout.fillWidth: true
             Layout.preferredHeight: 100
-            color: "#9BBD5C"
+            color: "#6C88A8"
 
             ColumnLayout {
                 anchors.centerIn: parent
@@ -123,7 +123,7 @@ ApplicationWindow {
                             MouseArea {
                                 anchors.fill: parent
                                 hoverEnabled: true
-                                onEntered: parent.border.color = "#9BBD5C"
+                                onEntered: parent.border.color = "#6C88A8"
                                 onExited: parent.border.color = "#E0E0E0"
                             }
                         }
@@ -164,7 +164,7 @@ ApplicationWindow {
                             MouseArea {
                                 anchors.fill: parent
                                 hoverEnabled: true
-                                onEntered: parent.border.color = "#9BBD5C"
+                                onEntered: parent.border.color = "#6C88A8"
                                 onExited: parent.border.color = "#E0E0E0"
                             }
                         }

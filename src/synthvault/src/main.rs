@@ -1,7 +1,7 @@
 use anyhow::{Context, Result};
 use clap::{Parser, Subcommand};
 use serde::{Deserialize, Serialize};
-use sha2::{Digest, Sha256};
+use sha2::Digest;
 use std::{
     fs,
     os::unix::fs::PermissionsExt,
@@ -11,6 +11,7 @@ use std::{
 
 const CFG_FILE: &str = "/etc/synthvault/volumes.json";
 const KEY_DIR: &str = "/etc/synthvault/keys";
+#[allow(dead_code)]
 const AUDIT_LOG: &str = "/var/log/synthvault/audit.json";
 
 #[derive(Debug, Clone, Serialize, Deserialize)]

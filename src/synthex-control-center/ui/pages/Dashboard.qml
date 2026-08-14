@@ -6,13 +6,13 @@ Rectangle {
     color: "transparent"
     anchors.fill: parent
 
-    readonly property color accentColor: "#9BBD5C"
-    readonly property color surfaceColor: "#1A1A2E"
+    readonly property color accentColor: "#6C88A8"
+    readonly property color surfaceColor: "#171D24"
     readonly property color textColor: "#FFFFFF"
-    readonly property color mutedText: "#8899AA"
-    readonly property color okColor: "#43A047"
-    readonly property color warnColor: "#FB8C00"
-    readonly property color dangerColor: "#E53935"
+    readonly property color mutedText: "#9AA1AB"
+    readonly property color okColor: "#7FBF8A"
+    readonly property color warnColor: "#D9B47E"
+    readonly property color dangerColor: "#D97C82"
 
     property var hwProfile: null
     property bool profileLoaded: false
@@ -92,7 +92,7 @@ Rectangle {
                 Layout.preferredHeight: 140
                 color: surfaceColor
                 radius: 12
-                border.color: "#2A2A3E"
+                border.color: "#12FFFFFF"
                 border.width: 1
 
                 ColumnLayout {
@@ -120,7 +120,7 @@ Rectangle {
                         Layout.fillWidth: true
                         height: 6
                         radius: 3
-                        color: "#2A2A3E"
+                        color: "#12FFFFFF"
                         Rectangle {
                             width: parent.width * (cpu ? Math.min(cpu.threads / 32, 1.0) : 0)
                             height: 6
@@ -145,7 +145,7 @@ Rectangle {
                 Layout.preferredHeight: 140
                 color: surfaceColor
                 radius: 12
-                border.color: "#2A2A3E"
+                border.color: "#12FFFFFF"
                 border.width: 1
 
                 ColumnLayout {
@@ -198,7 +198,7 @@ Rectangle {
                 Layout.preferredHeight: 140
                 color: surfaceColor
                 radius: 12
-                border.color: "#2A2A3E"
+                border.color: "#12FFFFFF"
                 border.width: 1
 
                 ColumnLayout {
@@ -224,7 +224,7 @@ Rectangle {
                         Layout.fillWidth: true
                         height: 6
                         radius: 3
-                        color: "#2A2A3E"
+                        color: "#12FFFFFF"
                         Rectangle {
                             width: parent.width * ramPct
                             height: 6
@@ -247,7 +247,7 @@ Rectangle {
                 Layout.preferredHeight: 140
                 color: surfaceColor
                 radius: 12
-                border.color: "#2A2A3E"
+                border.color: "#12FFFFFF"
                 border.width: 1
 
                 ColumnLayout {
@@ -326,7 +326,7 @@ Rectangle {
                     Layout.preferredHeight: 80
                     color: active ? Qt.rgba(0.608, 0.741, 0.361, 0.08) : (hovered ? "#24243A" : surfaceColor)
                     radius: 10
-                    border.color: active ? accentColor : "#2A2A3E"
+                    border.color: active ? accentColor : "#12FFFFFF"
                     border.width: active ? 2 : 1
                     Behavior on color { ColorAnimation { duration: 160 } }
                     Behavior on border.color { ColorAnimation { duration: 160 } }

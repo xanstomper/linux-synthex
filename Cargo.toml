@@ -82,3 +82,9 @@ dirs = "6.0"
 toml = "0.8"
 # CLI
 indicatif = "0.17"
+
+[profile.release]
+opt-level = 3
+lto = true
+codegen-units = 1
+strip = true

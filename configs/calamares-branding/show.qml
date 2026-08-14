@@ -13,11 +13,11 @@ Rectangle {
     ListModel {
         id: slides
         ListElement { title: "Welcome to Synthex"; subtitle: "The gaming-focused Linux distribution"; color: "#e94560" }
-        ListElement { title: "Gaming Ready"; subtitle: "Steam, Proton, Lutris, Heroic — all preconfigured"; color: "#0f3460" }
+        ListElement { title: "Gaming Ready"; subtitle: "Steam, Proton, Lutris, Heroic — all preconfigured"; color: "#232A34" }
         ListElement { title: "Performance Tuned"; subtitle: "CachyOS-style kernel tuning out of the box"; color: "#16213e" }
         ListElement { title: "Bazzite Features"; subtitle: "ujust, handheld support, Steam Gaming Mode"; color: "#533483" }
         ListElement { title: "Nobara Fixes"; subtitle: "NVIDIA wizard, OBS plugins, audio improvements"; color: "#e94560" }
-        ListElement { title: "Mint Usability"; subtitle: "Timeshift, USB writer, beginner-friendly tools"; color: "#0f3460" }
+        ListElement { title: "Mint Usability"; subtitle: "Timeshift, USB writer, beginner-friendly tools"; color: "#232A34" }
         ListElement { title: "Recovery System"; subtitle: "Btrfs snapshots, automatic rollback, boot repair"; color: "#16213e" }
         ListElement { title: "Unified Control Center"; subtitle: "One app for drivers, RGB, performance, snapshots"; color: "#533483" }
         ListElement { title: "Almost Done"; subtitle: "Installing packages and configuring your system..."; color: "#e94560" }

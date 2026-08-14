@@ -68,6 +68,7 @@ pub struct AuditEntry {
 
 impl AuditEntry {
     /// Format as a human-readable log line
+    #[allow(dead_code)]
     pub fn to_log_line(&self) -> String {
         let event_str = match &self.event {
             AuditEvent::SandboxCreated { label } =>

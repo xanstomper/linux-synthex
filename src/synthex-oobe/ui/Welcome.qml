@@ -28,7 +28,7 @@ Kirigami.ApplicationWindow {
                 Kirigami.Card {
                     banner {
                         title: "🖥 Desktop Tour"
-                        backgroundColor: "#9BBD5C"
+                        backgroundColor: "#6C88A8"
                     }
                     contentItem: Label {
                         text: "Explore your new Synthex desktop"

@@ -12,7 +12,7 @@ ApplicationWindow {
     visible: true
     title: qsTr("SynthOS App Manager")
     Material.theme: Material.Dark
-    Material.accent: "#FFB300"
+    Material.accent: "#6C88A8"
 
     // ─── State ─────────────────────────────────────────────
     property string currentCategory: "featured"
@@ -81,7 +81,7 @@ ApplicationWindow {
 
                         Rectangle {
                             width: 3; height: parent.height
-                            color: modelData.id === root.currentCategory ? "#FFB300" : "transparent"
+                            color: modelData.id === root.currentCategory ? "#6C88A8" : "transparent"
                         }
 
                         Row {
@@ -90,7 +90,7 @@ ApplicationWindow {
                             Text { text: modelData.icon; font.pixelSize: 15 }
                             Text {
                                 text: modelData.label; font.pixelSize: 13
-                                color: modelData.id === root.currentCategory ? "#FFFFFF" : "#8899AA"
+                                color: modelData.id === root.currentCategory ? "#FFFFFF" : "#9AA1AB"
                             }
                         }
                         MouseArea {
@@ -119,7 +119,7 @@ ApplicationWindow {
                         Layout.preferredWidth: 260; height: 36
                         placeholderText: qsTr("Search apps…")
                         color: "#FFFFFF"
-                        Material.accent: "#FFB300"
+                        Material.accent: "#6C88A8"
                         onTextChanged: root.searchQuery = text
                     }
                     Button {
@@ -158,7 +158,7 @@ ApplicationWindow {
                                 Text { text: modelData.icon; font.pixelSize: 40; anchors.horizontalCenter: parent.horizontalCenter }
                                 Text { text: modelData.name; font { pixelSize: 14; bold: true }; color: "#FFFFFF"; anchors.horizontalCenter: parent.horizontalCenter }
                                 Text {
-                                    text: modelData.desc; font.pixelSize: 11; color: "#8899AA"
+                                    text: modelData.desc; font.pixelSize: 11; color: "#9AA1AB"
                                     wrapMode: Text.WordWrap; width: parent.width
                                     horizontalAlignment: Text.AlignHCenter
                                 }
@@ -197,7 +197,7 @@ ApplicationWindow {
                 ProgressBar {
                     anchors { right: parent.right; rightMargin: 16; verticalCenter: parent.verticalCenter }
                     width: 200; visible: root.installing; indeterminate: true
-                    Material.accent: "#FFB300"
+                    Material.accent: "#6C88A8"
                 }
             }
         }

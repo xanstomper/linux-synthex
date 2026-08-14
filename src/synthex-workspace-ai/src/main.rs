@@ -21,24 +21,23 @@ use std::{
 
 use anyhow::{Context, Result};
 use chrono::Utc;
-use serde::{Deserialize, Serialize};
 use tokio::sync::RwLock;
 use tracing::{error, info};
-use tracing_subscriber::{fmt, EnvFilter};
+use tracing_subscriber::EnvFilter;
 use zbus::{connection, interface};
 
 use ai_context_sync::{
-    AgentRegistry, IsolationLevel, WorkspaceContext, WorkspaceHistoryEntry, WorkspaceSnapshot,
-    apply_presets, load_all_contexts, load_context, load_history, save_context,
+    AgentRegistry, WorkspaceContext, WorkspaceSnapshot,
+    apply_presets, load_all_contexts, load_history, save_context,
     sync_context_to_brain,
 };
 use kwin_bridge::KwinBridge;
 use multi_agent_coordinator::{
-    AgentRecord, ClipboardEntry, CoordinatorHandle, DelegationTask, TaskStatus, WorkspaceEvent,
+    AgentRecord, CoordinatorHandle, WorkspaceEvent,
     spawn_coordinator,
 };
-use session::{SessionMeta, RestoreResult, list_sessions, restore_session, save_session};
-use snapshot::{WorkspaceSnapshot as WsSnapshot, capture_workspace, load_latest_snapshot};
+use session::{list_sessions, restore_session, save_session};
+use snapshot::{capture_workspace, load_latest_snapshot};
 
 // ─── Daemon state ─────────────────────────────────────────────────────────────
 
@@ -256,7 +255,7 @@ impl WorkspaceAI {
 
     /// Register `agent_id` as the active agent for workspace `n`.
     async fn assign_agent_to_workspace(&self, agent_id: String, workspace_n: u32) -> bool {
-        let mut state = self.state.write().await;
+        let state = self.state.write().await;
 
         // Upsert in registry.
         let record = if let Some(existing) = state.coordinator
@@ -588,7 +587,7 @@ async fn main() -> Result<()> {
     {
         let _state = Arc::clone(&state);
         session::spawn_autosave_task(move || {
-            let state = Arc::clone(&_state);
+            let _state = Arc::clone(&_state);
             async move {
                 let mut snaps = Vec::new();
                 for n in 0..10u32 {

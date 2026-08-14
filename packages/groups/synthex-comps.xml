@@ -280,6 +280,51 @@
         </packagelist>
       </group>
 
+      <!-- ═══════════════════════════════════════════════════════════════
+           synthex-creator-platform — Creator stack bundle (core + creator + safety)
+           ═══════════════════════════════════════════════════════════════ -->
+      <group>
+        <id>synthex-creator-platform</id>
+        <name>Synthex Creator Platform</name>
+        <description>Full creator workstation: core, essentials, safety and the creative suite</description>
+        <default>false</default>
+        <packagelist>
+          <packagereq type="mandatory">synthex-core</packagereq>
+          <packagereq type="mandatory">synthex-essentials</packagereq>
+          <packagereq type="mandatory">synthex-safety-check</packagereq>
+          <packagereq type="default">blender</packagereq>
+          <packagereq type="default">krita</packagereq>
+          <packagereq type="default">gimp</packagereq>
+          <packagereq type="default">inkscape</packagereq>
+          <packagereq type="default">kdenlive</packagereq>
+          <packagereq type="default">audacity</packagereq>
+          <packagereq type="default">obs-studio</packagereq>
+        </packagelist>
+      </group>
+
+      <!-- ═══════════════════════════════════════════════════════════════
+           synthex-gaming-platform — Gaming stack bundle (core + gaming + safety)
+           ═══════════════════════════════════════════════════════════════ -->
+      <group>
+        <id>synthex-gaming-platform</id>
+        <name>Synthex Gaming Platform</name>
+        <description>Full gaming workstation: core, essentials, safety, kernel and the gaming stack</description>
+        <default>false</default>
+        <packagelist>
+          <packagereq type="mandatory">synthex-core</packagereq>
+          <packagereq type="mandatory">synthex-kernel</packagereq>
+          <packagereq type="mandatory">synthex-essentials</packagereq>
+          <packagereq type="mandatory">synthex-safety-check</packagereq>
+          <packagereq type="default">synthex-gaming-optimizations</packagereq>
+          <packagereq type="default">steam</packagereq>
+          <packagereq type="default">gamescope</packagereq>
+          <packagereq type="default">mangohud</packagereq>
+          <packagereq type="default">gamemode</packagereq>
+          <packagereq type="default">lutris</packagereq>
+          <packagereq type="default">heroic-games-launcher</packagereq>
+        </packagelist>
+      </group>
+
     </groups>
   </composable>
 </composables>

@@ -9,7 +9,7 @@ Rectangle {
     
     id: sidebar
     width: 180
-    color: "#1A1A2E"
+    color: "#171D24"
     
     ColumnLayout {
         anchors.fill: parent
@@ -26,7 +26,7 @@ Rectangle {
                 text: "☀️ Synthex"
                 font.pixelSize: 20
                 font.bold: true
-                color: "#9BBD5C"
+                color: "#6C88A8"
             }
         }
         
@@ -51,7 +51,7 @@ Rectangle {
                 Layout.leftMargin: 8
                 Layout.rightMargin: 8
                 radius: 8
-                color: sidebar.currentIndex === index ? "#9BBD5C" : "transparent"
+                color: sidebar.currentIndex === index ? "#6C88A8" : "transparent"
                 
                 RowLayout {
                     anchors.fill: parent
@@ -63,7 +63,7 @@ Rectangle {
                     }
                     Text {
                         text: model.name
-                        color: sidebar.currentIndex === index ? "#0B0F1A" : "#FFFFFF"
+                        color: sidebar.currentIndex === index ? "#0C1116" : "#FFFFFF"
                         font.pixelSize: 13
                         font.bold: sidebar.currentIndex === index
                     }
@@ -73,7 +73,7 @@ Rectangle {
                 MouseArea {
                     anchors.fill: parent
                     hoverEnabled: true
-                    onEntered: if (sidebar.currentIndex !== index) color = "#3A3A4A"
+                    onEntered: if (sidebar.currentIndex !== index) color = "#1E242F"
                     onExited: if (sidebar.currentIndex !== index) color = "transparent"
                     onClicked: {
                         sidebar.currentIndex = index

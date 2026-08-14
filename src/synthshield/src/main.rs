@@ -56,6 +56,7 @@ impl Default for ShieldState {
     }
 }
 
+#[allow(dead_code)]
 #[derive(Debug, Serialize, Deserialize, Default)]
 struct ScanResult {
     total_files: usize,

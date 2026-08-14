@@ -1,0 +1,48 @@
+{
+  "$schema": "https://synthex-os.org/schemas/design-tokens.json",
+  "name": "SynthOS Nova",
+  "version": "2026.10.2",
+  "description": "Single source of truth for the SynthOS desktop visual identity. Palette extracted pixel-accurately from the reference mockups: deep blue-charcoal surfaces, desaturated slate-blue accent, cream + lavender secondaries, muted status colors.",
+  "color": {
+    "bg0":        "#10151B",
+    "bg1":        "#171D24",
+    "bg2":        "#1E242F",
+    "bg3":        "#232A34",
+    "bar":        "#141B24",
+    "border":     "rgba(255,255,255,0.06)",
+    "borderHi":   "rgba(255,255,255,0.12)",
+    "accent":     "#6C88A8",
+    "accentHi":   "#82A0BE",
+    "accentDeep": "#56759B",
+    "accentInk":  "#0C1116",
+    "lavender":   "#ABA2E4",
+    "cream":      "#DECFC4",
+    "success":    "#7FBF8A",
+    "warning":    "#D9B47E",
+    "danger":     "#D97C82",
+    "text":       "#DDE3EB",
+    "textDim":    "#9AA1AB",
+    "textMute":   "#67707D"
+  },
+  "radius": { "xs": 6, "sm": 10, "md": 14, "lg": 18, "panel": 20, "pill": 9999 },
+  "spacing": { "xs": 4, "sm": 8, "md": 12, "lg": 16, "xl": 24, "xxl": 32 },
+  "type": {
+    "family": "Inter",
+    "mono": "JetBrains Mono",
+    "scale": { "caption": 10, "bodySm": 12, "body": 14, "bodyLg": 16, "heading": 20, "display": 30 },
+    "tracking": { "label": 2, "title": 1 }
+  },
+  "motion": { "micro": 120, "standard": 180, "enter": 220, "ease": "cubic-bezier(0.4, 0.0, 0.2, 1.0)" },
+  "surface": {
+    "panelOpacity": 0.88,
+    "cardOpacity": 0.94,
+    "shadow": "0 8px 24px rgba(0,0,0,0.35)",
+    "blurPx": 24
+  },
+  "reference": {
+    "source": "extracted from supplied reference screenshots via pixel analysis",
+    "bar": "thin, edge-to-edge, bottom (#141B24)",
+    "accentHue": "210° desaturated slate blue",
+    "secondaries": ["260° lavender (REF B)", "30–40° warm cream (REF A)"]
+  }
+}

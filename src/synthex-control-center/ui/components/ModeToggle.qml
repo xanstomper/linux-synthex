@@ -12,8 +12,8 @@ Rectangle {
     width: 130
     height: 60
     radius: 10
-    color: active ? "#9BBD5C" : "#1A1A2E"
-    border.color: active ? "#9BBD5C" : "#3A3A4A"
+    color: active ? "#6C88A8" : "#171D24"
+    border.color: active ? "#6C88A8" : "#1E242F"
     border.width: active ? 2 : 1
     
     ColumnLayout {
@@ -26,7 +26,7 @@ Rectangle {
         }
         Text {
             text: label
-            color: active ? "#0B0F1A" : "#FFFFFF"
+            color: active ? "#0C1116" : "#FFFFFF"
             font.pixelSize: 11
             font.bold: active
             Layout.alignment: Qt.AlignHCenter
@@ -36,8 +36,8 @@ Rectangle {
     MouseArea {
         anchors.fill: parent
         hoverEnabled: true
-        onEntered: if (!active) parent.color = "#3A3A4A"
-        onExited: if (!active) parent.color = "#1A1A2E"
+        onEntered: if (!active) parent.color = "#1E242F"
+        onExited: if (!active) parent.color = "#171D24"
         onClicked: parent.clicked()
     }
 }

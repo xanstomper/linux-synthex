@@ -35,10 +35,12 @@ pub trait AIProvider: Send + Sync {
     /// Stream a chat completion, collecting the full response.
     async fn chat_stream(&self, req: ChatRequest) -> Result<ChatResponse>;
     /// List available models.
+    #[allow(dead_code)]
     async fn list_models(&self) -> Result<Vec<String>>;
     /// Return true when the provider endpoint is reachable.
     async fn health_check(&self) -> bool;
     /// Human-readable name for logging.
+    #[allow(dead_code)]
     fn name(&self) -> &'static str;
 }
 
@@ -86,11 +88,13 @@ struct OllamaMessage {
     content: String,
 }
 
+#[allow(dead_code)]
 #[derive(Deserialize)]
 struct OllamaTagsResponse {
     models: Vec<OllamaModel>,
 }
 
+#[allow(dead_code)]
 #[derive(Deserialize)]
 struct OllamaModel {
     name: String,
@@ -412,6 +416,7 @@ impl AutoProvider {
         }
     }
 
+    #[allow(dead_code)]
     pub async fn select_provider(&self) -> &dyn AIProvider {
         if self.ollama.health_check().await {
             info!("auto-provider: using Ollama");

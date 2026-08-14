@@ -1,5 +1,8 @@
-// Synthex Synthex Focus — Panel layout
-// Installed via: plasma-apply-desktoptheme
+// ╔══════════════════════════════════════════════════════════════╗
+// ║  SynthOS Nova — Plasma panel layout (Synthex Focus profile)  ║
+// ║  Floating centered bottom panel · real Plasma 6 widgets      ║
+// ╚══════════════════════════════════════════════════════════════╝
+// Applied via: plasma-apply-desktoptheme / look-and-feel import
 
 var plasma = getApi("plasma");
 
@@ -9,40 +12,45 @@ for (var i = 0; i < existing.length; i++) {
     removePanel(existing[i]);
 }
 
-// Create panels
-var panels = [];
-var panelConfigs = {
-  "top": {
-    "type": "minimal",
-    "height": 28,
-    "opacity": 0.85,
-    "blur": true,
-    "widgets": [
-      "launcher",
-      "spacer",
-      "clock",
-      "tray"
-    ]
-  }
-};
+// ─── Single floating panel, bottom, centered ───────────────────────────
+var panel = new Panel("org.kde.plasma.panel");
+panel.location = "bottom";
+panel.height = 44;          // compact
+panel.floating = true;      // Nova floating look (Plasma 6)
 
-for (var loc in panelConfigs) {
-    var cfg = panelConfigs[loc];
-    var panel = new Panel("org.kde.panel");
-    panel.location = loc;
-    if (cfg.height) panel.height = cfg.height;
-    if (cfg.width) panel.width = cfg.width;
-    if (cfg.floating) panel.floating = true;
-    if (cfg.opacity < 1.0 && !cfg.blur) panel.opacity = cfg.opacity;
-    
-    // Add widgets
-    for (var w = 0; w < cfg.widgets.length; w++) {
-        var wid = cfg.widgets[w];
-        if (wid == 'spacer') panel.addSpacer();
-        else panel.addWidget("org.kde.plasma." + wid);
-    }
-    
-    panels.push(panel);
-}
+// Left: application launcher + window buttons
+panel.addWidget("org.kde.plasma.kickoff");
+panel.addWidget("org.kde.plasma.marginsseparator");
+var tasks = panel.addWidget("org.kde.plasma.icontasks");
+tasks.currentConfigGroup = ["General"];
+tasks.writeConfig("launchers", [
+    "applications:org.kde.konsole.desktop",
+    "applications:org.kde.dolphin.desktop",
+    "applications:firefox.desktop",
+    "applications:systemsettings.desktop"
+].join(","));
+tasks.writeConfig("groupingStrategy", "1");   // group by app
+tasks.writeConfig("maxStripes", "1");
+tasks.writeConfig("showToolbars", "false");
 
-print("Synthex Synthex Focus panels applied");
+// Center: media controls (real MPRIS)
+panel.addSpacer();
+panel.addWidget("org.kde.plasma.mediacontroller");
+panel.addSpacer();
+
+// Right: system tray + clock
+var tray = panel.addWidget("org.kde.plasma.systemtray");
+tray.currentConfigGroup = ["General"];
+tray.writeConfig("pin", "org.kde.plasma.volume,org.kde.plasma.networkmanagement,org.kde.plasma.battery,org.kde.plasma.bluetooth,org.kde.plasma.notifications,org.kde.plasma.nightcolor");
+tray.writeConfig("scaleIconsToFit", "true");
+
+var clock = panel.addWidget("org.kde.plasma.digitalclock");
+clock.currentConfigGroup = ["Appearance"];
+clock.writeConfig("showDate", "true");
+clock.writeConfig("dateFormat", "custom");
+clock.writeConfig("customDateFormat", "ddd  d  HH:mm");
+clock.writeConfig("fontFamily", "Inter");
+
+panel.addWidget("org.kde.plasma.marginsseparator");
+
+print("SynthOS Nova panel layout applied");

@@ -6,7 +6,6 @@ use anyhow::Result;
 use clap::{Parser, Subcommand};
 use serde::{Serialize, Deserialize};
 use std::collections::HashMap;
-use std::process::Command;
 
 #[derive(Parser)]
 #[command(name = "synthex-proton", version = "0.1.0", about = "Proton/Wine-GE manager for SynthOS")]

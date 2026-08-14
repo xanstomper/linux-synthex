@@ -94,7 +94,7 @@ Kirigami.ScrollablePage {
                 }
                 Label {
                     text: downloadStatus
-                    color: "#FFB300"
+                    color: "#6C88A8"
                     visible: downloadStatus !== ""
                 }
             }
@@ -131,7 +131,7 @@ Kirigami.ScrollablePage {
 
             RowLayout {
                 Kirigami.FormData.label: i18n("Lutris runners path:")
-                Label { text: "~/.local/share/lutris/runners/"; font.pixelSize: 11; color: "#8899AA" }
+                Label { text: "~/.local/share/lutris/runners/"; font.pixelSize: 11; color: "#9AA1AB" }
             }
 
             RowLayout {
@@ -151,7 +151,7 @@ Kirigami.ScrollablePage {
         ColumnLayout {
             spacing: 8
             Label { text: i18n("This will download the latest Proton-GE from GitHub\nand install it to ~/.steam/steam/compatibilitytools.d/"); wrapMode: Text.WordWrap }
-            Label { text: i18n("Requires: curl, jq"); color: "#8899AA"; font.pixelSize: 11 }
+            Label { text: i18n("Requires: curl, jq"); color: "#9AA1AB"; font.pixelSize: 11 }
         }
 
         onAccepted: {

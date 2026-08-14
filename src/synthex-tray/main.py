@@ -57,7 +57,7 @@ def daemon_loop():
             os.makedirs(os.path.dirname(STATE_FILE), exist_ok=True)
             with open(STATE_FILE, "w") as f:
                 json.dump(status, f)
-            time.sleep(30)
+            time.sleep(5)   # Brain OS: poll every 5 s for snappy tray status
         except KeyboardInterrupt:
             break
         except Exception as e: log.debug("tray: %s", e)

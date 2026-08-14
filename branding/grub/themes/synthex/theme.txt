@@ -4,7 +4,7 @@
 #
 # Palette:
 #   Background ........... #090910   near-black navy
-#   Amber primary ........ #FFB300   vivid amber
+#   Amber primary ........ #6C88A8   vivid amber
 #   Amber bright ......... #FFD060   highlight / selected
 #   Amber dim ............ #CC8800   subtitle / accent
 #   Amber deep ........... #7A5C00   muted warm
@@ -38,7 +38,7 @@ desktop-image:   "background.png"
     align  = "center"
     text   = "SynthOS"
     font   = "font-title"
-    color  = "#FFB300"
+    color  = "#6C88A8"
 }
 
 # ── Tagline ───────────────────────────────────────────────────────────────────
@@ -111,7 +111,7 @@ desktop-image:   "background.png"
     top          = 77%
     width        = 60%
     height       = 5
-    fg_color     = "#FFB300"
+    fg_color     = "#6C88A8"
     bg_color     = "#1E1A0F"
     border_color = "#3A3018"
 }

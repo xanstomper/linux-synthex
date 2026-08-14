@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- SynthOS Nova — default wallpaper
+     Recreated from the reference screenshot's wallpaper region (pixel-sampled):
+     a calm slate-blue → blue-charcoal vertical gradient with two soft accent
+     blooms. Bright at the top (so the dock+wallpaper reads as one calm field),
+     settling into deep blue-charcoal toward the dock. Large negative space. -->
+<svg xmlns="http://www.w3.org/2000/svg" width="3840" height="2160" viewBox="0 0 3840 2160">
+  <defs>
+    <!-- vertical gradient: bright slate-blue top → blue-charcoal bottom
+         (sampled: #7B8695 → #5B5F66 → #2F3744 → #1B222B) -->
+    <linearGradient id="sky" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%"   stop-color="#7B8695"/>
+      <stop offset="22%"  stop-color="#5B5F66"/>
+      <stop offset="48%"  stop-color="#3D424A"/>
+      <stop offset="74%"  stop-color="#2F3744"/>
+      <stop offset="100%" stop-color="#1B222B"/>
+    </linearGradient>
+
+    <radialGradient id="bloom1" cx="50%" cy="50%" r="50%">
+      <stop offset="0%"  stop-color="#82A0BE" stop-opacity="0.16"/>
+      <stop offset="45%" stop-color="#82A0BE" stop-opacity="0.06"/>
+      <stop offset="100%" stop-color="#82A0BE" stop-opacity="0"/>
+    </radialGradient>
+    <radialGradient id="bloom2" cx="50%" cy="50%" r="50%">
+      <stop offset="0%"  stop-color="#ABA2E4" stop-opacity="0.10"/>
+      <stop offset="50%" stop-color="#ABA2E4" stop-opacity="0.03"/>
+      <stop offset="100%" stop-color="#ABA2E4" stop-opacity="0"/>
+    </radialGradient>
+
+    <linearGradient id="dockshade" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%"   stop-color="#000000" stop-opacity="0"/>
+      <stop offset="100%" stop-color="#000000" stop-opacity="0.22"/>
+    </linearGradient>
+  </defs>
+
+  <rect width="3840" height="2160" fill="url(#sky)"/>
+
+  <!-- soft slate bloom, upper-left third -->
+  <circle cx="1080" cy="540" r="1500" fill="url(#bloom1)"/>
+  <!-- lavender bloom, center-right -->
+  <circle cx="2700" cy="720" r="1100" fill="url(#bloom2)"/>
+
+  <!-- whisper-thin horizon lines (terminal-inspired structure) -->
+  <line x1="0" y1="1500" x2="3840" y2="1500" stroke="#82A0BE" stroke-opacity="0.06" stroke-width="2"/>
+  <line x1="0" y1="1512" x2="3840" y2="1512" stroke="#ABA2E4" stroke-opacity="0.04" stroke-width="2"/>
+
+  <!-- subtle mark, lower-left (far from the centered dock) -->
+  <circle cx="220" cy="1950" r="5" fill="#82A0BE" fill-opacity="0.45"/>
+  <circle cx="244" cy="1950" r="5" fill="#9AA1AB" fill-opacity="0.30"/>
+  <circle cx="268" cy="1950" r="5" fill="#ABA2E4" fill-opacity="0.30"/>
+
+  <!-- gentle darkening toward the bottom dock -->
+  <rect width="3840" height="2160" fill="url(#dockshade)" y="1700" height="460"/>
+</svg>

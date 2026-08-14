@@ -1,14 +1,13 @@
 use crate::capabilities::{Capability, NetworkScope};
 use crate::audit::{AuditEntry, AuditEvent};
 use anyhow::{anyhow, Context, Result};
-use nix::unistd::{Uid, Gid};
 use serde::{Deserialize, Serialize};
 use std::collections::{HashMap, HashSet};
 use std::path::PathBuf;
 use std::sync::Arc;
-use std::time::{Duration, Instant};
+use std::time::Instant;
 use tokio::sync::RwLock;
-use tracing::{debug, error, info, warn};
+use tracing::{debug, info, warn};
 use uuid::Uuid;
 use chrono::Utc;
 
@@ -131,6 +130,7 @@ impl Default for SandboxConfig {
 }
 
 /// Live state of a running agent inside a sandbox
+#[allow(dead_code)]
 #[derive(Debug)]
 struct AgentState {
     handle: AgentHandle,
@@ -149,8 +149,10 @@ pub struct SandboxInstance {
     agent: Option<AgentState>,
     audit_log: Vec<AuditEntry>,
     pub status: SandboxStatus,
+    #[allow(dead_code)]
     created_at: chrono::DateTime<Utc>,
     /// Pending approval requests (capability_key -> requester_pid)
+    #[allow(dead_code)]
     pending_approvals: HashMap<String, u32>,
 }
 
@@ -207,6 +209,7 @@ impl SandboxInstance {
         self.agent.as_ref().and_then(|a| a.pid)
     }
 
+    #[allow(dead_code)]
     pub fn has_capability_exact(&self, cap: &Capability) -> bool {
         self.capabilities.contains(&cap.to_audit_string())
     }
@@ -227,6 +230,7 @@ impl SandboxInstance {
     }
 
     /// Check network access for a given domain
+    #[allow(dead_code)]
     pub fn can_access_domain(&self, domain: &str) -> bool {
         self.capability_objects.iter().any(|c| c.allows_network_domain(domain))
     }

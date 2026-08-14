@@ -56,7 +56,58 @@ impl WeatherSnapshot {
     fn is_snowy(&self)  -> bool { self.condition == "snowy" }
 }
 
+/// Whether outbound weather lookups are permitted.
+///
+/// **Privacy default: OFF.** Network weather fetching leaks the user's public
+/// IP address (and an approximate location) to a third-party service (wttr.in).
+/// SynthOS ships with this disabled; the ambient/temporal theming uses a purely
+/// local time-of-day + season heuristic instead.  Users who want live weather
+/// can opt in by setting `SYNTHEX_TEMPORAL_WEATHER=1` or adding
+/// `weather_fetch = true` to `/etc/synthex/temporal.conf`.
+fn weather_fetch_enabled() -> bool {
+    if std::env::var("SYNTHEX_TEMPORAL_WEATHER")
+        .map(|v| v == "1" || v.eq_ignore_ascii_case("true"))
+        .unwrap_or(false)
+    {
+        return true;
+    }
+    matches!(
+        std::fs::read_to_string("/etc/synthex/temporal.conf")
+            .ok()
+            .and_then(|c| c.lines().find(|l| l.trim_start().starts_with("weather_fetch")).map(str::to_string)),
+        Some(l) if l.contains("true")
+    )
+}
+
+/// Build a purely-local weather snapshot from the wall clock and calendar.
+/// No network access, no location disclosure.  Produces a best-effort
+/// "day/night + season" approximation that drives the theming engine.
+fn local_snapshot() -> WeatherSnapshot {
+    let now = Local::now();
+    let hour = now.hour();
+    let is_day = hour >= 6 && hour < 20;
+    let month = now.month();
+    // Crude seasonal hint (northern hemisphere).
+    let (season_cond, desc) = match month {
+        12 | 1 | 2  => ("snowy".to_string(),  "winter night".to_string()),
+        3 | 4 | 5   => ("sunny".to_string(),  "spring".to_string()),
+        6 | 7 | 8   => ("sunny".to_string(),  "summer".to_string()),
+        _           => ("cloudy".to_string(), "autumn".to_string()),
+    };
+    let condition = if is_day { season_cond } else { "clear".to_string() };
+    WeatherSnapshot {
+        condition,
+        temp_c: if is_day { 22.0 } else { 16.0 },
+        is_day,
+        description: desc,
+        fetched_at: now.to_rfc3339(),
+    }
+}
+
 /// Fetch weather from wttr.in JSON API.
+///
+/// **Privacy:** only called when `weather_fetch_enabled()` is true. Off by
+/// default — see that function's docs.
 async fn fetch_weather() -> Result<WeatherSnapshot, TemporalError> {
     let client = reqwest::Client::builder()
         .timeout(Duration::from_secs(10))
@@ -405,6 +456,13 @@ impl TemporalIface {
 
     /// Force an immediate weather refresh (e.g. from a KDE widget).
     async fn refresh_weather(&self) -> bool {
+        if !weather_fetch_enabled() {
+            // Privacy mode: never touch the network; refresh from local clock.
+            let snap = local_snapshot();
+            save_weather_cache(&snap).await;
+            self.state.write().await.weather = snap;
+            return true;
+        }
         match fetch_weather().await {
             Ok(snap) => {
                 save_weather_cache(&snap).await;
@@ -422,6 +480,21 @@ impl TemporalIface {
 // ─── background tasks ─────────────────────────────────────────────────────────
 
 async fn weather_loop(state: SharedState) {
+    // Privacy gate: if network weather is disabled, seed once from the local
+    // clock and stay quiet (no outbound requests, ever).
+    if !weather_fetch_enabled() {
+        info!("weather network fetch disabled (privacy default) — using local time-of-day heuristic");
+        let snap = load_weather_cache().await.unwrap_or_else(local_snapshot);
+        state.write().await.weather = snap;
+        // Re-derive the local snapshot every poll interval so day/night still
+        // transitions correctly without any network access.
+        loop {
+            let snap = local_snapshot();
+            state.write().await.weather = snap;
+            sleep(Duration::from_secs(WEATHER_POLL_SECS)).await;
+        }
+    }
+
     loop {
         let snap = match fetch_weather().await {
             Ok(s) => {
@@ -433,7 +506,7 @@ async fn weather_loop(state: SharedState) {
                 warn!("weather fetch failed: {e}; using cache or default");
                 load_weather_cache()
                     .await
-                    .unwrap_or_default()
+                    .unwrap_or_else(local_snapshot)
             }
         };
         state.write().await.weather = snap;
@@ -502,12 +575,16 @@ async fn main() -> Result<()> {
 
     info!("SynthOS Temporal Daemon starting — version 2026.10");
 
-    // Pre-warm weather from cache
+    // Pre-warm weather from cache (privacy default: local heuristic, no network)
     let initial_weather = load_weather_cache()
         .await
         .unwrap_or_else(|| {
-            warn!("no weather cache; will fetch on first interval");
-            WeatherSnapshot::default()
+            if weather_fetch_enabled() {
+                warn!("no weather cache; will fetch on first interval (network enabled)");
+            } else {
+                info!("privacy mode: weather derived from local time-of-day");
+            }
+            local_snapshot()
         });
 
     let state: SharedState = Arc::new(RwLock::new(TemporalState {

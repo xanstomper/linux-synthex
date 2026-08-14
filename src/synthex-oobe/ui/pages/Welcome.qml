@@ -26,7 +26,7 @@ ApplicationWindow {
             Rectangle {
                 Layout.fillWidth: true
                 Layout.preferredHeight: 120
-                color: "#9BBD5C"
+                color: "#6C88A8"
                 clip: true
 
                 ColumnLayout {

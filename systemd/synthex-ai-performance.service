@@ -16,5 +16,33 @@ ExecStart=/bin/sh -c 'echo mq-deadline > /sys/block/nvme*/queue/scheduler 2>/dev
 # Increase NVMe read-ahead to 2 MiB for faster model weight streaming
 ExecStart=/bin/sh -c 'echo 2048 > /sys/block/nvme*/queue/read_ahead_kb 2>/dev/null || true'
 
+# ── Hardening ──────────────────────────────────────────────────────────────
+# Note: this service writes /sys (governor/scheduler), so we deliberately omit
+# ProtectKernelTunables.  All other hardening directives are applied.
+NoNewPrivileges=yes
+PrivateTmp=yes
+PrivateDevices=no
+ProtectSystem=strict
+ProtectClock=yes
+ProtectControlGroups=yes
+ProtectHome=yes
+ProtectHostname=yes
+ProtectKernelModules=yes
+ProtectKernelLogs=yes
+ProtectProc=invisible
+ProtectRoot=yes
+RestrictRealtime=yes
+RestrictSUIDSGID=yes
+LockPersonality=yes
+MemoryDenyWriteExecute=yes
+RemoveIPC=yes
+RestrictAddressFamilies=AF_UNIX
+SystemCallArchitectures=native
+SystemCallFilter=@system-service
+SystemCallFilter=~@privileged @resources
+CapabilityBoundingSet=CAP_SYS_ADMIN
+AmbientCapabilities=CAP_SYS_ADMIN
+UMask=0077
+
 [Install]
 WantedBy=multi-user.target

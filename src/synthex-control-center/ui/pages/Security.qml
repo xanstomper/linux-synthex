@@ -4,13 +4,13 @@ import QtQuick.Layouts 1.15
 
 Rectangle {
     color: "transparent"; anchors.fill: parent
-    readonly property color accentColor: "#9BBD5C"
+    readonly property color accentColor: "#6C88A8"
     readonly property color textColor: "#FFFFFF"
-    readonly property color mutedText: "#8899AA"
-    readonly property color okColor: "#43A047"
-    readonly property color warnColor: "#FB8C00"
-    readonly property color dangerColor: "#E53935"
-    readonly property color surfaceColor: "#1A1A2E"
+    readonly property color mutedText: "#9AA1AB"
+    readonly property color okColor: "#7FBF8A"
+    readonly property color warnColor: "#D9B47E"
+    readonly property color dangerColor: "#D97C82"
+    readonly property color surfaceColor: "#171D24"
 
     ColumnLayout {
         anchors.fill: parent; spacing: 20
@@ -32,7 +32,7 @@ Rectangle {
 
             Rectangle {
                 Layout.fillWidth: true; Layout.preferredHeight: 260
-                color: surfaceColor; radius: 12; border.color: "#2A2A3E"; border.width: 1
+                color: surfaceColor; radius: 12; border.color: "#12FFFFFF"; border.width: 1
                 ColumnLayout { anchors.fill: parent; anchors.margins: 16; spacing: 8
                     Text { text: "🛡️ Active Protection"; font.pixelSize: 16; font.bold: true; color: textColor }
                     Repeater {
@@ -59,7 +59,7 @@ Rectangle {
 
             Rectangle {
                 Layout.fillWidth: true; Layout.preferredHeight: 260
-                color: surfaceColor; radius: 12; border.color: "#2A2A3E"; border.width: 1
+                color: surfaceColor; radius: 12; border.color: "#12FFFFFF"; border.width: 1
                 ColumnLayout { anchors.fill: parent; anchors.margins: 16; spacing: 8
                     Text { text: "🔍 Security Audit"; font.pixelSize: 16; font.bold: true; color: textColor }
                     Repeater {
@@ -88,12 +88,12 @@ Rectangle {
             Layout.fillWidth: true; title: "Quick Actions"
             RowLayout { anchors.fill: parent; anchors.margins: 16; spacing: 12
                 Button { text: "Run Security Audit"; background: Rectangle { color: accentColor; radius: 8 }
-                    contentItem: Text { text: parent.text; color: "#0B0F1A"; font.pixelSize: 13; font.bold: true }
+                    contentItem: Text { text: parent.text; color: "#0C1116"; font.pixelSize: 13; font.bold: true }
                 }
                 Button { text: "View Firewall Rules"; background: Rectangle { color: "#1E88E5"; radius: 8 }
                     contentItem: Text { text: parent.text; color: "#FFFFFF"; font.pixelSize: 13 }
                 }
-                Button { text: "Check for CVEs"; background: Rectangle { color: "#FB8C00"; radius: 8 }
+                Button { text: "Check for CVEs"; background: Rectangle { color: "#D9B47E"; radius: 8 }
                     contentItem: Text { text: parent.text; color: "#FFFFFF"; font.pixelSize: 13 }
                 }
             }

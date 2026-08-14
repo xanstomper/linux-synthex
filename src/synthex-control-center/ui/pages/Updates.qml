@@ -4,12 +4,12 @@ import QtQuick.Layouts 1.15
 
 Rectangle {
     color: "transparent"; anchors.fill: parent
-    readonly property color accentColor: "#9BBD5C"
+    readonly property color accentColor: "#6C88A8"
     readonly property color textColor: "#FFFFFF"
-    readonly property color mutedText: "#8899AA"
-    readonly property color okColor: "#43A047"
-    readonly property color warnColor: "#FB8C00"
-    readonly property color surfaceColor: "#1A1A2E"
+    readonly property color mutedText: "#9AA1AB"
+    readonly property color okColor: "#7FBF8A"
+    readonly property color warnColor: "#D9B47E"
+    readonly property color surfaceColor: "#171D24"
 
     property int updateCount: 0
     property bool checking: false
@@ -26,7 +26,7 @@ Rectangle {
             Layout.fillWidth: true; spacing: 16
             Rectangle {
                 Layout.fillWidth: true; Layout.preferredHeight: 100
-                color: surfaceColor; radius: 12; border.color: "#2A2A3E"; border.width: 1
+                color: surfaceColor; radius: 12; border.color: "#12FFFFFF"; border.width: 1
                 ColumnLayout { anchors.fill: parent; anchors.margins: 16
                     Text { text: "System Updates"; font.pixelSize: 14; font.bold: true; color: textColor }
                     Text { text: checking ? "Checking..." : updateCount + " updates available"; font.pixelSize: 20; font.bold: true; color: updateCount > 0 ? warnColor : okColor }
@@ -35,7 +35,7 @@ Rectangle {
             }
             Rectangle {
                 Layout.fillWidth: true; Layout.preferredHeight: 100
-                color: surfaceColor; radius: 12; border.color: "#2A2A3E"; border.width: 1
+                color: surfaceColor; radius: 12; border.color: "#12FFFFFF"; border.width: 1
                 ColumnLayout { anchors.fill: parent; anchors.margins: 16
                     Text { text: "Security Updates"; font.pixelSize: 14; font.bold: true; color: textColor }
                     Text { text: "Auto-install enabled"; font.pixelSize: 20; font.bold: true; color: okColor }
@@ -44,7 +44,7 @@ Rectangle {
             }
             Rectangle {
                 Layout.fillWidth: true; Layout.preferredHeight: 100
-                color: surfaceColor; radius: 12; border.color: "#2A2A3E"; border.width: 1
+                color: surfaceColor; radius: 12; border.color: "#12FFFFFF"; border.width: 1
                 ColumnLayout { anchors.fill: parent; anchors.margins: 16
                     Text { text: "Flatpak Updates"; font.pixelSize: 14; font.bold: true; color: textColor }
                     Text { text: "Flathub connected"; font.pixelSize: 20; font.bold: true; color: okColor }
@@ -55,7 +55,7 @@ Rectangle {
 
         // Update pipeline
         Rectangle {
-            Layout.fillWidth: true; color: surfaceColor; radius: 12; border.color: "#2A2A3E"; border.width: 1
+            Layout.fillWidth: true; color: surfaceColor; radius: 12; border.color: "#12FFFFFF"; border.width: 1
             ColumnLayout { anchors.fill: parent; anchors.margins: 16; spacing: 12
                 Text { text: "Update Pipeline"; font.pixelSize: 16; font.bold: true; color: textColor }
                 RowLayout { spacing: 24
@@ -110,7 +110,7 @@ Rectangle {
                 Layout.fillWidth: true; Layout.preferredHeight: 48
                 enabled: !checking
                 background: Rectangle { color: accentColor; radius: 8 }
-                contentItem: Text { text: parent.text; color: "#0B0F1A"; font.pixelSize: 14; font.bold: true; horizontalAlignment: Text.AlignHCenter }
+                contentItem: Text { text: parent.text; color: "#0C1116"; font.pixelSize: 14; font.bold: true; horizontalAlignment: Text.AlignHCenter }
                 onClicked: { checking = true; updateCount = 0; lastCheck = "Just now"; timer.start() }
             }
             Button {

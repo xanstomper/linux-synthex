@@ -3,13 +3,13 @@ import QtQuick.Controls 2.15
 import QtQuick.Layouts 1.15
 
 Rectangle {
-    color: "#0B0F1A"
+    color: "#0C1016"
     anchors.fill: parent
 
-    readonly property color accentColor: "#FFB300"
-    readonly property color surfaceColor: "#1A1A2E"
+    readonly property color accentColor: "#6C88A8"
+    readonly property color surfaceColor: "#171D24"
     readonly property color textColor: "#FFFFFF"
-    readonly property color mutedText: "#8899AA"
+    readonly property color mutedText: "#9AA1AB"
 
     property int selectedProfile: -1
 
@@ -133,7 +133,7 @@ Rectangle {
                                 text: "\u2713"
                                 font.pixelSize: 14
                                 font.bold: true
-                                color: "#0B0F1A"
+                                color: "#0C1016"
                             }
                         }
                     }

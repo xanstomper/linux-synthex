@@ -1,3 +1,5 @@
+#![allow(dead_code)]
+
 /// Seccomp-BPF filter management for agent sandboxes.
 ///
 /// The filter is compiled once at daemon startup and then applied inside
@@ -193,38 +195,18 @@ impl SeccompFilter {
             debug!("Seccomp denylist filter installed ({} syscalls blocked)", self.blocked_syscalls.len());
         }
 
-        // Build and load the seccomp BPF filter using the `seccomp` crate.
+        // Build and load a raw BPF seccomp filter via the kernel's
+        // seccomp(2) SECCOMP_SET_MODE_FILTER syscall.  This is self-contained
+        // (only the `libc` crate is required) and avoids the unstable API of
+        // third-party seccomp bindings.
         //
         // In allowlist_mode every syscall NOT in blocked_syscalls is killed;
         // in denylist_mode every syscall IN blocked_syscalls is killed.
         if kernel_supports_seccomp() {
-            let default_action = if self.allowlist_mode {
-                // "allowlist" means "allow only these; kill everything else"
-                seccomp::Action::KillProcess
-            } else {
-                // "denylist" means "allow everything except these"
-                seccomp::Action::Allow
-            };
-
-            let mut ctx = seccomp::Context::init(default_action).map_err(|e| {
-                anyhow::anyhow!("seccomp::Context::init failed: {e}")
+            let prog = build_bpf_program(&self.blocked_syscalls, self.allowlist_mode);
+            load_filter(&prog).map_err(|e| {
+                anyhow::anyhow!("seccomp(SECCOMP_SET_MODE_FILTER) failed: {e}")
             })?;
-
-            for &nr in &self.blocked_syscalls {
-                let rule_action = if self.allowlist_mode {
-                    seccomp::Action::Allow       // allowlist entry → permit this syscall
-                } else {
-                    seccomp::Action::KillProcess // denylist entry  → kill on this syscall
-                };
-                ctx.add_rule(seccomp::Rule::new(
-                    nr as usize,
-                    seccomp::Compare::always(),
-                    rule_action,
-                ))
-                .map_err(|e| anyhow::anyhow!("seccomp add_rule(nr={nr}) failed: {e}"))?;
-            }
-
-            ctx.load().map_err(|e| anyhow::anyhow!("seccomp::Context::load failed: {e}"))?;
 
             if self.allowlist_mode {
                 debug!(
@@ -240,7 +222,7 @@ impl SeccompFilter {
         } else {
             // Kernel does not support seccomp(2); namespace isolation is the
             // primary containment layer so we log a warning but do not abort.
-            log::warn!(
+            tracing::warn!(
                 "Kernel does not support seccomp — relying on namespace isolation only"
             );
         }
@@ -251,6 +233,97 @@ impl SeccompFilter {
     /// List the blocked (or allowed, in allowlist mode) syscall numbers.
     pub fn syscall_list(&self) -> &[i32] {
         &self.blocked_syscalls
+    }
+}
+
+// ---- Raw BPF seccomp filter generation -------------------------------------
+
+// BPF instruction opcodes (linux/filter.h).
+const BPF_LD: u32 = 0x00;
+const BPF_JMP: u32 = 0x05;
+const BPF_RET: u32 = 0x06;
+const BPF_W: u32 = 0x00;
+const BPF_ABS: u32 = 0x20;
+const BPF_JEQ: u32 = 0x10;
+const BPF_K: u32 = 0x00;
+
+// Offsets into `struct seccomp_data`.
+const OFF_NR: u32 = 0; // offsetof(nr)
+const OFF_ARCH: u32 = 4; // offsetof(arch)
+
+// `AUDIT_ARCH_X86_64` (EM_X86_64 | __AUD_ARCH_64BIT).
+const AUDIT_ARCH_X86_64: u32 = 0x8000_003E;
+
+// Return-action classes (linux/seccomp.h).
+const SECCOMP_RET_ALLOW: u32 = 0x7FFF_0000;
+const SECCOMP_RET_KILL_PROCESS: u32 = 0x8000_0000;
+
+/// A single BPF load-statement: `LD [ k ]`.
+const fn stmt(code: u32, k: u32) -> libc::sock_filter {
+    libc::sock_filter { code: code as u16, jt: 0, jf: 0, k }
+}
+
+/// A single BPF conditional jump: `JEQ (k) ? pc+jt : pc+jf`.
+const fn jump(code: u32, k: u32, jt: u8, jf: u8) -> libc::sock_filter {
+    libc::sock_filter { code: code as u16, jt, jf, k }
+}
+
+/// Compile a seccomp-BPF program for the given syscall set.
+///
+/// * `allowlist_mode == false` → denylist (default ALLOW, kill listed syscalls)
+/// * `allowlist_mode == true`  → allowlist (default KILL, allow listed syscalls)
+fn build_bpf_program(syscalls: &[i32], allowlist_mode: bool) -> Vec<libc::sock_filter> {
+    let ld_abs = BPF_LD | BPF_W | BPF_ABS;
+    let jeq_k = BPF_JMP | BPF_JEQ | BPF_K;
+    let ret_k = BPF_RET | BPF_K;
+
+    let mut prog: Vec<libc::sock_filter> = Vec::with_capacity(4 + 2 * syscalls.len());
+
+    // Guard: only permit the x86-64 native ABI (blocks x32 / abi-bypass).
+    prog.push(stmt(ld_abs, OFF_ARCH));
+    prog.push(jump(jeq_k, AUDIT_ARCH_X86_64, 1, 0)); // match → skip kill
+    prog.push(stmt(ret_k, SECCOMP_RET_KILL_PROCESS));
+
+    // Load the syscall number.
+    prog.push(stmt(ld_abs, OFF_NR));
+
+    for &nr in syscalls {
+        if allowlist_mode {
+            // match → jump over the KILL to the next compare / final ALLOW
+            prog.push(jump(jeq_k, nr as u32, 1, 0));
+            prog.push(stmt(ret_k, SECCOMP_RET_KILL_PROCESS));
+        } else {
+            // match → fall through to KILL; miss → skip the KILL
+            prog.push(jump(jeq_k, nr as u32, 0, 1));
+            prog.push(stmt(ret_k, SECCOMP_RET_KILL_PROCESS));
+        }
+    }
+
+    // Tail action: ALLOW for denylist (reached after all misses),
+    //              ALLOW for allowlist (reached on the final match).
+    prog.push(stmt(ret_k, SECCOMP_RET_ALLOW));
+    prog
+}
+
+/// Install a compiled BPF program into the calling thread via seccomp(2).
+/// Caller must already hold PR_SET_NO_NEW_PRIVS.
+fn load_filter(prog: &[libc::sock_filter]) -> std::io::Result<()> {
+    let mut fprog = libc::sock_fprog {
+        len: prog.len() as u16,
+        filter: prog.as_ptr() as *mut libc::sock_filter,
+    };
+    let rc = unsafe {
+        libc::syscall(
+            libc::SYS_seccomp,
+            libc::SECCOMP_SET_MODE_FILTER as libc::c_ulong,
+            0 as libc::c_ulong,
+            &mut fprog as *mut libc::sock_fprog as libc::c_ulong,
+        )
+    };
+    if rc == 0 {
+        Ok(())
+    } else {
+        Err(std::io::Error::last_os_error())
     }
 }
 

@@ -15,7 +15,7 @@ timezone America/New_York --utc
 authselect --useshadow --passalgo=sha512
 selinux --enforcing
 firewall --enabled --service=mdns,ssh
-services --enabled=NetworkManager,sshd,chronyd,auditd,fstrim.timer,sddm,synthex-firstboot,synthex-system-daemon
+services --enabled=NetworkManager,sshd,chronyd,auditd,fstrim.timer,sddm,synthex-firstboot,synthex-system-daemon,synthex-safety.service,synthex-slim.service,synthex-boot-profile.service,synthex-oobe.service,synthex-control-center.service
 services --disabled=lvm2-monitor,mdmonitor
 bootloader --location=mbr --append="rhgb quiet splash rd.driver.blacklist=nouveau modprobe.blacklist=nouveau mitigations=auto"
 network --bootproto=dhcp --device=link --activate
@@ -158,6 +158,12 @@ synthex-control-center
 synthex-app-manager
 synthex-update-manager
 
+# SynthOS platform bundles (meta-groups from synthex-comps.xml)
+@synthex-safety
+@synthex-essentials
+@synthex-creator-platform
+@synthex-gaming-platform
+
 # Additional utilities
 htop
 neofetch
@@ -273,6 +279,49 @@ if [ -f /usr/lib/systemd/system/synthex-firstboot.service ]; then
     systemctl enable synthex-firstboot.service
 fi
 
+# Enable SynthOS platform services
+for s in synthex-safety.service synthex-slim.service synthex-boot-profile.service \
+         synthex-oobe.service synthex-control-center.service; do
+    if [ -f /usr/lib/systemd/system/$s ]; then
+        systemctl enable $s 2>/dev/null || true
+    fi
+done
+
+# Live USB session: SDDM auto-login for liveuser only (never on installed system)
+mkdir -p /etc/sddm.conf.d/
+cat > /etc/sddm.conf.d/autologin.conf << 'AUTOEOF'
+[Autologin]
+User=liveuser
+Session=plasma
+AUTOEOF
+
+# Installer launcher on the live user's desktop
+if id liveuser >/dev/null 2>&1; then
+    LIVEDesk="/home/liveuser/Desktop"
+    mkdir -p "$LIVEDesk"
+    if [ -f /usr/share/applications/synthex-installer.desktop ]; then
+        cp /usr/share/applications/synthex-installer.desktop "$LIVEDesk/" 2>/dev/null || true
+        chmod +x "$LIVEDesk/synthex-installer.desktop" 2>/dev/null || true
+    fi
+fi
+
+# Polkit rule: live session runs installer without root prompt
+mkdir -p /etc/polkit-1/rules.d/
+cat > /etc/polkit-1/rules.d/49-synthex-live-installer.rules << 'POLKEOF'
+// SynthOS — allow liveuser to run the installer on the live USB only.
+polkit.addRule(function(action, subject) {
+    if (action.id === "org.freedesktop.policykit.exec" &&
+        subject.user === "liveuser") {
+        return polkit.Result.YES;
+    }
+});
+POLKEOF
+
+# Passwordless sudo for live session (live USB convenience)
+mkdir -p /etc/sudoers.d/
+echo "liveuser ALL=(ALL) NOPASSWD: ALL" > /etc/sudoers.d/00-synthex-liveuser
+chmod 440 /etc/sudoers.d/00-synthex-liveuser
+
 # ── Locale & keyboard ────────────────────────────────────────────────────────
 localectl set-locale LANG=en_US.UTF-8 2>/dev/null || true
 localectl set-x11-keymap us 2>/dev/null || true
@@ -323,6 +372,15 @@ RELEOF
 if [ -f /usr/share/synthex/scripts/post-install.sh ]; then
     bash /usr/share/synthex/scripts/post-install.sh --edition=plasma --livecd 2>/dev/null || true
 fi
+
+# ── Privacy policy (no-telemetry guarantee) ─────────────────────────────
+cat > /etc/synthex/privacy.conf << 'PRIVEOF'
+# SynthOS global privacy policy — NO telemetry, ever.
+weather_fetch = false
+integration_engine = false
+telemetry = false
+PRIVEOF
+chmod 644 /etc/synthex/privacy.conf
 
 echo "SynthOS Plasma Edition post-install complete."
 %end

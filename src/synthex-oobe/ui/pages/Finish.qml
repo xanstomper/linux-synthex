@@ -5,13 +5,13 @@ import QtQuick.Window 2.15
 
 Rectangle {
     id: finishPage
-    color: "#0B0F1A"
+    color: "#0C1016"
     anchors.fill: parent
 
-    readonly property color accentColor: "#FFB300"
-    readonly property color surfaceColor: "#1A1A2E"
+    readonly property color accentColor: "#6C88A8"
+    readonly property color surfaceColor: "#171D24"
     readonly property color textColor: "#FFFFFF"
-    readonly property color mutedText: "#8899AA"
+    readonly property color mutedText: "#9AA1AB"
 
     property bool setupComplete: false
     property string selectedProfile: "minimal"
@@ -231,7 +231,7 @@ Rectangle {
                 text: "\u{1F680}  Get Started"
                 font.pixelSize: 14
                 font.bold: true
-                color: "#0B0F1A"
+                color: "#0C1016"
                 horizontalAlignment: Text.AlignHCenter
                 verticalAlignment: Text.AlignVCenter
             }

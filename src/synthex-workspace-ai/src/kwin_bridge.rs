@@ -63,6 +63,7 @@ trait KWinScripting {
 
 // ─── Higher-level bridge ──────────────────────────────────────────────────────
 
+#[allow(dead_code)]
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct VirtualDesktopInfo {
     pub index: u32,
@@ -97,6 +98,7 @@ impl KwinBridge {
     }
 
     /// Return the 0-indexed current desktop.
+    #[allow(dead_code)]
     pub async fn current_desktop(&self) -> Result<i32> {
         let proxy = KWinProxy::new(&self.conn).await?;
         Ok(proxy.current_desktop().await? - 1)
@@ -194,6 +196,7 @@ if (desktops.length > {n}) {{
     }
 
     /// Reconfigure KWin (needed after changes to its config file).
+    #[allow(dead_code)]
     pub async fn reconfigure(&self) -> Result<()> {
         let proxy = KWinProxy::new(&self.conn).await?;
         proxy.reconfigure().await.context("reconfigure")?;
@@ -227,6 +230,7 @@ if (desktops.length > {n}) {{
 // ─── Fallback helpers ─────────────────────────────────────────────────────────
 
 /// Try to connect to KWin; if it fails, log a warning and return None.
+#[allow(dead_code)]
 pub async fn try_connect() -> Option<KwinBridge> {
     match KwinBridge::new().await {
         Ok(b) => Some(b),

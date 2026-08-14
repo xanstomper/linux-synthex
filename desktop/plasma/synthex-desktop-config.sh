@@ -42,7 +42,7 @@ lookandfeeltool -a org.synthex.desktop 2>/dev/null || \
     echo "⚠  Look-and-feel package not found. Install synthex-plasma-theme."
 
 # ─── Wallpaper ────────────────────────────────────────────────────────────
-WALLPAPER="/usr/share/wallpapers/synthex-default.jpg"
+WALLPAPER="/usr/share/wallpapers/synthex-nova.png"
 if [[ -f "${WALLPAPER}" ]]; then
     echo "   Setting default wallpaper..."
     plasma-apply-wallpaperimage "${WALLPAPER}" 2>/dev/null || \
@@ -55,9 +55,9 @@ fi
 
 # ─── Color Scheme ─────────────────────────────────────────────────────────
 echo "   Applying Synthex Fluent color scheme..."
-plasma-apply-colorscheme SynthexFluent 2>/dev/null || \
+plasma-apply-colorscheme SynthexFocus 2>/dev/null || \
     kwriteconfig6 --file "${CONFIG_DIR}/kdeglobals" \
-        --group "General" --key "ColorScheme" "SynthexFluent"
+        --group "General" --key "ColorScheme" "SynthexFocus"
 
 # ─── Panel Layout ─────────────────────────────────────────────────────────
 echo "   Configuring panel layout (Windows 11 style)..."
@@ -115,6 +115,26 @@ kwriteconfig6 --file "${CONFIG_DIR}/kwinrc" \
 kwriteconfig6 --file "${CONFIG_DIR}/kwinrc" \
     --group "Windows" \
     --key "WindowCornerRadius" "12"
+
+# Night Color — real KWin display gamma feature (off by default; toggle in tray)
+kwriteconfig6 --file "${CONFIG_DIR}/kwinrc" \
+    --group "NightColor" \
+    --key "Active" "false"
+kwriteconfig6 --file "${CONFIG_DIR}/kwinrc" \
+    --group "NightColor" \
+    --key "Mode" "TimingsFixed"
+kwriteconfig6 --file "${CONFIG_DIR}/kwinrc" \
+    --group "NightColor" \
+    --key "NightTemperature" "4200"
+kwriteconfig6 --file "${CONFIG_DIR}/kwinrc" \
+    --group "NightColor" \
+    --key " EveningBeginFixed" "2000"
+kwriteconfig6 --file "${CONFIG_DIR}/kwinrc" \
+    --group "NightColor" \
+    --key "MorningBeginFixed" "0600"
+kwriteconfig6 --file "${CONFIG_DIR}/kwinrc" \
+    --group "NightColor" \
+    --key "TransitionTime" "30"
 
 # Blur
 kwriteconfig6 --file "${CONFIG_DIR}/kwinrc" \
@@ -182,11 +202,36 @@ kwriteconfig6 --file "${CONFIG_DIR}/kscreensaverrc" \
     --group "KScreenSaver" \
     --key "Lock" "true"
 
-# ─── Privacy ──────────────────────────────────────────────────────────────
-echo "   Configuring privacy settings..."
+# ─── Privacy (comprehensive telemetry kill) ─────────────────────────────
+echo "   Configuring privacy settings (zero telemetry)..."
 kwriteconfig6 --file "${CONFIG_DIR}/kactivitymanagerdrc" \
     --group "plugins" \
     --key "telemetryEnabled" "false"
+
+# Plasma's kded "kuriikwsfilter" + the broader KDE telemetry plug-ins
+touch "${CONFIG_DIR}/kded6rc" 2>/dev/null || true
+kwriteconfig6 --file "${CONFIG_DIR}/kded6rc" \
+    --group "Module-networkstatus" --key "autoload" "false" 2>/dev/null || true
+
+# Baloo file indexer: keep it from phoning home / heavy indexing on first run
+kwriteconfig6 --file "${CONFIG_DIR}/baloofilerc" \
+    --group "Basic Settings" --key "Indexing-Enabled" "false"
+
+# KRunner: disable web-search suggestions (would hit search engines)
+kwriteconfig6 --file "${CONFIG_DIR}/krunnerrc" \
+    --group "Plugins" --key "runner_bookmarksrunnerEnabled" "false" 2>/dev/null || true
+kwriteconfig6 --file "${CONFIG_DIR}/krunnerrc" \
+    --group "Plugins" --key "wikiSearchEnabled" "false" 2>/dev/null || true
+
+# Discover: turn off release-feed / promotional content fetching
+kwriteconfig6 --file "${CONFIG_DIR}/discoverrc" \
+    --group "Feedback" --key "FeedbackLevel" "0" 2>/dev/null || true
+
+# Global KDE feedback level (KDE Frameworks telemetry) → None
+kwriteconfig6 --file "${CONFIG_DIR}/kdeglobals" \
+    --group "KDE" --key "FeedbackLevel" "0" 2>/dev/null || true
+kwriteconfig6 --file "${CONFIG_DIR}/kdeglobals" \
+    --group "KDE" --key "widgetStyle" "synthex" 2>/dev/null || true
 
 # ─── KDE Wallet (disabled by default) ─────────────────────────────────────
 echo "   Disabling KDE Wallet (can be enabled manually)..."

@@ -6,6 +6,10 @@ description = "SynthOS time-aware daemon — weather, color schemes, ambient aud
 license     = "GPL-3.0-or-later"
 authors     = ["SynthOS Team <team@synthex-os.org>"]
 
+# Keep this crate out of the root workspace (ships standalone via its RPM spec).
+[workspace]
+
+
 [[bin]]
 name = "synthex-temporal"
 path = "src/main.rs"

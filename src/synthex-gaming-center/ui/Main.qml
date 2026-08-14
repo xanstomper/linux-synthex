@@ -11,13 +11,13 @@ Window {
     minimumWidth: 900
     minimumHeight: 600
     title: "Synthex Gaming Center"
-    color: "#0B0F1A"
+    color: "#0C1016"
 
     readonly property color accentColor: "#E53935"
-    readonly property color bgColor: "#0B0F1A"
-    readonly property color surfaceColor: "#1A1A2E"
+    readonly property color bgColor: "#0C1016"
+    readonly property color surfaceColor: "#171D24"
     readonly property color textColor: "#FFFFFF"
-    readonly property color mutedText: "#8899AA"
+    readonly property color mutedText: "#9AA1AB"
 
     ColumnLayout {
         anchors.fill: parent

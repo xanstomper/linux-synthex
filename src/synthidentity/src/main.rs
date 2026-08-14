@@ -4,10 +4,9 @@ use serde::{Deserialize, Serialize};
 use sha2::{Digest, Sha256};
 use std::{
     fs,
-    io::{self, BufRead, Write},
+    io::{self, Write},
     os::unix::fs::PermissionsExt,
     path::PathBuf,
-    process::Command,
 };
 
 const DB_FILE: &str = "/var/lib/synthidentity/creds.json";
@@ -224,6 +223,7 @@ fn decrypt_secret(encrypted: &[u8], password: &str) -> Result<String> {
     String::from_utf8(plaintext).map_err(|_| anyhow::anyhow!("Decryption failed (wrong password?)"))
 }
 
+#[allow(dead_code)]
 fn audit(_s: &mut Store, action: &str, target: &str, result: &str) {
     // Just print to stderr for now; we can add a file later
     eprintln!("  [audit] {} {} {} -> {}", now(), action, target, result);

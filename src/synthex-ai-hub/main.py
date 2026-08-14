@@ -657,7 +657,7 @@ if HAS_TK:
             def _work() -> None:
                 ok = _start_ollama()
                 if ok:
-                    time.sleep(2)
+                    time.sleep(0.5)  # reduced from 2 s – ollama is ready much faster
                 self.after(0, self._svc_refresh)
             threading.Thread(target=_work, daemon=True).start()
 

@@ -54,6 +54,34 @@ sentinel:
 
 
 
+# ── Component build shortcuts (granular, used by CI) ───────────────────────
+build: rust
+
+build-desktopd:
+	cargo build --release -p synthex-desktopd
+
+build-stored:
+	cargo build --release -p synthex-stored
+
+build-hwdaemon:
+	cargo build --release -p synthex-hwdaemon
+
+build-gpu-setupd:
+	cargo build --release -p synthex-gpu-setupd
+
+build-control-center:
+	@echo -e "$(GREEN)[PY]$(RESET) Validating synthex-control-center (Python/QML)..."
+	@python3 -m py_compile src/synthex-control-center/main.py
+	@test -f src/synthex-control-center/ui/Main.qml
+	@echo -e "$(GREEN)[OK]$(RESET)    synthex-control-center validated"
+
+build-studio:
+	@echo -e "$(GREEN)[PY]$(RESET) Validating synthex-studio (Python/QML)..."
+	@python3 -m py_compile src/synthex-studio/main.py
+	@test -f src/synthex-studio/ui/Main.qml
+	@echo -e "$(GREEN)[OK]$(RESET)    synthex-studio validated"
+
+
 # ── Kickstart validation ──────────────────────────────────────────────────────
 ks-validate:
 	@echo -e "$(GREEN)[KS]$(RESET) Validating kickstart files..."

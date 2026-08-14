@@ -4,12 +4,12 @@ import QtQuick.Layouts 1.15
 
 Rectangle {
     color: "transparent"; anchors.fill: parent
-    readonly property color accentColor: "#9BBD5C"
+    readonly property color accentColor: "#6C88A8"
     readonly property color textColor: "#FFFFFF"
-    readonly property color mutedText: "#8899AA"
-    readonly property color okColor: "#43A047"
-    readonly property color warnColor: "#FB8C00"
-    readonly property color surfaceColor: "#1A1A2E"
+    readonly property color mutedText: "#9AA1AB"
+    readonly property color okColor: "#7FBF8A"
+    readonly property color warnColor: "#D9B47E"
+    readonly property color surfaceColor: "#171D24"
 
     ColumnLayout {
         anchors.fill: parent; spacing: 20
@@ -36,7 +36,7 @@ Rectangle {
 
         // Available kernels
         Rectangle {
-            Layout.fillWidth: true; color: surfaceColor; radius: 12; border.color: "#2A2A3E"; border.width: 1
+            Layout.fillWidth: true; color: surfaceColor; radius: 12; border.color: "#12FFFFFF"; border.width: 1
             ColumnLayout { anchors.fill: parent; anchors.margins: 16; spacing: 8
                 Text { text: "📦 Installed Kernels"; font.pixelSize: 16; font.bold: true; color: textColor }
                 Repeater {
@@ -70,7 +70,7 @@ Rectangle {
                             }
                             Item { Layout.fillWidth: true }
                             Text { text: modelData.active ? "▶ RUNNING" : ""; font.pixelSize: 11; font.bold: true; color: accentColor }
-                            Button { visible: !modelData.active; text: "Boot"; background: Rectangle { color: "#2A2A3E"; radius: 6 }
+                            Button { visible: !modelData.active; text: "Boot"; background: Rectangle { color: "#12FFFFFF"; radius: 6 }
                                 contentItem: Text { text: parent.text; color: textColor; font.pixelSize: 11 }
                             }
                             Button { visible: !modelData.active; text: "Remove"; background: Rectangle { color: dangerColor; radius: 6 }
@@ -84,7 +84,7 @@ Rectangle {
 
         // Available to install
         Rectangle {
-            Layout.fillWidth: true; color: surfaceColor; radius: 12; border.color: "#2A2A3E"; border.width: 1
+            Layout.fillWidth: true; color: surfaceColor; radius: 12; border.color: "#12FFFFFF"; border.width: 1
             ColumnLayout { anchors.fill: parent; anchors.margins: 16; spacing: 8
                 Text { text: "📥 Available to Install"; font.pixelSize: 16; font.bold: true; color: textColor }
                 Repeater {
@@ -100,7 +100,7 @@ Rectangle {
                             Text { text: modelData.label; font.pixelSize: 11; color: mutedText }
                         }
                         Button { text: "Install"; background: Rectangle { color: accentColor; radius: 6 }
-                            contentItem: Text { text: parent.text; color: "#0B0F1A"; font.pixelSize: 11; font.bold: true }
+                            contentItem: Text { text: parent.text; color: "#0C1116"; font.pixelSize: 11; font.bold: true }
                         }
                     }
                 }

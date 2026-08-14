@@ -4,7 +4,6 @@
 
 use anyhow::Result;
 use clap::{Parser, Subcommand};
-use serde::Serialize;
 use std::path::Path;
 use std::process::Command;
 
@@ -27,6 +26,7 @@ const STATE_FILE: &str = "/var/lib/synthex/handheld-mode";
 
 fn is_active() -> bool { Path::new(STATE_FILE).exists() }
 
+#[allow(dead_code)]
 fn run(args: &[&str]) { let _ = Command::new("systemctl").args(args).status(); }
 fn run_user(args: &[&str]) { let _ = Command::new("systemctl").arg("--user").args(args).status(); }
 

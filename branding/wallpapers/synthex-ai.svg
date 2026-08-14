@@ -7,6 +7,6 @@
     </linearGradient>
   </defs>
   <rect width="3840" height="2160" fill="url(#grad)"/>
-  <circle cx="1920" cy="1080" r="800" fill="#9BBD5C" opacity="0.03"/>
-  <circle cx="1920" cy="1080" r="400" fill="#9BBD5C" opacity="0.02"/>
+  <circle cx="1920" cy="1080" r="800" fill="#6C88A8" opacity="0.03"/>
+  <circle cx="1920" cy="1080" r="400" fill="#6C88A8" opacity="0.02"/>
 </svg>

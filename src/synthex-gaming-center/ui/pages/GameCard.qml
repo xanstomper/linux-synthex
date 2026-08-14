@@ -10,7 +10,7 @@ Rectangle {
     height: 280
     radius: 10
     color:  "#111118"
-    border.color: hoverArea.containsMouse ? "#FFB300" : "#222233"
+    border.color: hoverArea.containsMouse ? "#6C88A8" : "#222233"
     border.width: hoverArea.containsMouse ? 2 : 1
     clip: true
 
@@ -74,7 +74,7 @@ Rectangle {
             Label {
                 text: "⏱ " + (playtime !== "0h" ? playtime : "Not played")
                 font.pixelSize: 10
-                color: "#8899AA"
+                color: "#9AA1AB"
             }
             Item { Layout.fillWidth: true }
         }
@@ -90,7 +90,7 @@ Rectangle {
 
             background: Rectangle {
                 radius: 6
-                color: parent.pressed ? "#CC8800" : "#FFB300"
+                color: parent.pressed ? "#CC8800" : "#6C88A8"
             }
             contentItem: Text {
                 text: parent.text

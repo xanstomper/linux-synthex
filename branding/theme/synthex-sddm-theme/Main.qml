@@ -12,7 +12,7 @@ Rectangle {
         gradient: Gradient {
             GradientStop { position: 0.0; color: "#1a1a2e" }
             GradientStop { position: 0.5; color: "#16213e" }
-            GradientStop { position: 1.0; color: "#0f3460" }
+            GradientStop { position: 1.0; color: "#232A34" }
         }
     }
 
@@ -92,7 +92,7 @@ Rectangle {
             width: 60
             height: 60
             radius: 30
-            color: "#0f3460"
+            color: "#232A34"
             border.color: "#e94560"
             border.width: 2
             Text { anchors.centerIn: parent; text: "👤"; font.pixelSize: 28 }

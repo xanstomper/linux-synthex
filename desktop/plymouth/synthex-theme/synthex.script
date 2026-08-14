@@ -1,148 +1,146 @@
 #!/usr/bin/plymouthd
-# Synthex Plymouth Boot Theme — script module
-# /usr/share/plymouth/themes/synthex/synthex.script
+# ═══════════════════════════════════════════════════════════════════════════
+#  SynthOS Plymouth Boot Theme — "Solaris"
+#  Charcoal gradient, glowing periwinkle sun logo, elegant centered growth bar.
+# ═══════════════════════════════════════════════════════════════════════════
 
-# ── Background ────────────────────────────────────────────────────────────────
-Window.SetBackgroundTopColor    (0.043, 0.059, 0.102, 1.0);  # #0B0F1A
-Window.SetBackgroundBottomColor (0.051, 0.075, 0.153, 1.0);  # #0D1327
+# ── Background gradient ──────────────────────────────────────────────────────
+Window.SetBackgroundTopColor    (0.051, 0.055, 0.071, 1.0);   # #0D0F14
+Window.SetBackgroundBottomColor (0.102, 0.110, 0.133, 1.0);   # #1A1D24
 
-# ── Logo ──────────────────────────────────────────────────────────────────────
+# ── Logo ─────────────────────────────────────────────────────────────────────
 logo_image  = Image("synthex-logo.png");
 logo_sprite = Sprite();
 logo_sprite.SetImage(logo_image);
 logo_sprite.SetX(Window.GetWidth()  / 2 - logo_image.GetWidth()  / 2);
-logo_sprite.SetY(Window.GetHeight() / 2 - logo_image.GetHeight() / 2 - 40);
+logo_sprite.SetY(Window.GetHeight() / 2 - logo_image.GetHeight() / 2 - 36);
 logo_sprite.SetOpacity(0);
 
-# ── "SynthOS" text label ──────────────────────────────────────────────────────
-label_image  = Image.Text("SynthOS", 1.0, 0.70, 0.0, 1.0);   # amber #FFB300 ≈ rgb(1,0.7,0)
+# ── "SynthOS" wordmark ───────────────────────────────────────────────────────
+label_image  = Image.Text("SynthOS", 0.424, 0.533, 0.659, 1.0);   # periwinkle
 label_sprite = Sprite();
 label_sprite.SetImage(label_image);
 label_sprite.SetX(Window.GetWidth()  / 2 - label_image.GetWidth()  / 2);
-label_sprite.SetY(logo_sprite.GetY() + logo_image.GetHeight() + 16);
+label_sprite.SetY(logo_sprite.GetY() + logo_image.GetHeight() + 14);
 label_sprite.SetOpacity(0);
 
-# ── Spinner ───────────────────────────────────────────────────────────────────
-spinner_image  = Image("spinner.png");
-spinner_sprite = Sprite();
-spinner_sprite.SetImage(spinner_image);
-spinner_sprite.SetX(Window.GetWidth()  / 2 - spinner_image.GetWidth()  / 2);
-spinner_sprite.SetY(label_sprite.GetY() + label_image.GetHeight() + 24);
-spinner_sprite.SetOpacity(0);
+# ── Ambient glow behind logo (subtle pulsing halo) ───────────────────────────
+glow_image  = Image.CreateFilledWith(logo_image.GetWidth() + 120,
+                                     logo_image.GetHeight() + 120,
+                                     0.424, 0.533, 0.659, 1.0);
+glow_sprite = Sprite();
+glow_sprite.SetImage(glow_image);
+glow_sprite.SetX(logo_sprite.GetX() - 60);
+glow_sprite.SetY(logo_sprite.GetY() - 60);
+glow_sprite.SetOpacity(0);
 
-# ── Progress bar ──────────────────────────────────────────────────────────────
-progress_bar_bg_image = Image.CreateFilledWith(300, 4, 0.165, 0.165, 0.243, 1.0); # #2A2A3E
-progress_bar_image    = Image.CreateFilledWith(300, 4, 1.0,   0.70,  0.0,   1.0); # #FFB300
+# ── Progress bar (thin, centered, grows from middle) ─────────────────────────
+BAR_W = 280; BAR_H = 3; BAR_Y_OFFSET = 96;
 
-progress_bar_bg_sprite = Sprite();
-progress_bar_bg_sprite.SetImage(progress_bar_bg_image);
-progress_bar_bg_sprite.SetX(Window.GetWidth() / 2 - 150);
-progress_bar_bg_sprite.SetY(spinner_sprite.GetY() + spinner_image.GetHeight() + 20);
-progress_bar_bg_sprite.SetOpacity(0);
+bar_bg_sprite = Sprite();
+bar_bg_sprite.SetImage(Image.CreateFilledWith(BAR_W, BAR_H, 1.0, 1.0, 1.0, 1.0));
+bar_bg_sprite.SetX(Window.GetWidth() / 2 - BAR_W / 2);
+bar_bg_sprite.SetY(label_sprite.GetY() + label_image.GetHeight() + BAR_Y_OFFSET);
+bar_bg_sprite.SetOpacity(0);
 
-progress_bar_sprite = Sprite();
-progress_bar_sprite.SetImage(progress_bar_image);
-progress_bar_sprite.SetX(progress_bar_bg_sprite.GetX());
-progress_bar_sprite.SetY(progress_bar_bg_sprite.GetY());
-progress_bar_sprite.SetOpacity(0);
+bar_sprite = Sprite();
+bar_sprite.SetImage(Image.CreateFilledWith(1, BAR_H, 0.424, 0.533, 0.659, 1.0));
+bar_sprite.SetX(Window.GetWidth() / 2);
+bar_sprite.SetY(bar_bg_sprite.GetY());
+bar_sprite.SetOpacity(0);
 
-# ── Password dialog ───────────────────────────────────────────────────────────
+# ── State ────────────────────────────────────────────────────────────────────
+boot_progress = 0;
+frame_count   = 0;
+fade_done     = 0;
 dialog_visible = 0;
 
-# ── Animation state ───────────────────────────────────────────────────────────
-boot_progress    = 0;
-spin_angle       = 0;
-fade_in_done     = 0;
-frame_count      = 0;
-
-# ── Fade-in (first ~60 frames) ───────────────────────────────────────────────
-fun fade_in(progress) {
-    alpha = Math.Min(1.0, progress * 3.0);
+# ── Fade-in (logo, wordmark, glow ramp up over ~0.5s) ────────────────────────
+fun fade_in(t) {
+    alpha = Math.Min(1.0, t * 2.2);
     logo_sprite.SetOpacity(alpha);
     label_sprite.SetOpacity(alpha);
-    spinner_sprite.SetOpacity(alpha);
-    progress_bar_bg_sprite.SetOpacity(alpha * 0.6);
-    progress_bar_sprite.SetOpacity(alpha * 0.6);
+    glow_sprite.SetOpacity(alpha * 0.10);
+    bar_bg_sprite.SetOpacity(alpha * 0.18);
 }
 
-# ── Spinner rotation ──────────────────────────────────────────────────────────
-fun spin_update() {
-    spin_angle = (spin_angle + 8) % 360;
-    spinner_sprite.SetImage(spinner_image.Rotate(spin_angle * Math.Pi / 180));
-}
-
-# ── Progress bar update ───────────────────────────────────────────────────────
-fun progress_update(p) {
-    w = Math.Clamp(Math.Int(300 * p), 1, 300);
-    bar = Image.CreateFilledWith(w, 4, 1.0, 0.70, 0.0, 1.0);
-    progress_bar_sprite.SetImage(bar);
-    progress_bar_sprite.SetOpacity(1.0);
-    progress_bar_bg_sprite.SetOpacity(1.0);
-}
-
-# ── Main refresh callback (called every frame) ────────────────────────────────
+# ── Pulsing glow + centered progress growth ──────────────────────────────────
 fun refresh_callback() {
     frame_count++;
-    local.elapsed = frame_count / 50.0;          # ~50fps Plymouth default
+    local.elapsed = frame_count / 50.0;
 
-    if (fade_in_done == 0) {
+    if (fade_done == 0) {
         fade_in(elapsed);
-        if (elapsed >= 0.4) { fade_in_done = 1; }
+        if (elapsed >= 0.5) { fade_done = 1; }
     }
 
-    spin_update();
-    progress_update(boot_progress);
+    # gentle halo pulse (sinusoidal between 0.05 and 0.16)
+    pulse = 0.105 + 0.055 * Math.Sin(frame_count * 0.06);
+    glow_sprite.SetOpacity(pulse * (fade_done == 1 ? 1.0 : Math.Min(1.0, local.elapsed * 2.2)));
+
+    # progress bar grows from center outward, capped at full width
+    w = Math.Clamp(Math.Int(BAR_W * boot_progress), 1, BAR_W);
+    bar_sprite.SetImage(Image.CreateFilledWith(w, BAR_H, 0.424, 0.533, 0.659, 1.0));
+    # keep centered while growing
+    bar_sprite.SetX(Window.GetWidth() / 2 - w / 2);
+    bar_sprite.SetOpacity(fade_done == 1 ? 0.95 : Math.Min(1.0, local.elapsed * 2.2) * 0.95);
 }
 
 Plymouth.SetRefreshFunction(refresh_callback);
 
-# ── Progress callback ─────────────────────────────────────────────────────────
 fun progress_callback(duration, progress) {
     boot_progress = progress;
 }
-
 Plymouth.SetBootProgressFunction(progress_callback);
 
-# ── Quit (fade out on login screen) ──────────────────────────────────────────
+# ── Quit (graceful fade out → hands off to SDDM) ─────────────────────────────
 fun quit_callback() {
     logo_sprite.SetOpacity(0);
     label_sprite.SetOpacity(0);
-    spinner_sprite.SetOpacity(0);
-    progress_bar_sprite.SetOpacity(0);
-    progress_bar_bg_sprite.SetOpacity(0);
+    glow_sprite.SetOpacity(0);
+    bar_sprite.SetOpacity(0);
+    bar_bg_sprite.SetOpacity(0);
 }
-
 Plymouth.SetQuitFunction(quit_callback);
 
-# ── Encryption password dialog ────────────────────────────────────────────────
+# ── LUKS encryption passphrase dialog ────────────────────────────────────────
 fun password_callback(action, bullets) {
     dialog_visible = 1;
-    # Render password prompt text
-    prompt_img    = Image.Text("🔒  Disk Encryption Passphrase:", 0.533, 0.6, 0.867, 1.0);
+
+    # prompt label
+    prompt_img    = Image.Text("Disk Encryption Passphrase", 0.831, 0.886, 0.980, 1.0);
     prompt_sprite = Sprite();
     prompt_sprite.SetImage(prompt_img);
     prompt_sprite.SetX(Window.GetWidth() / 2 - prompt_img.GetWidth() / 2);
-    prompt_sprite.SetY(Window.GetHeight() / 2 + 60);
+    prompt_sprite.SetY(Window.GetHeight() / 2 + 70);
+    prompt_sprite.SetOpacity(0.9);
 
-    # Render bullet dots
+    # subtle underline field
+    field_w = 260; field_h = 2;
+    field_img = Image.CreateFilledWith(field_w, field_h, 0.424, 0.533, 0.659, 1.0);
+    field_sprite = Sprite();
+    field_sprite.SetImage(field_img);
+    field_sprite.SetX(Window.GetWidth() / 2 - field_w / 2);
+    field_sprite.SetY(prompt_sprite.GetY() + 28);
+    field_sprite.SetOpacity(0.6);
+
+    # bullet dots for entered characters
     bullet_str = "";
     for (i = 0; i < bullets; i++) { bullet_str += "●"; }
-    bullet_img    = Image.Text(bullet_str, 1.0, 0.70, 0.0, 1.0);
+    bullet_img    = Image.Text(bullet_str, 0.424, 0.533, 0.659, 1.0);
     bullet_sprite = Sprite();
     bullet_sprite.SetImage(bullet_img);
     bullet_sprite.SetX(Window.GetWidth() / 2 - bullet_img.GetWidth() / 2);
-    bullet_sprite.SetY(Window.GetHeight() / 2 + 88);
+    bullet_sprite.SetY(prompt_sprite.GetY() + 4);
 }
-
 Plymouth.SetDisplayPasswordFunction(password_callback);
 
-# ── Message display ───────────────────────────────────────────────────────────
+# ── Boot message line ────────────────────────────────────────────────────────
 fun message_callback(text) {
-    msg_img    = Image.Text(text, 0.533, 0.6, 0.867, 0.7);
+    msg_img    = Image.Text(text, 0.353, 0.392, 0.502, 0.7);
     msg_sprite = Sprite();
     msg_sprite.SetImage(msg_img);
     msg_sprite.SetX(Window.GetWidth() / 2 - msg_img.GetWidth() / 2);
-    msg_sprite.SetY(Window.GetHeight() - 48);
+    msg_sprite.SetY(Window.GetHeight() - 44);
 }
-
 Plymouth.SetMessageFunction(message_callback);

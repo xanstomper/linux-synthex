@@ -22,6 +22,7 @@ enum PerfCommand {
     Status,
 }
 
+#[allow(dead_code)]
 fn write_file(path: &str, content: &str) -> bool {
     Command::new("sudo").args(["sh", "-c", &format!("echo '{}' > {}", content.replace("'", "'\"'"), path)])
         .status().map(|s| s.success()).unwrap_or(false)

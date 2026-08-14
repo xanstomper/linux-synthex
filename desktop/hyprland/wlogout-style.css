@@ -1,51 +1,60 @@
-/* Synthex wlogout CSS — power menu theme
- * Full-screen overlay with large icon buttons
- */
+/* ═══════════════════════════════════════════════════════════════════════════
+ *  SynthOS Nova — wlogout power menu theme
+ *  Full-screen dim · charcoal tiles · periwinkle focus
+ * ═══════════════════════════════════════════════════════════════════════════ */
 
 window {
-    background-color: rgba(26, 26, 46, 0.9);
+    background-color: rgba(17, 19, 24, 0.88);
 }
 
 button {
-    background-color: rgba(22, 33, 62, 0.8);
-    color: #ffffff;
-    border: 2px solid transparent;
-    border-radius: 16px;
+    background-color: rgba(29, 32, 39, 0.85);
+    color: #DDE3EB;
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 22px;
     background-repeat: no-repeat;
     background-position: center;
-    background-size: 25%;
+    background-size: 26%;
     margin: 16px;
-    transition: all 200ms ease;
+    transition: all 180ms cubic-bezier(.4,0,.2,1);
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.30);
 }
 
 button:focus,
 button:active,
 button:hover {
-    background-color: rgba(233, 69, 96, 0.3);
-    border-color: #e94560;
+    background-color: rgba(126, 166, 244, 0.16);
+    border-color: #6C88A8;
     outline: none;
+    transform: scale(1.03);
 }
 
 #lock {
-    background-image: image(url("/usr/share/wlogout/icons/lock.png"), rgba(233, 69, 96, 0.5));
+    background-image: image(url("/usr/share/wlogout/icons/lock.png"), rgba(126, 166, 244, 0.85));
 }
 
 #logout {
-    background-image: image(url("/usr/share/wlogout/icons/logout.png"), rgba(233, 69, 96, 0.5));
+    background-image: image(url("/usr/share/wlogout/icons/logout.png"), rgba(183, 164, 247, 0.85));
 }
 
 #suspend {
-    background-image: image(url("/usr/share/wlogout/icons/suspend.png"), rgba(233, 69, 96, 0.5));
+    background-image: image(url("/usr/share/wlogout/icons/suspend.png"), rgba(232, 180, 90, 0.85));
 }
 
 #hibernate {
-    background-image: image(url("/usr/share/wlogout/icons/hibernate.png"), rgba(233, 69, 96, 0.5));
-}
-
-#reboot {
-    background-image: image(url("/usr/share/wlogout/icons/reboot.png"), rgba(233, 69, 96, 0.5));
+    background-image: image(url("/usr/share/wlogout/icons/hibernate.png"), rgba(118, 196, 126, 0.85));
 }
 
 #shutdown {
-    background-image: image(url("/usr/share/wlogout/icons/shutdown.png"), rgba(233, 69, 96, 0.5));
+    background-image: image(url("/usr/share/wlogout/icons/shutdown.png"), rgba(232, 116, 124, 0.85));
+}
+
+#shutdown:focus,
+#shutdown:hover {
+    background-color: rgba(232, 116, 124, 0.20);
+    border-color: #D97C82;
+}
+
+#reboot {
+    background-image: image(url("/usr/share/wlogout/icons/reboot.png"), rgba(126, 166, 244, 0.85));
 }
