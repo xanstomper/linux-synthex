@@ -95,7 +95,7 @@ install -m 0755 desktop/plasma/synthex-desktop-config.sh \
     %{buildroot}%{_datadir}/synthex/plasma/scripts/
 
 # Color schemes
-install -m 0644 desktop/plasma/color-schemes/*.colors \
+install -m 0644 branding/desktop-profiles/focus/colorscheme/synthex-focus.colors \
     %{buildroot}%{_datadir}/color-schemes/
 
 # Look and feel
@@ -103,16 +103,12 @@ cp -r desktop/plasma/look-and-feel/org.synthex.desktop \
     %{buildroot}%{_datadir}/plasma/look-and-feel/
 
 # Desktop theme
-cp -r desktop/plasma/desktop-theme/Synthex-Fluent-Material \
-    %{buildroot}%{_datadir}/plasma/desktoptheme/
+install -m 0644 desktop/plasma/desktop-theme/synthex-nova \
+    %{buildroot}%{_datadir}/plasma/desktoptheme/synthex-nova
 
 # Aurorae window decoration
-cp -r desktop/plasma/aurorae/Synthex-Fluent \
+cp -r desktop/plasma/aurorae/Synthex-Nova \
     %{buildroot}%{_datadir}/aurorae/themes/
-
-# SDDM theme
-cp -r desktop/plasma/sddm-theme/* \
-    %{buildroot}%{_datadir}/sddm/themes/synthex/
 
 # Wayland session file
 install -m 0644 desktop/plasma/synthex-plasma-wayland.desktop \
@@ -151,11 +147,9 @@ fi
 %{_datadir}/synthex/plasma/config/
 %{_datadir}/synthex/plasma/scripts/
 %{_datadir}/plasma/look-and-feel/org.synthex.desktop/
-%{_datadir}/plasma/desktoptheme/Synthex-Fluent-Material/
-%{_datadir}/color-schemes/SynthexFluent.colors
-%{_datadir}/color-schemes/SynthexFluentDark.colors
-%{_datadir}/aurorae/themes/Synthex-Fluent/
-%{_datadir}/sddm/themes/synthex/
+%{_datadir}/plasma/desktoptheme/synthex-nova
+%{_datadir}/color-schemes/synthex-focus.colors
+%{_datadir}/aurorae/themes/Synthex-Nova/
 %{_datadir}/wayland-sessions/synthex-plasma-wayland.desktop
 %config %{_sysconfdir}/skel/.config/
 %license LICENSE

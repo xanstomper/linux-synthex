@@ -4,70 +4,67 @@ import QtQuick.Layouts 1.15
 
 Rectangle {
     id: root
-    width: 240
-    height: 110
-    radius: 18
-    color: "#141923"
-    border.color: "#14ffffff"
+    width: 250
+    height: 112
+    radius: (typeof systemBridge !== "undefined" && systemBridge) ? systemBridge.cornerRadius : 18
+    color: "#a612161f" // Translucent liquid glass base
+    border.color: "#28ffffff"
     border.width: 1
 
-    property string currentTime: "04:44"
-    property string currentAmPm: "PM"
-    property string currentDate: "Tue, 09 August 2022"
+    property string currentTime: (typeof systemBridge !== "undefined" && systemBridge) ? (new Date().toLocaleTimeString(Qt.locale(), "hh:mm")) : "04:44"
+    property string ampm: (typeof systemBridge !== "undefined" && systemBridge) ? (new Date().toLocaleTimeString(Qt.locale(), "AP")) : "PM"
+    property string currentDate: (typeof systemBridge !== "undefined" && systemBridge) ? (new Date().toLocaleDateString(Qt.locale(), "ddd, dd MMMM yyyy")) : "Tue, 09 August 2022"
+
+    // Liquid Glass Specular Top Highlight
+    Rectangle {
+        anchors.fill: parent
+        radius: root.radius
+        gradient: Gradient {
+            GradientStop { position: 0.0; color: "#22ffffff" }
+            GradientStop { position: 0.08; color: "#06ffffff" }
+            GradientStop { position: 1.0; color: "#00ffffff" }
+        }
+    }
 
     Timer {
         interval: 1000
         running: true
         repeat: true
-        triggeredOnStart: true
         onTriggered: {
-            var now = new Date()
-            var hours = now.getHours()
-            var ampm = hours >= 12 ? "PM" : "AM"
-            hours = hours % 12
-            hours = hours ? hours : 12
-            var strHours = hours < 10 ? "0" + hours : "" + hours
-            var min = now.getMinutes()
-            var strMin = min < 10 ? "0" + min : "" + min
-            root.currentTime = strHours + ":" + strMin
-            root.currentAmPm = ampm
-
-            var days = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"]
-            var months = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"]
-            var dayName = days[now.getDay()]
-            var dayNum = now.getDate() < 10 ? "0" + now.getDate() : "" + now.getDate()
-            var monthName = months[now.getMonth()]
-            root.currentDate = dayName + ", " + dayNum + " " + monthName + " " + now.getFullYear()
+            var d = new Date()
+            root.currentTime = d.toLocaleTimeString(Qt.locale(), "hh:mm")
+            root.ampm = d.toLocaleTimeString(Qt.locale(), "AP")
+            root.currentDate = d.toLocaleDateString(Qt.locale(), "ddd, dd MMMM yyyy")
         }
     }
 
     ColumnLayout {
         anchors.fill: parent
         anchors.margins: 18
-        spacing: 4
+        spacing: 2
 
         RowLayout {
-            spacing: 2
-            Layout.alignment: Qt.AlignLeft | Qt.AlignVCenter
+            spacing: 6
+            Layout.alignment: Qt.AlignLeft
 
             Text {
                 text: root.currentTime
                 font.family: "Inter"
-                font.pixelSize: 38
+                font.pixelSize: 40
                 font.bold: true
-                color: "#7AA2F7"
-                font.letterSpacing: -0.5
+                color: (typeof systemBridge !== "undefined" && systemBridge) ? systemBridge.accentColor : "#7AA2F7"
+                style: Text.Raised
+                styleColor: "#40000000"
             }
 
             Text {
-                text: root.currentAmPm
+                text: root.ampm
                 font.family: "Inter"
-                font.pixelSize: 18
+                font.pixelSize: 15
                 font.bold: true
-                color: "#56759B"
+                color: "#6C88A8"
                 Layout.alignment: Qt.AlignBottom
-                Layout.bottomMargin: 5
-                Layout.leftMargin: 3
+                Layout.bottomMargin: 8
             }
         }
 
@@ -76,8 +73,24 @@ Rectangle {
             font.family: "Inter"
             font.pixelSize: 13
             font.weight: Font.Medium
-            color: "#9AA1AB"
-            Layout.alignment: Qt.AlignLeft
+            color: "#A0AAB8"
+        }
+    }
+
+    // Elastic Gooey Hover Interaction
+    MouseArea {
+        id: hoverArea
+        anchors.fill: parent
+        hoverEnabled: true
+        cursorShape: Qt.PointingHandCursor
+    }
+
+    scale: hoverArea.pressed ? 0.97 : (hoverArea.containsMouse ? 1.025 : 1.0)
+    Behavior on scale {
+        NumberAnimation {
+            duration: 250
+            easing.type: Easing.OutBack
+            easing.overshoot: 1.3
         }
     }
 }

@@ -6,13 +6,24 @@ Rectangle {
     id: root
     width: 540
     height: 620
-    radius: 20
-    color: "#141923"
-    border.color: "#14ffffff"
+    radius: (typeof systemBridge !== "undefined" && systemBridge) ? systemBridge.cornerRadius : 20
+    color: "#d012161f" // Translucent liquid glass
+    border.color: "#30ffffff"
     border.width: 1
 
     property int activeCategoryIndex: 0
     property string username: (typeof systemBridge !== "undefined" && systemBridge) ? systemBridge.username : "user"
+
+    // Liquid Glass Specular Top Highlight
+    Rectangle {
+        anchors.fill: parent
+        radius: root.radius
+        gradient: Gradient {
+            GradientStop { position: 0.0; color: "#22ffffff" }
+            GradientStop { position: 0.06; color: "#06ffffff" }
+            GradientStop { position: 1.0; color: "#00ffffff" }
+        }
+    }
 
     ColumnLayout {
         anchors.fill: parent
@@ -24,8 +35,8 @@ Rectangle {
             Layout.fillWidth: true
             Layout.preferredHeight: 44
             radius: 12
-            color: "#0affffff"
-            border.color: searchInput.activeFocus ? "#7AA2F7" : "#0fffffff"
+            color: "#14ffffff"
+            border.color: searchInput.activeFocus ? ((typeof systemBridge !== "undefined" && systemBridge) ? systemBridge.accentColor : "#7AA2F7") : "#1fffffff"
             border.width: 1
 
             RowLayout {
@@ -105,8 +116,8 @@ Rectangle {
                         width: categoryList.width
                         height: 36
                         radius: 8
-                        color: root.activeCategoryIndex === index ? "#386c88a8" : "transparent"
-                        border.color: root.activeCategoryIndex === index ? "#4d7aa2f7" : "transparent"
+                        color: root.activeCategoryIndex === index ? "#357aa2f7" : (catMouse.containsMouse ? "#10ffffff" : "transparent")
+                        border.color: root.activeCategoryIndex === index ? "#7AA2F7" : "transparent"
 
                         RowLayout {
                             anchors.fill: parent
@@ -118,7 +129,7 @@ Rectangle {
                                 text: model.icon
                                 font.family: "Symbols Nerd Font"
                                 font.pixelSize: 14
-                                color: root.activeCategoryIndex === index ? "#7AA2F7" : "#9AA1AB"
+                                color: root.activeCategoryIndex === index ? "#FFFFFF" : "#9AA1AB"
                             }
 
                             Text {
@@ -126,17 +137,21 @@ Rectangle {
                                 font.family: "Inter"
                                 font.pixelSize: 13
                                 font.weight: root.activeCategoryIndex === index ? Font.DemiBold : Font.Normal
-                                color: root.activeCategoryIndex === index ? "#7AA2F7" : "#9AA1AB"
+                                color: root.activeCategoryIndex === index ? "#FFFFFF" : "#A0AAB8"
                                 elide: Text.ElideRight
                                 Layout.fillWidth: true
                             }
                         }
 
                         MouseArea {
+                            id: catMouse
                             anchors.fill: parent
+                            hoverEnabled: true
                             cursorShape: Qt.PointingHandCursor
                             onClicked: root.activeCategoryIndex = index
                         }
+
+                        Behavior on color { ColorAnimation { duration: 140 } }
                     }
                 }
 
@@ -163,7 +178,7 @@ Rectangle {
                             text: "󰄬"
                             font.family: "Symbols Nerd Font"
                             font.pixelSize: 14
-                            color: "#7AA2F7"
+                            color: (typeof systemBridge !== "undefined" && systemBridge) ? systemBridge.accentColor : "#7AA2F7"
                         }
 
                         Text {
@@ -248,8 +263,8 @@ Rectangle {
                         width: appsList.width
                         height: 52
                         radius: 12
-                        color: "#05ffffff"
-                        border.color: "#0affffff"
+                        color: appMouse.containsMouse ? "#1affffff" : "#08ffffff"
+                        border.color: appMouse.containsMouse ? "#30ffffff" : "#10ffffff"
 
                         RowLayout {
                             anchors.fill: parent
@@ -288,23 +303,24 @@ Rectangle {
                                     text: model.category
                                     font.family: "Inter"
                                     font.pixelSize: 11
-                                    color: "#9AA1AB"
+                                    color: "#A0AAB8"
                                 }
                             }
                         }
 
                         MouseArea {
+                            id: appMouse
                             anchors.fill: parent
                             hoverEnabled: true
                             cursorShape: Qt.PointingHandCursor
-                            onEntered: parent.color = "#0fffffff"
-                            onExited: parent.color = "#05ffffff"
                             onClicked: {
                                 if (typeof systemBridge !== "undefined" && systemBridge) {
                                     systemBridge.launchApp(model.cmd)
                                 }
                             }
                         }
+
+                        Behavior on color { ColorAnimation { duration: 140 } }
                     }
                 }
             }

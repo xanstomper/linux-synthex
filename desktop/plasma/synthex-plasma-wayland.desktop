@@ -1,0 +1,6 @@
+[Desktop Entry]
+Name=SynthOS (Plasma)
+Comment=SynthOS Nova — Plasma 6 Wayland session
+Exec=/usr/libexec/plasma-dbus-run-session-if-needed /usr/bin/startplasma-wayland
+Type=Application
+DesktopNames=SynthOS;KDE;

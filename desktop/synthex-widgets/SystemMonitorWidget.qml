@@ -6,9 +6,9 @@ Rectangle {
     id: root
     width: 430
     height: 200
-    radius: 18
-    color: "#141923"
-    border.color: "#14ffffff"
+    radius: (typeof systemBridge !== "undefined" && systemBridge) ? systemBridge.cornerRadius : 18
+    color: "#a612161f" // Translucent liquid glass
+    border.color: "#28ffffff"
     border.width: 1
 
     property int cpuPct: (typeof systemBridge !== "undefined" && systemBridge) ? systemBridge.cpuPct : 32
@@ -18,6 +18,17 @@ Rectangle {
     property string upSpeed: (typeof systemBridge !== "undefined" && systemBridge) ? systemBridge.netUpSpeed : "42 KB/s"
     property string uptimeStr: (typeof systemBridge !== "undefined" && systemBridge) ? systemBridge.uptimeStr : "2h 15m"
     property string kernelStr: (typeof systemBridge !== "undefined" && systemBridge) ? systemBridge.kernelStr : "6.3.9-synth"
+
+    // Liquid Glass Specular Top Highlight
+    Rectangle {
+        anchors.fill: parent
+        radius: root.radius
+        gradient: Gradient {
+            GradientStop { position: 0.0; color: "#22ffffff" }
+            GradientStop { position: 0.08; color: "#06ffffff" }
+            GradientStop { position: 1.0; color: "#00ffffff" }
+        }
+    }
 
     Connections {
         target: (typeof systemBridge !== "undefined") ? systemBridge : null
@@ -55,7 +66,7 @@ Rectangle {
                         text: root.cpuPct + "%"
                         font.family: "Inter"
                         font.pixelSize: 12
-                        color: "#9AA1AB"
+                        color: "#A0AAB8"
                     }
                 }
 
@@ -111,7 +122,7 @@ Rectangle {
                         text: root.ramPct + "%"
                         font.family: "Inter"
                         font.pixelSize: 12
-                        color: "#9AA1AB"
+                        color: "#A0AAB8"
                     }
                 }
 
@@ -167,7 +178,7 @@ Rectangle {
                         text: root.diskPct + "%"
                         font.family: "Inter"
                         font.pixelSize: 12
-                        color: "#9AA1AB"
+                        color: "#A0AAB8"
                     }
                 }
 
@@ -292,7 +303,7 @@ Rectangle {
                         text: root.uptimeStr
                         font.family: "Inter"
                         font.pixelSize: 11
-                        color: "#9AA1AB"
+                        color: "#A0AAB8"
                     }
                 }
 
@@ -309,7 +320,7 @@ Rectangle {
                         text: root.kernelStr
                         font.family: "Inter"
                         font.pixelSize: 11
-                        color: "#9AA1AB"
+                        color: "#A0AAB8"
                     }
                 }
             }

@@ -1,0 +1,26 @@
+[org.gnome.desktop.interface]
+gtk-theme='Synthex-dark'
+icon-theme='Papirus-Dark'
+cursor-theme='Synthex-Cursor'
+cursor-size=24
+font-name='Inter 10'
+monospace-font-name='JetBrains Mono 10'
+color-scheme='prefer-dark'
+enable-hot-corners=false
+
+[org.gnome.shell]
+favorite-apps=['firefox.desktop', 'org.gnome.Nautilus.desktop', 'org.gnome.Console.desktop', 'synthex-control-center.desktop']
+
+[org.gnome.desktop.background]
+picture-uri='file:///usr/share/wallpapers/synthex-nova.png'
+picture-uri-dark='file:///usr/share/wallpapers/synthex-nova.png'
+picture-options='zoom'
+
+[org.gnome.desktop.screensaver]
+picture-uri='file:///usr/share/wallpapers/synthex-nova.png'
+
+[org.gnome.desktop.wm.preferences]
+button-layout=':minimize,maximize,close'
+
+[org.gnome.mutter]
+experimental-features=['scale-monitor-framebuffer']

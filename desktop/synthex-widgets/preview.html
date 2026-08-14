@@ -3,144 +3,185 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>SynthOS Rice Live Interactive Preview</title>
+<title>SynthOS Zenith Rice — Liquid Glass & Animated Desktop Preview</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
 <style>
   :root {
-    --bg-surface: #141923;
-    --bg-dark: #10151B;
-    --bg-dock: rgba(18, 22, 31, 0.90);
-    --border-subtle: rgba(255, 255, 255, 0.08);
-    --border-hi: rgba(255, 255, 255, 0.16);
-    --accent-blue: #7AA2F7;
+    --accent: #7AA2F7;
     --accent-purple: #BB9AF7;
     --accent-gold: #E5A84B;
     --accent-teal: #73DACA;
     --accent-cyan: #2AC3DE;
-    --accent-red: #F7768E;
-    --accent-green: #9ECE6A;
-    --text-primary: #FFFFFF;
-    --text-dim: #9AA1AB;
-    --text-mute: #67707D;
-    --radius-card: 18px;
-    --radius-pill: 9999px;
+    --accent-pink: #F7768E;
+    
+    --bg-glass: rgba(18, 22, 31, 0.65);
+    --bg-glass-card: rgba(20, 25, 35, 0.68);
+    --bg-glass-dock: rgba(16, 20, 28, 0.72);
+    
+    --border-glass: rgba(255, 255, 255, 0.14);
+    --border-glass-hi: rgba(255, 255, 255, 0.28);
+    --sheen-top: rgba(255, 255, 255, 0.18);
+    
+    --text-main: #FFFFFF;
+    --text-sub: #A0AAB8;
+    --text-dim: #67707D;
+    
+    --radius-card: 20px;
+    --radius-dock: 32px;
   }
 
-  * {
-    box-sizing: border-box;
-    margin: 0;
-    padding: 0;
-    user-select: none;
-  }
-
+  * { box-sizing: border-box; margin: 0; padding: 0; }
   body {
     font-family: 'Inter', sans-serif;
-    background: #0B0E14;
-    color: var(--text-primary);
+    color: var(--text-main);
+    background: #090C10;
     min-height: 100vh;
     display: flex;
     flex-direction: column;
     align-items: center;
     justify-content: center;
     overflow-x: hidden;
+    padding: 24px 16px;
   }
 
-  /* Desktop Canvas Frame */
-  .desktop-canvas {
+  /* Desktop Viewport Canvas */
+  .desktop-viewport {
     position: relative;
-    width: 1440px;
-    height: 900px;
-    background: linear-gradient(180deg, rgba(13, 20, 32, 0.4) 0%, rgba(10, 14, 20, 0.65) 100%),
-                url('https://images.unsplash.com/photo-1506744038136-46273834b3fb?auto=format&fit=crop&w=2000&q=80') center/cover no-repeat;
-    border: 1px solid var(--border-subtle);
-    border-radius: 20px;
-    box-shadow: 0 30px 80px rgba(0, 0, 0, 0.7);
+    width: 100%;
+    max-width: 1400px;
+    height: 860px;
+    border-radius: 28px;
     overflow: hidden;
-    margin: 20px auto;
+    box-shadow: 0 35px 100px rgba(0, 0, 0, 0.85), 0 0 0 1px rgba(255, 255, 255, 0.1);
+    background-size: cover;
+    background-position: center;
+    transition: background-image 0.5s ease;
+  }
+
+  /* Dynamic Wallpapers */
+  .wp-nebula {
+    background-image: radial-gradient(circle at 20% 30%, rgba(122, 162, 247, 0.25) 0%, transparent 50%),
+                      radial-gradient(circle at 80% 70%, rgba(187, 154, 247, 0.22) 0%, transparent 50%),
+                      linear-gradient(135deg, #0B0E14 0%, #111722 50%, #0D121B 100%);
+  }
+  .wp-cyber {
+    background-image: radial-gradient(circle at 75% 25%, rgba(0, 240, 255, 0.25) 0%, transparent 45%),
+                      radial-gradient(circle at 25% 75%, rgba(255, 0, 127, 0.22) 0%, transparent 45%),
+                      linear-gradient(135deg, #060810 0%, #0F1026 50%, #080612 100%);
+  }
+  .wp-sunset {
+    background-image: radial-gradient(circle at 50% 80%, rgba(229, 168, 75, 0.3) 0%, transparent 50%),
+                      radial-gradient(circle at 30% 20%, rgba(247, 118, 142, 0.2) 0%, transparent 45%),
+                      linear-gradient(135deg, #120E18 0%, #1E1322 50%, #0D0B12 100%);
+  }
+
+  /* Liquid Glass Base */
+  .liquid-glass {
+    background: var(--bg-glass-card);
+    backdrop-filter: blur(28px) saturate(190%) contrast(105%);
+    -webkit-backdrop-filter: blur(28px) saturate(190%) contrast(105%);
+    border: 1px solid var(--border-glass);
+    box-shadow: inset 0 1px 0 var(--sheen-top), 0 20px 50px rgba(0, 0, 0, 0.55);
+    border-radius: var(--radius-card);
+    transition: transform 0.28s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 0.28s ease, border-color 0.2s ease;
+  }
+  .liquid-glass:hover {
+    transform: translateY(-4px) scale(1.015);
+    border-color: var(--border-glass-hi);
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.35), 0 26px 65px rgba(0, 0, 0, 0.65);
   }
 
   /* Top Status Pill */
-  .top-status-pill {
+  .top-pill {
     position: absolute;
-    top: 16px;
+    top: 20px;
     left: 50%;
     transform: translateX(-50%);
-    background: var(--bg-dock);
-    backdrop-filter: blur(20px);
-    border: 1px solid var(--border-subtle);
-    border-radius: var(--radius-pill);
-    padding: 8px 24px;
+    height: 38px;
+    padding: 0 22px;
+    border-radius: 9999px;
+    background: var(--bg-glass-dock);
+    backdrop-filter: blur(24px) saturate(180%);
+    border: 1px solid var(--border-glass);
+    box-shadow: inset 0 1px 0 var(--sheen-top), 0 10px 30px rgba(0, 0, 0, 0.5);
     display: flex;
     align-items: center;
-    gap: 12px;
-    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.4);
+    gap: 10px;
+    font-size: 13px;
+    font-weight: 600;
     z-index: 10;
   }
-
   .status-dot {
     width: 8px;
     height: 8px;
     border-radius: 50%;
-    background: var(--accent-blue);
-    box-shadow: 0 0 10px var(--accent-blue);
+    background: var(--accent);
+    box-shadow: 0 0 10px var(--accent);
+    animation: pulseDot 2.2s infinite ease-in-out;
+  }
+  @keyframes pulseDot {
+    0%, 100% { opacity: 1; transform: scale(1); }
+    50% { opacity: 0.5; transform: scale(0.85); }
   }
 
-  .pill-text {
-    font-size: 13px;
-    font-weight: 600;
-    color: var(--text-primary);
-    letter-spacing: 0.3px;
-  }
-
-  /* Widgets Base */
-  .widget-card {
+  /* Desktop Grid Layout */
+  .desktop-layout {
     position: absolute;
-    background: var(--bg-surface);
-    border: 1px solid var(--border-subtle);
-    border-radius: var(--radius-card);
-    box-shadow: 0 16px 36px rgba(0, 0, 0, 0.45);
-    backdrop-filter: blur(16px);
-    padding: 18px;
-    transition: transform 0.2s ease, box-shadow 0.2s ease;
+    inset: 0;
+    padding: 76px 36px 110px 36px;
+    display: grid;
+    grid-template-columns: 340px 1fr 370px;
+    gap: 20px;
+    pointer-events: none;
   }
+  .desktop-layout > * { pointer-events: auto; }
 
-  .widget-card:hover {
-    box-shadow: 0 20px 48px rgba(0, 0, 0, 0.6);
+  .col-left, .col-right {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+  }
+  .col-center {
+    display: flex;
+    align-items: center;
+    justify-content: center;
   }
 
   /* Clock Widget */
-  .clock-widget {
-    top: 40px;
-    left: 40px;
-    width: 210px;
+  .clock-card {
+    padding: 18px 22px;
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
   }
-  .clock-time {
-    font-size: 40px;
+  .time-row {
+    display: flex;
+    align-items: baseline;
+    gap: 6px;
+  }
+  .time-val {
+    font-size: 38px;
     font-weight: 800;
-    color: var(--accent-blue);
-    line-height: 1;
+    color: var(--accent);
     letter-spacing: -1px;
+    text-shadow: 0 2px 14px rgba(122, 162, 247, 0.4);
   }
-  .clock-ampm {
-    font-size: 18px;
+  .time-ampm {
+    font-size: 14px;
     font-weight: 700;
-    color: #56759B;
-    margin-left: 4px;
+    color: #6C88A8;
   }
-  .clock-date {
+  .date-val {
     font-size: 13px;
-    color: var(--text-dim);
-    margin-top: 8px;
     font-weight: 500;
+    color: var(--text-sub);
   }
 
   /* Weather Widget */
-  .weather-widget {
-    top: 170px;
-    left: 40px;
-    width: 310px;
+  .weather-card {
+    padding: 16px 20px;
     display: flex;
     align-items: center;
     gap: 16px;
@@ -148,709 +189,569 @@
   .weather-icon-temp {
     display: flex;
     align-items: center;
-    gap: 8px;
+    gap: 10px;
   }
-  .temp-val {
-    font-size: 34px;
-    font-weight: 700;
-    color: #FFF;
+  .weather-glyph {
+    font-size: 36px;
+    color: var(--accent-gold);
+    filter: drop-shadow(0 2px 8px rgba(229, 168, 75, 0.4));
   }
-  .weather-details {
-    display: flex;
-    flex-direction: column;
-    gap: 2px;
+  .weather-temp {
+    font-size: 32px;
+    font-weight: 800;
   }
-  .weather-headline {
+  .weather-info {
+    font-size: 12px;
+    color: var(--text-sub);
+    line-height: 1.45;
+  }
+  .weather-city {
     font-size: 13px;
     font-weight: 700;
-    color: #FFF;
-  }
-  .weather-sub {
-    font-size: 12px;
-    color: var(--text-dim);
+    color: #FFFFFF;
+    margin-bottom: 2px;
   }
 
-  /* Terminal Window Widget */
-  .terminal-widget {
-    top: 310px;
-    left: 40px;
-    width: 420px;
-    background: #12161F;
-    padding: 0;
+  /* Terminal Card */
+  .terminal-card {
+    padding: 14px 18px;
     font-family: 'JetBrains Mono', monospace;
-    overflow: hidden;
+    font-size: 12px;
+    background: rgba(14, 18, 26, 0.75);
   }
   .term-header {
-    background: rgba(255, 255, 255, 0.02);
-    padding: 10px 14px;
     display: flex;
     align-items: center;
-    border-bottom: 1px solid var(--border-subtle);
-  }
-  .traffic-dots {
-    display: flex;
-    gap: 6px;
+    gap: 8px;
+    margin-bottom: 12px;
   }
   .traffic-dot {
     width: 10px;
     height: 10px;
     border-radius: 50%;
   }
-  .dot-red { background: #FF5F56; }
-  .dot-yellow { background: #FFBD2E; }
-  .dot-green { background: #27C93F; }
   .term-title {
-    font-size: 11px;
     color: var(--text-dim);
-    margin-left: 14px;
+    font-size: 11px;
+    margin-left: auto;
   }
   .term-body {
-    padding: 16px;
-    font-size: 11.5px;
-    line-height: 1.45;
-  }
-  .term-cmd {
-    color: var(--accent-blue);
-    font-weight: bold;
-    margin-bottom: 10px;
-  }
-  .fetch-grid {
-    display: grid;
-    grid-template-columns: 140px 1fr;
-    gap: 12px;
-    align-items: center;
-  }
-  .fetch-logo {
-    color: var(--accent-blue);
-    white-space: pre;
-    line-height: 1.2;
-    font-size: 10px;
-  }
-  .fetch-info {
     display: flex;
-    flex-direction: column;
-    gap: 2px;
+    gap: 18px;
+    line-height: 1.4;
   }
-  .info-row {
-    display: flex;
-    gap: 8px;
-  }
-  .info-k {
-    width: 38px;
-    font-weight: 700;
-  }
-  .info-v {
-    color: #DDE3EB;
-  }
-  .color-bar {
-    display: flex;
-    height: 6px;
-    border-radius: 3px;
-    overflow: hidden;
-    margin-top: 8px;
-    width: 180px;
-  }
-  .cb-1 { background: #F7768E; flex: 1; }
-  .cb-2 { background: #FF9E64; flex: 1; }
-  .cb-3 { background: #E0AF68; flex: 1; }
-  .cb-4 { background: #9ECE6A; flex: 1; }
-  .cb-5 { background: #73DACA; flex: 1; }
-  .cb-6 { background: #7AA2F7; flex: 1; }
-  .cb-7 { background: #BB9AF7; flex: 1; }
-  .cb-8 { background: #C0CAF5; flex: 1; }
+  .term-logo { color: var(--accent); white-space: pre; }
+  .term-specs { color: #DDE3EB; }
+  .term-spec-k { font-weight: 700; color: var(--accent-purple); display: inline-block; width: 44px; }
+  .term-rainbow { margin-top: 6px; letter-spacing: 2px; }
 
-  /* Center Application Launcher */
-  .launcher-widget {
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    width: 480px;
-    height: 520px;
+  /* Media Center */
+  .media-card {
+    padding: 14px 16px;
     display: flex;
     flex-direction: column;
-    gap: 12px;
-    z-index: 20;
-  }
-  .launcher-search {
-    background: rgba(255, 255, 255, 0.04);
-    border: 1px solid var(--border-subtle);
-    border-radius: 12px;
-    padding: 10px 14px;
-    display: flex;
-    align-items: center;
     gap: 10px;
-    color: var(--text-dim);
-    font-size: 13px;
   }
-  .launcher-body {
-    display: grid;
-    grid-template-columns: 140px 1fr;
-    gap: 14px;
+  .media-tabs {
+    display: flex;
+    gap: 6px;
+  }
+  .media-tab {
     flex: 1;
-    overflow: hidden;
-  }
-  .launcher-sidebar {
-    display: flex;
-    flex-direction: column;
-    gap: 2px;
-    border-right: 1px solid var(--border-subtle);
-    padding-right: 10px;
-  }
-  .cat-item {
-    padding: 6px 10px;
-    border-radius: 8px;
-    font-size: 12px;
-    color: var(--text-dim);
-    cursor: pointer;
-    display: flex;
-    align-items: center;
-    gap: 6px;
-    transition: all 0.15s;
-  }
-  .cat-item.active {
-    background: rgba(108, 136, 168, 0.22);
-    color: var(--accent-blue);
+    text-align: center;
+    padding: 4px 8px;
+    border-radius: 6px;
+    font-size: 11px;
     font-weight: 600;
+    color: var(--text-sub);
+    background: rgba(255, 255, 255, 0.04);
+    cursor: pointer;
+    transition: all 0.2s;
   }
-  .cat-item:hover {
-    background: rgba(255, 255, 255, 0.05);
-    color: #FFF;
+  .media-tab.active {
+    color: #FFFFFF;
+    background: rgba(122, 162, 247, 0.22);
+    border: 1px solid var(--accent);
   }
-  .user-footer {
-    margin-top: auto;
-    padding-top: 10px;
-    border-top: 1px solid var(--border-subtle);
+  .media-main {
     display: flex;
+    gap: 14px;
     align-items: center;
-    justify-content: space-between;
-    font-size: 12px;
   }
-  .app-list {
+  .album-art {
+    width: 90px;
+    height: 90px;
+    border-radius: 12px;
+    background: linear-gradient(135deg, #0B0E14, #182236);
+    border: 1px solid var(--border-glass);
     display: flex;
     flex-direction: column;
-    gap: 6px;
-    overflow-y: auto;
-  }
-  .app-item {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    padding: 8px 10px;
-    border-radius: 10px;
-    cursor: pointer;
-    background: rgba(255, 255, 255, 0.02);
-    border: 1px solid rgba(255, 255, 255, 0.04);
-    transition: background 0.15s;
-  }
-  .app-item:hover {
-    background: rgba(255, 255, 255, 0.08);
-  }
-  .app-icon {
-    width: 32px;
-    height: 32px;
-    border-radius: 8px;
-    display: flex;
     align-items: center;
     justify-content: center;
-    font-size: 16px;
-  }
-  .app-meta {
-    display: flex;
-    flex-direction: column;
-  }
-  .app-name {
-    font-size: 13px;
-    font-weight: 600;
-    color: #FFF;
-  }
-  .app-desc {
-    font-size: 11px;
-    color: var(--text-dim);
-  }
-
-  /* Quick Settings Widget */
-  .quick-settings-widget {
-    top: 40px;
-    right: 40px;
-    width: 230px;
-    display: flex;
-    flex-direction: column;
-    gap: 14px;
-  }
-  .qs-row {
-    display: flex;
-    flex-direction: column;
-    gap: 6px;
-  }
-  .qs-head {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-  }
-  .qs-icon {
-    font-size: 20px;
-  }
-  .qs-titles {
-    display: flex;
-    flex-direction: column;
-  }
-  .qs-title {
-    font-size: 12px;
-    font-weight: 700;
-    color: #FFF;
-  }
-  .qs-sub {
-    font-size: 10.5px;
-    color: var(--text-dim);
-  }
-  .qs-slider {
-    width: 100%;
-    height: 6px;
-    border-radius: 3px;
-    background: #1E2633;
-    overflow: hidden;
-  }
-  .qs-fill-gold {
-    height: 100%;
-    width: 52%;
-    background: var(--accent-gold);
-  }
-  .qs-fill-blue {
-    height: 100%;
-    width: 100%;
-    background: var(--accent-cyan);
-  }
-
-  /* Media Player Widget */
-  .media-widget {
-    top: 220px;
-    right: 40px;
-    width: 290px;
-    display: flex;
-    gap: 14px;
-  }
-  .media-cover {
-    width: 84px;
-    height: 84px;
-    border-radius: 10px;
-    background: radial-gradient(circle at center, #1E293B 0%, #0B111A 100%);
     position: relative;
     overflow: hidden;
-    border: 1px solid var(--border-subtle);
   }
-  .media-moon {
-    width: 24px;
-    height: 24px;
+  .moon-art {
+    width: 28px;
+    height: 28px;
     border-radius: 50%;
     background: #E2E8F0;
-    position: absolute;
-    top: 30px;
-    left: 30px;
-    box-shadow: 0 0 12px #93C5FD;
+    box-shadow: 0 0 16px #93C5FD;
+    margin-bottom: 8px;
+  }
+  .visualizer-bars {
+    display: flex;
+    gap: 3px;
+    align-items: flex-end;
+    height: 18px;
+  }
+  .v-bar {
+    width: 3px;
+    background: var(--accent);
+    border-radius: 1.5px;
+    animation: vBarBounce 1.2s infinite ease-in-out alternate;
+  }
+  @keyframes vBarBounce {
+    0% { height: 4px; }
+    100% { height: 16px; }
   }
   .media-details {
     flex: 1;
     display: flex;
     flex-direction: column;
-    justify-content: space-between;
+    gap: 4px;
   }
-  .media-title {
-    font-size: 13.5px;
-    font-weight: 700;
-    color: #FFF;
-  }
-  .media-artist {
-    font-size: 11px;
-    color: var(--text-dim);
-  }
+  .media-title { font-size: 14px; font-weight: 700; }
+  .media-artist { font-size: 11px; color: var(--text-sub); }
   .media-scrubber {
-    height: 3px;
+    width: 100%;
+    height: 4px;
     background: #1E2633;
     border-radius: 2px;
-    width: 100%;
+    margin: 8px 0 4px 0;
     position: relative;
+    cursor: pointer;
   }
   .media-progress {
-    height: 100%;
     width: 35%;
-    background: var(--accent-blue);
+    height: 100%;
+    background: var(--accent);
+    border-radius: 2px;
   }
   .media-controls {
     display: flex;
     justify-content: center;
     gap: 16px;
-    font-size: 14px;
-    color: #DDE3EB;
+    font-size: 18px;
+    color: var(--text-sub);
     cursor: pointer;
   }
+  .media-controls span:hover { color: #FFFFFF; }
 
-  /* System Monitor Widget */
-  .sysmon-widget {
-    top: 380px;
-    right: 40px;
-    width: 380px;
+  /* Quick Settings */
+  .qs-card {
+    padding: 14px 16px;
     display: flex;
     flex-direction: column;
     gap: 12px;
   }
-  .sysmon-top-row {
+  .slider-group { display: flex; flex-direction: column; gap: 8px; }
+  .slider-row { display: flex; align-items: center; gap: 10px; font-size: 13px; }
+  .slider-bar-track {
+    flex: 1;
+    height: 8px;
+    background: #1E2633;
+    border-radius: 4px;
+    overflow: hidden;
+    cursor: pointer;
+  }
+  .slider-bar-fill { height: 100%; border-radius: 4px; }
+  .qs-tiles {
     display: grid;
-    grid-template-columns: 1fr 1fr 1fr;
-    gap: 10px;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 8px;
+  }
+  .qs-tile {
+    height: 44px;
+    border-radius: 10px;
+    background: rgba(255, 255, 255, 0.04);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 2px;
+    font-size: 10px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+  .qs-tile.active {
+    background: rgba(122, 162, 247, 0.2);
+    border-color: var(--accent);
+  }
+
+  /* System Monitor */
+  .sysmon-card {
+    padding: 16px 18px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+  .spark-row {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 12px;
   }
   .spark-card {
     display: flex;
     flex-direction: column;
     gap: 4px;
   }
-  .spark-header {
+  .spark-header { display: flex; justify-content: space-between; font-size: 11px; font-weight: 700; }
+  .spark-header span:last-child { color: var(--text-sub); font-weight: 500; }
+  .spark-canvas {
+    width: 100%;
+    height: 34px;
+    border-radius: 4px;
+    background: rgba(255, 255, 255, 0.02);
+  }
+  .sysmon-footer {
     display: flex;
     justify-content: space-between;
     font-size: 11px;
-  }
-  .spark-k { font-weight: 700; color: #FFF; }
-  .spark-v { color: var(--text-dim); }
-  .spark-canvas {
-    width: 100%;
-    height: 32px;
-    border-radius: 4px;
-  }
-  .sysmon-bot-row {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    border-top: 1px solid rgba(255,255,255,0.04);
-    padding-top: 8px;
-    font-size: 10.5px;
-  }
-  .net-speed {
-    color: var(--accent-teal);
-    font-weight: 600;
+    color: var(--text-sub);
+    padding-top: 6px;
+    border-top: 1px solid rgba(255, 255, 255, 0.06);
   }
 
-  /* Bottom Floating Dock */
-  .bottom-island-dock {
+  /* Floating Island Dock */
+  .bottom-dock {
     position: absolute;
-    bottom: 20px;
+    bottom: 22px;
     left: 50%;
     transform: translateX(-50%);
-    width: 860px;
-    height: 60px;
-    background: var(--bg-dock);
-    backdrop-filter: blur(24px);
-    border: 1px solid var(--border-subtle);
-    border-radius: var(--radius-pill);
-    box-shadow: 0 16px 40px rgba(0, 0, 0, 0.55);
+    height: 64px;
+    padding: 0 20px;
+    border-radius: var(--radius-dock);
+    background: var(--bg-glass-dock);
+    backdrop-filter: blur(30px) saturate(200%);
+    border: 1px solid var(--border-glass);
+    box-shadow: inset 0 1px 0 var(--sheen-top), 0 20px 60px rgba(0, 0, 0, 0.65);
     display: flex;
     align-items: center;
-    justify-content: space-between;
-    padding: 0 20px;
-    z-index: 10;
+    gap: 20px;
+    z-index: 20;
+    transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
   }
-
-  .dock-left-tools {
-    display: flex;
-    gap: 12px;
-    font-size: 16px;
-    color: var(--text-dim);
-    cursor: pointer;
-  }
-  .dock-left-tools span:hover {
-    color: #FFF;
-  }
-  .dock-apps {
-    display: flex;
-    gap: 14px;
-  }
-  .dock-app-icon {
-    width: 36px;
-    height: 36px;
-    border-radius: 10px;
+  .dock-section { display: flex; align-items: center; gap: 12px; font-size: 16px; color: var(--text-sub); }
+  .dock-icon-btn {
+    width: 40px;
+    height: 40px;
+    border-radius: 12px;
     display: flex;
     align-items: center;
     justify-content: center;
     font-size: 18px;
+    color: #FFFFFF;
     cursor: pointer;
-    transition: transform 0.15s cubic-bezier(0.4, 0, 0.2, 1);
+    transition: transform 0.22s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 0.2s;
   }
-  .dock-app-icon:hover {
-    transform: scale(1.18);
+  .dock-icon-btn:hover {
+    transform: translateY(-8px) scale(1.18);
+    box-shadow: 0 10px 20px rgba(0, 0, 0, 0.4);
   }
-  .dock-right-status {
+
+  /* Customizer Control Bar (Top Level) */
+  .control-strip {
+    margin-top: 16px;
     display: flex;
     align-items: center;
-    gap: 12px;
-    font-size: 14px;
-    color: var(--text-dim);
+    gap: 14px;
+    padding: 10px 20px;
+    border-radius: 9999px;
+    background: rgba(18, 22, 31, 0.85);
+    border: 1px solid var(--border-glass);
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
   }
-  .dock-time {
+  .strip-btn {
+    padding: 6px 14px;
+    border-radius: 20px;
     font-size: 12px;
-    font-weight: 700;
-    color: #DDE3EB;
-    margin-left: 6px;
+    font-weight: 600;
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    color: #FFFFFF;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+  .strip-btn:hover, .strip-btn.active {
+    background: var(--accent);
+    color: #000000;
+    border-color: var(--accent);
   }
 </style>
 </head>
 <body>
 
-<div class="desktop-canvas">
-  <!-- Top Status Pill -->
-  <div class="top-status-pill">
-    <div class="status-dot"></div>
-    <div class="pill-text" id="livePillTime">Tue, 09 August 2022 &nbsp; 04:44 PM</div>
+  <!-- Desktop Viewport Simulation -->
+  <div class="desktop-viewport wp-nebula" id="viewport">
+
+    <!-- Top Status Pill -->
+    <div class="top-pill">
+      <div class="status-dot"></div>
+      <span id="pillDateTime">Tue, 09 August 2022 &nbsp; 04:44 PM</span>
+    </div>
+
+    <!-- Desktop Grid Layout -->
+    <div class="desktop-layout">
+
+      <!-- Left Column: Clock, Weather, Terminal Rice -->
+      <div class="col-left">
+
+        <div class="liquid-glass clock-card">
+          <div class="time-row">
+            <span class="time-val" id="clockVal">04:44</span>
+            <span class="time-ampm">PM</span>
+          </div>
+          <span class="date-val">Tue, 09 August 2022</span>
+        </div>
+
+        <div class="liquid-glass weather-card">
+          <div class="weather-icon-temp">
+            <span class="weather-glyph">⛅</span>
+            <span class="weather-temp">34°</span>
+          </div>
+          <div>
+            <div class="weather-city">Ajmer is now Clouds.</div>
+            <div class="weather-info">Wind speed is 4.49 m/s<br>And Humidity is 49%</div>
+          </div>
+        </div>
+
+        <div class="liquid-glass terminal-card">
+          <div class="term-header">
+            <span class="traffic-dot" style="background:#ED6A5E"></span>
+            <span class="traffic-dot" style="background:#F5BF4F"></span>
+            <span class="traffic-dot" style="background:#61C554"></span>
+            <span class="term-title">rxfetch</span>
+          </div>
+          <div class="term-body">
+            <div class="term-logo">
+   .---.   
+ /       \ 
+|   .--.  |
+`--'   / / 
+      / /  
+ .---' /   
+|  .--'    
+ \       / 
+  `-----'  </div>
+            <div class="term-specs">
+              <div><span class="term-spec-k">os</span> synth OS</div>
+              <div><span class="term-spec-k">ker</span> 6.3.9-synth</div>
+              <div><span class="term-spec-k">pkgs</span> 1247</div>
+              <div><span class="term-spec-k">sh</span> fish</div>
+              <div><span class="term-spec-k">wm</span> Hyprland</div>
+              <div><span class="term-spec-k">ram</span> 4.62G / 11.4G</div>
+              <div class="term-rainbow">████████</div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- Center Application Space -->
+      <div class="col-center"></div>
+
+      <!-- Right Column: Quick Settings, Media Center, System Monitor -->
+      <div class="col-right">
+
+        <!-- Quick Settings -->
+        <div class="liquid-glass qs-card">
+          <div class="slider-group">
+            <div class="slider-row">
+              <span style="color:var(--accent-gold)">󰃠</span>
+              <div class="slider-bar-track"><div class="slider-bar-fill" style="width:52%; background:var(--accent-gold)"></div></div>
+              <span style="width:32px; color:var(--text-sub)">52%</span>
+            </div>
+            <div class="slider-row">
+              <span style="color:var(--accent-cyan)">󰕾</span>
+              <div class="slider-bar-track"><div class="slider-bar-fill" style="width:100%; background:var(--accent-cyan)"></div></div>
+              <span style="width:32px; color:var(--text-sub)">100%</span>
+            </div>
+          </div>
+
+          <div class="qs-tiles">
+            <div class="qs-tile active"><span>󰤨</span><span>Wi-Fi</span></div>
+            <div class="qs-tile active"><span>󰂯</span><span>Bluetooth</span></div>
+            <div class="qs-tile" onclick="this.classList.toggle('active')"><span>⚡</span><span>Game Mode</span></div>
+            <div class="qs-tile" onclick="this.classList.toggle('active')"><span>󰛨</span><span>Night Light</span></div>
+            <div class="qs-tile" onclick="this.classList.toggle('active')"><span>󰂛</span><span>DND</span></div>
+            <div class="qs-tile"><span>󰖂</span><span>VPN</span></div>
+          </div>
+        </div>
+
+        <!-- Media Center -->
+        <div class="liquid-glass media-card">
+          <div class="media-tabs">
+            <div class="media-tab active">󰝚 Playing</div>
+            <div class="media-tab">󰒮 Queue</div>
+            <div class="media-tab">󰓃 EQ</div>
+          </div>
+
+          <div class="media-main">
+            <div class="album-art">
+              <div class="moon-art"></div>
+              <div class="visualizer-bars">
+                <div class="v-bar" style="animation-delay: 0.1s"></div>
+                <div class="v-bar" style="animation-delay: 0.3s"></div>
+                <div class="v-bar" style="animation-delay: 0.5s"></div>
+                <div class="v-bar" style="animation-delay: 0.2s"></div>
+                <div class="v-bar" style="animation-delay: 0.4s"></div>
+                <div class="v-bar" style="animation-delay: 0.6s"></div>
+              </div>
+            </div>
+
+            <div class="media-details">
+              <div class="media-title">After Dark</div>
+              <div class="media-artist">Sweater Weather</div>
+              <div class="media-scrubber"><div class="media-progress"></div></div>
+              <div class="media-controls">
+                <span>󰒮</span>
+                <span style="color:#FFF">󰏤</span>
+                <span>󰒭</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- System Monitor -->
+        <div class="liquid-glass sysmon-card">
+          <div class="spark-row">
+            <div class="spark-card">
+              <div class="spark-header"><span>CPU</span><span>32%</span></div>
+              <canvas class="spark-canvas" id="c1"></canvas>
+            </div>
+            <div class="spark-card">
+              <div class="spark-header"><span>RAM</span><span>46%</span></div>
+              <canvas class="spark-canvas" id="c2"></canvas>
+            </div>
+            <div class="spark-card">
+              <div class="spark-header"><span>DISK</span><span>61%</span></div>
+              <canvas class="spark-canvas" id="c3"></canvas>
+            </div>
+          </div>
+
+          <div class="sysmon-footer">
+            <span style="color:var(--accent-teal)">NETWORK ↓ 128 KB/s ↑ 42 KB/s</span>
+            <span>UPTIME 2h 15m</span>
+          </div>
+        </div>
+
+      </div>
+
+    </div>
+
+    <!-- Floating Island Dock -->
+    <div class="bottom-dock">
+      <div class="dock-section">
+        <span>󰀻</span>
+        <span>󰍉</span>
+        <span>󰹟</span>
+        <span>󰒓</span>
+      </div>
+
+      <div class="dock-section" style="gap:14px">
+        <div class="dock-icon-btn" style="background:#FF7139">󰈹</div>
+        <div class="dock-icon-btn" style="background:#007ACC">󰨞</div>
+        <div class="dock-icon-btn" style="background:#24292E">󰆍</div>
+        <div class="dock-icon-btn" style="background:#4A90E2">󰉋</div>
+        <div class="dock-icon-btn" style="background:#30D158">󰍹</div>
+        <div class="dock-icon-btn" style="background:#1DB954">󰓇</div>
+        <div class="dock-icon-btn" style="background:#5865F2">󰙯</div>
+      </div>
+
+      <div class="dock-section">
+        <span>󰤨</span>
+        <span>󰂯</span>
+        <span>󰕾</span>
+        <span>󰁹</span>
+        <span style="font-size:13px; font-weight:700; color:#FFF">04:44 PM</span>
+      </div>
+    </div>
+
   </div>
 
-  <!-- Top Left: Clock -->
-  <div class="widget-card clock-widget">
-    <div style="display: flex; align-items: baseline;">
-      <span class="clock-time" id="liveClockTime">04:44</span>
-      <span class="clock-ampm" id="liveClockAmPm">PM</span>
-    </div>
-    <div class="clock-date" id="liveClockDate">Tue, 09 August 2022</div>
+  <!-- Live Customizer Switcher Bar -->
+  <div class="control-strip">
+    <span style="font-size:12px; font-weight:700; color:var(--text-sub)">WALLPAPER:</span>
+    <button class="strip-btn active" onclick="setWallpaper('wp-nebula', this)">🌌 Nebula</button>
+    <button class="strip-btn" onclick="setWallpaper('wp-cyber', this)">⚡ Cyber Wave</button>
+    <button class="strip-btn" onclick="setWallpaper('wp-sunset', this)">🌅 Sunset</button>
+
+    <div style="width:1px; height:20px; background:rgba(255,255,255,0.1)"></div>
+
+    <span style="font-size:12px; font-weight:700; color:var(--text-sub)">THEME:</span>
+    <button class="strip-btn active" onclick="setTheme('#7AA2F7', '#BB9AF7', this)">Nova Ice</button>
+    <button class="strip-btn" onclick="setTheme('#00F0FF', '#FF007F', this)">Neon Cyber</button>
+    <button class="strip-btn" onclick="setTheme('#88C0D0', '#81A1C1', this)">Nord Frost</button>
   </div>
 
-  <!-- Top Left: Weather -->
-  <div class="widget-card weather-widget">
-    <div class="weather-icon-temp">
-      <span style="font-size: 32px;">⛅</span>
-      <span class="temp-val">34°</span>
-    </div>
-    <div class="weather-details">
-      <div class="weather-headline">Ajmer is now Clouds.</div>
-      <div class="weather-sub">Wind speed is 4.49 m/s</div>
-      <div class="weather-sub">And Humidity is 49%</div>
-    </div>
-  </div>
+  <script>
+    // Draw Canvas Sparklines
+    function drawSpark(id, color, fillRgba, pts) {
+      const c = document.getElementById(id);
+      if (!c) return;
+      const ctx = c.getContext('2d');
+      const w = c.width = c.clientWidth * 2;
+      const h = c.height = c.clientHeight * 2;
+      const step = w / (pts.length - 1);
 
-  <!-- Middle Left: Terminal Rice -->
-  <div class="widget-card terminal-widget">
-    <div class="term-header">
-      <div class="traffic-dots">
-        <div class="traffic-dot dot-red"></div>
-        <div class="traffic-dot dot-yellow"></div>
-        <div class="traffic-dot dot-green"></div>
-      </div>
-      <div class="term-title">~ &nbsp; xanstomper@synth</div>
-    </div>
-    <div class="term-body">
-      <div class="term-cmd">rxfetch</div>
-      <div class="fetch-grid">
-        <div class="fetch-logo">
-       .---.       
-     /       \     
-    |   .--.  |    
-    `--'   / /     
-          / /      
-     .---' /       
-    |  .--'        
-     \       /     
-      `-----'      </div>
-        <div class="fetch-info">
-          <div class="info-row"><span class="info-k" style="color:#F7768E">os</span><span class="info-v">synth OS</span></div>
-          <div class="info-row"><span class="info-k" style="color:#FF9E64">ker</span><span class="info-v">6.3.9-synth</span></div>
-          <div class="info-row"><span class="info-k" style="color:#E0AF68">pkgs</span><span class="info-v">1247</span></div>
-          <div class="info-row"><span class="info-k" style="color:#9ECE6A">sh</span><span class="info-v">fish</span></div>
-          <div class="info-row"><span class="info-k" style="color:#73DACA">wm</span><span class="info-v">Hyprland</span></div>
-          <div class="info-row"><span class="info-k" style="color:#7AA2F7">term</span><span class="info-v">alacritty</span></div>
-          <div class="info-row"><span class="info-k" style="color:#BB9AF7">ram</span><span class="info-v">5.21G / 15.6G</span></div>
-          <div class="info-row"><span class="info-k" style="color:#F7768E">disk</span><span class="info-v">82G / 232G</span></div>
-        </div>
-      </div>
-      <div class="color-bar">
-        <div class="cb-1"></div><div class="cb-2"></div><div class="cb-3"></div><div class="cb-4"></div>
-        <div class="cb-5"></div><div class="cb-6"></div><div class="cb-7"></div><div class="cb-8"></div>
-      </div>
-    </div>
-  </div>
+      ctx.clearRect(0, 0, w, h);
+      ctx.beginPath();
+      ctx.moveTo(0, h);
+      pts.forEach((p, i) => ctx.lineTo(i * step, h * (1.0 - p * 0.9)));
+      ctx.lineTo(w, h);
+      ctx.closePath();
+      ctx.fillStyle = fillRgba;
+      ctx.fill();
 
-  <!-- Center: Application Launcher Menu -->
-  <div class="widget-card launcher-widget" id="launcherMenu">
-    <div class="launcher-search">
-      <span>🔍</span>
-      <span>Search apps, files, settings...</span>
-    </div>
-    <div class="launcher-body">
-      <div class="launcher-sidebar">
-        <div class="cat-item active">⭐ Favorites</div>
-        <div class="cat-item">🪟 All Applications</div>
-        <div class="cat-item">🛠 Development</div>
-        <div class="cat-item">🎨 Graphics</div>
-        <div class="cat-item">🌐 Internet</div>
-        <div class="cat-item">🎵 Multimedia</div>
-        <div class="cat-item">📄 Office</div>
-        <div class="cat-item">⚙️ Settings</div>
-        <div class="cat-item">💻 System</div>
-        <div class="cat-item">🧰 Utilities</div>
-        <div class="user-footer">
-          <span>👤 xanstomper</span>
-          <span>🔒 🔄 ⏻</span>
-        </div>
-      </div>
-      <div class="app-list">
-        <div class="app-item">
-          <div class="app-icon" style="background:#FF7139;">🦊</div>
-          <div class="app-meta"><span class="app-name">Firefox</span><span class="app-desc">Web Browser</span></div>
-        </div>
-        <div class="app-item">
-          <div class="app-icon" style="background:#007ACC;">💻</div>
-          <div class="app-meta"><span class="app-name">Visual Studio Code</span><span class="app-desc">Code Editor</span></div>
-        </div>
-        <div class="app-item">
-          <div class="app-icon" style="background:#1DB954;">🎵</div>
-          <div class="app-meta"><span class="app-name">Spotify</span><span class="app-desc">Music Player</span></div>
-        </div>
-        <div class="app-item">
-          <div class="app-icon" style="background:#4A90E2;">📁</div>
-          <div class="app-meta"><span class="app-name">Files</span><span class="app-desc">File Manager</span></div>
-        </div>
-        <div class="app-item">
-          <div class="app-icon" style="background:#333333;">⌨️</div>
-          <div class="app-meta"><span class="app-name">Terminal</span><span class="app-desc">System Terminal</span></div>
-        </div>
-        <div class="app-item">
-          <div class="app-icon" style="background:#5865F2;">💬</div>
-          <div class="app-meta"><span class="app-name">Discord</span><span class="app-desc">Internet Messenger</span></div>
-        </div>
-      </div>
-    </div>
-  </div>
+      ctx.beginPath();
+      pts.forEach((p, i) => {
+        if (i === 0) ctx.moveTo(0, h * (1.0 - p * 0.9));
+        else ctx.lineTo(i * step, h * (1.0 - p * 0.9));
+      });
+      ctx.strokeStyle = color;
+      ctx.lineWidth = 3;
+      ctx.stroke();
+    }
 
-  <!-- Top Right: Quick Settings -->
-  <div class="widget-card quick-settings-widget">
-    <div class="qs-row">
-      <div class="qs-head">
-        <span class="qs-icon" style="color:var(--accent-gold)">☀️</span>
-        <div class="qs-titles">
-          <span class="qs-title">Backlight</span>
-          <span class="qs-sub">Brightness at 52%</span>
-        </div>
-      </div>
-      <div class="qs-slider"><div class="qs-fill-gold"></div></div>
-    </div>
-    <div style="height: 1px; background: rgba(255,255,255,0.04);"></div>
-    <div class="qs-row">
-      <div class="qs-head">
-        <span class="qs-icon" style="color:var(--accent-cyan)">🔊</span>
-        <div class="qs-titles">
-          <span class="qs-title">Volume</span>
-          <span class="qs-sub">Volume at 100%</span>
-        </div>
-      </div>
-      <div class="qs-slider"><div class="qs-fill-blue"></div></div>
-    </div>
-  </div>
+    drawSpark('c1', '#7AA2F7', 'rgba(122, 162, 247, 0.25)', [0.2, 0.35, 0.28, 0.5, 0.32, 0.45, 0.6, 0.4, 0.32, 0.55, 0.32]);
+    drawSpark('c2', '#BB9AF7', 'rgba(187, 154, 247, 0.25)', [0.4, 0.42, 0.5, 0.46, 0.52, 0.48, 0.62, 0.45, 0.46, 0.5, 0.46]);
+    drawSpark('c3', '#E5A84B', 'rgba(229, 168, 75, 0.25)', [0.55, 0.6, 0.58, 0.61, 0.63, 0.6, 0.65, 0.62, 0.61, 0.61, 0.61]);
 
-  <!-- Middle Right: Media Widget -->
-  <div class="widget-card media-widget">
-    <div class="media-cover">
-      <div class="media-moon"></div>
-    </div>
-    <div class="media-details">
-      <div>
-        <div class="media-title">After Dark</div>
-        <div class="media-artist">Sweater Weather</div>
-      </div>
-      <div>
-        <div style="display:flex; justify-content:space-between; font-size:10px; color:var(--text-dim); margin-bottom:4px;">
-          <span>1:24</span><span>4:01</span>
-        </div>
-        <div class="media-scrubber"><div class="media-progress"></div></div>
-      </div>
-      <div class="media-controls">
-        <span>⏮</span><span>⏸</span><span>⏭</span>
-      </div>
-    </div>
-  </div>
+    function setWallpaper(wpClass, btn) {
+      const vp = document.getElementById('viewport');
+      vp.className = 'desktop-viewport ' + wpClass;
+      document.querySelectorAll('.control-strip button').forEach(b => {
+        if (b.innerText.includes('Nebula') || b.innerText.includes('Cyber') || b.innerText.includes('Sunset')) {
+          b.classList.remove('active');
+        }
+      });
+      btn.classList.add('active');
+    }
 
-  <!-- Bottom Right: System Monitor -->
-  <div class="widget-card sysmon-widget">
-    <div class="sysmon-top-row">
-      <div class="spark-card">
-        <div class="spark-header"><span class="spark-k">CPU</span><span class="spark-v">32%</span></div>
-        <canvas class="spark-canvas" id="canvasCpu"></canvas>
-      </div>
-      <div class="spark-card">
-        <div class="spark-header"><span class="spark-k">RAM</span><span class="spark-v">46%</span></div>
-        <canvas class="spark-canvas" id="canvasRam"></canvas>
-      </div>
-      <div class="spark-card">
-        <div class="spark-header"><span class="spark-k">DISK</span><span class="spark-v">61%</span></div>
-        <canvas class="spark-canvas" id="canvasDisk"></canvas>
-      </div>
-    </div>
-    <div class="sysmon-bot-row">
-      <div>
-        <span style="font-weight:700; color:#FFF;">NETWORK &nbsp;</span>
-        <span class="net-speed">↓ 128 KB/s &nbsp; ↑ 42 KB/s</span>
-      </div>
-      <div>
-        <span style="color:var(--text-dim);">UPTIME 2h 15m &nbsp; KERNEL 6.3.9</span>
-      </div>
-    </div>
-  </div>
-
-  <!-- Bottom Floating Island Dock -->
-  <div class="bottom-island-dock">
-    <div class="dock-left-tools">
-      <span onclick="toggleLauncher()" title="Toggle Launcher">⊞</span>
-      <span>🔍</span>
-      <span>🗔</span>
-      <span>🔔</span>
-    </div>
-    <div class="dock-apps">
-      <div class="dock-app-icon" style="background:#FF7139;">🦊</div>
-      <div class="dock-app-icon" style="background:#007ACC;">💻</div>
-      <div class="dock-app-icon" style="background:#24292E;">⌨️</div>
-      <div class="dock-app-icon" style="background:#4A90E2;">📁</div>
-      <div class="dock-app-icon" style="background:#30D158;">📊</div>
-      <div class="dock-app-icon" style="background:#1DB954;">🎵</div>
-      <div class="dock-app-icon" style="background:#5865F2;">💬</div>
-    </div>
-    <div class="dock-right-status">
-      <span>📶</span>
-      <span>󰂯</span>
-      <span>🔊</span>
-      <span>🔋</span>
-      <span class="dock-time" id="dockClock">04:44 PM</span>
-    </div>
-  </div>
-</div>
-
-<script>
-  function drawSpark(canvasId, points, color, fill) {
-    const cvs = document.getElementById(canvasId);
-    if (!cvs) return;
-    const ctx = cvs.getContext('2d');
-    const w = cvs.width = cvs.offsetWidth;
-    const h = cvs.height = cvs.offsetHeight;
-    const step = w / (points.length - 1);
-
-    ctx.beginPath();
-    ctx.moveTo(0, h);
-    points.forEach((p, i) => ctx.lineTo(i * step, h * (1 - p * 0.9)));
-    ctx.lineTo(w, h);
-    ctx.closePath();
-    ctx.fillStyle = fill;
-    ctx.fill();
-
-    ctx.beginPath();
-    points.forEach((p, i) => {
-      if (i === 0) ctx.moveTo(0, h * (1 - p * 0.9));
-      else ctx.lineTo(i * step, h * (1 - p * 0.9));
-    });
-    ctx.strokeStyle = color;
-    ctx.lineWidth = 2;
-    ctx.stroke();
-  }
-
-  drawSpark('canvasCpu', [0.2, 0.35, 0.28, 0.5, 0.32, 0.45, 0.6, 0.4, 0.32, 0.55, 0.32], '#7AA2F7', 'rgba(122, 162, 247, 0.25)');
-  drawSpark('canvasRam', [0.4, 0.42, 0.5, 0.46, 0.52, 0.48, 0.62, 0.45, 0.46, 0.5, 0.46], '#BB9AF7', 'rgba(187, 154, 247, 0.25)');
-  drawSpark('canvasDisk', [0.55, 0.6, 0.58, 0.61, 0.63, 0.6, 0.65, 0.62, 0.61, 0.61, 0.61], '#E5A84B', 'rgba(229, 168, 75, 0.25)');
-
-  function toggleLauncher() {
-    const l = document.getElementById('launcherMenu');
-    l.style.display = (l.style.display === 'none') ? 'flex' : 'none';
-  }
-</script>
+    function setTheme(accent, secondary, btn) {
+      document.documentElement.style.setProperty('--accent', accent);
+      document.documentElement.style.setProperty('--accent-purple', secondary);
+      document.querySelectorAll('.control-strip button').forEach(b => {
+        if (b.innerText.includes('Nova') || b.innerText.includes('Neon') || b.innerText.includes('Nord')) {
+          b.classList.remove('active');
+        }
+      });
+      btn.classList.add('active');
+      drawSpark('c1', accent, 'rgba(122, 162, 247, 0.25)', [0.2, 0.35, 0.28, 0.5, 0.32, 0.45, 0.6, 0.4, 0.32, 0.55, 0.32]);
+    }
+  </script>
 </body>
 </html>

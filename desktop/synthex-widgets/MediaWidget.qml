@@ -5,13 +5,13 @@ import QtQuick.Layouts 1.15
 Rectangle {
     id: root
     width: 360
-    height: 190
+    height: 196
     radius: (typeof systemBridge !== "undefined" && systemBridge) ? systemBridge.cornerRadius : 18
-    color: (typeof systemBridge !== "undefined" && systemBridge) ? systemBridge.surfaceColor : "#141923"
-    border.color: "#14ffffff"
+    color: "#a612161f" // Translucent liquid glass
+    border.color: "#28ffffff"
     border.width: 1
 
-    property int activeTab: 0 // 0: Now Playing, 1: Queue, 2: Equalizer
+    property int activeTab: 0
     property string trackTitle: (typeof systemBridge !== "undefined" && systemBridge) ? systemBridge.mediaTitle : "After Dark"
     property string artistName: (typeof systemBridge !== "undefined" && systemBridge) ? systemBridge.mediaArtist : "Sweater Weather"
     property string currentTime: (typeof systemBridge !== "undefined" && systemBridge) ? systemBridge.mediaPos : "1:24"
@@ -19,6 +19,17 @@ Rectangle {
     property real progressPct: (typeof systemBridge !== "undefined" && systemBridge) ? systemBridge.mediaProgress : 0.35
     property bool isPlaying: (typeof systemBridge !== "undefined" && systemBridge) ? systemBridge.mediaPlaying : true
     property string coverUrl: (typeof systemBridge !== "undefined" && systemBridge) ? systemBridge.mediaCover : ""
+
+    // Liquid Glass Specular Top Highlight
+    Rectangle {
+        anchors.fill: parent
+        radius: root.radius
+        gradient: Gradient {
+            GradientStop { position: 0.0; color: "#22ffffff" }
+            GradientStop { position: 0.08; color: "#06ffffff" }
+            GradientStop { position: 1.0; color: "#00ffffff" }
+        }
+    }
 
     ColumnLayout {
         anchors.fill: parent
@@ -30,31 +41,37 @@ Rectangle {
             Layout.fillWidth: true
             spacing: 8
 
-            Rectangle {
-                Layout.fillWidth: true
-                height: 24
-                radius: 6
-                color: root.activeTab === 0 ? "#257aa2f7" : "transparent"
-                Text { text: "󰝚 Now Playing"; font.family: "Inter"; font.pixelSize: 11; font.bold: true; color: root.activeTab === 0 ? "#7AA2F7" : "#9AA1AB"; anchors.centerIn: parent }
-                MouseArea { anchors.fill: parent; cursorShape: Qt.PointingHandCursor; onClicked: root.activeTab = 0 }
-            }
+            Repeater {
+                model: [
+                    { idx: 0, label: "󰝚 Now Playing" },
+                    { idx: 1, label: "󰒮 Queue" },
+                    { idx: 2, label: "󰓃 EQ" }
+                ]
 
-            Rectangle {
-                Layout.fillWidth: true
-                height: 24
-                radius: 6
-                color: root.activeTab === 1 ? "#257aa2f7" : "transparent"
-                Text { text: "󰒮 Queue"; font.family: "Inter"; font.pixelSize: 11; font.bold: true; color: root.activeTab === 1 ? "#7AA2F7" : "#9AA1AB"; anchors.centerIn: parent }
-                MouseArea { anchors.fill: parent; cursorShape: Qt.PointingHandCursor; onClicked: root.activeTab = 1 }
-            }
+                Rectangle {
+                    Layout.fillWidth: true
+                    height: 26
+                    radius: 7
+                    color: root.activeTab === modelData.idx ? "#307aa2f7" : "#08ffffff"
+                    border.color: root.activeTab === modelData.idx ? "#7AA2F7" : "transparent"
 
-            Rectangle {
-                Layout.fillWidth: true
-                height: 24
-                radius: 6
-                color: root.activeTab === 2 ? "#257aa2f7" : "transparent"
-                Text { text: "󰓃 EQ"; font.family: "Inter"; font.pixelSize: 11; font.bold: true; color: root.activeTab === 2 ? "#7AA2F7" : "#9AA1AB"; anchors.centerIn: parent }
-                MouseArea { anchors.fill: parent; cursorShape: Qt.PointingHandCursor; onClicked: root.activeTab = 2 }
+                    Text {
+                        text: modelData.label
+                        font.family: "Inter"
+                        font.pixelSize: 11
+                        font.bold: true
+                        color: root.activeTab === modelData.idx ? "#FFFFFF" : "#9AA1AB"
+                        anchors.centerIn: parent
+                    }
+
+                    MouseArea {
+                        anchors.fill: parent
+                        cursorShape: Qt.PointingHandCursor
+                        onClicked: root.activeTab = modelData.idx
+                    }
+
+                    Behavior on color { ColorAnimation { duration: 160 } }
+                }
             }
         }
 
@@ -67,10 +84,11 @@ Rectangle {
 
             // Album Artwork & Visualizer
             Rectangle {
-                Layout.preferredWidth: 100
-                Layout.preferredHeight: 100
-                radius: 12
-                color: "#0B0E14"
+                Layout.preferredWidth: 104
+                Layout.preferredHeight: 104
+                radius: 14
+                color: "#080B10"
+                border.color: "#20ffffff"
                 clip: true
 
                 Image {
@@ -85,25 +103,25 @@ Rectangle {
                     anchors.fill: parent
                     visible: root.coverUrl === ""
                     gradient: Gradient {
-                        GradientStop { position: 0.0; color: "#0D1117" }
-                        GradientStop { position: 0.5; color: "#161B22" }
+                        GradientStop { position: 0.0; color: "#0B0E14" }
+                        GradientStop { position: 0.5; color: "#131822" }
                         GradientStop { position: 1.0; color: "#0B1528" }
                     }
 
                     Rectangle {
-                        width: 28
-                        height: 28
-                        radius: 14
+                        width: 30
+                        height: 30
+                        radius: 15
                         color: "#E2E8F0"
                         anchors.centerIn: parent
                         border.color: "#93C5FD"
                         border.width: 1.5
 
                         Rectangle {
-                            width: 22
-                            height: 22
-                            radius: 11
-                            color: "#0D1117"
+                            width: 24
+                            height: 24
+                            radius: 12
+                            color: "#0B0E14"
                             x: 5
                             y: 2
                         }
@@ -112,18 +130,18 @@ Rectangle {
                     // Mini Spectrum Visualizer bars
                     RowLayout {
                         anchors.bottom: parent.bottom
-                        anchors.bottomMargin: 6
+                        anchors.bottomMargin: 8
                         anchors.horizontalCenter: parent.horizontalCenter
-                        spacing: 2
+                        spacing: 3
 
                         Repeater {
-                            model: [8, 14, 18, 12, 16, 22, 10, 15]
+                            model: [10, 16, 22, 14, 18, 26, 12, 17]
                             Rectangle {
                                 width: 3
-                                height: root.isPlaying ? (modelData * (0.6 + Math.random() * 0.4)) : 4
+                                height: root.isPlaying ? (modelData * (0.6 + Math.sin(Date.now()/200 + index)*0.35)) : 4
                                 radius: 1.5
-                                color: "#7AA2F7"
-                                Behavior on height { NumberAnimation { duration: 150 } }
+                                color: (typeof systemBridge !== "undefined" && systemBridge) ? systemBridge.accentColor : "#7AA2F7"
+                                Behavior on height { NumberAnimation { duration: 100 } }
                             }
                         }
                     }
@@ -150,7 +168,7 @@ Rectangle {
                     text: root.artistName
                     font.family: "Inter"
                     font.pixelSize: 11
-                    color: "#9AA1AB"
+                    color: "#A0AAB8"
                     elide: Text.ElideRight
                     Layout.fillWidth: true
                 }
@@ -160,25 +178,25 @@ Rectangle {
                 // Scrubber
                 ColumnLayout {
                     Layout.fillWidth: true
-                    spacing: 2
+                    spacing: 3
 
                     RowLayout {
                         Layout.fillWidth: true
-                        Text { text: root.currentTime; font.family: "Inter"; font.pixelSize: 10; color: "#9AA1AB" }
+                        Text { text: root.currentTime; font.family: "Inter"; font.pixelSize: 10; color: "#A0AAB8" }
                         Item { Layout.fillWidth: true }
-                        Text { text: root.totalTime; font.family: "Inter"; font.pixelSize: 10; color: "#9AA1AB" }
+                        Text { text: root.totalTime; font.family: "Inter"; font.pixelSize: 10; color: "#A0AAB8" }
                     }
 
                     Rectangle {
                         Layout.fillWidth: true
-                        Layout.preferredHeight: 4
-                        radius: 2
+                        Layout.preferredHeight: 5
+                        radius: 2.5
                         color: "#1E2633"
 
                         Rectangle {
                             width: parent.width * Math.max(0.0, Math.min(1.0, root.progressPct))
                             height: parent.height
-                            radius: 2
+                            radius: 2.5
                             color: (typeof systemBridge !== "undefined" && systemBridge) ? systemBridge.accentColor : "#7AA2F7"
                         }
                     }
@@ -187,12 +205,12 @@ Rectangle {
                 // Control Buttons
                 RowLayout {
                     Layout.alignment: Qt.AlignHCenter
-                    spacing: 16
+                    spacing: 18
 
                     Text {
                         text: "󰒮"
                         font.family: "Symbols Nerd Font"
-                        font.pixelSize: 16
+                        font.pixelSize: 18
                         color: "#DDE3EB"
                         MouseArea {
                             anchors.fill: parent; cursorShape: Qt.PointingHandCursor
@@ -203,7 +221,7 @@ Rectangle {
                     Text {
                         text: root.isPlaying ? "󰏤" : "󰐊"
                         font.family: "Symbols Nerd Font"
-                        font.pixelSize: 20
+                        font.pixelSize: 24
                         color: "#FFFFFF"
                         MouseArea {
                             anchors.fill: parent; cursorShape: Qt.PointingHandCursor
@@ -214,7 +232,7 @@ Rectangle {
                     Text {
                         text: "󰒭"
                         font.family: "Symbols Nerd Font"
-                        font.pixelSize: 16
+                        font.pixelSize: 18
                         color: "#DDE3EB"
                         MouseArea {
                             anchors.fill: parent; cursorShape: Qt.PointingHandCursor
@@ -238,7 +256,8 @@ Rectangle {
                 width: parent.width
                 height: 28
                 radius: 6
-                color: modelData.active ? "#257aa2f7" : "#05ffffff"
+                color: modelData.active ? "#307aa2f7" : "#05ffffff"
+                border.color: modelData.active ? "#7AA2F7" : "transparent"
 
                 RowLayout {
                     anchors.fill: parent
@@ -309,7 +328,7 @@ Rectangle {
                     Rectangle {
                         Layout.fillWidth: true
                         Layout.preferredHeight: 32
-                        radius: 6
+                        radius: 7
                         color: (typeof systemBridge !== "undefined" && systemBridge && systemBridge.eqPreset === modelData) ? "#357aa2f7" : "#08ffffff"
                         border.color: (typeof systemBridge !== "undefined" && systemBridge && systemBridge.eqPreset === modelData) ? "#7AA2F7" : "transparent"
 
@@ -338,10 +357,10 @@ Rectangle {
             Item { Layout.fillHeight: true }
 
             Text {
-                text: "Audio Output: " + ((typeof systemBridge !== "undefined" && systemBridge) ? systemBridge.currentAudioOutput : "Speakers")
+                text: "Audio Routing: " + ((typeof systemBridge !== "undefined" && systemBridge) ? systemBridge.currentAudioOutput : "Speakers")
                 font.family: "Inter"
                 font.pixelSize: 10
-                color: "#9AA1AB"
+                color: "#A0AAB8"
             }
         }
     }

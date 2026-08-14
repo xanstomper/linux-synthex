@@ -1,0 +1,6 @@
+[Desktop Entry]
+Name=SynthOS (GNOME)
+Comment=SynthOS Nova — GNOME Wayland session
+Exec=/usr/bin/gnome-session --session=gnome
+Type=Application
+DesktopNames=SynthOS;GNOME;

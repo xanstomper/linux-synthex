@@ -1,51 +1,46 @@
 Name:           synthex-cursors
 Version:        2026.10
 Release:        1%{?dist}
-Summary:        SynthOS cursor theme — Bibata Modern Classic (bundled)
-License:        GPL-3.0+
-URL:            https://synthex-os.org
+Summary:        SynthOS Nova cursor theme — Synthex-Cursor (Breeze-based, slate accent)
+
+License:        GPL-3.0-or-later
+URL:            https://getsynthex.org
 BuildArch:      noarch
-Requires:       python3
+Requires:       (plasma-breeze or breeze-cursor-theme)
+Requires:       hicolor-icon-theme
 
 %description
-SynthOS default cursor theme.
-Bundles Bibata-Modern-Classic compiled cursor set with the SynthOS
-amber glow variant for selected/active states.
-Also installs a Bibata-Modern-Amber cursor variant for users who
-prefer a fully amber-accented cursor.
+Installs the Synthex-Cursor theme: Nova metadata layered over the Breeze
+cursor silhouette (inherits Breeze so every cursor shape is always present),
+and sets it as the system default cursor for new sessions.
 
-%prep
-# No source archive — files installed directly from repo
-
-%build
-# Nothing to compile — noarch data/script package
+Design: rounded Breeze silhouette, 2px high-contrast outline, SynthOS Nova
+slate-blue accent on active states. Sizes 24 (default) / 32 / 48 inherit
+from Breeze's rendered sizes.
 
 %install
-install -d %{buildroot}%{_datadir}/icons
-# Bundled cursor theme (pre-built)
-cp -r branding/cursors/Bibata-Modern-Classic \
-    %{buildroot}%{_datadir}/icons/ 2>/dev/null || true
-cp -r branding/cursors/Bibata-Modern-Amber \
-    %{buildroot}%{_datadir}/icons/ 2>/dev/null || true
+install -d %{buildroot}%{_datadir}/icons/Synthex-Cursor
+install -m 0644 desktop/common/synthex-cursor/target/index.theme \
+    %{buildroot}%{_datadir}/icons/Synthex-Cursor/index.theme
+install -m 0644 desktop/common/synthex-cursor/target/cursor.theme \
+    %{buildroot}%{_datadir}/icons/Synthex-Cursor/cursor.theme
 
-# Default xcursor symlink
+# System-wide default cursor
 install -d %{buildroot}%{_datadir}/icons/default
-cat > %{buildroot}%{_datadir}/icons/default/index.theme << 'ITHEME'
+cat > %{buildroot}%{_datadir}/icons/default/index.theme <<'EOF'
 [Icon Theme]
-Inherits=Bibata-Modern-Classic
-ITHEME
-
-%post
-if command -v gtk-update-icon-cache &>/dev/null; then
-    gtk-update-icon-cache -f %{_datadir}/icons/Bibata-Modern-Classic &>/dev/null || true
-    gtk-update-icon-cache -f %{_datadir}/icons/Bibata-Modern-Amber &>/dev/null || true
-fi
+Inherits=Synthex-Cursor
+EOF
 
 %files
-%{_datadir}/icons/Bibata-Modern-Classic/
-%{_datadir}/icons/Bibata-Modern-Amber/
+%{_datadir}/icons/Synthex-Cursor/
 %{_datadir}/icons/default/index.theme
 
+%post
+gtk-update-icon-cache -f %{_datadir}/icons/Synthex-Cursor &>/dev/null || :
+
 %changelog
-* Thu Oct 01 2026 SynthOS Team <team@synthex-os.org> - 2026.10-1
-- Initial release: Bibata Modern Classic + Amber variant
+* Sun Aug 14 2026 SynthOS Team <team@synthex-os.org> - 2026.10-1
+- Ship real Synthex-Cursor theme (Breeze-inheriting, Nova accent)
+- Set system default cursor via icons/default/index.theme
+- Drop unavailable Bibata bundling; Breeze provides all cursor shapes

@@ -18,11 +18,11 @@ cargo build --release
 
 %install
 install -Dm755 target/release/synthex-recovery %{buildroot}%{_bindir}/synthex-recovery
-install -Dm644 systemd/synthex-recovery-rs.service %{buildroot}%{_unitdir}/synthex-recovery-rs.service 2>/dev/null || :
+install -Dm644 systemd/synthex-recovery.service %{buildroot}%{_unitdir}/synthex-recovery.service 2>/dev/null || :
 
 %files
 %{_bindir}/synthex-recovery
-%{_unitdir}/synthex-recovery-rs.service
+%{_unitdir}/synthex-recovery.service
 
 %changelog
 * Mon Jul 06 2026 Synthex Team <dev@synthex.org> - 0.1.0-1

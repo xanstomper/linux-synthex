@@ -5,10 +5,10 @@ import QtQuick.Layouts 1.15
 Rectangle {
     id: root
     width: 320
-    height: 110
-    radius: 18
-    color: "#141923"
-    border.color: "#14ffffff"
+    height: 112
+    radius: (typeof systemBridge !== "undefined" && systemBridge) ? systemBridge.cornerRadius : 18
+    color: "#a612161f" // Translucent liquid glass
+    border.color: "#28ffffff"
     border.width: 1
 
     property string location: (typeof systemBridge !== "undefined" && systemBridge) ? systemBridge.weatherCity : "Ajmer"
@@ -17,6 +17,17 @@ Rectangle {
     property string windSpeed: (typeof systemBridge !== "undefined" && systemBridge) ? systemBridge.weatherWind : "4.49 m/s"
     property string humidity: (typeof systemBridge !== "undefined" && systemBridge) ? systemBridge.weatherHumidity : "49%"
     property string weatherIcon: (typeof systemBridge !== "undefined" && systemBridge) ? systemBridge.weatherIcon : "󰖐"
+
+    // Liquid Glass Specular Top Highlight
+    Rectangle {
+        anchors.fill: parent
+        radius: root.radius
+        gradient: Gradient {
+            GradientStop { position: 0.0; color: "#22ffffff" }
+            GradientStop { position: 0.08; color: "#06ffffff" }
+            GradientStop { position: 1.0; color: "#00ffffff" }
+        }
+    }
 
     RowLayout {
         anchors.fill: parent
@@ -31,7 +42,7 @@ Rectangle {
             Text {
                 text: root.weatherIcon
                 font.family: "Symbols Nerd Font"
-                font.pixelSize: 36
+                font.pixelSize: 38
                 color: "#E5A84B"
                 Layout.alignment: Qt.AlignVCenter
             }
@@ -43,6 +54,8 @@ Rectangle {
                 font.bold: true
                 color: "#FFFFFF"
                 Layout.alignment: Qt.AlignVCenter
+                style: Text.Raised
+                styleColor: "#40000000"
             }
         }
 
@@ -66,15 +79,32 @@ Rectangle {
                 text: "Wind speed is " + root.windSpeed
                 font.family: "Inter"
                 font.pixelSize: 12
-                color: "#9AA1AB"
+                color: "#A0AAB8"
             }
 
             Text {
                 text: "And Humidity is " + root.humidity
                 font.family: "Inter"
                 font.pixelSize: 12
-                color: "#9AA1AB"
+                color: "#A0AAB8"
             }
+        }
+    }
+
+    // Elastic Gooey Hover Interaction
+    MouseArea {
+        id: hoverArea
+        anchors.fill: parent
+        hoverEnabled: true
+        cursorShape: Qt.PointingHandCursor
+    }
+
+    scale: hoverArea.pressed ? 0.97 : (hoverArea.containsMouse ? 1.025 : 1.0)
+    Behavior on scale {
+        NumberAnimation {
+            duration: 250
+            easing.type: Easing.OutBack
+            easing.overshoot: 1.3
         }
     }
 }

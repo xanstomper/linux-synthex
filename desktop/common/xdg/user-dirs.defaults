@@ -1,0 +1,10 @@
+# SynthOS — XDG user directories (default for new users)
+# Managed by xdg-user-dirs; language-localized names are created on first login.
+DESKTOP=Desktop
+DOWNLOAD=Downloads
+TEMPLATES=Templates
+PUBLICSHARE=Public
+DOCUMENTS=Documents
+MUSIC=Music
+PICTURES=Pictures
+VIDEOS=Videos

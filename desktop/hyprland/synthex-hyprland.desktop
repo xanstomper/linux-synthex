@@ -1,0 +1,6 @@
+[Desktop Entry]
+Name=SynthOS (Hyprland)
+Comment=SynthOS Nova — Hyprland dynamic tiling session
+Exec=/usr/bin/synthex-hyprland-session
+Type=Application
+DesktopNames=SynthOS;Hyprland;

@@ -1,0 +1,8 @@
+#!/usr/bin/env bash
+# SynthOS Nova — Hyprland session wrapper (mirrors the distro session env)
+export XDG_CURRENT_DESKTOP=SynthOS:Hyprland
+export XDG_SESSION_TYPE=wayland
+export XDG_SESSION_DESKTOP=SynthOS-Hyprland
+export GTK_THEME=Synthex-dark:dark
+export QT_QPA_PLATFORMTHEME=qt6ct
+exec /usr/bin/Hyprland

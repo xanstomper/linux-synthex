@@ -7,12 +7,23 @@ Rectangle {
     width: 290
     height: 240
     radius: (typeof systemBridge !== "undefined" && systemBridge) ? systemBridge.cornerRadius : 18
-    color: (typeof systemBridge !== "undefined" && systemBridge) ? systemBridge.surfaceColor : "#141923"
-    border.color: "#14ffffff"
+    color: "#a612161f" // Translucent liquid glass
+    border.color: "#28ffffff"
     border.width: 1
 
     property int brightnessPct: (typeof systemBridge !== "undefined" && systemBridge) ? systemBridge.brightness : 52
     property int volumePct: (typeof systemBridge !== "undefined" && systemBridge) ? systemBridge.volume : 100
+
+    // Liquid Glass Specular Top Highlight
+    Rectangle {
+        anchors.fill: parent
+        radius: root.radius
+        gradient: Gradient {
+            GradientStop { position: 0.0; color: "#22ffffff" }
+            GradientStop { position: 0.08; color: "#06ffffff" }
+            GradientStop { position: 1.0; color: "#00ffffff" }
+        }
+    }
 
     ColumnLayout {
         anchors.fill: parent
@@ -55,7 +66,7 @@ Rectangle {
                     }
                 }
 
-                Text { text: root.brightnessPct + "%"; font.family: "Inter"; font.pixelSize: 11; color: "#9AA1AB"; Layout.preferredWidth: 32 }
+                Text { text: root.brightnessPct + "%"; font.family: "Inter"; font.pixelSize: 11; color: "#A0AAB8"; Layout.preferredWidth: 32 }
             }
 
             // Volume Slider
@@ -89,7 +100,7 @@ Rectangle {
                     }
                 }
 
-                Text { text: root.volumePct + "%"; font.family: "Inter"; font.pixelSize: 11; color: "#9AA1AB"; Layout.preferredWidth: 32 }
+                Text { text: root.volumePct + "%"; font.family: "Inter"; font.pixelSize: 11; color: "#A0AAB8"; Layout.preferredWidth: 32 }
             }
         }
 
@@ -112,7 +123,7 @@ Rectangle {
                 Layout.fillWidth: true
                 Layout.preferredHeight: 46
                 radius: 10
-                color: "#1a7aa2f7"
+                color: "#207aa2f7"
                 border.color: "#7AA2F7"
                 border.width: 1
 
@@ -129,7 +140,7 @@ Rectangle {
                 Layout.fillWidth: true
                 Layout.preferredHeight: 46
                 radius: 10
-                color: "#1a7aa2f7"
+                color: "#207aa2f7"
                 border.color: "#7AA2F7"
                 border.width: 1
 
@@ -146,7 +157,7 @@ Rectangle {
                 Layout.fillWidth: true
                 Layout.preferredHeight: 46
                 radius: 10
-                color: (typeof systemBridge !== "undefined" && systemBridge && systemBridge.performanceMode === "gaming") ? "#25e5a84b" : "#08ffffff"
+                color: (typeof systemBridge !== "undefined" && systemBridge && systemBridge.performanceMode === "gaming") ? "#30e5a84b" : "#08ffffff"
                 border.color: (typeof systemBridge !== "undefined" && systemBridge && systemBridge.performanceMode === "gaming") ? "#E5A84B" : "transparent"
 
                 ColumnLayout {
@@ -172,7 +183,7 @@ Rectangle {
                 Layout.fillWidth: true
                 Layout.preferredHeight: 46
                 radius: 10
-                color: (typeof systemBridge !== "undefined" && systemBridge && systemBridge.nightLight) ? "#25e5a84b" : "#08ffffff"
+                color: (typeof systemBridge !== "undefined" && systemBridge && systemBridge.nightLight) ? "#30e5a84b" : "#08ffffff"
                 border.color: (typeof systemBridge !== "undefined" && systemBridge && systemBridge.nightLight) ? "#E5A84B" : "transparent"
 
                 ColumnLayout {
@@ -197,7 +208,7 @@ Rectangle {
                 Layout.fillWidth: true
                 Layout.preferredHeight: 46
                 radius: 10
-                color: (typeof systemBridge !== "undefined" && systemBridge && systemBridge.dnd) ? "#25f7768e" : "#08ffffff"
+                color: (typeof systemBridge !== "undefined" && systemBridge && systemBridge.dnd) ? "#30f7768e" : "#08ffffff"
                 border.color: (typeof systemBridge !== "undefined" && systemBridge && systemBridge.dnd) ? "#F7768E" : "transparent"
 
                 ColumnLayout {

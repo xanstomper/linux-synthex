@@ -56,16 +56,16 @@ mkdir -p %{buildroot}%{_sysconfdir}/xdg
 mkdir -p %{buildroot}%{_sysconfdir}/pam.d
 
 # Cursor theme
-cp -r common/synthex-cursor/target/* %{buildroot}%{_datadir}/icons/Synthex-Cursor/
+cp -r desktop/common/synthex-cursor/target/* %{buildroot}%{_datadir}/icons/Synthex-Cursor/
 
 # Design tokens
-cp -r desktop/common/tokens/* %{buildroot}%{_datadir}/synthex/tokens/
+cp -r branding/theme/tokens/* %{buildroot}%{_datadir}/synthex/tokens/
 
 # Wallpapers
-cp -r desktop/common/wallpapers/* %{buildroot}%{_datadir}/synthex/wallpapers/
+cp -r branding/wallpapers/* %{buildroot}%{_datadir}/synthex/wallpapers/
 
 # Branding assets
-cp -r desktop/common/branding/* %{buildroot}%{_datadir}/synthex/branding/
+cp -r branding/logo/* %{buildroot}%{_datadir}/synthex/branding/
 
 # Scripts
 cp -r desktop/common/scripts/* %{buildroot}%{_datadir}/synthex/scripts/
