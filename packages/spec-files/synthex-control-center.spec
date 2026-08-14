@@ -1,67 +1,71 @@
 Name:           synthex-control-center
-Version:        1.0.0
+Version:        2.0.0
 Release:        1%{?dist}
-Summary:        SynthOS unified control center GUI
+Summary:        SynthOS System Settings — dispatches to the native desktop settings application
+BuildArch:      noarch
 
 License:        MIT
-URL:            https://getsynthex.io
+URL:            https://synthex-os.org
 
-BuildRequires:  cmake
-BuildRequires:  make
-BuildRequires:  gcc-c++
-BuildRequires:  qt6-qtbase-devel
-BuildRequires:  qt6-qtdeclarative-devel
-BuildRequires:  qt6-qtquickcontrols2-devel
-BuildRequires:  qt6-qtsvg-devel
-BuildRequires:  polkit-devel
+# No build tools needed — this is a shell script dispatcher
+BuildRequires:  coreutils
 
-Requires:       qt6-qtbase
-Requires:       qt6-qtdeclarative
-BuildRequires:  qt6-qtquickcontrols2-devel
-Requires:       qt6-qtquickcontrols2
-Requires:       qt6-qtsvg
+# Pull in the real settings backends depending on the desktop edition
 Requires:       polkit
 
+# Cinnamon edition (default — matches Linux Mint)
+Recommends:     cinnamon
+Recommends:     cinnamon-common
+
+# GNOME edition
+Recommends:     gnome-control-center
+
+# KDE Plasma edition
+Recommends:     plasma-systemsettings
+
+# Standalone Wayland tools (for Hyprland/Sway/Standalone)
+Recommends:     pavucontrol
+Recommends:     nm-connection-editor
+Recommends:     blueman
+Recommends:     wdisplays
+
 %description
-Unified control panel for SynthOS.  Provides a Qt6/QML graphical interface
-for managing SynthOS-specific settings:
+SynthOS System Settings launcher. Detects the active desktop environment
+and launches the correct native settings application:
 
-  - Desktop profile switching (Classic / AI / Focus)
-  - SynthOS feature toggles (temporal daemon, mesh networking, focus mode)
-  - System update channel selection
-  - Hardware quick-config (GPU, audio, peripherals)
+  - Cinnamon: cinnamon-settings (Linux Mint, full hardware settings)
+  - GNOME: gnome-control-center
+  - KDE Plasma: systemsettings
+  - COSMIC: cosmic-settings
+  - XFCE: xfce4-settings-manager
+  - MATE: mate-control-center
+  - Budgie: budgie-control-center
 
-Requires a SynthOS session (uses D-Bus interfaces provided by synthex-core
-daemons).
+All hardware-level configuration (Wi-Fi, Bluetooth, Display, Sound,
+Power, Keyboard, Mouse, Themes, Users, Firewall, Updates, Drivers)
+is handled by the upstream desktop settings application.
 
 %prep
-%setup -q
+%setup -c -T
 
 %build
-%cmake \
-    -DCMAKE_BUILD_TYPE=Release \
-    -DCMAKE_INSTALL_PREFIX=%{_prefix} \
-    -DBUILD_TESTING=OFF
-%cmake_build
+# Nothing to build — shell script only
 
 %install
-%cmake_install
-
-# Fallback for non-cmake_install macro systems
-# install -Dm755 %{__cmake_builddir}/synthex-control-center \
-#     %{buildroot}%{_bindir}/synthex-control-center
+install -Dm755 %{SOURCE0}/../src/synthex-control-center/synthex-control-center \
+    %{buildroot}%{_bindir}/synthex-control-center
 
 install -d %{buildroot}%{_datadir}/applications
 cat > %{buildroot}%{_datadir}/applications/synthex-control-center.desktop << 'EOF'
 [Desktop Entry]
 Type=Application
-Name=SynthOS Control Center
-Comment=Configure SynthOS system settings
+Name=System Settings
+Comment=Configure system hardware, appearance, and preferences
 Exec=synthex-control-center
 Icon=preferences-system
 Categories=Settings;System;
-Keywords=settings;control;synthex;
-StartupWMClass=synthex-control-center
+Keywords=settings;control;system;preferences;
+StartupNotify=true
 EOF
 
 install -d %{buildroot}%{_datadir}/polkit-1/actions
@@ -72,7 +76,7 @@ cat > %{buildroot}%{_datadir}/polkit-1/actions/io.synthex.control-center.policy 
     "http://www.freedesktop.org/standards/PolicyKit/1/policyconfig.dtd">
 <policyconfig>
   <vendor>SynthOS</vendor>
-  <vendor_url>https://getsynthex.io</vendor_url>
+  <vendor_url>https://synthex-os.org</vendor_url>
   <action id="io.synthex.control-center.apply-settings">
     <description>Apply system-wide SynthOS settings</description>
     <message>Authentication is required to apply SynthOS system settings.</message>
@@ -91,7 +95,7 @@ EOF
 %{_datadir}/polkit-1/actions/io.synthex.control-center.policy
 
 %changelog
-* Wed Oct 01 2026 SynthOS Team <team@synthex-os.org> - 1.0.0-1
-- Fix Release tag macro escaping (%%{?dist} → %{?dist})
-- Fix install macro escaping (%%{buildroot}%%{_bindir} → %{buildroot}%{_bindir})
-- Add complete BuildRequires, Requires, cmake build, .desktop, polkit policy
+* Thu Aug 14 2026 SynthOS Team <team@synthex-os.org> - 2.0.0-1
+- Rewrite as native desktop settings dispatcher
+- Use real cinnamon-settings / gnome-control-center / systemsettings
+- Drop custom Qt6/QML UI in favor of upstream desktop applications

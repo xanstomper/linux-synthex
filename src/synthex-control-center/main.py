@@ -63,11 +63,12 @@ MODULES = [
 ]
 
 
-class SettingsWindow(Gtk.ApplicationWindow):
-    def __init__(self, app):
-        super().__init__(application=app, title="System Settings")
+class SettingsWindow(Gtk.Window):
+    def __init__(self):
+        super().__init__(title="System Settings")
         self.set_default_size(880, 640)
         self.set_position(Gtk.WindowPosition.CENTER)
+        self.connect("destroy", Gtk.main_quit)
 
         self.all_buttons = []
 
@@ -350,22 +351,12 @@ class SettingsWindow(Gtk.ApplicationWindow):
         return "Unknown"
 
 
-class SettingsApp(Gtk.Application):
-    def __init__(self):
-        super().__init__(
-            application_id="org.synthex.settings",
-            flags=Gio.ApplicationFlags.FLAGS_NONE,
-        )
-
-    def do_activate(self):
-        win = SettingsWindow(self)
-        win.present()
-
-
 def main():
-    app = SettingsApp()
-    app.run(sys.argv)
+    win = SettingsWindow()
+    win.show_all()
+    Gtk.main()
 
 
 if __name__ == "__main__":
     main()
+
