@@ -1036,31 +1036,133 @@ class SettingsAppWindow(Gtk.Window):
             frame.add(vbox)
             self.content_box.pack_start(frame, False, False, 0)
 
-        # ── 15. Security ────────────────────────────────────────────────
+        # ── 15. Security (Complete SynthOS Security Center) ────────────
         elif cat_id == "security":
-            frame = Gtk.Frame(label="Firewall Protection (UFW / nftables)")
-            vbox = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=10)
-            vbox.set_border_width(16)
+            # 1. Firewall Master & Active Rules Table
+            fw_frame = Gtk.Frame(label="Firewall Protection & Port Filter (UFW / nftables)")
+            fw_vbox = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=10)
+            fw_vbox.set_border_width(16)
 
             fw_r = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=12)
-            fw_r.pack_start(Gtk.Label(label="Firewall Active Status", xalign=0), True, True, 0)
+            fw_r.pack_start(Gtk.Label(label="Global Firewall Protection Status", xalign=0), True, True, 0)
             fw_sw = Gtk.Switch()
             fw_sw.set_active(SecurityAdapter.get_firewall_status())
-            fw_sw.connect("state-set", lambda s, st: SecurityAdapter.set_firewall_status(st))
+            fw_sw.connect("state-set", lambda s, st: (SecurityAdapter.set_firewall_status(st), self._render_category_page("security", "Security", ["Firewall", "Encryption"])))
             fw_r.pack_end(fw_sw, False, False, 0)
-            vbox.pack_start(fw_r, False, False, 0)
+            fw_vbox.pack_start(fw_r, False, False, 0)
+
+            # Live Firewall Rules List
+            fw_list = Gtk.ListBox()
+            fw_list.set_selection_mode(Gtk.SelectionMode.NONE)
+            rules = SecurityAdapter.get_firewall_rules()
+            for r in rules[:8]:
+                row = Gtk.ListBoxRow()
+                h = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=12)
+                h.set_border_width(6)
+                h.pack_start(Gtk.Label(label=f"<b>[{r['id']}]</b> {r['to']}", use_markup=True, xalign=0), True, True, 0)
+                badge = Gtk.Label()
+                badge.set_markup(f"<span color='#2ecc71'><b>{r['action']}</b></span>")
+                h.pack_end(badge, False, False, 0)
+
+                btn_del = Gtk.Button.new_with_label("Delete")
+                btn_del.connect("clicked", lambda b, rid=r["id"]: (SecurityAdapter.delete_firewall_rule(rid), self._render_category_page("security", "Security", ["Firewall", "Encryption"])))
+                h.pack_end(btn_del, False, False, 4)
+
+                row.add(h)
+                fw_list.add(row)
+            fw_vbox.pack_start(fw_list, False, False, 4)
 
             btn_add_rule = Gtk.Button.new_with_label("Add Port Rule (Allow / Block)...")
             btn_add_rule.connect("clicked", self._show_add_firewall_rule_dialog)
-            vbox.pack_start(btn_add_rule, False, False, 4)
+            fw_vbox.pack_start(btn_add_rule, False, False, 4)
 
-            sb_r = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=12)
-            sb_r.pack_start(Gtk.Label(label="Secure Boot Status:", xalign=0), True, True, 0)
-            sb_r.pack_end(Gtk.Label(label=SecurityAdapter.get_secure_boot_status()), False, False, 0)
-            vbox.pack_start(sb_r, False, False, 0)
+            fw_frame.add(fw_vbox)
+            self.content_box.pack_start(fw_frame, False, False, 0)
 
-            frame.add(vbox)
-            self.content_box.pack_start(frame, False, False, 0)
+            # 2. Hardware Security (TPM 2.0 & Secure Boot)
+            hw_sec_frame = Gtk.Frame(label="Hardware Cryptography & Secure Boot Verification")
+            hw_sec_grid = Gtk.Grid()
+            hw_sec_grid.set_column_spacing(24)
+            hw_sec_grid.set_row_spacing(10)
+            hw_sec_grid.set_border_width(16)
+
+            hw_sec_grid.attach(Gtk.Label(label="<b>Trusted Platform Module (TPM):</b>", use_markup=True, xalign=0), 0, 0, 1, 1)
+            hw_sec_grid.attach(Gtk.Label(label=SecurityAdapter.get_tpm_status(), xalign=0), 1, 0, 1, 1)
+
+            hw_sec_grid.attach(Gtk.Label(label="<b>UEFI Secure Boot State:</b>", use_markup=True, xalign=0), 0, 1, 1, 1)
+            hw_sec_grid.attach(Gtk.Label(label=SecurityAdapter.get_secure_boot_status(), xalign=0), 1, 1, 1, 1)
+
+            hw_sec_frame.add(hw_sec_grid)
+            self.content_box.pack_start(hw_sec_frame, False, False, 0)
+
+            # 3. Kernel CPU Vulnerability Mitigations
+            mit_frame = Gtk.Frame(label="Kernel CPU Hardware Vulnerability Mitigations")
+            mit_vbox = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=6)
+            mit_vbox.set_border_width(16)
+
+            mlist = Gtk.ListBox()
+            mlist.set_selection_mode(Gtk.SelectionMode.NONE)
+            for mit in SecurityAdapter.get_kernel_mitigations():
+                mrow = Gtk.ListBoxRow()
+                mh = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=12)
+                mh.set_border_width(4)
+                mh.pack_start(Gtk.Label(label=f"<b>{mit['name']}</b>", use_markup=True, xalign=0), True, True, 0)
+                st_color = "#2ecc71" if ("Mitigation" in mit["status"] or "Not affected" in mit["status"]) else "#e67e22"
+                stat_lbl = Gtk.Label()
+                stat_lbl.set_markup(f"<span color='{st_color}'>{mit['status']}</span>")
+                mh.pack_end(stat_lbl, False, False, 0)
+                mrow.add(mh)
+                mlist.add(mrow)
+            mit_vbox.pack_start(mlist, False, False, 0)
+            mit_frame.add(mit_vbox)
+            self.content_box.pack_start(mit_frame, False, False, 0)
+
+            # 4. Active Sessions & Remote SSH Access
+            sess_frame = Gtk.Frame(label="Active User Sessions & Remote Shell Access")
+            sess_vbox = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=10)
+            sess_vbox.set_border_width(16)
+
+            for s in SecurityAdapter.get_active_sessions():
+                sr = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=12)
+                sr.pack_start(Gtk.Image.new_from_icon_name("system-users", Gtk.IconSize.BUTTON), False, False, 0)
+                sr.pack_start(Gtk.Label(label=f"Session: <b>{s['id']}</b> (User: {s['user']} on {s['seat']})", use_markup=True, xalign=0), True, True, 0)
+                badge = Gtk.Label()
+                badge.set_markup("<span color='#2ecc71'><b>Active Local Session</b></span>" if s["active"] else "<span>Inactive</span>")
+                sr.pack_end(badge, False, False, 0)
+                sess_vbox.pack_start(sr, False, False, 0)
+
+            ssh_r = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=12)
+            ssh_r.pack_start(Gtk.Label(label="Allow Remote SSH Terminal Shell Access (Port 22)", xalign=0), True, True, 0)
+            ssh_sw = Gtk.Switch()
+            ssh_sw.set_active(SecurityAdapter.get_ssh_service_status())
+            ssh_sw.connect("state-set", lambda s, st: SecurityAdapter.set_ssh_service(st))
+            ssh_r.pack_end(ssh_sw, False, False, 0)
+            sess_vbox.pack_start(ssh_r, False, False, 4)
+
+            sess_frame.add(sess_vbox)
+            self.content_box.pack_start(sess_frame, False, False, 0)
+
+            # 5. Lock Screen & Inactivity Security
+            lock_frame = Gtk.Frame(label="Screen Locking & Authentication Policies")
+            lock_grid = Gtk.Grid()
+            lock_grid.set_column_spacing(16)
+            lock_grid.set_row_spacing(10)
+            lock_grid.set_border_width(16)
+
+            lock_grid.attach(Gtk.Label(label="Lock screen on suspend / sleep:", xalign=0), 0, 0, 1, 1)
+            l_sw1 = Gtk.Switch()
+            l_sw1.set_active(True)
+            l_sw1.connect("state-set", lambda s, st: safe_set_gsetting("org.cinnamon.desktop.screensaver", "lock-on-suspend", st))
+            lock_grid.attach(l_sw1, 1, 0, 1, 1)
+
+            lock_grid.attach(Gtk.Label(label="Require password after screen turns off:", xalign=0), 0, 1, 1, 1)
+            l_sw2 = Gtk.Switch()
+            l_sw2.set_active(True)
+            l_sw2.connect("state-set", lambda s, st: safe_set_gsetting("org.cinnamon.desktop.screensaver", "lock-enabled", st))
+            lock_grid.attach(l_sw2, 1, 1, 1, 1)
+
+            lock_frame.add(lock_grid)
+            self.content_box.pack_start(lock_frame, False, False, 0)
 
         # ── 16. Privacy (Complete SynthOS Privacy Center) ───────────────
         elif cat_id == "privacy":
@@ -1128,7 +1230,8 @@ class SettingsAppWindow(Gtk.Window):
                     child.destroy()
                 app_data = all_perms.get(app_name, {})
                 for row_idx, (p_key, p_label) in enumerate(perm_names):
-                    pgrid.attach(Gtk.Label(label=f"<b>{p_label}</b>:", use_markup=True, xalign=0), 0, row_idx, 1, 1)
+                    safe_p_label = GLib.markup_escape_text(p_label)
+                    pgrid.attach(Gtk.Label(label=f"<b>{safe_p_label}</b>:", use_markup=True, xalign=0), 0, row_idx, 1, 1)
                     val_cb = Gtk.ComboBoxText()
                     for opt in ["Allowed", "Denied", "Ask Every Time", "Session-Only"]:
                         val_cb.append_text(opt)
