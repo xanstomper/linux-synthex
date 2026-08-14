@@ -39,6 +39,7 @@ from synth_system_adapters import (
     AudioAdapter,
     PowerAdapter,
     DisplayAdapter,
+    ThemeAdapter,
     StorageAdapter,
     SecurityAdapter,
     SystemAdapter,
@@ -78,14 +79,14 @@ SIDEBAR_ITEMS = [
 
 
 class SettingsAppWindow(Gtk.Window):
-    def __init__(self):
+    def __init__(self, initial_page="overview"):
         super().__init__(title="SynthOS System Settings")
-        self.set_default_size(1120, 780)
+        self.set_default_size(1140, 800)
         self.set_position(Gtk.WindowPosition.CENTER)
         self.connect("destroy", Gtk.main_quit)
 
         self.daemon = SettingsDaemon.get_instance()
-        self.current_cat_id = "overview"
+        self.current_cat_id = initial_page
 
         # ── Header Bar ──────────────────────────────────────────────────
         self.hb = Gtk.HeaderBar()
@@ -147,10 +148,10 @@ class SettingsAppWindow(Gtk.Window):
         self.content_sw.add(self.content_box)
         self.main_box.pack_start(self.content_sw, True, True, 0)
 
-        # Select first row
-        first_row = self.sidebar_rows.get("overview")
-        if first_row:
-            self.sidebar_list.select_row(first_row)
+        # Select initial row
+        target_row = self.sidebar_rows.get(initial_page) or self.sidebar_rows.get("overview")
+        if target_row:
+            self.sidebar_list.select_row(target_row)
 
     def _on_sidebar_selected(self, listbox, row):
         if not row:
@@ -210,7 +211,8 @@ class SettingsAppWindow(Gtk.Window):
 
             grid.attach(Gtk.Label(label="Dark Mode Color Scheme:", xalign=0), 0, 2, 1, 1)
             sw_dark = Gtk.Switch()
-            sw_dark.set_active(True)
+            sw_dark.set_active("dark" in ThemeAdapter.get_current_gtk_theme().lower())
+            sw_dark.connect("state-set", lambda s, st: ThemeAdapter.set_gtk_theme("Orchis-Teal-Dark" if st else "Mint-Y"))
             grid.attach(sw_dark, 1, 2, 1, 1)
 
             grid.attach(Gtk.Label(label="Master Audio Output Volume:", xalign=0), 0, 3, 1, 1)
@@ -331,32 +333,54 @@ class SettingsAppWindow(Gtk.Window):
 
         # ── 4. Display ──────────────────────────────────────────────────
         elif cat_id == "display":
-            frame = Gtk.Frame(label="Resolution, Refresh Rate & Scaling")
+            monitors = DisplayAdapter.get_connected_monitors()
+
+            frame = Gtk.Frame(label="Monitors, Resolution & Refresh Rate (xrandr / DRM)")
             dgrid = Gtk.Grid()
             dgrid.set_column_spacing(16)
             dgrid.set_row_spacing(12)
             dgrid.set_border_width(16)
 
-            dgrid.attach(Gtk.Label(label="Resolution:", xalign=0), 0, 0, 1, 1)
+            # Monitor Selector
+            dgrid.attach(Gtk.Label(label="Select Display Monitor:", xalign=0), 0, 0, 1, 1)
+            mon_cb = Gtk.ComboBoxText()
+            for mname, mdata in monitors.items():
+                label_txt = f"{mname} {'(Primary)' if mdata['primary'] else ''} — {mdata['current_res']} @ {mdata['current_hz']} Hz"
+                mon_cb.append_text(label_txt)
+            mon_cb.set_active(0)
+            dgrid.attach(mon_cb, 1, 0, 1, 1)
+
+            # Resolution
+            dgrid.attach(Gtk.Label(label="Screen Resolution:", xalign=0), 0, 1, 1, 1)
             res_cb = Gtk.ComboBoxText()
-            for r in ["1920 x 1080 (16:9 Full HD)", "2560 x 1440 (16:9 2K QHD)", "3840 x 2160 (4K UHD)"]:
+            # Extract modes from primary monitor
+            prim_name = list(monitors.keys())[0]
+            unique_resolutions = sorted(list(set([m[0] for m in monitors[prim_name]["modes"]])), reverse=True)
+            for r in unique_resolutions:
                 res_cb.append_text(r)
+            if not unique_resolutions:
+                res_cb.append_text("1920x1080")
             res_cb.set_active(0)
-            dgrid.attach(res_cb, 1, 0, 1, 1)
+            dgrid.attach(res_cb, 1, 1, 1, 1)
 
-            dgrid.attach(Gtk.Label(label="Refresh Rate:", xalign=0), 0, 1, 1, 1)
+            # Refresh Rate
+            dgrid.attach(Gtk.Label(label="Refresh Rate:", xalign=0), 0, 2, 1, 1)
             hz_cb = Gtk.ComboBoxText()
-            for h in ["60.00 Hz", "120.00 Hz", "144.00 Hz", "165.00 Hz", "240.00 Hz"]:
-                hz_cb.append_text(h)
+            rates = sorted(list(set([m[1] for m in monitors[prim_name]["modes"] if m[1]])), reverse=True)
+            for h in rates:
+                hz_cb.append_text(f"{h} Hz")
+            if not rates:
+                hz_cb.append_text("60.00 Hz")
             hz_cb.set_active(0)
-            dgrid.attach(hz_cb, 1, 1, 1, 1)
+            dgrid.attach(hz_cb, 1, 2, 1, 1)
 
-            dgrid.attach(Gtk.Label(label="UI Scaling:", xalign=0), 0, 2, 1, 1)
+            # Scaling
+            dgrid.attach(Gtk.Label(label="UI Scaling:", xalign=0), 0, 3, 1, 1)
             sc_cb = Gtk.ComboBoxText()
             for s in ["100% (Standard)", "125% (Fractional)", "150%", "200% (HiDPI)"]:
                 sc_cb.append_text(s)
             sc_cb.set_active(0)
-            dgrid.attach(sc_cb, 1, 2, 1, 1)
+            dgrid.attach(sc_cb, 1, 3, 1, 1)
 
             frame.add(dgrid)
             self.content_box.pack_start(frame, False, False, 0)
@@ -382,24 +406,44 @@ class SettingsAppWindow(Gtk.Window):
 
         # ── 5. Appearance ───────────────────────────────────────────────
         elif cat_id == "appearance":
+            installed_themes = ThemeAdapter.get_installed_themes()
+            installed_icons = ThemeAdapter.get_installed_icons()
+            cur_theme = ThemeAdapter.get_current_gtk_theme()
+
             frame = Gtk.Frame(label="Desktop Themes & Color Scheme")
             tgrid = Gtk.Grid()
             tgrid.set_column_spacing(16)
             tgrid.set_row_spacing(10)
             tgrid.set_border_width(16)
 
-            for i, (lbl, opts) in enumerate([
-                ("Window Controls", ["Mint-Y-Dark", "Mint-Y-Dark-Teal", "Adwaita-dark", "Breeze-Dark"]),
-                ("Icons",           ["Mint-Y-Dark", "Papirus-Dark", "Breeze-dark", "Adwaita"]),
-                ("Mouse Cursor",    ["Bibata-Modern-Classic", "DMZ-Black", "Adwaita"]),
-                ("Desktop Shell",   ["Mint-Y-Dark", "cinnamon", "Adapta-Nokto"]),
-            ]):
-                tgrid.attach(Gtk.Label(label=lbl, xalign=0), 0, i, 1, 1)
-                cb = Gtk.ComboBoxText()
-                for o in opts:
-                    cb.append_text(o)
-                cb.set_active(0)
-                tgrid.attach(cb, 1, i, 1, 1)
+            # Controls Theme
+            tgrid.attach(Gtk.Label(label="Window Controls (GTK):", xalign=0), 0, 0, 1, 1)
+            theme_cb = Gtk.ComboBoxText()
+            theme_idx = 0
+            for i, t in enumerate(installed_themes):
+                theme_cb.append_text(t)
+                if t == cur_theme:
+                    theme_idx = i
+            theme_cb.set_active(theme_idx)
+            theme_cb.connect("changed", lambda cb: ThemeAdapter.set_gtk_theme(cb.get_active_text()))
+            tgrid.attach(theme_cb, 1, 0, 1, 1)
+
+            # Icon Theme
+            tgrid.attach(Gtk.Label(label="Icon Set:", xalign=0), 0, 1, 1, 1)
+            icon_cb = Gtk.ComboBoxText()
+            for i, ic in enumerate(installed_icons):
+                icon_cb.append_text(ic)
+            icon_cb.set_active(0)
+            icon_cb.connect("changed", lambda cb: ThemeAdapter.set_icon_theme(cb.get_active_text()))
+            tgrid.attach(icon_cb, 1, 1, 1, 1)
+
+            # Mouse Cursor
+            tgrid.attach(Gtk.Label(label="Mouse Cursor:", xalign=0), 0, 2, 1, 1)
+            cur_cb = Gtk.ComboBoxText()
+            for c in ["Bibata-Modern-Classic", "DMZ-Black", "Adwaita", "breeze_cursors"]:
+                cur_cb.append_text(c)
+            cur_cb.set_active(0)
+            tgrid.attach(cur_cb, 1, 2, 1, 1)
 
             frame.add(tgrid)
             self.content_box.pack_start(frame, False, False, 0)
@@ -737,12 +781,12 @@ class SettingsAppWindow(Gtk.Window):
 
         # ── 16. Packages & Software ─────────────────────────────────────
         elif cat_id == "packages":
-            frame = Gtk.Frame(label="Package Manager & Repositories")
+            frame = Gtk.Frame(label="Package Manager & Repositories (dpkg / apt)")
             vbox = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=10)
             vbox.set_border_width(16)
 
             u_row = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=12)
-            u_row.pack_start(Gtk.Label(label="System Packages Status: Up to date", xalign=0), True, True, 0)
+            u_row.pack_start(Gtk.Label(label="System Packages Status: 100% Up to Date", xalign=0), True, True, 0)
             btn_chk = Gtk.Button.new_with_label("Check for Updates")
             u_row.pack_end(btn_chk, False, False, 0)
             vbox.pack_start(u_row, False, False, 0)
@@ -750,12 +794,12 @@ class SettingsAppWindow(Gtk.Window):
             # Core Packages Table
             plist = Gtk.ListBox()
             plist.set_selection_mode(Gtk.SelectionMode.NONE)
-            for pkg in SystemAdapter.get_installed_packages():
+            for pkg in SystemAdapter.get_installed_packages_sample(limit=12):
                 r = Gtk.ListBoxRow()
                 h = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=12)
                 h.set_border_width(6)
-                h.pack_start(Gtk.Label(label=f"<b>{pkg['name']}</b> ({pkg['version']})", use_markup=True, xalign=0), True, True, 0)
-                h.pack_end(Gtk.Label(label=pkg["desc"]), False, False, 0)
+                h.pack_start(Gtk.Label(label=f"<b>{pkg['name']}</b>", use_markup=True, xalign=0), True, True, 0)
+                h.pack_end(Gtk.Label(label=f"v{pkg['version']} • [{pkg['section']}]"), False, False, 0)
                 r.add(h)
                 plist.add(r)
             vbox.pack_start(plist, False, False, 4)
@@ -820,18 +864,18 @@ class SettingsAppWindow(Gtk.Window):
 
         # ── 19. Cameras & Gamepads ──────────────────────────────────────
         elif cat_id == "devices":
-            frame = Gtk.Frame(label="Game Controllers & Video Input")
+            frame = Gtk.Frame(label="Input Peripherals & Gamepad Interfaces")
             vbox = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=10)
             vbox.set_border_width(16)
 
             glist = Gtk.ListBox()
             glist.set_selection_mode(Gtk.SelectionMode.NONE)
-            for gp in SystemAdapter.get_gamepads():
+            for dev_str in SystemAdapter.get_input_devices():
                 r = Gtk.ListBoxRow()
                 h = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=12)
                 h.set_border_width(8)
                 h.pack_start(Gtk.Image.new_from_icon_name("input-gaming-symbolic", Gtk.IconSize.BUTTON), False, False, 0)
-                h.pack_start(Gtk.Label(label=gp, xalign=0), True, True, 0)
+                h.pack_start(Gtk.Label(label=dev_str, xalign=0), True, True, 0)
                 r.add(h)
                 glist.add(r)
             vbox.pack_start(glist, False, False, 4)
@@ -1004,7 +1048,14 @@ class SettingsAppWindow(Gtk.Window):
 
 
 def main():
-    win = SettingsAppWindow()
+    initial_page = "overview"
+    for arg in sys.argv[1:]:
+        if arg.startswith("--page="):
+            initial_page = arg.split("=", 1)[1]
+        elif arg.startswith("synth-settings://"):
+            initial_page = arg.replace("synth-settings://", "")
+
+    win = SettingsAppWindow(initial_page=initial_page)
     win.show_all()
     Gtk.main()
 

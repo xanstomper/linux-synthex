@@ -224,13 +224,20 @@ class AudioAdapter:
             for line in out.split("\n"):
                 parts = line.split("\t")
                 if len(parts) >= 2:
-                    sinks.append(parts[1])
+                    raw_name = parts[1]
+                    clean_name = raw_name
+                    if "usb" in raw_name.lower():
+                        clean_name = "USB Audio DAC / Headphones"
+                    elif "hdmi" in raw_name.lower():
+                        clean_name = "HDMI / DisplayPort Audio Output"
+                    elif "pci" in raw_name.lower():
+                        clean_name = "Built-in Analog Stereo Output"
+                    sinks.append(clean_name)
         if not sinks:
             sinks = [
-                "Built-in Audio (Analog Stereo)",
+                "USB Audio DAC / Headphones",
                 "HDMI / DisplayPort Digital Output",
-                "USB Audio DAC / High-Res Output",
-                "Bluetooth A2DP Audio Headset"
+                "Built-in Analog Stereo Output"
             ]
         return sinks
 
@@ -274,25 +281,37 @@ class PowerAdapter:
 
 class DisplayAdapter:
     @staticmethod
-    def get_display_info():
-        monitors = []
+    def get_connected_monitors():
+        monitors = {}
         ok, out, _ = run_cmd("xrandr --current")
         if ok and out:
+            current_mon = None
             for line in out.split("\n"):
                 if " connected" in line:
                     parts = line.split()
                     name = parts[0]
                     primary = "primary" in line
-                    res_match = re.search(r"(\d+x\d+)\+(\d+)\+(\d+)", line)
-                    res = res_match.group(1) if res_match else "1920x1080"
-                    monitors.append({
-                        "name": name,
-                        "primary": primary,
-                        "resolution": res
-                    })
+                    current_mon = name
+                    monitors[name] = {"primary": primary, "modes": [], "current_res": "1920x1080", "current_hz": "60.00"}
+                elif current_mon and line.startswith("   "):
+                    parts = line.strip().split()
+                    if parts:
+                        res = parts[0]
+                        rates = parts[1:]
+                        for r in rates:
+                            hz = r.replace("*", "").replace("+", "")
+                            if "*" in r:
+                                monitors[current_mon]["current_res"] = res
+                                monitors[current_mon]["current_hz"] = hz
+                            if (res, hz) not in monitors[current_mon]["modes"]:
+                                monitors[current_mon]["modes"].append((res, hz))
         if not monitors:
-            monitors.append({"name": "eDP-1 (Primary Display)", "primary": True, "resolution": "1920x1080"})
+            monitors["HDMI-1"] = {"primary": True, "modes": [("1920x1080", "60.00"), ("2560x1440", "144.00")], "current_res": "1920x1080", "current_hz": "60.00"}
         return monitors
+
+    @staticmethod
+    def set_monitor_mode(output_name: str, res: str, rate: str):
+        return run_cmd(f"xrandr --output {output_name} --mode {res} --rate {rate}")[0]
 
     @staticmethod
     def is_hdr_supported():
@@ -305,7 +324,68 @@ class DisplayAdapter:
         return "1" in out
 
 
-# ── 6. Storage & Disks Integration (UDisks2 / procfs) ──────────────────────────
+# ── 6. Theme & Desktop Integration ────────────────────────────────────────────
+
+class ThemeAdapter:
+    @staticmethod
+    def get_installed_themes():
+        themes = set()
+        for d in ["/usr/share/themes", os.path.expanduser("~/.themes"), os.path.expanduser("~/.local/share/themes")]:
+            if os.path.isdir(d):
+                try:
+                    themes.update(os.listdir(d))
+                except Exception:
+                    pass
+        sorted_themes = sorted([t for t in themes if not t.startswith(".")])
+        return sorted_themes if sorted_themes else ["Mint-Y-Dark", "Orchis-Teal-Dark", "Adwaita-dark", "Breeze-Dark"]
+
+    @staticmethod
+    def get_installed_icons():
+        icons = set()
+        for d in ["/usr/share/icons", os.path.expanduser("~/.icons"), os.path.expanduser("~/.local/share/icons")]:
+            if os.path.isdir(d):
+                try:
+                    icons.update(os.listdir(d))
+                except Exception:
+                    pass
+        sorted_icons = sorted([i for i in icons if not i.startswith(".")])
+        return sorted_icons if sorted_icons else ["Mint-Y-Dark", "Tela-circle-dark", "Papirus-Dark", "Adwaita"]
+
+    @staticmethod
+    def get_current_gtk_theme():
+        iface = get_gsettings("org.cinnamon.desktop.interface") or get_gsettings("org.gnome.desktop.interface")
+        if iface:
+            try:
+                return iface.get_string("gtk-theme")
+            except Exception:
+                pass
+        return "Mint-Y-Dark"
+
+    @staticmethod
+    def set_gtk_theme(theme_name: str):
+        for schema in ["org.cinnamon.desktop.interface", "org.gnome.desktop.interface"]:
+            iface = get_gsettings(schema)
+            if iface:
+                try:
+                    iface.set_string("gtk-theme", theme_name)
+                    iface.set_string("gtk-application-prefer-dark-theme", "1" if "dark" in theme_name.lower() else "0")
+                except Exception:
+                    pass
+        return True
+
+    @staticmethod
+    def set_icon_theme(icon_name: str):
+        for schema in ["org.cinnamon.desktop.interface", "org.gnome.desktop.interface"]:
+            iface = get_gsettings(schema)
+            if iface:
+                try:
+                    iface.set_string("icon-theme", icon_name)
+                except Exception:
+                    pass
+        return True
+
+
+# ── 7. Storage & Disks Integration (UDisks2 / procfs) ──────────────────────────
 
 class StorageAdapter:
     @staticmethod
@@ -327,9 +407,9 @@ class StorageAdapter:
                 pass
         if not devices:
             devices = [
-                {"name": "nvme0n1", "size": "1000.0G", "type": "disk", "model": "Samsung SSD 990 PRO 1TB", "children": [
-                    {"name": "nvme0n1p1", "size": "1.0G", "fstype": "vfat", "mountpoint": "/boot/efi"},
-                    {"name": "nvme0n1p2", "size": "999.0G", "fstype": "btrfs", "mountpoint": "/"}
+                {"name": "sda", "size": "238.5G", "type": "disk", "model": "UDSS UD3CS1HT301-256G SSD", "children": [
+                    {"name": "sda1", "size": "512M", "fstype": "vfat", "mountpoint": "/boot/efi"},
+                    {"name": "sda2", "size": "238.0G", "fstype": "ext4", "mountpoint": "/"}
                 ]}
             ]
         return devices
@@ -348,10 +428,10 @@ class StorageAdapter:
                         "available": parts[3],
                         "percent": parts[4]
                     }
-        return {"total": "999G", "used": "42G", "available": "957G", "percent": "5%"}
+        return {"total": "238G", "used": "42G", "available": "196G", "percent": "18%"}
 
 
-# ── 7. Security & Firewall Integration (UFW / nftables) ────────────────────────
+# ── 8. Security & Firewall Integration (UFW / nftables) ────────────────────────
 
 class SecurityAdapter:
     @staticmethod
@@ -374,7 +454,7 @@ class SecurityAdapter:
         return "Standard UEFI / Custom Keys"
 
 
-# ── 8. System & Package Integration ───────────────────────────────────────────
+# ── 9. System, Packages & Services Integration ─────────────────────────────────
 
 class SystemAdapter:
     @staticmethod
@@ -448,25 +528,35 @@ class SystemAdapter:
         return printers
 
     @staticmethod
-    def get_gamepads():
-        devices = []
-        if os.path.exists("/dev/input"):
-            for f in os.listdir("/dev/input"):
-                if f.startswith("js"):
-                    devices.append(f"Joystick / Gamepad Interface (/dev/input/{f})")
-        if not devices:
-            devices = ["No external physical gamepads connected"]
-        return devices
+    def get_input_devices():
+        devs = []
+        if os.path.exists("/dev/input/by-id"):
+            for d in os.listdir("/dev/input/by-id"):
+                clean = d.replace("usb-", "").replace("-event-mouse", " (Mouse)").replace("-event-kbd", " (Keyboard)").replace("-if01", "")
+                devs.append(clean)
+        if not devs:
+            devs = ["Generic 2.4G Wireless Keyboard & Mouse (/dev/input/event0)"]
+        return devs
 
     @staticmethod
-    def get_installed_packages():
-        # Quick sample of core system packages
-        return [
-            {"name": "cinnamon", "version": "6.0.4", "desc": "Cinnamon Desktop Environment"},
-            {"name": "pipewire", "version": "1.0.5", "desc": "Next-generation multimedia server"},
-            {"name": "network-manager", "version": "1.44.2", "desc": "Network connection management"},
-            {"name": "mesa-vulkan-drivers", "version": "24.0.5", "desc": "Mesa 3D Graphics drivers"},
-            {"name": "linux-synthex-kernel", "version": "6.10.3-synthex", "desc": "BORE-patched Realtime Gaming Kernel"},
-            {"name": "timeshift", "version": "24.01", "desc": "BTRFS System Snapshot Tool"},
-            {"name": "ufw", "version": "0.36.2", "desc": "Uncomplicated Firewall"},
-        ]
+    def get_installed_packages_sample(limit=15):
+        packages = []
+        ok, out, _ = run_cmd("dpkg-query -W -f='${binary:Package}\t${Version}\t${Section}\n' | head -25")
+        if ok and out:
+            for line in out.split("\n"):
+                parts = line.split("\t")
+                if len(parts) >= 2:
+                    packages.append({
+                        "name": parts[0],
+                        "version": parts[1],
+                        "section": parts[2] if len(parts) >= 3 else "system"
+                    })
+        if not packages:
+            packages = [
+                {"name": "cinnamon", "version": "6.0.4", "section": "x11"},
+                {"name": "pipewire", "version": "1.0.5", "section": "sound"},
+                {"name": "network-manager", "version": "1.44.2", "section": "net"},
+                {"name": "mesa-vulkan-drivers", "version": "24.0.5", "section": "graphics"},
+                {"name": "linux-synthex-kernel", "version": "6.10.3-synthex", "section": "kernel"}
+            ]
+        return packages[:limit]
