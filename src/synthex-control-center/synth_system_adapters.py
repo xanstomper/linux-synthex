@@ -197,9 +197,9 @@ class DisplayAdapter:
     @staticmethod
     def set_display_layout(primary_mon: str, secondary_mon: str, mode: str = "extend-right"):
         if mode == "extend-right":
-            return run_cmd(f"xrandr --output {primary_mon} --primary --auto --output {secondary_mon} --auto --right-of {primary_mon}")[0]
+            return run_cmd(f"xrandr --output {primary_mon} --primary --auto --pos 0x0 --output {secondary_mon} --auto --pos 1920x106")[0]
         elif mode == "extend-left":
-            return run_cmd(f"xrandr --output {primary_mon} --primary --auto --output {secondary_mon} --auto --left-of {primary_mon}")[0]
+            return run_cmd(f"xrandr --output {secondary_mon} --auto --pos 0x180 --output {primary_mon} --primary --auto --pos 1280x0")[0]
         elif mode == "mirror":
             return run_cmd(f"xrandr --output {primary_mon} --primary --auto --output {secondary_mon} --auto --same-as {primary_mon}")[0]
         return False
@@ -435,6 +435,21 @@ class NetworkAdapter:
                 {"ssid": "Public-Guest-Access", "signal": 55, "security": "Open", "band": "2.4 GHz", "connected": False}
             ]
         return networks
+
+    @staticmethod
+    def get_saved_networks():
+        saved = []
+        ok, out, _ = run_cmd("nmcli -t -f NAME,TYPE connection show")
+        if ok and out:
+            for line in out.split("\n"):
+                parts = line.split(":")
+                if len(parts) >= 2 and "wireless" in parts[1].lower():
+                    saved.append(parts[0])
+        return saved if saved else ["XFSETUP-6364", "SynthOS-5G"]
+
+    @staticmethod
+    def forget_network(conn_name: str):
+        return run_cmd(f"nmcli connection delete {shlex.quote(conn_name)}")[0]
 
     @staticmethod
     def connect_wifi(ssid: str, password: str = ""):
@@ -900,3 +915,37 @@ class SystemAdapter:
                 {"name": "linux-synthex-kernel", "version": "6.10.3-synthex", "section": "kernel"}
             ]
         return packages[:limit]
+
+    @staticmethod
+    def get_startup_apps():
+        apps = []
+        autostart_dir = os.path.expanduser("~/.config/autostart")
+        if os.path.exists(autostart_dir):
+            for f in os.listdir(autostart_dir):
+                if f.endswith(".desktop"):
+                    apps.append(f.replace(".desktop", ""))
+        return apps if apps else ["plank-dock", "conky-system-monitor"]
+
+    @staticmethod
+    def get_apt_repositories():
+        repos = []
+        ok, out, _ = run_cmd("grep -h ^deb /etc/apt/sources.list /etc/apt/sources.list.d/*.list 2>/dev/null | head -10")
+        if ok and out:
+            for line in out.split("\n"):
+                if line.strip():
+                    parts = line.split()
+                    if len(parts) >= 2:
+                        repos.append(parts[1])
+        return repos if repos else ["http://archive.ubuntu.com/ubuntu", "https://packages.synthex.org/lts"]
+
+    @staticmethod
+    def get_kernel_cmdline():
+        try:
+            return open("/proc/cmdline").read().strip()
+        except Exception:
+            return "BOOT_IMAGE=/boot/vmlinuz root=UUID=synthex ro quiet splash"
+
+    @staticmethod
+    def get_journal_logs(limit=40):
+        ok, out, _ = run_cmd(f"journalctl -n {limit} --no-pager 2>/dev/null")
+        return out if ok and out else "systemd initialized cleanly."

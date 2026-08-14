@@ -58,8 +58,8 @@ SIDEBAR_ITEMS = [
     ("overview",      "Overview",               "preferences-system",                      ["Quick Settings", "System Health", "Battery & Power"]),
     ("display",       "Display",                "preferences-desktop-display",              ["Resolution", "Refresh rate", "Arrangement", "Scaling", "HDR", "Night light", "VRR", "Rotation"]),
     ("gaming",        "Gaming & Performance",   "applications-games",                      ["CPU Governor", "BORE Scheduler", "GameMode", "ZRAM Compression", "GPU Latency"]),
-    ("network",       "Network",                "preferences-system-network",               ["Wi-Fi", "Ethernet", "VPN", "Proxy", "DNS", "Firewall", "Network sharing"]),
-    ("bluetooth",     "Bluetooth",              "bluetooth",                                ["Devices", "Pairing", "Audio devices", "File transfer"]),
+    ("network",       "Network",                "preferences-system-network",               ["Wi-Fi", "Ethernet", "VPN", "Proxy", "DNS", "Firewall", "Saved Networks"]),
+    ("bluetooth",     "Bluetooth",              "bluetooth",                                ["Devices", "Pairing", "Audio devices", "Codecs", "File transfer"]),
     ("sound",         "Sound",                  "multimedia-volume-control",                 ["Output", "Input", "Volume", "Per-app audio", "Microphone", "Audio test", "PipeWire"]),
     ("appearance",    "Appearance",             "preferences-desktop-theme",                ["Theme", "Dark/Light", "Accent", "Wallpaper", "Icons", "Cursor", "Fonts", "Animations"]),
     ("desktop",       "Desktop",                "cs-desktop",                             ["Panels", "Dock", "Workspaces", "Window behavior", "Virtual desktops", "Hot corners"]),
@@ -71,7 +71,7 @@ SIDEBAR_ITEMS = [
     ("users",         "Users & Accounts",       "system-users",                             ["Accounts", "Password", "Administrator privileges", "Login behavior", "Profile"]),
     ("security",      "Security",               "cs-firewall",                              ["Firewall", "Encryption", "Secure Boot status", "Permissions", "Authentication", "Screen lock"]),
     ("privacy",       "Privacy",                "preferences-system-privacy",              ["Location", "Camera", "Microphone", "Screen capture", "App permissions", "Telemetry"]),
-    ("apps",          "Apps",                   "preferences-desktop-default-applications", ["Installed applications", "Default applications", "Startup applications", "File associations"]),
+    ("apps",          "Apps & Defaults",        "preferences-desktop-default-applications", ["Installed applications", "Default applications", "Startup applications", "File associations"]),
     ("packages",      "Packages & Software",    "system-software-install",                  ["Updates", "Installed packages", "Repositories", "Drivers", "Optional components"]),
     ("printers",      "Printers & Scanners",    "cs-printer",                             ["Printers", "Scanners", "Print queues", "Test page"]),
     ("devices",       "Cameras & Gamepads",     "camera-video",                             ["Video devices", "Game controllers", "Calibration", "Force feedback"]),
@@ -92,7 +92,6 @@ class SettingsAppWindow(Gtk.Window):
 
         self.daemon = SettingsDaemon.get_instance()
         self.current_cat_id = initial_page
-        self.current_tier = "all"  # basic, advanced, developer, all
 
         # ── Header Bar ──────────────────────────────────────────────────
         self.hb = Gtk.HeaderBar()
@@ -558,6 +557,20 @@ class SettingsAppWindow(Gtk.Window):
             wvbox.pack_start(nlist, False, False, 4)
             wframe.add(wvbox)
             self.content_box.pack_start(wframe, False, False, 0)
+
+            # Saved Networks Frame
+            s_frame = Gtk.Frame(label="Saved Wi-Fi Profiles")
+            s_box = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=6)
+            s_box.set_border_width(16)
+            for sn in NetworkAdapter.get_saved_networks():
+                sr = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=12)
+                sr.pack_start(Gtk.Label(label=f"<b>{sn}</b>", use_markup=True, xalign=0), True, True, 0)
+                btn_f = Gtk.Button.new_with_label("Forget Network")
+                btn_f.connect("clicked", lambda b, n=sn: (NetworkAdapter.forget_network(n), self._render_category_page("network", "Network", ["Wi-Fi", "Ethernet", "VPN"])))
+                sr.pack_end(btn_f, False, False, 0)
+                s_box.pack_start(sr, False, False, 0)
+            s_frame.add(s_box)
+            self.content_box.pack_start(s_frame, False, False, 0)
 
             # VPN Frame
             vframe = Gtk.Frame(label="VPN & Secure Connections")
@@ -1069,7 +1082,7 @@ class SettingsAppWindow(Gtk.Window):
             frame.add(vbox)
             self.content_box.pack_start(frame, False, False, 0)
 
-        # ── 17. Apps ────────────────────────────────────────────────────
+        # ── 17. Apps & Defaults ─────────────────────────────────────────
         elif cat_id == "apps":
             frame = Gtk.Frame(label="Default System Applications")
             grid = Gtk.Grid()
@@ -1095,6 +1108,21 @@ class SettingsAppWindow(Gtk.Window):
             frame.add(grid)
             self.content_box.pack_start(frame, False, False, 0)
 
+            # Startup Applications list
+            st_frame = Gtk.Frame(label="Startup Applications (Autostart)")
+            st_box = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=6)
+            st_box.set_border_width(16)
+            for app in SystemAdapter.get_startup_apps():
+                ar = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=12)
+                ar.pack_start(Gtk.Image.new_from_icon_name("system-run-symbolic", Gtk.IconSize.BUTTON), False, False, 0)
+                ar.pack_start(Gtk.Label(label=f"<b>{app}</b>", use_markup=True, xalign=0), True, True, 0)
+                ar_sw = Gtk.Switch()
+                ar_sw.set_active(True)
+                ar.pack_end(ar_sw, False, False, 0)
+                st_box.pack_start(ar, False, False, 0)
+            st_frame.add(st_box)
+            self.content_box.pack_start(st_frame, False, False, 0)
+
         # ── 18. Packages & Software ─────────────────────────────────────
         elif cat_id == "packages":
             frame = Gtk.Frame(label="Package Manager & Repositories (dpkg / apt)")
@@ -1111,7 +1139,7 @@ class SettingsAppWindow(Gtk.Window):
             # Core Packages Table
             plist = Gtk.ListBox()
             plist.set_selection_mode(Gtk.SelectionMode.NONE)
-            for pkg in SystemAdapter.get_installed_packages_sample(limit=12):
+            for pkg in SystemAdapter.get_installed_packages_sample(limit=10):
                 r = Gtk.ListBoxRow()
                 h = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=12)
                 h.set_border_width(6)
@@ -1120,6 +1148,15 @@ class SettingsAppWindow(Gtk.Window):
                 r.add(h)
                 plist.add(r)
             vbox.pack_start(plist, False, False, 4)
+
+            # APT Repositories Table
+            repo_frame = Gtk.Frame(label="Active Software Repositories")
+            repo_box = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=6)
+            repo_box.set_border_width(12)
+            for repo in SystemAdapter.get_apt_repositories():
+                repo_box.pack_start(Gtk.Label(label=f"• {repo}", xalign=0), False, False, 0)
+            repo_frame.add(repo_box)
+            vbox.pack_start(repo_frame, False, False, 4)
 
             frame.add(vbox)
             self.content_box.pack_start(frame, False, False, 0)
@@ -1337,6 +1374,17 @@ class SettingsAppWindow(Gtk.Window):
                 r.add(h)
                 slist.add(r)
             vbox.pack_start(slist, False, False, 4)
+
+            # Kernel Command Line
+            kframe = Gtk.Frame(label="Active Kernel Command Line (/proc/cmdline)")
+            kbox = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=6)
+            kbox.set_border_width(12)
+            klbl = Gtk.Label(label=SystemAdapter.get_kernel_cmdline(), xalign=0)
+            klbl.set_line_wrap(True)
+            klbl.set_selectable(True)
+            kbox.pack_start(klbl, False, False, 0)
+            kframe.add(kbox)
+            vbox.pack_start(kframe, False, False, 4)
 
             frame.add(vbox)
             self.content_box.pack_start(frame, False, False, 0)
