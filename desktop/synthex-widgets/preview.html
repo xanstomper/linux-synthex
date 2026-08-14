@@ -76,6 +76,10 @@
                       radial-gradient(circle at 30% 20%, rgba(247, 118, 142, 0.2) 0%, transparent 45%),
                       linear-gradient(135deg, #120E18 0%, #1E1322 50%, #0D0B12 100%);
   }
+  .wp-minimal {
+    background-image: radial-gradient(circle at 50% 50%, rgba(122, 162, 247, 0.08) 0%, transparent 60%),
+                      linear-gradient(135deg, #07090E 0%, #0D1117 50%, #040608 100%);
+  }
 
   /* Liquid Glass Base */
   .liquid-glass {
@@ -710,13 +714,17 @@
     <button class="strip-btn active" onclick="setWallpaper('wp-nebula', this)">🌌 Nebula</button>
     <button class="strip-btn" onclick="setWallpaper('wp-cyber', this)">⚡ Cyber Wave</button>
     <button class="strip-btn" onclick="setWallpaper('wp-sunset', this)">🌅 Sunset</button>
+    <button class="strip-btn" onclick="setWallpaper('wp-minimal', this)">⬛ Minimal</button>
 
     <div style="width:1px; height:20px; background:rgba(255,255,255,0.1)"></div>
 
     <span style="font-size:12px; font-weight:700; color:var(--text-sub)">THEME:</span>
     <button class="strip-btn active" onclick="setTheme('#7AA2F7', '#BB9AF7', this)">Nova Ice</button>
+    <button class="strip-btn" onclick="setTheme('#89B4FA', '#CBA6F7', this)">Catppuccin</button>
     <button class="strip-btn" onclick="setTheme('#00F0FF', '#FF007F', this)">Neon Cyber</button>
     <button class="strip-btn" onclick="setTheme('#88C0D0', '#81A1C1', this)">Nord Frost</button>
+    <button class="strip-btn" onclick="setTheme('#D79921', '#FE8019', this)">Gruvbox</button>
+    <button class="strip-btn" onclick="setTheme('#FF71CE', '#01CDFE', this)">Synthwave</button>
   </div>
 
   <script>

@@ -1,0 +1,16 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="3840" height="2160" viewBox="0 0 3840 2160">
+  <defs>
+    <radialGradient id="sunset" cx="50%" cy="80%" r="60%">
+      <stop offset="0%" style="stop-color:#FE8019;stop-opacity:0.25"/>
+      <stop offset="40%" style="stop-color:#EB6F92;stop-opacity:0.15"/>
+      <stop offset="100%" style="stop-color:#000000;stop-opacity:0"/>
+    </radialGradient>
+    <linearGradient id="bg" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" style="stop-color:#0B0912"/>
+      <stop offset="50%" style="stop-color:#18101E"/>
+      <stop offset="100%" style="stop-color:#08060E"/>
+    </linearGradient>
+  </defs>
+  <rect width="3840" height="2160" fill="url(#bg)"/>
+  <rect width="3840" height="2160" fill="url(#sunset)"/>
+</svg>

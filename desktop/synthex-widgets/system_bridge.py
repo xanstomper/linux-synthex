@@ -82,6 +82,33 @@ THEME_PRESETS = {
         "border": "#262626",
         "text": "#F3F4F6",
         "textDim": "#9CA3AF"
+    },
+    "gruvbox": {
+        "accent": "#D79921",
+        "secondary": "#FE8019",
+        "surface": "#282828",
+        "dock": "#1D2021",
+        "border": "#3C3836",
+        "text": "#EBDBB2",
+        "textDim": "#A89984"
+    },
+    "rosepine": {
+        "accent": "#EB6F92",
+        "secondary": "#C4A7E7",
+        "surface": "#191724",
+        "dock": "#13101E",
+        "border": "#26233A",
+        "text": "#E0DEF4",
+        "textDim": "#908CAA"
+    },
+    "synthwave": {
+        "accent": "#FF71CE",
+        "secondary": "#01CDFE",
+        "surface": "#1E122B",
+        "dock": "#150C20",
+        "border": "#341B4D",
+        "text": "#FFFFFF",
+        "textDim": "#B983FF"
     }
 }
 
@@ -94,6 +121,9 @@ DEFAULT_CONFIG = {
     "dockColor": "#12161F",
     "cornerRadius": 18,
     "cardOpacity": 0.94,
+    "dockSize": 40,
+    "dockPosition": "bottom",
+    "wallpaperPath": "file:///home/jewboy420/linux-synthex/branding/wallpaper/synthex-dark-4k.svg",
     "widgets": {
         "clock": True,
         "weather": True,
@@ -104,11 +134,11 @@ DEFAULT_CONFIG = {
         "dock": True,
         "topPill": True
     },
-    "dockPosition": "bottom",
     "performanceMode": "balanced",
     "nightLight": False,
     "dnd": False,
-    "eqPreset": "Balanced"
+    "eqPreset": "Balanced",
+    "eqBands": [0, 2, 0, -1, 3]
 }
 
 
@@ -264,6 +294,32 @@ class SystemBridge(QObject):
     @Property(str, notify=configChanged)
     def eqPreset(self):
         return self._config.get("eqPreset", "Balanced")
+
+    @Property("QVariantList", notify=configChanged)
+    def eqBands(self):
+        return self._config.get("eqBands", [0, 2, 0, -1, 3])
+
+    @Property(str, notify=configChanged)
+    def wallpaperPath(self):
+        return self._config.get("wallpaperPath", "file:///home/jewboy420/linux-synthex/branding/wallpaper/synthex-dark-4k.svg")
+
+    @Property(int, notify=configChanged)
+    def dockSize(self):
+        return self._config.get("dockSize", 40)
+
+    @Property(str, notify=configChanged)
+    def dockPosition(self):
+        return self._config.get("dockPosition", "bottom")
+
+    @Property("QVariantList", constant=True)
+    def wallpapersList(self):
+        return [
+            {"name": "Synthex Dark 4K", "path": "file:///home/jewboy420/linux-synthex/branding/wallpaper/synthex-dark-4k.svg"},
+            {"name": "Synthex Light 4K", "path": "file:///home/jewboy420/linux-synthex/branding/wallpaper/synthex-light-4k.svg"},
+            {"name": "Minimal Dark 4K", "path": "file:///home/jewboy420/linux-synthex/branding/wallpaper/synthex-minimal-dark-4k.svg"},
+            {"name": "Cyber Wave 4K", "path": "file:///home/jewboy420/linux-synthex/branding/wallpaper/synthex-cyber-4k.svg"},
+            {"name": "Sunset Horizon 4K", "path": "file:///home/jewboy420/linux-synthex/branding/wallpaper/synthex-sunset-4k.svg"}
+        ]
 
     # ─── Hardware & Subsystem Properties ────────────────────────────────────
 
@@ -464,6 +520,60 @@ class SystemBridge(QObject):
         self._save_config()
         self.configChanged.emit()
         threading.Thread(target=self._apply_perf_mode, args=(mode,), daemon=True).start()
+
+    @Slot(str)
+    def setWallpaper(self, path: str):
+        self._config["wallpaperPath"] = path
+        self._save_config()
+        self.configChanged.emit()
+
+    @Slot(int)
+    def setDockSize(self, size: int):
+        self._config["dockSize"] = max(32, min(64, size))
+        self._save_config()
+        self.configChanged.emit()
+
+    @Slot(str)
+    def setDockPosition(self, pos: str):
+        if pos in ("bottom", "top", "floating"):
+            self._config["dockPosition"] = pos
+            self._save_config()
+            self.configChanged.emit()
+
+    @Slot(int, int)
+    def setEqBand(self, band_idx: int, value: int):
+        bands = list(self._config.get("eqBands", [0, 0, 0, 0, 0]))
+        if 0 <= band_idx < len(bands):
+            bands[band_idx] = max(-12, min(12, value))
+            self._config["eqBands"] = bands
+            self._save_config()
+            self.configChanged.emit()
+
+    @Slot(str, result=bool)
+    def exportConfig(self, target_path: str):
+        try:
+            p = Path(target_path.replace("file://", ""))
+            p.parent.mkdir(parents=True, exist_ok=True)
+            with open(p, "w") as f:
+                json.dump(self._config, f, indent=2)
+            return True
+        except Exception:
+            return False
+
+    @Slot(str, result=bool)
+    def importConfig(self, source_path: str):
+        try:
+            p = Path(source_path.replace("file://", ""))
+            if p.exists():
+                with open(p, "r") as f:
+                    cfg = json.load(f)
+                    self._config.update(cfg)
+                    self._save_config()
+                    self.configChanged.emit()
+                    return True
+        except Exception:
+            pass
+        return False
 
     @Slot(bool)
     def toggleNightLight(self, enabled: bool):

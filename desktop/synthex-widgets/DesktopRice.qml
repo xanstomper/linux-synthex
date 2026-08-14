@@ -15,7 +15,7 @@ Item {
     Image {
         id: bgWallpaper
         anchors.fill: parent
-        source: "file:///home/jewboy420/linux-synthex/branding/wallpaper/synthex-dark-4k.svg"
+        source: (typeof systemBridge !== "undefined" && systemBridge) ? systemBridge.wallpaperPath : "file:///home/jewboy420/linux-synthex/branding/wallpaper/synthex-dark-4k.svg"
         fillMode: Image.PreserveAspectCrop
 
         // Subtle dark gradient overlay
@@ -138,8 +138,8 @@ Item {
     Rectangle {
         id: bottomDock
         width: 1040
-        height: 64
-        radius: 32
+        height: (typeof systemBridge !== "undefined" && systemBridge) ? (systemBridge.dockSize + 24) : 64
+        radius: height / 2
         color: (typeof systemBridge !== "undefined" && systemBridge) ? systemBridge.dockColor : "#e612161f"
         border.color: "#14ffffff"
         border.width: 1

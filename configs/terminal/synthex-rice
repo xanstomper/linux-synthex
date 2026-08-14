@@ -2,7 +2,7 @@
 # SPDX-License-Identifier: MIT OR Apache-2.0
 """
 synthex-rice — CLI customization tool for SynthOS Desktop Rice & Themes
-Allows instantaneous tweaking of themes, accent colors, widget toggles, and EQ presets.
+Allows instantaneous tweaking of themes, accent colors, widget toggles, EQ presets, wallpapers, and presets.
 """
 
 import argparse
@@ -20,7 +20,10 @@ THEME_PRESETS = {
     "catppuccin": {"accent": "#89B4FA", "secondary": "#CBA6F7", "surface": "#1E1E2E", "dock": "#181825"},
     "nord": {"accent": "#88C0D0", "secondary": "#81A1C1", "surface": "#2E3440", "dock": "#242933"},
     "cyberpunk": {"accent": "#00F0FF", "secondary": "#FF007F", "surface": "#0D0D18", "dock": "#07070F"},
-    "oled": {"accent": "#60A5FA", "secondary": "#A78BFA", "surface": "#0A0A0A", "dock": "#000000"}
+    "oled": {"accent": "#60A5FA", "secondary": "#A78BFA", "surface": "#0A0A0A", "dock": "#000000"},
+    "gruvbox": {"accent": "#D79921", "secondary": "#FE8019", "surface": "#282828", "dock": "#1D2021"},
+    "rosepine": {"accent": "#EB6F92", "secondary": "#C4A7E7", "surface": "#191724", "dock": "#13101E"},
+    "synthwave": {"accent": "#FF71CE", "secondary": "#01CDFE", "surface": "#1E122B", "dock": "#150C20"}
 }
 
 
@@ -33,12 +36,16 @@ def load_config():
             pass
     return {
         "theme": "nova",
+        "styleMode": "glass",
         "accentColor": "#7AA2F7",
         "secondaryColor": "#BB9AF7",
         "surfaceColor": "#141923",
         "dockColor": "#12161F",
         "cornerRadius": 18,
         "cardOpacity": 0.94,
+        "dockSize": 40,
+        "dockPosition": "bottom",
+        "wallpaperPath": "file:///home/jewboy420/linux-synthex/branding/wallpaper/synthex-dark-4k.svg",
         "widgets": {
             "clock": True,
             "weather": True,
@@ -49,10 +56,11 @@ def load_config():
             "dock": True,
             "topPill": True
         },
-        "dockPosition": "bottom",
         "performanceMode": "balanced",
-        "styleMode": "glass",
-        "eqPreset": "Balanced"
+        "nightLight": False,
+        "dnd": False,
+        "eqPreset": "Balanced",
+        "eqBands": [0, 2, 0, -1, 3]
     }
 
 
@@ -79,6 +87,10 @@ def main():
     accent_p = subparsers.add_parser("accent", help="Set custom hex accent color")
     accent_p.add_argument("hex", help="Hex color code (e.g. #7AA2F7, #00F0FF, #E5A84B)")
 
+    # Wallpaper command
+    wall_p = subparsers.add_parser("wallpaper", help="Manage desktop background wallpaper")
+    wall_p.add_argument("path", help="Path or URL to wallpaper image file")
+
     # Widget command
     widget_p = subparsers.add_parser("widget", help="Toggle desktop widget visibility")
     widget_p.add_argument("name", choices=["clock", "weather", "quickSettings", "mediaPlayer", "systemMonitor", "terminalRice", "dock", "topPill", "list"], help="Widget name")
@@ -87,6 +99,11 @@ def main():
     # EQ command
     eq_p = subparsers.add_parser("eq", help="Set media center equalizer preset")
     eq_p.add_argument("preset", choices=["Balanced", "Bass Boost", "Vocal Clarity", "Electronic Hi-Fi"], help="EQ Preset")
+
+    # Presets export/import command
+    preset_p = subparsers.add_parser("preset", help="Export or import complete rice configuration")
+    preset_p.add_argument("action", choices=["export", "import", "reset"], help="Preset action")
+    preset_p.add_argument("file", nargs="?", default="~/.config/synthex/my-rice.json", help="Path to json preset file")
 
     args = parser.parse_args()
     cfg = load_config()
@@ -98,7 +115,6 @@ def main():
             cfg["styleMode"] = args.mode
             save_config(cfg)
             print(f"Finish style set to: \033[1m{args.mode.upper()}\033[0m")
-        return
 
     elif args.command == "theme":
         if args.name == "list":
@@ -107,10 +123,8 @@ def main():
                 cur = " (active)" if cfg.get("theme") == t else ""
                 print(f"  • \033[1m{t}\033[0m{cur}")
             print()
-            return
         elif args.name == "current":
             print(f"Current theme: {cfg.get('theme', 'nova')}")
-            return
         else:
             preset = THEME_PRESETS[args.name]
             cfg["theme"] = args.name
@@ -125,6 +139,14 @@ def main():
         cfg["accentColor"] = color
         save_config(cfg)
 
+    elif args.command == "wallpaper":
+        p = args.path
+        if not p.startswith("file://") and not p.startswith("http"):
+            p = f"file://{os.path.abspath(os.path.expanduser(p))}"
+        cfg["wallpaperPath"] = p
+        save_config(cfg)
+        print(f"Wallpaper set to: {p}")
+
     elif args.command == "widget":
         if args.name == "list":
             print("\nDesktop Widgets Status:")
@@ -132,7 +154,6 @@ def main():
                 st = "\033[32mON\033[0m" if v else "\033[31mOFF\033[0m"
                 print(f"  • {k:15}: {st}")
             print()
-            return
         else:
             w = cfg.setdefault("widgets", {})
             if args.state == "on":
@@ -147,6 +168,43 @@ def main():
     elif args.command == "eq":
         cfg["eqPreset"] = args.preset
         save_config(cfg)
+
+    elif args.command == "preset":
+        target = Path(os.path.expanduser(args.file))
+        if args.action == "export":
+            target.parent.mkdir(parents=True, exist_ok=True)
+            with open(target, "w") as f:
+                json.dump(cfg, f, indent=2)
+            print(f"\033[32m✔ Exported current rice to {target}\033[0m")
+        elif args.action == "import":
+            if target.exists():
+                with open(target, "r") as f:
+                    new_cfg = json.load(f)
+                    cfg.update(new_cfg)
+                    save_config(cfg)
+                    print(f"\033[32m✔ Successfully imported rice from {target}\033[0m")
+            else:
+                print(f"\033[31m✖ File not found: {target}\033[0m")
+        elif args.action == "reset":
+            save_config({
+                "theme": "nova",
+                "styleMode": "glass",
+                "accentColor": "#7AA2F7",
+                "secondaryColor": "#BB9AF7",
+                "surfaceColor": "#141923",
+                "dockColor": "#12161F",
+                "cornerRadius": 18,
+                "cardOpacity": 0.94,
+                "dockSize": 40,
+                "dockPosition": "bottom",
+                "wallpaperPath": "file:///home/jewboy420/linux-synthex/branding/wallpaper/synthex-dark-4k.svg",
+                "widgets": {"clock": True, "weather": True, "quickSettings": True, "mediaPlayer": True, "systemMonitor": True, "terminalRice": True, "dock": True, "topPill": True},
+                "performanceMode": "balanced",
+                "nightLight": False,
+                "dnd": False,
+                "eqPreset": "Balanced",
+                "eqBands": [0, 2, 0, -1, 3]
+            })
 
     else:
         parser.print_help()
