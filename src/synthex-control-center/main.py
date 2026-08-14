@@ -85,7 +85,7 @@ SIDEBAR_ITEMS = [
 class SettingsAppWindow(Gtk.Window):
     def __init__(self, initial_page="overview"):
         super().__init__(title="SynthOS System Settings")
-        self.set_default_size(1180, 840)
+        self.set_default_size(1200, 860)
         self.set_position(Gtk.WindowPosition.CENTER)
         self.connect("destroy", Gtk.main_quit)
 
@@ -101,8 +101,8 @@ class SettingsAppWindow(Gtk.Window):
 
         # Global Deep Search
         self.search_entry = Gtk.SearchEntry()
-        self.search_entry.set_placeholder_text("Search settings, Wi-Fi, CPU governor, displays, packages...")
-        self.search_entry.set_width_chars(36)
+        self.search_entry.set_placeholder_text("Search settings, GPU, Wi-Fi, refresh rate, PipeWire, CPU governor...")
+        self.search_entry.set_width_chars(38)
         self.search_entry.connect("search-changed", self._on_global_search)
         self.hb.pack_end(self.search_entry)
 
@@ -186,7 +186,7 @@ class SettingsAppWindow(Gtk.Window):
         header.pack_start(h_title, False, False, 0)
 
         h_sub = Gtk.Label(xalign=0)
-        safe_subcats = GLib.markup_escape_text(' • '.join(subcats[:5]))
+        safe_subcats = GLib.markup_escape_text(' • '.join(subcats[:6]))
         h_sub.set_markup(f"<span color='#888888'>Configure {safe_subcats}</span>")
         header.pack_start(h_sub, False, False, 0)
 
@@ -345,7 +345,7 @@ class SettingsAppWindow(Gtk.Window):
                     btn_conn.connect("clicked", lambda b, ssid=net["ssid"]: self._show_wifi_connect_dialog(ssid))
                     h.pack_end(btn_conn, False, False, 0)
 
-                h.pack_end(Gtk.Label(label=f"{net['signal']}% • {net['security']}"), False, False, 8)
+                h.pack_end(Gtk.Label(label=f"{net['signal']}% • {net['security']} • {net.get('band', '5.0 GHz')}"), False, False, 8)
                 r.add(h)
                 nlist.add(r)
             wvbox.pack_start(nlist, False, False, 4)
@@ -369,6 +369,31 @@ class SettingsAppWindow(Gtk.Window):
             vvbox.pack_start(btn_add_vpn, False, False, 4)
             vframe.add(vvbox)
             self.content_box.pack_start(vframe, False, False, 0)
+
+            # Advanced Network Hardware Details
+            hw_frame = Gtk.Frame(label="Network Architecture & Hardware Details")
+            hw_grid = Gtk.Grid()
+            hw_grid.set_column_spacing(24)
+            hw_grid.set_row_spacing(8)
+            hw_grid.set_border_width(16)
+
+            net_hw = NetworkAdapter.get_hardware_info()
+            hw_rows = [
+                ("Interface Name", net_hw["interface"]),
+                ("MAC Address", net_hw["mac"]),
+                ("Interface MTU", net_hw["mtu"]),
+                ("Active IPv4 Address", net_hw["ipv4"]),
+                ("Default Gateway", net_hw["gateway"]),
+                ("Active DNS Servers", net_hw["dns"]),
+            ]
+            for i, (k, v) in enumerate(hw_rows):
+                hw_grid.attach(Gtk.Label(label=f"<b>{k}</b>", use_markup=True, xalign=0), 0, i, 1, 1)
+                vl = Gtk.Label(label=v, xalign=0)
+                vl.set_selectable(True)
+                hw_grid.attach(vl, 1, i, 1, 1)
+
+            hw_frame.add(hw_grid)
+            self.content_box.pack_start(hw_frame, False, False, 0)
 
         # ── 4. Bluetooth ────────────────────────────────────────────────
         elif cat_id == "bluetooth":
@@ -397,8 +422,13 @@ class SettingsAppWindow(Gtk.Window):
                 h.set_border_width(8)
                 h.pack_start(Gtk.Image.new_from_icon_name("audio-headphones-symbolic", Gtk.IconSize.BUTTON), False, False, 0)
                 h.pack_start(Gtk.Label(label=d["name"], xalign=0), True, True, 0)
+
+                btn_t = Gtk.Button.new_with_label("Disconnect" if d.get("connected") else "Connect")
+                btn_t.connect("clicked", lambda b, mac=d["mac"], conn=d.get("connected"): BluetoothAdapter.toggle_device_connect(mac, not conn))
+                h.pack_end(btn_t, False, False, 0)
+
                 st_lbl = Gtk.Label(label="Connected" if d.get("connected") else "Paired")
-                h.pack_end(st_lbl, False, False, 0)
+                h.pack_end(st_lbl, False, False, 8)
                 r.add(h)
                 plist.add(r)
             vbox.pack_start(plist, False, False, 4)
@@ -457,10 +487,37 @@ class SettingsAppWindow(Gtk.Window):
             sc_cb.connect("changed", lambda cb: safe_set_gsetting("org.cinnamon.desktop.interface", "text-scaling-factor", 1.25 if "125" in cb.get_active_text() else (1.5 if "150" in cb.get_active_text() else (2.0 if "200" in cb.get_active_text() else 1.0))))
             dgrid.attach(sc_cb, 1, 3, 1, 1)
 
+            # Brightness Slider
+            dgrid.attach(Gtk.Label(label="Hardware Brightness:", xalign=0), 0, 4, 1, 1)
+            br_scale = Gtk.Scale.new_with_range(Gtk.Orientation.HORIZONTAL, 0.2, 1.4, 0.05)
+            br_scale.set_value(1.0)
+            br_scale.set_hexpand(True)
+            br_scale.connect("value-changed", lambda sc: DisplayAdapter.set_monitor_brightness(prim_name, sc.get_value()))
+            dgrid.attach(br_scale, 1, 4, 1, 1)
+
+            # Apply Button
+            btn_apply = Gtk.Button.new_with_label("Apply Display Mode")
+            btn_apply.connect("clicked", lambda b: DisplayAdapter.set_monitor_mode(prim_name, res_cb.get_active_text(), hz_cb.get_active_text().replace(" Hz", "")))
+            dgrid.attach(btn_apply, 0, 5, 2, 1)
+
             frame.add(dgrid)
             self.content_box.pack_start(frame, False, False, 0)
 
-            # Night Light & HDR
+            # Multi-Monitor Layout Canvas
+            if len(monitors) > 1:
+                lay_frame = Gtk.Frame(label="Multi-Monitor Arrangement")
+                lay_box = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=16)
+                lay_box.set_border_width(16)
+                btn_ext_r = Gtk.Button.new_with_label("Extend HDMI-1 to Right of HDMI-2")
+                btn_ext_r.connect("clicked", lambda b: DisplayAdapter.set_display_layout("HDMI-2", "HDMI-1", "extend-right"))
+                btn_mir = Gtk.Button.new_with_label("Mirror Displays (Same as HDMI-2)")
+                btn_mir.connect("clicked", lambda b: DisplayAdapter.set_display_layout("HDMI-2", "HDMI-1", "mirror"))
+                lay_box.pack_start(btn_ext_r, False, False, 0)
+                lay_box.pack_start(btn_mir, False, False, 0)
+                lay_frame.add(lay_box)
+                self.content_box.pack_start(lay_frame, False, False, 0)
+
+            # Night Light & Color Temp
             nl_frame = Gtk.Frame(label="Night Light & Color Temperature")
             nl_box = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=8)
             nl_box.set_border_width(16)
@@ -478,6 +535,31 @@ class SettingsAppWindow(Gtk.Window):
 
             nl_frame.add(nl_box)
             self.content_box.pack_start(nl_frame, False, False, 0)
+
+            # Advanced Display Hardware Info
+            disp_hw_frame = Gtk.Frame(label="Display Stack & GPU Architecture Details")
+            disp_hw_grid = Gtk.Grid()
+            disp_hw_grid.set_column_spacing(24)
+            disp_hw_grid.set_row_spacing(8)
+            disp_hw_grid.set_border_width(16)
+
+            dhw = DisplayAdapter.get_hardware_info()
+            dhw_rows = [
+                ("Graphics Processing Unit (GPU)", dhw["gpu"]),
+                ("Display Driver", dhw["driver"]),
+                ("OpenGL Architecture", dhw["opengl"]),
+                ("Vulkan Graphics API", dhw["vulkan"]),
+                ("Variable Refresh Rate (VRR)", "Supported (Adaptive Sync Available)" if dhw["vrr_supported"] else "Standard V-Sync"),
+                ("HDR Metadata Passthrough", "Hardware Supported" if dhw["hdr_supported"] else "Standard SDR 8-Bit RGB"),
+            ]
+            for i, (k, v) in enumerate(dhw_rows):
+                disp_hw_grid.attach(Gtk.Label(label=f"<b>{k}</b>", use_markup=True, xalign=0), 0, i, 1, 1)
+                vl = Gtk.Label(label=v, xalign=0)
+                vl.set_selectable(True)
+                disp_hw_grid.attach(vl, 1, i, 1, 1)
+
+            disp_hw_frame.add(disp_hw_grid)
+            self.content_box.pack_start(disp_hw_frame, False, False, 0)
 
         # ── 6. Appearance ───────────────────────────────────────────────
         elif cat_id == "appearance":
@@ -584,10 +666,14 @@ class SettingsAppWindow(Gtk.Window):
 
             sgrid.attach(Gtk.Label(label="Output Device:", xalign=0), 0, 1, 1, 1)
             out_cb = Gtk.ComboBoxText()
-            for o in AudioAdapter.get_audio_sinks():
-                out_cb.append_text(o)
+            for s in AudioAdapter.get_detailed_sinks():
+                out_cb.append_text(f"{s['name']} ({s.get('sample_spec', '48kHz')})")
             out_cb.set_active(0)
             sgrid.attach(out_cb, 1, 1, 1, 1)
+
+            btn_test_spk = Gtk.Button.new_with_label("Test Left & Right Speakers")
+            btn_test_spk.connect("clicked", lambda b: AudioAdapter.test_speakers())
+            sgrid.attach(btn_test_spk, 0, 2, 2, 1)
 
             frame.add(sgrid)
             self.content_box.pack_start(frame, False, False, 0)
@@ -606,6 +692,31 @@ class SettingsAppWindow(Gtk.Window):
                 mix_box.pack_start(ar, False, False, 0)
             mix_frame.add(mix_box)
             self.content_box.pack_start(mix_frame, False, False, 0)
+
+            # Audio Hardware Details
+            aud_hw_frame = Gtk.Frame(label="Audio Server & DSP Hardware Details")
+            aud_hw_grid = Gtk.Grid()
+            aud_hw_grid.set_column_spacing(24)
+            aud_hw_grid.set_row_spacing(8)
+            aud_hw_grid.set_border_width(16)
+
+            ahw = AudioAdapter.get_hardware_info()
+            ahw_rows = [
+                ("Audio Server Daemon", ahw["server"]),
+                ("PipeWire Version", ahw["version"]),
+                ("Default DSP Specification", ahw["sample_spec"]),
+                ("Audio Quantum Buffer", ahw["quantum"]),
+                ("Base Sample Rate", ahw["rate"]),
+                ("Bit Depth Processing", ahw["bit_depth"]),
+            ]
+            for i, (k, v) in enumerate(ahw_rows):
+                aud_hw_grid.attach(Gtk.Label(label=f"<b>{k}</b>", use_markup=True, xalign=0), 0, i, 1, 1)
+                vl = Gtk.Label(label=v, xalign=0)
+                vl.set_selectable(True)
+                aud_hw_grid.attach(vl, 1, i, 1, 1)
+
+            aud_hw_frame.add(aud_hw_grid)
+            self.content_box.pack_start(aud_hw_frame, False, False, 0)
 
         # ── 9. Notifications ────────────────────────────────────────────
         elif cat_id == "notifications":
@@ -727,6 +838,29 @@ class SettingsAppWindow(Gtk.Window):
 
             to_frame.add(to_grid)
             self.content_box.pack_start(to_frame, False, False, 0)
+
+            # Power Architecture & CPU Scaling Details
+            p_hw_frame = Gtk.Frame(label="Power Management & CPU Scaling Architecture")
+            p_hw_grid = Gtk.Grid()
+            p_hw_grid.set_column_spacing(24)
+            p_hw_grid.set_row_spacing(8)
+            p_hw_grid.set_border_width(16)
+
+            phw = PowerAdapter.get_hardware_info()
+            phw_rows = [
+                ("CPU Scaling Driver", phw["driver"]),
+                ("Energy Performance Preference (EPP)", phw["epp"]),
+                ("Battery / AC State", phw["battery_status"]),
+                ("Power Profiles Daemon", phw["power_profiles_daemon"]),
+            ]
+            for i, (k, v) in enumerate(phw_rows):
+                p_hw_grid.attach(Gtk.Label(label=f"<b>{k}</b>", use_markup=True, xalign=0), 0, i, 1, 1)
+                vl = Gtk.Label(label=v, xalign=0)
+                vl.set_selectable(True)
+                p_hw_grid.attach(vl, 1, i, 1, 1)
+
+            p_hw_frame.add(p_hw_grid)
+            self.content_box.pack_start(p_hw_frame, False, False, 0)
 
         # ── 13. Users & Accounts ────────────────────────────────────────
         elif cat_id == "users":
@@ -861,26 +995,49 @@ class SettingsAppWindow(Gtk.Window):
 
         # ── 18. Storage & Disks ─────────────────────────────────────────
         elif cat_id == "storage":
-            frame = Gtk.Frame(label="Disks & Storage Partitions (UDisks2)")
+            frame = Gtk.Frame(label="Physical Disks & Partition Tables (UDisks2)")
             vbox = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=10)
             vbox.set_border_width(16)
 
             dlist = Gtk.ListBox()
             dlist.set_selection_mode(Gtk.SelectionMode.NONE)
-            for dev in StorageAdapter.get_storage_devices():
+            for dev in StorageAdapter.get_detailed_drives():
                 r = Gtk.ListBoxRow()
+                vb = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=6)
+                vb.set_border_width(8)
+
                 h = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=12)
-                h.set_border_width(8)
                 h.pack_start(Gtk.Image.new_from_icon_name("drive-harddisk-symbolic", Gtk.IconSize.BUTTON), False, False, 0)
-                h.pack_start(Gtk.Label(label=f"<b>{dev['name']}</b> ({dev['model']})", use_markup=True, xalign=0), True, True, 0)
-                h.pack_end(Gtk.Label(label=f"Capacity: {dev['size']}"), False, False, 0)
-                r.add(h)
+                h.pack_start(Gtk.Label(label=f"<b>{dev['name']}</b> — {dev['model']}", use_markup=True, xalign=0), True, True, 0)
+                h.pack_end(Gtk.Label(label=f"Total Capacity: {dev['size']}"), False, False, 0)
+                vb.pack_start(h, False, False, 0)
+
+                for part in dev.get("children", []):
+                    pr = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=12)
+                    pr.set_margin_left(28)
+                    pr.pack_start(Gtk.Label(label=f"Partition: <b>{part.get('name')}</b> ({part.get('size')}, {part.get('fstype', 'raw')})", use_markup=True, xalign=0), True, True, 0)
+                    mp = part.get("mountpoint") or "Not Mounted"
+                    pr.pack_start(Gtk.Label(label=f"Mount: {mp}"), False, False, 0)
+
+                    if part.get("mountpoint"):
+                        btn_u = Gtk.Button.new_with_label("Unmount")
+                        btn_u.connect("clicked", lambda b, pname=part.get("name"): StorageAdapter.unmount_partition(pname))
+                        pr.pack_end(btn_u, False, False, 0)
+                    else:
+                        btn_m = Gtk.Button.new_with_label("Mount")
+                        btn_m.connect("clicked", lambda b, pname=part.get("name"): StorageAdapter.mount_partition(pname))
+                        pr.pack_end(btn_m, False, False, 0)
+
+                    vb.pack_start(pr, False, False, 0)
+
+                r.add(vb)
                 dlist.add(r)
             vbox.pack_start(dlist, False, False, 4)
 
-            usage = StorageAdapter.get_root_usage()
-            u_lbl = Gtk.Label(label=f"Root Partition (/): {usage['used']} used of {usage['total']} ({usage['percent']} full)", xalign=0)
-            vbox.pack_start(u_lbl, False, False, 0)
+            # TRIM Action
+            btn_trim = Gtk.Button.new_with_label("Run SSD TRIM / Discard Optimization Now")
+            btn_trim.connect("clicked", lambda b: StorageAdapter.run_fstrim())
+            vbox.pack_start(btn_trim, False, False, 4)
 
             frame.add(vbox)
             self.content_box.pack_start(frame, False, False, 0)
