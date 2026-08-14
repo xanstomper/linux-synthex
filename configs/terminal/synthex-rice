@@ -1,0 +1,141 @@
+#!/usr/bin/env python3
+# SPDX-License-Identifier: MIT OR Apache-2.0
+"""
+synthex-rice — CLI customization tool for SynthOS Desktop Rice & Themes
+Allows instantaneous tweaking of themes, accent colors, widget toggles, and EQ presets.
+"""
+
+import argparse
+import json
+import os
+import sys
+from pathlib import Path
+
+CONFIG_DIR = Path.home() / ".config" / "synthex"
+CONFIG_FILE = CONFIG_DIR / "rice.json"
+
+THEME_PRESETS = {
+    "nova": {"accent": "#7AA2F7", "secondary": "#BB9AF7", "surface": "#141923", "dock": "#12161F"},
+    "tokyonight": {"accent": "#7AA2F7", "secondary": "#F7768E", "surface": "#1A1B26", "dock": "#16161E"},
+    "catppuccin": {"accent": "#89B4FA", "secondary": "#CBA6F7", "surface": "#1E1E2E", "dock": "#181825"},
+    "nord": {"accent": "#88C0D0", "secondary": "#81A1C1", "surface": "#2E3440", "dock": "#242933"},
+    "cyberpunk": {"accent": "#00F0FF", "secondary": "#FF007F", "surface": "#0D0D18", "dock": "#07070F"},
+    "oled": {"accent": "#60A5FA", "secondary": "#A78BFA", "surface": "#0A0A0A", "dock": "#000000"}
+}
+
+
+def load_config():
+    if CONFIG_FILE.exists():
+        try:
+            with open(CONFIG_FILE, "r") as f:
+                return json.load(f)
+        except Exception:
+            pass
+    return {
+        "theme": "nova",
+        "accentColor": "#7AA2F7",
+        "secondaryColor": "#BB9AF7",
+        "surfaceColor": "#141923",
+        "dockColor": "#12161F",
+        "cornerRadius": 18,
+        "cardOpacity": 0.94,
+        "widgets": {
+            "clock": True,
+            "weather": True,
+            "quickSettings": True,
+            "mediaPlayer": True,
+            "systemMonitor": True,
+            "terminalRice": True,
+            "dock": True,
+            "topPill": True
+        },
+        "performanceMode": "balanced",
+        "eqPreset": "Balanced"
+    }
+
+
+def save_config(cfg):
+    CONFIG_DIR.mkdir(parents=True, exist_ok=True)
+    with open(CONFIG_FILE, "w") as f:
+        json.dump(cfg, f, indent=2)
+    print("\033[32m✔ SynthOS Rice configuration saved successfully!\033[0m")
+
+
+def main():
+    parser = argparse.ArgumentParser(description="SynthOS Desktop Rice & Theme Customizer")
+    subparsers = parser.add_subparsers(dest="command")
+
+    # Theme command
+    theme_p = subparsers.add_parser("theme", help="Manage desktop themes")
+    theme_p.add_argument("name", choices=list(THEME_PRESETS.keys()) + ["list", "current"], help="Theme preset name")
+
+    # Accent command
+    accent_p = subparsers.add_parser("accent", help="Set custom hex accent color")
+    accent_p.add_argument("hex", help="Hex color code (e.g. #7AA2F7, #00F0FF, #E5A84B)")
+
+    # Widget command
+    widget_p = subparsers.add_parser("widget", help="Toggle desktop widget visibility")
+    widget_p.add_argument("name", choices=["clock", "weather", "quickSettings", "mediaPlayer", "systemMonitor", "terminalRice", "dock", "topPill", "list"], help="Widget name")
+    widget_p.add_argument("state", choices=["on", "off", "toggle"], nargs="?", default="toggle")
+
+    # EQ command
+    eq_p = subparsers.add_parser("eq", help="Set media center equalizer preset")
+    eq_p.add_argument("preset", choices=["Balanced", "Bass Boost", "Vocal Clarity", "Electronic Hi-Fi"], help="EQ Preset")
+
+    args = parser.parse_args()
+    cfg = load_config()
+
+    if args.command == "theme":
+        if args.name == "list":
+            print("\nAvailable SynthOS Themes:")
+            for t in THEME_PRESETS:
+                cur = " (active)" if cfg.get("theme") == t else ""
+                print(f"  • \033[1m{t}\033[0m{cur}")
+            print()
+            return
+        elif args.name == "current":
+            print(f"Current theme: {cfg.get('theme', 'nova')}")
+            return
+        else:
+            preset = THEME_PRESETS[args.name]
+            cfg["theme"] = args.name
+            cfg["accentColor"] = preset["accent"]
+            cfg["secondaryColor"] = preset["secondary"]
+            cfg["surfaceColor"] = preset["surface"]
+            cfg["dockColor"] = preset["dock"]
+            save_config(cfg)
+
+    elif args.command == "accent":
+        color = args.hex if args.hex.startswith("#") else f"#{args.hex}"
+        cfg["accentColor"] = color
+        save_config(cfg)
+
+    elif args.command == "widget":
+        if args.name == "list":
+            print("\nDesktop Widgets Status:")
+            for k, v in cfg.get("widgets", {}).items():
+                st = "\033[32mON\033[0m" if v else "\033[31mOFF\033[0m"
+                print(f"  • {k:15}: {st}")
+            print()
+            return
+        else:
+            w = cfg.setdefault("widgets", {})
+            if args.state == "on":
+                w[args.name] = True
+            elif args.state == "off":
+                w[args.name] = False
+            else:
+                w[args.name] = not w.get(args.name, True)
+            save_config(cfg)
+            print(f"Widget '{args.name}' is now {'ON' if w[args.name] else 'OFF'}")
+
+    elif args.command == "eq":
+        cfg["eqPreset"] = args.preset
+        save_config(cfg)
+
+    else:
+        parser.print_help()
+
+
+if __name__ == "__main__":
+    main()

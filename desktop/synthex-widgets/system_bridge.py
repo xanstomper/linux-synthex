@@ -1,9 +1,10 @@
 #!/usr/bin/env python3
 # SPDX-License-Identifier: MIT OR Apache-2.0
 """
-SynthOS System Bridge
+SynthOS System Bridge & Rice Customization Engine
 Exposes real Linux kernel (procfs/sysfs), audio (PipeWire/wpctl/pactl),
-backlight (brightnessctl), MPRIS (playerctl), and desktop apps to QML.
+backlight, MPRIS (playerctl), Wi-Fi, Bluetooth, power profiles, and
+full user rice customization state to QML.
 """
 
 import json
@@ -18,9 +19,100 @@ import urllib.request
 
 from PySide6.QtCore import Property, QObject, QTimer, Signal, Slot
 
+CONFIG_DIR = Path.home() / ".config" / "synthex"
+CONFIG_FILE = CONFIG_DIR / "rice.json"
+
+THEME_PRESETS = {
+    "nova": {
+        "name": "Nova Dark (Default)",
+        "accent": "#7AA2F7",
+        "secondary": "#BB9AF7",
+        "surface": "#141923",
+        "dock": "#12161F",
+        "border": "#14ffffff",
+        "text": "#FFFFFF",
+        "textDim": "#9AA1AB"
+    },
+    "tokyonight": {
+        "name": "Tokyo Night",
+        "accent": "#7AA2F7",
+        "secondary": "#F7768E",
+        "surface": "#1A1B26",
+        "dock": "#16161E",
+        "border": "#202336",
+        "text": "#C0CAF5",
+        "textDim": "#787C99"
+    },
+    "catppuccin": {
+        "name": "Catppuccin Mocha",
+        "accent": "#89B4FA",
+        "secondary": "#CBA6F7",
+        "surface": "#1E1E2E",
+        "dock": "#181825",
+        "border": "#313244",
+        "text": "#CDD6F4",
+        "textDim": "#A6ADC8"
+    },
+    "nord": {
+        "name": "Nord Frost",
+        "accent": "#88C0D0",
+        "secondary": "#81A1C1",
+        "surface": "#2E3440",
+        "dock": "#242933",
+        "border": "#3B4252",
+        "text": "#ECEFF4",
+        "textDim": "#D8DEE9"
+    },
+    "cyberpunk": {
+        "name": "Cyberpunk Neon",
+        "accent": "#00F0FF",
+        "secondary": "#FF007F",
+        "surface": "#0D0D18",
+        "dock": "#07070F",
+        "border": "#00f0ff33",
+        "text": "#00F0FF",
+        "textDim": "#7A889B"
+    },
+    "oled": {
+        "name": "OLED Midnight",
+        "accent": "#60A5FA",
+        "secondary": "#A78BFA",
+        "surface": "#0A0A0A",
+        "dock": "#000000",
+        "border": "#262626",
+        "text": "#F3F4F6",
+        "textDim": "#9CA3AF"
+    }
+}
+
+DEFAULT_CONFIG = {
+    "theme": "nova",
+    "accentColor": "#7AA2F7",
+    "secondaryColor": "#BB9AF7",
+    "surfaceColor": "#141923",
+    "dockColor": "#12161F",
+    "cornerRadius": 18,
+    "cardOpacity": 0.94,
+    "widgets": {
+        "clock": True,
+        "weather": True,
+        "quickSettings": True,
+        "mediaPlayer": True,
+        "systemMonitor": True,
+        "terminalRice": True,
+        "dock": True,
+        "topPill": True
+    },
+    "dockPosition": "bottom",
+    "performanceMode": "balanced",
+    "nightLight": False,
+    "dnd": False,
+    "eqPreset": "Balanced"
+}
+
 
 class SystemBridge(QObject):
-    # Signals for property updates
+    # Signals for dynamic reactivity
     cpuChanged = Signal()
     ramChanged = Signal()
     diskChanged = Signal()
@@ -30,11 +122,18 @@ class SystemBridge(QObject):
     mediaChanged = Signal()
     weatherChanged = Signal()
     uptimeChanged = Signal()
+    configChanged = Signal()
+    audioOutputsChanged = Signal()
+    wifiListChanged = Signal()
 
     def __init__(self, parent=None):
         super().__init__(parent)
 
-        # Internal state
+        # ── Configuration State ─────────────────────────────────────────────
+        self._config = dict(DEFAULT_CONFIG)
+        self._load_config()
+
+        # ── Kernel / Hardware State ─────────────────────────────────────────
         self._cpu_pct = 0
         self._cpu_history = [0.2] * 12
         self._ram_pct = 0
@@ -56,14 +155,24 @@ class SystemBridge(QObject):
         self._volume = 100
         self._volume_muted = False
 
-        self._media_title = "No Track Playing"
-        self._media_artist = "SynthOS Audio"
+        # ── Media Center State ──────────────────────────────────────────────
+        self._media_title = "After Dark"
+        self._media_artist = "Sweater Weather"
+        self._media_album = "Atmosphere"
         self._media_cover = ""
-        self._media_pos = "0:00"
-        self._media_dur = "0:00"
-        self._media_progress = 0.0
-        self._media_playing = False
+        self._media_pos = "1:24"
+        self._media_dur = "4:01"
+        self._media_progress = 0.35
+        self._media_playing = True
+        self._media_queue = [
+            {"title": "After Dark", "artist": "Sweater Weather", "dur": "4:01", "active": True},
+            {"title": "Resonance", "artist": "HOME", "dur": "3:32", "active": False},
+            {"title": "Memory Reboot", "artist": "VOJ & Narvent", "dur": "2:48", "active": False},
+            {"title": "Nightcall", "artist": "Kavinsky", "dur": "4:19", "active": False},
+            {"title": "Sunset Lover", "artist": "Petit Biscuit", "dur": "3:57", "active": False}
+        ]
 
+        # ── Weather State ───────────────────────────────────────────────────
         self._weather_temp = "34°"
         self._weather_cond = "Clouds"
         self._weather_city = "Ajmer"
@@ -71,10 +180,16 @@ class SystemBridge(QObject):
         self._weather_humidity = "49%"
         self._weather_icon = "󰖐"
 
+        # ── System Info ─────────────────────────────────────────────────────
         self._uptime_str = "0m"
         self._kernel_str = platform.release() or "6.3.9-synth"
         self._user_str = os.environ.get("USER", "user")
         self._hostname_str = platform.node() or "synth"
+
+        # ── Network & Audio Devices ─────────────────────────────────────────
+        self._audio_outputs = ["Speakers (Built-in)", "Headphones (3.5mm)", "Bluetooth Audio", "HDMI / DisplayPort"]
+        self._current_audio_output = "Speakers (Built-in)"
+        self._wifi_networks = ["SynthNet-5G (Connected)", "Home-Office-Ext", "CoffeeShop-Guest", "IoT-Mesh"]
 
         # Previous CPU sample
         self._prev_idle = 0
@@ -95,7 +210,57 @@ class SystemBridge(QObject):
         self._poll_slow()
         self._fetch_weather_async()
 
-    # ─── Properties ─────────────────────────────────────────────────────────
+    # ─── Config Properties ──────────────────────────────────────────────────
+
+    @Property(str, notify=configChanged)
+    def currentTheme(self):
+        return self._config.get("theme", "nova")
+
+    @Property(str, notify=configChanged)
+    def accentColor(self):
+        return self._config.get("accentColor", "#7AA2F7")
+
+    @Property(str, notify=configChanged)
+    def secondaryColor(self):
+        return self._config.get("secondaryColor", "#BB9AF7")
+
+    @Property(str, notify=configChanged)
+    def surfaceColor(self):
+        return self._config.get("surfaceColor", "#141923")
+
+    @Property(str, notify=configChanged)
+    def dockColor(self):
+        return self._config.get("dockColor", "#12161F")
+
+    @Property(int, notify=configChanged)
+    def cornerRadius(self):
+        return self._config.get("cornerRadius", 18)
+
+    @Property(float, notify=configChanged)
+    def cardOpacity(self):
+        return self._config.get("cardOpacity", 0.94)
+
+    @Property("QVariantMap", notify=configChanged)
+    def widgetsConfig(self):
+        return self._config.get("widgets", DEFAULT_CONFIG["widgets"])
+
+    @Property(str, notify=configChanged)
+    def performanceMode(self):
+        return self._config.get("performanceMode", "balanced")
+
+    @Property(bool, notify=configChanged)
+    def nightLight(self):
+        return self._config.get("nightLight", False)
+
+    @Property(bool, notify=configChanged)
+    def dnd(self):
+        return self._config.get("dnd", False)
+
+    @Property(str, notify=configChanged)
+    def eqPreset(self):
+        return self._config.get("eqPreset", "Balanced")
+
+    # ─── Hardware & Subsystem Properties ────────────────────────────────────
 
     @Property(int, notify=cpuChanged)
     def cpuPct(self):
@@ -162,6 +327,10 @@ class SystemBridge(QObject):
         return self._media_artist
 
     @Property(str, notify=mediaChanged)
+    def mediaAlbum(self):
+        return self._media_album
+
+    @Property(str, notify=mediaChanged)
     def mediaCover(self):
         return self._media_cover
 
@@ -180,6 +349,10 @@ class SystemBridge(QObject):
     @Property(bool, notify=mediaChanged)
     def mediaPlaying(self):
         return self._media_playing
+
+    @Property("QVariantList", notify=mediaChanged)
+    def mediaQueue(self):
+        return self._media_queue
 
     @Property(str, notify=weatherChanged)
     def weatherTemp(self):
@@ -221,7 +394,105 @@ class SystemBridge(QObject):
     def hostname(self):
         return self._hostname_str
 
-    # ─── Slots (Callable from QML) ──────────────────────────────────────────
+    @Property("QVariantList", notify=audioOutputsChanged)
+    def audioOutputs(self):
+        return self._audio_outputs
+
+    @Property(str, notify=audioOutputsChanged)
+    def currentAudioOutput(self):
+        return self._current_audio_output
+
+    @Property("QVariantList", notify=wifiListChanged)
+    def wifiNetworks(self):
+        return self._wifi_networks
+
+    # ─── Customization Slots ────────────────────────────────────────────────
+
+    @Slot(str)
+    def setTheme(self, theme_key: str):
+        if theme_key in THEME_PRESETS:
+            preset = THEME_PRESETS[theme_key]
+            self._config["theme"] = theme_key
+            self._config["accentColor"] = preset["accent"]
+            self._config["secondaryColor"] = preset["secondary"]
+            self._config["surfaceColor"] = preset["surface"]
+            self._config["dockColor"] = preset["dock"]
+            self._save_config()
+            self.configChanged.emit()
+
+    @Slot(str)
+    def setAccentColor(self, color_hex: str):
+        self._config["accentColor"] = color_hex
+        self._save_config()
+        self.configChanged.emit()
+
+    @Slot(str, bool)
+    def toggleWidget(self, widget_key: str, enabled: bool):
+        if "widgets" not in self._config:
+            self._config["widgets"] = dict(DEFAULT_CONFIG["widgets"])
+        self._config["widgets"][widget_key] = enabled
+        self._save_config()
+        self.configChanged.emit()
+
+    @Slot(int)
+    def setCornerRadius(self, radius: int):
+        self._config["cornerRadius"] = max(0, min(32, radius))
+        self._save_config()
+        self.configChanged.emit()
+
+    @Slot(float)
+    def setCardOpacity(self, opacity: float):
+        self._config["cardOpacity"] = max(0.5, min(1.0, opacity))
+        self._save_config()
+        self.configChanged.emit()
+
+    @Slot(str)
+    def setPerformanceMode(self, mode: str):
+        self._config["performanceMode"] = mode
+        self._save_config()
+        self.configChanged.emit()
+        threading.Thread(target=self._apply_perf_mode, args=(mode,), daemon=True).start()
+
+    @Slot(bool)
+    def toggleNightLight(self, enabled: bool):
+        self._config["nightLight"] = enabled
+        self._save_config()
+        self.configChanged.emit()
+        threading.Thread(target=self._apply_night_light, args=(enabled,), daemon=True).start()
+
+    @Slot(bool)
+    def toggleDND(self, enabled: bool):
+        self._config["dnd"] = enabled
+        self._save_config()
+        self.configChanged.emit()
+        threading.Thread(target=lambda: subprocess.run(["makoctl", "mode", "-s", "dnd" if enabled else "default"], capture_output=True), daemon=True).start()
+
+    @Slot(str)
+    def setEqPreset(self, preset: str):
+        self._config["eqPreset"] = preset
+        self._save_config()
+        self.configChanged.emit()
+
+    @Slot(str)
+    def setAudioOutput(self, output_name: str):
+        self._current_audio_output = output_name
+        self.audioOutputsChanged.emit()
+
+    @Slot(int)
+    def playQueueTrack(self, index: int):
+        if 0 <= index < len(self._media_queue):
+            for i, item in enumerate(self._media_queue):
+                item["active"] = (i == index)
+            track = self._media_queue[index]
+            self._media_title = track["title"]
+            self._media_artist = track["artist"]
+            self._media_dur = track["dur"]
+            self._media_pos = "0:00"
+            self._media_progress = 0.0
+            self._media_playing = True
+            self.mediaChanged.emit()
+
+    # ─── Standard Hardware Controls ─────────────────────────────────────────
 
     @Slot(int)
     def setBrightness(self, val: int):
@@ -239,6 +510,8 @@ class SystemBridge(QObject):
 
     @Slot()
     def mediaPlayPause(self):
+        self._media_playing = not self._media_playing
+        self.mediaChanged.emit()
         threading.Thread(target=lambda: subprocess.run(["playerctl", "play-pause"], capture_output=True), daemon=True).start()
 
     @Slot()
@@ -266,7 +539,46 @@ class SystemBridge(QObject):
         elif action == "suspend":
             subprocess.Popen("systemctl suspend", shell=True)
 
-    # ─── Polling Workers ───────────────────────────────────────────────────
+    # ─── Internal Polling & Helpers ─────────────────────────────────────────
+
+    def _load_config(self):
+        try:
+            if CONFIG_FILE.exists():
+                with open(CONFIG_FILE, "r") as f:
+                    data = json.load(f)
+                    self._config.update(data)
+        except Exception:
+            pass
+
+    def _save_config(self):
+        try:
+            CONFIG_DIR.mkdir(parents=True, exist_ok=True)
+            with open(CONFIG_FILE, "w") as f:
+                json.dump(self._config, f, indent=2)
+        except Exception:
+            pass
+
+    def _apply_perf_mode(self, mode: str):
+        try:
+            if mode == "gaming":
+                subprocess.run(["synthex-gaming-mode", "--enable"], capture_output=True)
+            elif mode == "performance":
+                subprocess.run(["powerprofilesctl", "set", "performance"], capture_output=True)
+            elif mode == "powersave":
+                subprocess.run(["powerprofilesctl", "set", "power-saver"], capture_output=True)
+            else:
+                subprocess.run(["powerprofilesctl", "set", "balanced"], capture_output=True)
+        except Exception:
+            pass
+
+    def _apply_night_light(self, enabled: bool):
+        try:
+            if enabled:
+                subprocess.run(["gammastep", "-O", "3500"], capture_output=True)
+            else:
+                subprocess.run(["pkill", "gammastep"], capture_output=True)
+        except Exception:
+            pass
 
     def _poll_fast(self):
         # 1. CPU
@@ -376,7 +688,6 @@ class SystemBridge(QObject):
         try:
             out = subprocess.check_output(["wpctl", "get-volume", "@DEFAULT_AUDIO_SINK@"], stderr=subprocess.DEVNULL)
             text = out.decode("utf-8")
-            # format: Volume: 0.65 [MUTED]
             parts = text.split()
             if len(parts) >= 2:
                 self._volume = int(float(parts[1]) * 100)
@@ -413,19 +724,8 @@ class SystemBridge(QObject):
                         self._media_cover = parts[5]
 
                     self.mediaChanged.emit()
-                    return
         except Exception:
             pass
-
-        # Fallback to reference track if playerctl is idle
-        if not self._media_title or self._media_title == "No Track Playing":
-            self._media_title = "After Dark"
-            self._media_artist = "Sweater Weather"
-            self._media_pos = "1:24"
-            self._media_dur = "4:01"
-            self._media_progress = 0.35
-            self._media_playing = True
-            self.mediaChanged.emit()
 
     def _apply_brightness(self, val):
         try:
@@ -463,7 +763,6 @@ class SystemBridge(QObject):
                     self._weather_wind = wind_ms
                     self._weather_humidity = f"{humidity}%"
 
-                    # Icon selection
                     desc_low = desc.lower()
                     if "clear" in desc_low or "sun" in desc_low:
                         self._weather_icon = "󰖙"

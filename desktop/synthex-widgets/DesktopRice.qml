@@ -1,22 +1,19 @@
 import QtQuick 2.15
 import QtQuick.Controls 2.15
 import QtQuick.Layouts 1.15
-import QtQuick.Window 2.15
 
-Window {
+Item {
     id: root
+    width: 1920
+    height: 1080
     visible: true
-    width: Screen.width > 0 ? Screen.width : 1920
-    height: Screen.height > 0 ? Screen.height : 1080
-    title: "SynthOS Desktop Rice"
-    flags: Qt.FramelessWindowHint
-    color: "transparent"
 
-    property bool showLauncher: true
+    property bool showLauncher: false
+    property bool showCustomizer: false
 
-    // ── Wallpaper Backdrop ─────────────────────────────────────────────────
+    // ── Background Wallpaper ───────────────────────────────────────────────
     Image {
-        id: bgImage
+        id: bgWallpaper
         anchors.fill: parent
         source: "file:///home/jewboy420/linux-synthex/branding/wallpaper/synthex-dark-4k.svg"
         fillMode: Image.PreserveAspectCrop
@@ -35,14 +32,15 @@ Window {
     // ── Top Center Status Pill ─────────────────────────────────────────────
     Rectangle {
         id: topPill
-        width: 320
+        width: 340
         height: 38
         radius: 19
-        color: "#e612161f"
+        color: (typeof systemBridge !== "undefined" && systemBridge) ? systemBridge.dockColor : "#e612161f"
         border.color: "#14ffffff"
         border.width: 1
         anchors.horizontalCenter: parent.horizontalCenter
         y: 18
+        visible: (!systemBridge || !systemBridge.widgetsConfig || systemBridge.widgetsConfig["topPill"] !== false)
 
         RowLayout {
             anchors.centerIn: parent
@@ -52,11 +50,11 @@ Window {
                 width: 8
                 height: 8
                 radius: 4
-                color: "#7AA2F7"
+                color: (typeof systemBridge !== "undefined" && systemBridge) ? systemBridge.accentColor : "#7AA2F7"
             }
 
             Text {
-                text: "Tue, 09 August 2022   04:44 PM"
+                text: (new Date().toLocaleDateString(Qt.locale(), "ddd, dd MMMM yyyy")) + "   " + (new Date().toLocaleTimeString(Qt.locale(), "hh:mm AP"))
                 font.family: "Inter"
                 font.pixelSize: 13
                 font.bold: true
@@ -73,10 +71,12 @@ Window {
 
         ClockWidget {
             id: clockWidget
+            visible: (!systemBridge || !systemBridge.widgetsConfig || systemBridge.widgetsConfig["clock"] !== false)
         }
 
         WeatherWidget {
             id: weatherWidget
+            visible: (!systemBridge || !systemBridge.widgetsConfig || systemBridge.widgetsConfig["weather"] !== false)
         }
     }
 
@@ -85,6 +85,7 @@ Window {
         id: terminalWidget
         x: 48
         y: 300
+        visible: (!systemBridge || !systemBridge.widgetsConfig || systemBridge.widgetsConfig["terminalRice"] !== false)
     }
 
     // ── Center: Application Launcher Menu ──────────────────────────────────
@@ -96,20 +97,32 @@ Window {
         Behavior on opacity { NumberAnimation { duration: 180 } }
     }
 
+    // ── Center: Rice & Desktop Customizer Panel ────────────────────────────
+    RiceSettingsWidget {
+        id: customizerWidget
+        anchors.centerIn: parent
+        visible: root.showCustomizer
+        opacity: root.showCustomizer ? 1.0 : 0.0
+        Behavior on opacity { NumberAnimation { duration: 180 } }
+        onCloseRequested: root.showCustomizer = false
+    }
+
     // ── Top Right: Quick Settings Widget ───────────────────────────────────
     QuickSettingsWidget {
         id: quickSettingsWidget
         anchors.right: parent.right
         anchors.rightMargin: 48
         y: 48
+        visible: (!systemBridge || !systemBridge.widgetsConfig || systemBridge.widgetsConfig["quickSettings"] !== false)
     }
 
-    // ── Middle Right: Media Player Widget ──────────────────────────────────
+    // ── Middle Right: Media Player / Media Center ──────────────────────────
     MediaWidget {
         id: mediaWidget
         anchors.right: parent.right
         anchors.rightMargin: 48
-        y: 250
+        y: 310
+        visible: (!systemBridge || !systemBridge.widgetsConfig || systemBridge.widgetsConfig["mediaPlayer"] !== false)
     }
 
     // ── Bottom Right: System Monitor Widget ────────────────────────────────
@@ -117,46 +130,69 @@ Window {
         id: systemMonitorWidget
         anchors.right: parent.right
         anchors.rightMargin: 48
-        y: 420
+        y: 520
+        visible: (!systemBridge || !systemBridge.widgetsConfig || systemBridge.widgetsConfig["systemMonitor"] !== false)
     }
 
     // ── Bottom Center: Floating Island Dock ────────────────────────────────
     Rectangle {
         id: bottomDock
-        width: 1000
+        width: 1040
         height: 64
         radius: 32
-        color: "#e612161f"
+        color: (typeof systemBridge !== "undefined" && systemBridge) ? systemBridge.dockColor : "#e612161f"
         border.color: "#14ffffff"
         border.width: 1
         anchors.horizontalCenter: parent.horizontalCenter
         anchors.bottom: parent.bottom
         anchors.bottomMargin: 24
+        visible: (!systemBridge || !systemBridge.widgetsConfig || systemBridge.widgetsConfig["dock"] !== false)
 
         RowLayout {
             anchors.fill: parent
             anchors.leftMargin: 20
             anchors.rightMargin: 20
 
-            // Left Section (Launcher, Search, Workspaces, Notifications)
+            // Left Section (Launcher, Search, Workspaces, Customizer, Notifications)
             RowLayout {
-                spacing: 14
+                spacing: 12
 
                 Rectangle {
                     width: 36
                     height: 36
                     radius: 18
                     color: root.showLauncher ? "#337aa2f7" : "transparent"
-                    Text { text: "󰀻"; font.family: "Symbols Nerd Font"; font.pixelSize: 18; color: root.showLauncher ? "#7AA2F7" : "#9AA1AB"; anchors.centerIn: parent }
+                    Text { text: "󰀻"; font.family: "Symbols Nerd Font"; font.pixelSize: 18; color: root.showLauncher ? ((typeof systemBridge !== "undefined" && systemBridge) ? systemBridge.accentColor : "#7AA2F7") : "#9AA1AB"; anchors.centerIn: parent }
                     MouseArea {
                         anchors.fill: parent
                         cursorShape: Qt.PointingHandCursor
-                        onClicked: root.showLauncher = !root.showLauncher
+                        onClicked: {
+                            root.showCustomizer = false
+                            root.showLauncher = !root.showLauncher
+                        }
                     }
                 }
 
                 Text { text: "󰍉"; font.family: "Symbols Nerd Font"; font.pixelSize: 16; color: "#9AA1AB" }
                 Text { text: "󰹟"; font.family: "Symbols Nerd Font"; font.pixelSize: 16; color: "#9AA1AB" }
+
+                // Customizer Toggle Button
+                Rectangle {
+                    width: 36
+                    height: 36
+                    radius: 18
+                    color: root.showCustomizer ? "#337aa2f7" : "transparent"
+                    Text { text: "󰒓"; font.family: "Symbols Nerd Font"; font.pixelSize: 16; color: root.showCustomizer ? ((typeof systemBridge !== "undefined" && systemBridge) ? systemBridge.accentColor : "#7AA2F7") : "#9AA1AB"; anchors.centerIn: parent }
+                    MouseArea {
+                        anchors.fill: parent
+                        cursorShape: Qt.PointingHandCursor
+                        onClicked: {
+                            root.showLauncher = false
+                            root.showCustomizer = !root.showCustomizer
+                        }
+                    }
+                }
+
                 Text { text: "󰂚"; font.family: "Symbols Nerd Font"; font.pixelSize: 16; color: "#9AA1AB" }
             }
 
@@ -221,7 +257,7 @@ Window {
                 Text { text: "󰁹"; font.family: "Symbols Nerd Font"; font.pixelSize: 16; color: "#9AA1AB" }
 
                 Text {
-                    text: (typeof systemBridge !== "undefined" && systemBridge) ? (new Date().toLocaleTimeString(Qt.locale(), "hh:mm AP")) : "04:44 PM"
+                    text: (new Date().toLocaleTimeString(Qt.locale(), "hh:mm AP"))
                     font.family: "Inter"
                     font.pixelSize: 13
                     font.bold: true
