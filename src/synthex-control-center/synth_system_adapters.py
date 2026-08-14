@@ -120,31 +120,62 @@ class DisplayAdapter:
                     monitors[name] = {
                         "name": name,
                         "primary": primary,
-                        "modes": [],
+                        "modes": {},       # res -> list of float rates
+                        "all_modes": [],   # list of (res, hz_str)
                         "current_res": "1920x1080",
                         "current_hz": "60.00",
+                        "max_hz": 60.0,
                         "brightness": 1.0,
                         "gamma": "1.0:1.0:1.0"
                     }
                 elif current_mon and line.startswith("   "):
-                    parts = line.strip().split()
-                    if parts:
-                        res = parts[0]
-                        rates = parts[1:]
-                        for r in rates:
-                            hz = r.replace("*", "").replace("+", "")
-                            if "*" in r:
-                                monitors[current_mon]["current_res"] = res
-                                monitors[current_mon]["current_hz"] = hz
-                            if (res, hz) not in monitors[current_mon]["modes"]:
-                                monitors[current_mon]["modes"].append((res, hz))
+                    raw = line.strip()
+                    parts = raw.split()
+                    if not parts:
+                        continue
+                    res = parts[0]
+                    if not re.match(r"^\d+x\d+$", res):
+                        continue
+
+                    rest = line[len(res) + line.find(res):]
+                    rate_tokens = re.findall(r"(\d+\.\d+)(\*|\+|\s)", rest)
+                    if not rate_tokens:
+                        num_matches = re.findall(r"\b\d+\.\d+\b", rest)
+                        rate_tokens = [(n, "") for n in num_matches]
+
+                    for hz_str, flag in rate_tokens:
+                        try:
+                            hz_float = float(hz_str)
+                        except ValueError:
+                            continue
+                        if res not in monitors[current_mon]["modes"]:
+                            monitors[current_mon]["modes"][res] = []
+                        if hz_float not in monitors[current_mon]["modes"][res]:
+                            monitors[current_mon]["modes"][res].append(hz_float)
+
+                        monitors[current_mon]["all_modes"].append((res, f"{hz_float:.2f}"))
+
+                        if "*" in line and (f"{hz_str}*" in line or "*" in flag):
+                            monitors[current_mon]["current_res"] = res
+                            monitors[current_mon]["current_hz"] = f"{hz_float:.2f}"
+
+            # Compute max_hz per monitor
+            for mname, mdata in monitors.items():
+                all_rates = []
+                for r_list in mdata["modes"].values():
+                    all_rates.extend(r_list)
+                if all_rates:
+                    mdata["max_hz"] = max(all_rates)
+
         if not monitors:
             monitors["HDMI-2"] = {
                 "name": "HDMI-2",
                 "primary": True,
-                "modes": [("1920x1080", "100.00"), ("1920x1080", "60.00"), ("1280x720", "60.00")],
+                "modes": {"1920x1080": [100.0, 60.0], "1280x720": [60.0]},
+                "all_modes": [("1920x1080", "100.00"), ("1920x1080", "60.00"), ("1280x720", "60.00")],
                 "current_res": "1920x1080",
                 "current_hz": "100.00",
+                "max_hz": 100.0,
                 "brightness": 1.0,
                 "gamma": "1.0:1.0:1.0"
             }

@@ -277,14 +277,18 @@ class SettingsAppWindow(Gtk.Window):
                 m_card = Gtk.Frame()
                 m_vbox = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=4)
                 m_vbox.set_border_width(12)
-                m_vbox.set_size_request(180, 100)
+                m_vbox.set_size_request(200, 110)
 
                 m_lbl = Gtk.Label()
-                m_lbl.set_markup(f"<b>{mname}</b> {'<span color=\"#3498db\">(Primary)</span>' if mdata['primary'] else ''}")
+                m_lbl.set_markup(f"<b>{mname}</b> {'<span color=\"#2ecc71\"><b>(Primary)</b></span>' if mdata['primary'] else ''}")
                 m_vbox.pack_start(m_lbl, False, False, 0)
 
-                m_mode_lbl = Gtk.Label(label=f"{mdata['current_res']} @ {mdata['current_hz']} Hz")
+                m_mode_lbl = Gtk.Label(label=f"Active: {mdata['current_res']} @ {mdata['current_hz']} Hz")
                 m_vbox.pack_start(m_mode_lbl, False, False, 0)
+
+                m_max_lbl = Gtk.Label()
+                m_max_lbl.set_markup(f"<span color='#3498db'><b>Max: {mdata.get('max_hz', 60.0):.2f} Hz</b></span>")
+                m_vbox.pack_start(m_max_lbl, False, False, 0)
 
                 m_card.add(m_vbox)
                 canvas_box.pack_start(m_card, False, False, 0)
@@ -293,7 +297,7 @@ class SettingsAppWindow(Gtk.Window):
 
             if len(monitors) > 1:
                 btn_arr_box = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=10)
-                btn_ext_r = Gtk.Button.new_with_label("Extend Displays (Side by Side)")
+                btn_ext_r = Gtk.Button.new_with_label("Arrange HDMI-2 (Left) + HDMI-1 (Right)")
                 btn_ext_r.connect("clicked", lambda b: DisplayAdapter.set_display_layout("HDMI-2", "HDMI-1", "extend-right"))
                 btn_mir = Gtk.Button.new_with_label("Mirror Displays (Clone View)")
                 btn_mir.connect("clicked", lambda b: DisplayAdapter.set_display_layout("HDMI-2", "HDMI-1", "mirror"))
@@ -317,7 +321,7 @@ class SettingsAppWindow(Gtk.Window):
             mon_list = list(monitors.keys())
             for mname in mon_list:
                 mdata = monitors[mname]
-                label_txt = f"{mname} {'(Primary)' if mdata['primary'] else ''} — {mdata['current_res']} @ {mdata['current_hz']} Hz"
+                label_txt = f"{mname} {'(Primary)' if mdata['primary'] else ''} — {mdata['current_res']} @ {mdata['current_hz']} Hz (Max: {mdata.get('max_hz', 60.0):.2f} Hz)"
                 mon_cb.append_text(label_txt)
             mon_cb.set_active(0)
             dgrid.attach(mon_cb, 1, 0, 1, 1)
@@ -327,23 +331,47 @@ class SettingsAppWindow(Gtk.Window):
             # Resolution Dropdown
             dgrid.attach(Gtk.Label(label="Screen Resolution:", xalign=0), 0, 1, 1, 1)
             res_cb = Gtk.ComboBoxText()
-            unique_resolutions = sorted(list(set([m[0] for m in monitors[prim_name]["modes"]])), reverse=True)
-            for r in unique_resolutions:
-                res_cb.append_text(r)
-            if not unique_resolutions:
-                res_cb.append_text("1920x1080")
-            res_cb.set_active(0)
-            dgrid.attach(res_cb, 1, 1, 1, 1)
 
             # Refresh Rate Dropdown
             dgrid.attach(Gtk.Label(label="Refresh Rate:", xalign=0), 0, 2, 1, 1)
             hz_cb = Gtk.ComboBoxText()
-            rates = sorted(list(set([m[1] for m in monitors[prim_name]["modes"] if m[1]])), reverse=True)
-            for h in rates:
-                hz_cb.append_text(f"{h} Hz")
-            if not rates:
-                hz_cb.append_text("100.00 Hz")
-            hz_cb.set_active(0)
+
+            def _update_rates_for_res(selected_res, mon_target):
+                hz_cb.remove_all()
+                mode_dict = monitors.get(mon_target, {}).get("modes", {})
+                rates_list = mode_dict.get(selected_res, [60.0])
+                sorted_rates = sorted(rates_list, reverse=True)
+                active_hz = monitors.get(mon_target, {}).get("current_hz", "")
+                active_idx = 0
+                for idx, h in enumerate(sorted_rates):
+                    hz_str = f"{h:.2f} Hz"
+                    hz_cb.append_text(hz_str)
+                    if active_hz and f"{h:.2f}" == active_hz:
+                        active_idx = idx
+                if not sorted_rates:
+                    hz_cb.append_text("60.00 Hz")
+                hz_cb.set_active(active_idx)
+
+            def _update_resolutions_for_mon(mon_target):
+                res_cb.remove_all()
+                mode_dict = monitors.get(mon_target, {}).get("modes", {})
+                res_keys = sorted(list(mode_dict.keys()), reverse=True)
+                if not res_keys:
+                    res_keys = ["1920x1080", "1280x720"]
+                cur_res = monitors.get(mon_target, {}).get("current_res", res_keys[0])
+                cur_idx = 0
+                for idx, r in enumerate(res_keys):
+                    res_cb.append_text(r)
+                    if r == cur_res:
+                        cur_idx = idx
+                res_cb.set_active(cur_idx)
+                _update_rates_for_res(res_keys[cur_idx], mon_target)
+
+            _update_resolutions_for_mon(prim_name)
+            res_cb.connect("changed", lambda cb: _update_rates_for_res(cb.get_active_text(), mon_list[mon_cb.get_active()]))
+            mon_cb.connect("changed", lambda cb: _update_resolutions_for_mon(mon_list[cb.get_active()]))
+
+            dgrid.attach(res_cb, 1, 1, 1, 1)
             dgrid.attach(hz_cb, 1, 2, 1, 1)
 
             # Orientation / Rotation
@@ -352,7 +380,7 @@ class SettingsAppWindow(Gtk.Window):
             for rot_lbl, rot_val in [("Standard Landscape (0°)", "normal"), ("Portrait (90° Clockwise)", "right"), ("Inverted Landscape (180°)", "inverted"), ("Portrait (270° Counter-Clockwise)", "left")]:
                 rot_cb.append_text(rot_lbl)
             rot_cb.set_active(0)
-            rot_cb.connect("changed", lambda cb: DisplayAdapter.set_monitor_rotation(prim_name, "normal" if cb.get_active() == 0 else ("right" if cb.get_active() == 1 else ("inverted" if cb.get_active() == 2 else "left"))))
+            rot_cb.connect("changed", lambda cb: DisplayAdapter.set_monitor_rotation(mon_list[mon_cb.get_active()], "normal" if cb.get_active() == 0 else ("right" if cb.get_active() == 1 else ("inverted" if cb.get_active() == 2 else "left"))))
             dgrid.attach(rot_cb, 1, 3, 1, 1)
 
             # UI Scaling
@@ -369,15 +397,19 @@ class SettingsAppWindow(Gtk.Window):
             br_scale = Gtk.Scale.new_with_range(Gtk.Orientation.HORIZONTAL, 0.2, 1.4, 0.05)
             br_scale.set_value(1.0)
             br_scale.set_hexpand(True)
-            br_scale.connect("value-changed", lambda sc: DisplayAdapter.set_monitor_brightness(prim_name, sc.get_value()))
+            br_scale.connect("value-changed", lambda sc: DisplayAdapter.set_monitor_brightness(mon_list[mon_cb.get_active()], sc.get_value()))
             dgrid.attach(br_scale, 1, 5, 1, 1)
 
-            # Apply with Confirmation Countdown Dialog
-            btn_apply_box = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=10)
-            btn_apply = Gtk.Button.new_with_label("Apply Display Settings (with 15s Confirmation)")
-            btn_apply.connect("clicked", lambda b: self._apply_display_mode_with_confirmation(prim_name, res_cb.get_active_text(), hz_cb.get_active_text().replace(" Hz", "")))
-            btn_apply_box.pack_start(btn_apply, False, False, 0)
-            dgrid.attach(btn_apply_box, 0, 6, 2, 1)
+            # Set As Primary & Apply Buttons
+            btn_action_box = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=10)
+            btn_primary = Gtk.Button.new_with_label("Set as Primary Display")
+            btn_primary.connect("clicked", lambda b: DisplayAdapter.set_primary_monitor(mon_list[mon_cb.get_active()]))
+
+            btn_apply = Gtk.Button.new_with_label("Apply Mode (with 15s Confirmation)")
+            btn_apply.connect("clicked", lambda b: self._apply_display_mode_with_confirmation(mon_list[mon_cb.get_active()], res_cb.get_active_text(), hz_cb.get_active_text().replace(" Hz", "")))
+            btn_action_box.pack_start(btn_primary, False, False, 0)
+            btn_action_box.pack_start(btn_apply, False, False, 0)
+            dgrid.attach(btn_action_box, 0, 6, 2, 1)
 
             cfg_frame.add(dgrid)
             self.content_box.pack_start(cfg_frame, False, False, 0)
@@ -1240,7 +1272,9 @@ class SettingsAppWindow(Gtk.Window):
                 h.set_border_width(6)
                 icon_name = "emblem-default" if item["healthy"] else "dialog-warning"
                 h.pack_start(Gtk.Image.new_from_icon_name(icon_name, Gtk.IconSize.BUTTON), False, False, 0)
-                h.pack_start(Gtk.Label(label=f"<b>{item['name']}</b> — {item['desc']}", use_markup=True, xalign=0), True, True, 0)
+                safe_name = GLib.markup_escape_text(item["name"])
+                safe_desc = GLib.markup_escape_text(item["desc"])
+                h.pack_start(Gtk.Label(label=f"<b>{safe_name}</b> — {safe_desc}", use_markup=True, xalign=0), True, True, 0)
                 st_lbl = Gtk.Label()
                 st_lbl.set_markup("<span color='#2ecc71'><b>Operational</b></span>" if item["healthy"] else "<span color='#e74c3c'><b>Degraded</b></span>")
                 h.pack_end(st_lbl, False, False, 0)
