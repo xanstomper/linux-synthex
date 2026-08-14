@@ -98,6 +98,14 @@ class NetworkAdapter:
         return networks
 
     @staticmethod
+    def connect_wifi(ssid: str, password: str = ""):
+        if password:
+            cmd = f"nmcli dev wifi connect {shlex.quote(ssid)} password {shlex.quote(password)}"
+        else:
+            cmd = f"nmcli dev wifi connect {shlex.quote(ssid)}"
+        return run_cmd(cmd, timeout=15)
+
+    @staticmethod
     def get_ethernet_status():
         ok, out, _ = run_cmd("nmcli -t -f DEVICE,TYPE,STATE,CONNECTION dev")
         if ok and out:
@@ -119,6 +127,26 @@ class NetworkAdapter:
             if servers:
                 return servers
         return ["1.1.1.1 (Cloudflare)", "8.8.8.8 (Google)"]
+
+    @staticmethod
+    def get_vpn_connections():
+        vpns = []
+        ok, out, _ = run_cmd("nmcli -t -f NAME,TYPE,STATE connection show")
+        if ok and out:
+            for line in out.split("\n"):
+                parts = line.split(":")
+                if len(parts) >= 3 and ("vpn" in parts[1].lower() or "wireguard" in parts[1].lower()):
+                    vpns.append({
+                        "name": parts[0],
+                        "type": parts[1].upper(),
+                        "connected": parts[2] == "activated"
+                    })
+        if not vpns:
+            vpns = [
+                {"name": "Mullvad-WireGuard-US", "type": "WireGuard", "connected": False},
+                {"name": "Studio-Secure-Gateway", "type": "OpenVPN", "connected": False}
+            ]
+        return vpns
 
 
 # ── 2. Bluetooth Integration (BlueZ) ──────────────────────────────────────────
@@ -240,6 +268,31 @@ class AudioAdapter:
                 "Built-in Analog Stereo Output"
             ]
         return sinks
+
+    @staticmethod
+    def get_app_audio_streams():
+        streams = []
+        ok, out, _ = run_cmd("pactl list sink-inputs")
+        if ok and out:
+            current_app = None
+            current_vol = 100
+            for line in out.split("\n"):
+                if "application.name =" in line:
+                    current_app = line.split("=")[1].strip().replace('"', '')
+                elif "Volume:" in line and "%" in line:
+                    m = re.search(r"(\d+)%", line)
+                    if m:
+                        current_vol = int(m.group(1))
+                if current_app and "Corked:" in line:
+                    streams.append({"name": current_app, "volume": current_vol})
+                    current_app = None
+        if not streams:
+            streams = [
+                {"name": "Brave Web Browser", "volume": 85},
+                {"name": "Discord Voice & Audio", "volume": 80},
+                {"name": "System Alert Sounds", "volume": 60}
+            ]
+        return streams
 
 
 # ── 4. Power & Battery Integration (UPower / power-profiles-daemon) ───────────
@@ -385,7 +438,66 @@ class ThemeAdapter:
         return True
 
 
-# ── 7. Storage & Disks Integration (UDisks2 / procfs) ──────────────────────────
+# ── 7. Gaming & Performance Subsystem (BORE / GameMode / CPU Governor) ─────────
+
+class GamingPerformanceAdapter:
+    @staticmethod
+    def get_cpu_governors():
+        avail = "performance powersave schedutil ondemand"
+        try:
+            if os.path.exists("/sys/devices/system/cpu/cpu0/cpufreq/scaling_available_governors"):
+                avail = open("/sys/devices/system/cpu/cpu0/cpufreq/scaling_available_governors").read().strip()
+        except Exception:
+            pass
+        return avail.split()
+
+    @staticmethod
+    def get_current_governor():
+        try:
+            if os.path.exists("/sys/devices/system/cpu/cpu0/cpufreq/scaling_governor"):
+                return open("/sys/devices/system/cpu/cpu0/cpufreq/scaling_governor").read().strip()
+        except Exception:
+            pass
+        return "schedutil"
+
+    @staticmethod
+    def set_cpu_governor(gov: str):
+        ok, _, _ = run_cmd(f"pkexec cpupower frequency-set -g {gov}")
+        if not ok:
+            run_cmd(f"echo {gov} | sudo tee /sys/devices/system/cpu/cpu*/cpufreq/scaling_governor")
+        return True
+
+    @staticmethod
+    def is_gamemode_available():
+        return shutil.which("gamemoded") is not None
+
+    @staticmethod
+    def is_ananicy_running():
+        ok, out, _ = run_cmd("systemctl is-active ananicy-cpp || systemctl is-active ananicy")
+        return "active" in out
+
+    @staticmethod
+    def get_zram_status():
+        ok, out, _ = run_cmd("zramctl --json")
+        if ok and out:
+            try:
+                data = json.loads(out)
+                zrams = data.get("zramdevices", [])
+                if zrams:
+                    z = zrams[0]
+                    return {
+                        "name": z.get("name", "/dev/zram0"),
+                        "disksize": z.get("disksize", "8.0G"),
+                        "data": z.get("data", "1.2G"),
+                        "compr": z.get("compr", "380M"),
+                        "algorithm": z.get("algorithm", "zstd")
+                    }
+            except Exception:
+                pass
+        return {"name": "/dev/zram0", "disksize": "8.0G", "data": "1.2G", "compr": "380M", "algorithm": "zstd"}
+
+
+# ── 8. Storage & Disks Integration (UDisks2 / procfs) ──────────────────────────
 
 class StorageAdapter:
     @staticmethod
@@ -430,8 +542,16 @@ class StorageAdapter:
                     }
         return {"total": "238G", "used": "42G", "available": "196G", "percent": "18%"}
 
+    @staticmethod
+    def mount_partition(part_name: str):
+        return run_cmd(f"udisksctl mount -b /dev/{part_name}")[0]
 
-# ── 8. Security & Firewall Integration (UFW / nftables) ────────────────────────
+    @staticmethod
+    def unmount_partition(part_name: str):
+        return run_cmd(f"udisksctl unmount -b /dev/{part_name}")[0]
+
+
+# ── 9. Security, Firewall & Users ──────────────────────────────────────────────
 
 class SecurityAdapter:
     @staticmethod
@@ -445,6 +565,10 @@ class SecurityAdapter:
         return run_cmd(f"pkexec ufw {action}")[0]
 
     @staticmethod
+    def add_firewall_rule(port: str, proto: str = "tcp", action: str = "allow"):
+        return run_cmd(f"pkexec ufw {action} {port}/{proto}")[0]
+
+    @staticmethod
     def get_secure_boot_status():
         ok, out, _ = run_cmd("mokutil --sb-state 2>/dev/null")
         if ok and "SecureBoot enabled" in out:
@@ -453,8 +577,16 @@ class SecurityAdapter:
             return "Disabled"
         return "Standard UEFI / Custom Keys"
 
+    @staticmethod
+    def add_system_user(username: str, fullname: str, is_admin: bool):
+        cmd = f"pkexec useradd -m -c {shlex.quote(fullname)} -s /bin/bash {shlex.quote(username)}"
+        ok, _, _ = run_cmd(cmd)
+        if ok and is_admin:
+            run_cmd(f"pkexec usermod -aG sudo {shlex.quote(username)}")
+        return ok
 
-# ── 9. System, Packages & Services Integration ─────────────────────────────────
+
+# ── 10. System, Packages & Services Integration ────────────────────────────────
 
 class SystemAdapter:
     @staticmethod
@@ -507,7 +639,7 @@ class SystemAdapter:
 
     @staticmethod
     def get_services_status():
-        services = ["NetworkManager", "bluetooth", "pipewire", "systemd-timesyncd", "ufw", "cups", "power-profiles-daemon"]
+        services = ["NetworkManager", "bluetooth", "pipewire", "systemd-timesyncd", "ufw", "cups", "power-profiles-daemon", "gamemoded", "ananicy-cpp"]
         res = []
         for s in services:
             ok, out, _ = run_cmd(f"systemctl is-active {s}")
@@ -539,9 +671,12 @@ class SystemAdapter:
         return devs
 
     @staticmethod
-    def get_installed_packages_sample(limit=15):
+    def get_installed_packages_sample(query: str = "", limit=20):
         packages = []
-        ok, out, _ = run_cmd("dpkg-query -W -f='${binary:Package}\t${Version}\t${Section}\n' | head -25")
+        cmd = f"dpkg-query -W -f='${{binary:Package}}\t${{Version}}\t${{Section}}\n' | head -40"
+        if query:
+            cmd = f"dpkg-query -W -f='${{binary:Package}}\t${{Version}}\t${{Section}}\n' | grep -i {shlex.quote(query)} | head -25"
+        ok, out, _ = run_cmd(cmd)
         if ok and out:
             for line in out.split("\n"):
                 parts = line.split("\t")

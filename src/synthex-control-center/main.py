@@ -40,6 +40,7 @@ from synth_system_adapters import (
     PowerAdapter,
     DisplayAdapter,
     ThemeAdapter,
+    GamingPerformanceAdapter,
     StorageAdapter,
     SecurityAdapter,
     SystemAdapter,
@@ -51,37 +52,38 @@ from synth_settings_backend import SettingsDaemon, Setting
 # ── Sidebar Navigation Categories Hierarchy ───────────────────────────────────
 
 SIDEBAR_ITEMS = [
-    ("overview",      "Overview",             "preferences-system",                      ["Quick Settings", "System Health", "Battery & Power"]),
-    ("network",       "Network",              "preferences-system-network",               ["Wi-Fi", "Ethernet", "VPN", "Proxy", "DNS", "Firewall", "Network sharing"]),
-    ("bluetooth",     "Bluetooth",            "bluetooth",                                ["Devices", "Pairing", "Audio devices", "File transfer"]),
-    ("display",       "Display",              "preferences-desktop-display",              ["Resolution", "Refresh rate", "Scaling", "HDR", "Night light", "Color profiles", "Multiple monitors", "VRR"]),
-    ("appearance",    "Appearance",           "preferences-desktop-theme",                ["Theme", "Dark/Light", "Accent", "Wallpaper", "Icons", "Cursor", "Fonts", "Animations", "Effects"]),
-    ("desktop",       "Desktop",              "cs-desktop",                             ["Panels", "Dock", "Workspaces", "Window behavior", "Virtual desktops", "Hot corners"]),
-    ("sound",         "Sound",                "multimedia-volume-control",                 ["Output", "Input", "Volume", "Per-app audio", "Microphone", "Audio effects", "Bluetooth audio"]),
-    ("notifications", "Notifications",         "preferences-desktop-notification",        ["Global notifications", "Per-app permissions", "Do Not Disturb", "Notification sounds"]),
-    ("keyboard",      "Keyboard",             "preferences-desktop-keyboard",              ["Layout", "Shortcuts", "Compose key", "Repeat rate", "Accessibility"]),
-    ("mouse",         "Mouse & Touchpad",     "input-mouse",                              ["Pointer speed", "Acceleration", "Natural scrolling", "Gestures", "Tap-to-click", "Touchscreen / Pen"]),
-    ("power",         "Power & Battery",      "preferences-system-power",                 ["Power profiles", "Sleep", "Hibernate", "Screen timeout", "Lid behavior", "Battery health", "Usage"]),
-    ("users",         "Users & Accounts",     "system-users",                             ["Accounts", "Password", "Administrator privileges", "Login behavior", "Profile"]),
-    ("security",      "Security",             "cs-firewall",                              ["Firewall", "Encryption", "Secure Boot status", "Permissions", "Authentication", "Screen lock"]),
-    ("privacy",       "Privacy",              "preferences-system-privacy",              ["Location", "Camera", "Microphone", "Screen capture", "App permissions", "Telemetry", "Recent access"]),
-    ("apps",          "Apps",                 "preferences-desktop-default-applications", ["Installed applications", "Default applications", "Startup applications", "File associations"]),
-    ("packages",      "Packages & Software",  "system-software-install",                  ["Updates", "Installed packages", "Repositories", "Drivers", "Optional components"]),
-    ("storage",       "Storage & Disks",      "drive-harddisk",                           ["Disks", "Partitions", "Mounts", "Filesystems", "External drives", "SMART health"]),
-    ("printers",      "Printers & Scanners",  "cs-printer",                             ["Printers", "Scanners", "Print queues", "Test page"]),
-    ("devices",       "Cameras & Gamepads",   "camera-video",                             ["Video devices", "Game controllers", "Calibration", "Force feedback"]),
-    ("accessibility", "Accessibility",         "preferences-desktop-accessibility",       ["Screen reader", "Magnification", "High contrast", "Large text", "Sticky keys", "Slow keys"]),
-    ("datetime",      "Date & Time",           "preferences-system-time",                 ["Timezone", "NTP network sync", "12/24 hour format", "Automatic time"]),
-    ("region",        "Language & Region",    "cs-language",                            ["Language", "Locale", "Keyboard layouts", "Regional formats"]),
-    ("system",        "System",               "dialog-information",                       ["Hostname", "About", "Kernel", "Hardware", "Drivers", "System specs"]),
-    ("developer",     "Developer",            "utilities-terminal",                       ["Developer mode", "Logs", "Services", "Debugging", "Experimental features"]),
+    ("overview",      "Overview",               "preferences-system",                      ["Quick Settings", "System Health", "Battery & Power"]),
+    ("gaming",        "Gaming & Performance",   "applications-games",                      ["CPU Governor", "BORE Scheduler", "GameMode", "ZRAM Compression", "GPU Latency"]),
+    ("network",       "Network",                "preferences-system-network",               ["Wi-Fi", "Ethernet", "VPN", "Proxy", "DNS", "Firewall", "Network sharing"]),
+    ("bluetooth",     "Bluetooth",              "bluetooth",                                ["Devices", "Pairing", "Audio devices", "File transfer"]),
+    ("display",       "Display",                "preferences-desktop-display",              ["Resolution", "Refresh rate", "Scaling", "HDR", "Night light", "Color profiles", "Multiple monitors", "VRR"]),
+    ("appearance",    "Appearance",             "preferences-desktop-theme",                ["Theme", "Dark/Light", "Accent", "Wallpaper", "Icons", "Cursor", "Fonts", "Animations", "Effects"]),
+    ("desktop",       "Desktop",                "cs-desktop",                             ["Panels", "Dock", "Workspaces", "Window behavior", "Virtual desktops", "Hot corners"]),
+    ("sound",         "Sound",                  "multimedia-volume-control",                 ["Output", "Input", "Volume", "Per-app audio", "Microphone", "Audio effects", "Bluetooth audio"]),
+    ("notifications", "Notifications",           "preferences-desktop-notification",        ["Global notifications", "Per-app permissions", "Do Not Disturb", "Notification sounds"]),
+    ("keyboard",      "Keyboard",               "preferences-desktop-keyboard",              ["Layout", "Shortcuts", "Compose key", "Repeat rate", "Accessibility"]),
+    ("mouse",         "Mouse & Touchpad",       "input-mouse",                              ["Pointer speed", "Acceleration", "Natural scrolling", "Gestures", "Tap-to-click", "Touchscreen / Pen"]),
+    ("power",         "Power & Battery",        "preferences-system-power",                 ["Power profiles", "Sleep", "Hibernate", "Screen timeout", "Lid behavior", "Battery health", "Usage"]),
+    ("users",         "Users & Accounts",       "system-users",                             ["Accounts", "Password", "Administrator privileges", "Login behavior", "Profile"]),
+    ("security",      "Security",               "cs-firewall",                              ["Firewall", "Encryption", "Secure Boot status", "Permissions", "Authentication", "Screen lock"]),
+    ("privacy",       "Privacy",                "preferences-system-privacy",              ["Location", "Camera", "Microphone", "Screen capture", "App permissions", "Telemetry", "Recent access"]),
+    ("apps",          "Apps",                   "preferences-desktop-default-applications", ["Installed applications", "Default applications", "Startup applications", "File associations"]),
+    ("packages",      "Packages & Software",    "system-software-install",                  ["Updates", "Installed packages", "Repositories", "Drivers", "Optional components"]),
+    ("storage",       "Storage & Disks",        "drive-harddisk",                           ["Disks", "Partitions", "Mounts", "Filesystems", "External drives", "SMART health"]),
+    ("printers",      "Printers & Scanners",    "cs-printer",                             ["Printers", "Scanners", "Print queues", "Test page"]),
+    ("devices",       "Cameras & Gamepads",     "camera-video",                             ["Video devices", "Game controllers", "Calibration", "Force feedback"]),
+    ("accessibility", "Accessibility",           "preferences-desktop-accessibility",       ["Screen reader", "Magnification", "High contrast", "Large text", "Sticky keys", "Slow keys"]),
+    ("datetime",      "Date & Time",             "preferences-system-time",                 ["Timezone", "NTP network sync", "12/24 hour format", "Automatic time"]),
+    ("region",        "Language & Region",      "cs-language",                            ["Language", "Locale", "Keyboard layouts", "Regional formats"]),
+    ("system",        "System",                 "dialog-information",                       ["Hostname", "About", "Kernel", "Hardware", "Drivers", "System specs"]),
+    ("developer",     "Developer",              "utilities-terminal",                       ["Developer mode", "Logs", "Services", "Debugging", "Experimental features"]),
 ]
 
 
 class SettingsAppWindow(Gtk.Window):
     def __init__(self, initial_page="overview"):
         super().__init__(title="SynthOS System Settings")
-        self.set_default_size(1140, 800)
+        self.set_default_size(1160, 820)
         self.set_position(Gtk.WindowPosition.CENTER)
         self.connect("destroy", Gtk.main_quit)
 
@@ -97,8 +99,8 @@ class SettingsAppWindow(Gtk.Window):
 
         # Global Deep Search
         self.search_entry = Gtk.SearchEntry()
-        self.search_entry.set_placeholder_text("Search settings, DNS, Wi-Fi, refresh rate, packages...")
-        self.search_entry.set_width_chars(34)
+        self.search_entry.set_placeholder_text("Search settings, Wi-Fi, CPU governor, displays, packages...")
+        self.search_entry.set_width_chars(36)
         self.search_entry.connect("search-changed", self._on_global_search)
         self.hb.pack_end(self.search_entry)
 
@@ -109,7 +111,7 @@ class SettingsAppWindow(Gtk.Window):
         # Left Sidebar
         self.sidebar_sw = Gtk.ScrolledWindow()
         self.sidebar_sw.set_policy(Gtk.PolicyType.NEVER, Gtk.PolicyType.AUTOMATIC)
-        self.sidebar_sw.set_size_request(240, -1)
+        self.sidebar_sw.set_size_request(250, -1)
 
         self.sidebar_list = Gtk.ListBox()
         self.sidebar_list.set_selection_mode(Gtk.SelectionMode.SINGLE)
@@ -248,7 +250,67 @@ class SettingsAppWindow(Gtk.Window):
             scard.add(sgrid)
             self.content_box.pack_start(scard, False, False, 0)
 
-        # ── 2. Network ──────────────────────────────────────────────────
+        # ── 2. Gaming & Performance Tuning ──────────────────────────────
+        elif cat_id == "gaming":
+            frame = Gtk.Frame(label="CPU Frequency Governor & BORE Scheduler")
+            ggrid = Gtk.Grid()
+            ggrid.set_column_spacing(16)
+            ggrid.set_row_spacing(12)
+            ggrid.set_border_width(16)
+
+            ggrid.attach(Gtk.Label(label="Active CPU Governor:", xalign=0), 0, 0, 1, 1)
+            gov_cb = Gtk.ComboBoxText()
+            govs = GamingPerformanceAdapter.get_cpu_governors()
+            cur_gov = GamingPerformanceAdapter.get_current_governor()
+            for g in govs:
+                gov_cb.append_text(g)
+            if cur_gov in govs:
+                gov_cb.set_active(govs.index(cur_gov))
+            else:
+                gov_cb.set_active(0)
+            gov_cb.connect("changed", lambda cb: GamingPerformanceAdapter.set_cpu_governor(cb.get_active_text()))
+            ggrid.attach(gov_cb, 1, 0, 1, 1)
+
+            ggrid.attach(Gtk.Label(label="BORE Latency Responsiveness:", xalign=0), 0, 1, 1, 1)
+            bore_scale = Gtk.Scale.new_with_range(Gtk.Orientation.HORIZONTAL, 1, 10, 1)
+            bore_scale.set_value(8)
+            bore_scale.set_hexpand(True)
+            ggrid.attach(bore_scale, 1, 1, 1, 1)
+
+            ggrid.attach(Gtk.Label(label="Feral GameMode Auto-Priority:", xalign=0), 0, 2, 1, 1)
+            gm_sw = Gtk.Switch()
+            gm_sw.set_active(GamingPerformanceAdapter.is_gamemode_available())
+            ggrid.attach(gm_sw, 1, 2, 1, 1)
+
+            ggrid.attach(Gtk.Label(label="Ananicy-Cpp Auto-Nice Rules:", xalign=0), 0, 3, 1, 1)
+            an_sw = Gtk.Switch()
+            an_sw.set_active(GamingPerformanceAdapter.is_ananicy_running())
+            ggrid.attach(an_sw, 1, 3, 1, 1)
+
+            frame.add(ggrid)
+            self.content_box.pack_start(frame, False, False, 0)
+
+            # ZRAM Status
+            zframe = Gtk.Frame(label="ZRAM High-Speed RAM Swap Compression")
+            zgrid = Gtk.Grid()
+            zgrid.set_column_spacing(24)
+            zgrid.set_row_spacing(8)
+            zgrid.set_border_width(16)
+
+            zdata = GamingPerformanceAdapter.get_zram_status()
+            zgrid.attach(Gtk.Label(label="<b>ZRAM Device</b>", use_markup=True, xalign=0), 0, 0, 1, 1)
+            zgrid.attach(Gtk.Label(label=zdata["name"], xalign=0), 1, 0, 1, 1)
+
+            zgrid.attach(Gtk.Label(label="<b>Allocated Size</b>", use_markup=True, xalign=0), 0, 1, 1, 1)
+            zgrid.attach(Gtk.Label(label=zdata["disksize"], xalign=0), 1, 1, 1, 1)
+
+            zgrid.attach(Gtk.Label(label="<b>Compression Algorithm</b>", use_markup=True, xalign=0), 0, 2, 1, 1)
+            zgrid.attach(Gtk.Label(label=f"{zdata['algorithm'].upper()} (Real-time Compressed)", xalign=0), 1, 2, 1, 1)
+
+            zframe.add(zgrid)
+            self.content_box.pack_start(zframe, False, False, 0)
+
+        # ── 3. Network ──────────────────────────────────────────────────
         elif cat_id == "network":
             wframe = Gtk.Frame(label="Wi-Fi Networks (NetworkManager)")
             wvbox = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=10)
@@ -271,31 +333,42 @@ class SettingsAppWindow(Gtk.Window):
                 h.set_border_width(8)
                 h.pack_start(Gtk.Image.new_from_icon_name("network-wireless-signal-excellent-symbolic", Gtk.IconSize.BUTTON), False, False, 0)
                 h.pack_start(Gtk.Label(label=net["ssid"], xalign=0), True, True, 0)
-                h.pack_end(Gtk.Label(label=f"Signal: {net['signal']}% • {net['security']}"), False, False, 0)
+
+                if net.get("connected"):
+                    badge = Gtk.Label()
+                    badge.set_markup("<span color='#2ecc71'><b>Connected</b></span>")
+                    h.pack_end(badge, False, False, 0)
+                else:
+                    btn_conn = Gtk.Button.new_with_label("Connect")
+                    btn_conn.connect("clicked", lambda b, ssid=net["ssid"]: self._show_wifi_connect_dialog(ssid))
+                    h.pack_end(btn_conn, False, False, 0)
+
+                h.pack_end(Gtk.Label(label=f"{net['signal']}% • {net['security']}"), False, False, 8)
                 r.add(h)
                 nlist.add(r)
             wvbox.pack_start(nlist, False, False, 4)
             wframe.add(wvbox)
             self.content_box.pack_start(wframe, False, False, 0)
 
-            eframe = Gtk.Frame(label="Wired Ethernet & DNS")
-            egrid = Gtk.Grid()
-            egrid.set_column_spacing(16)
-            egrid.set_row_spacing(10)
-            egrid.set_border_width(16)
+            # VPN Frame
+            vframe = Gtk.Frame(label="VPN & Secure Connections")
+            vvbox = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=8)
+            vvbox.set_border_width(16)
+            for vpn in NetworkAdapter.get_vpn_connections():
+                vr = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=12)
+                vr.pack_start(Gtk.Label(label=f"<b>{vpn['name']}</b> ({vpn['type']})", use_markup=True, xalign=0), True, True, 0)
+                vsw = Gtk.Switch()
+                vsw.set_active(vpn.get("connected", False))
+                vr.pack_end(vsw, False, False, 0)
+                vvbox.pack_start(vr, False, False, 0)
 
-            eth = NetworkAdapter.get_ethernet_status()
-            egrid.attach(Gtk.Label(label="Ethernet Adapter (eth0):", xalign=0), 0, 0, 1, 1)
-            egrid.attach(Gtk.Label(label=f"{eth['connection']}", xalign=0), 1, 0, 1, 1)
+            btn_add_vpn = Gtk.Button.new_with_label("Add New VPN Profile (WireGuard / OpenVPN)...")
+            btn_add_vpn.connect("clicked", self._show_add_vpn_dialog)
+            vvbox.pack_start(btn_add_vpn, False, False, 4)
+            vframe.add(vvbox)
+            self.content_box.pack_start(vframe, False, False, 0)
 
-            egrid.attach(Gtk.Label(label="Configured DNS Servers:", xalign=0), 0, 1, 1, 1)
-            dns_lbl = Gtk.Label(label=", ".join(NetworkAdapter.get_dns_servers()), xalign=0)
-            egrid.attach(dns_lbl, 1, 1, 1, 1)
-
-            eframe.add(egrid)
-            self.content_box.pack_start(eframe, False, False, 0)
-
-        # ── 3. Bluetooth ────────────────────────────────────────────────
+        # ── 4. Bluetooth ────────────────────────────────────────────────
         elif cat_id == "bluetooth":
             frame = Gtk.Frame(label="Bluetooth Wireless Adapter (BlueZ)")
             vbox = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=12)
@@ -331,7 +404,7 @@ class SettingsAppWindow(Gtk.Window):
             frame.add(vbox)
             self.content_box.pack_start(frame, False, False, 0)
 
-        # ── 4. Display ──────────────────────────────────────────────────
+        # ── 5. Display ──────────────────────────────────────────────────
         elif cat_id == "display":
             monitors = DisplayAdapter.get_connected_monitors()
 
@@ -353,7 +426,6 @@ class SettingsAppWindow(Gtk.Window):
             # Resolution
             dgrid.attach(Gtk.Label(label="Screen Resolution:", xalign=0), 0, 1, 1, 1)
             res_cb = Gtk.ComboBoxText()
-            # Extract modes from primary monitor
             prim_name = list(monitors.keys())[0]
             unique_resolutions = sorted(list(set([m[0] for m in monitors[prim_name]["modes"]])), reverse=True)
             for r in unique_resolutions:
@@ -404,7 +476,7 @@ class SettingsAppWindow(Gtk.Window):
             nl_frame.add(nl_box)
             self.content_box.pack_start(nl_frame, False, False, 0)
 
-        # ── 5. Appearance ───────────────────────────────────────────────
+        # ── 6. Appearance ───────────────────────────────────────────────
         elif cat_id == "appearance":
             installed_themes = ThemeAdapter.get_installed_themes()
             installed_icons = ThemeAdapter.get_installed_icons()
@@ -458,7 +530,7 @@ class SettingsAppWindow(Gtk.Window):
             wframe.add(wbox)
             self.content_box.pack_start(wframe, False, False, 0)
 
-        # ── 6. Desktop ──────────────────────────────────────────────────
+        # ── 7. Desktop ──────────────────────────────────────────────────
         elif cat_id == "desktop":
             frame = Gtk.Frame(label="Panels & Taskbar Layout")
             pgrid = Gtk.Grid()
@@ -510,7 +582,7 @@ class SettingsAppWindow(Gtk.Window):
             hc_frame.add(hc_grid)
             self.content_box.pack_start(hc_frame, False, False, 0)
 
-        # ── 7. Sound ────────────────────────────────────────────────────
+        # ── 8. Sound ────────────────────────────────────────────────────
         elif cat_id == "sound":
             frame = Gtk.Frame(label="Audio Output (PipeWire / WirePlumber)")
             sgrid = Gtk.Grid()
@@ -535,24 +607,22 @@ class SettingsAppWindow(Gtk.Window):
             frame.add(sgrid)
             self.content_box.pack_start(frame, False, False, 0)
 
-            # Mic
-            iframe = Gtk.Frame(label="Audio Input & Microphone")
-            igrid = Gtk.Grid()
-            igrid.set_column_spacing(16)
-            igrid.set_row_spacing(12)
-            igrid.set_border_width(16)
+            # Per-app audio mixer
+            mix_frame = Gtk.Frame(label="Application Audio Mixer")
+            mix_box = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=8)
+            mix_box.set_border_width(16)
+            for app in AudioAdapter.get_app_audio_streams():
+                ar = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=12)
+                ar.pack_start(Gtk.Label(label=app["name"], xalign=0), False, False, 0)
+                ascale = Gtk.Scale.new_with_range(Gtk.Orientation.HORIZONTAL, 0, 100, 1)
+                ascale.set_value(app["volume"])
+                ascale.set_hexpand(True)
+                ar.pack_start(ascale, True, True, 0)
+                mix_box.pack_start(ar, False, False, 0)
+            mix_frame.add(mix_box)
+            self.content_box.pack_start(mix_frame, False, False, 0)
 
-            igrid.attach(Gtk.Label(label="Microphone Volume:", xalign=0), 0, 0, 1, 1)
-            mic_vol = Gtk.Scale.new_with_range(Gtk.Orientation.HORIZONTAL, 0, 100, 1)
-            mic_vol.set_value(AudioAdapter.get_mic_volume())
-            mic_vol.set_hexpand(True)
-            mic_vol.connect("value-changed", lambda sc: AudioAdapter.set_mic_volume(int(sc.get_value())))
-            igrid.attach(mic_vol, 1, 0, 1, 1)
-
-            iframe.add(igrid)
-            self.content_box.pack_start(iframe, False, False, 0)
-
-        # ── 8. Notifications ────────────────────────────────────────────
+        # ── 9. Notifications ────────────────────────────────────────────
         elif cat_id == "notifications":
             frame = Gtk.Frame(label="Notification Preferences")
             vbox = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=10)
@@ -583,7 +653,7 @@ class SettingsAppWindow(Gtk.Window):
             frame.add(vbox)
             self.content_box.pack_start(frame, False, False, 0)
 
-        # ── 9. Keyboard ─────────────────────────────────────────────────
+        # ── 10. Keyboard ────────────────────────────────────────────────
         elif cat_id == "keyboard":
             frame = Gtk.Frame(label="Key Repeat & Input Behavior")
             kgrid = Gtk.Grid()
@@ -613,7 +683,7 @@ class SettingsAppWindow(Gtk.Window):
             frame.add(kgrid)
             self.content_box.pack_start(frame, False, False, 0)
 
-        # ── 10. Mouse & Touchpad ────────────────────────────────────────
+        # ── 11. Mouse & Touchpad ────────────────────────────────────────
         elif cat_id == "mouse":
             frame = Gtk.Frame(label="Pointer & Touchpad Behavior")
             mgrid = Gtk.Grid()
@@ -644,7 +714,7 @@ class SettingsAppWindow(Gtk.Window):
             frame.add(mgrid)
             self.content_box.pack_start(frame, False, False, 0)
 
-        # ── 11. Power & Battery ─────────────────────────────────────────
+        # ── 12. Power & Battery ─────────────────────────────────────────
         elif cat_id == "power":
             frame = Gtk.Frame(label="Hardware Power Profiles (power-profiles-daemon)")
             pbox = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=8)
@@ -677,7 +747,7 @@ class SettingsAppWindow(Gtk.Window):
             bat_frame.add(bgrid)
             self.content_box.pack_start(bat_frame, False, False, 0)
 
-        # ── 12. Users & Accounts ────────────────────────────────────────
+        # ── 13. Users & Accounts ────────────────────────────────────────
         elif cat_id == "users":
             frame = Gtk.Frame(label="User Accounts & Permissions")
             vbox = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=10)
@@ -698,6 +768,7 @@ class SettingsAppWindow(Gtk.Window):
             btn_box = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=10)
             btn_pwd = Gtk.Button.new_with_label("Change Password...")
             btn_add = Gtk.Button.new_with_label("Add New Account...")
+            btn_add.connect("clicked", self._show_add_user_dialog)
             btn_box.pack_start(btn_pwd, False, False, 0)
             btn_box.pack_start(btn_add, False, False, 0)
             vbox.pack_start(btn_box, False, False, 4)
@@ -705,7 +776,7 @@ class SettingsAppWindow(Gtk.Window):
             frame.add(vbox)
             self.content_box.pack_start(frame, False, False, 0)
 
-        # ── 13. Security ────────────────────────────────────────────────
+        # ── 14. Security ────────────────────────────────────────────────
         elif cat_id == "security":
             frame = Gtk.Frame(label="Firewall Protection (UFW / nftables)")
             vbox = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=10)
@@ -719,6 +790,10 @@ class SettingsAppWindow(Gtk.Window):
             fw_r.pack_end(fw_sw, False, False, 0)
             vbox.pack_start(fw_r, False, False, 0)
 
+            btn_add_rule = Gtk.Button.new_with_label("Add Port Rule (Allow / Block)...")
+            btn_add_rule.connect("clicked", self._show_add_firewall_rule_dialog)
+            vbox.pack_start(btn_add_rule, False, False, 4)
+
             sb_r = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=12)
             sb_r.pack_start(Gtk.Label(label="Secure Boot Status:", xalign=0), True, True, 0)
             sb_r.pack_end(Gtk.Label(label=SecurityAdapter.get_secure_boot_status()), False, False, 0)
@@ -727,7 +802,7 @@ class SettingsAppWindow(Gtk.Window):
             frame.add(vbox)
             self.content_box.pack_start(frame, False, False, 0)
 
-        # ── 14. Privacy ─────────────────────────────────────────────────
+        # ── 15. Privacy ─────────────────────────────────────────────────
         elif cat_id == "privacy":
             frame = Gtk.Frame(label="Privacy & Telemetry Controls")
             vbox = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=10)
@@ -753,7 +828,7 @@ class SettingsAppWindow(Gtk.Window):
             frame.add(vbox)
             self.content_box.pack_start(frame, False, False, 0)
 
-        # ── 15. Apps ────────────────────────────────────────────────────
+        # ── 16. Apps ────────────────────────────────────────────────────
         elif cat_id == "apps":
             frame = Gtk.Frame(label="Default System Applications")
             grid = Gtk.Grid()
@@ -779,7 +854,7 @@ class SettingsAppWindow(Gtk.Window):
             frame.add(grid)
             self.content_box.pack_start(frame, False, False, 0)
 
-        # ── 16. Packages & Software ─────────────────────────────────────
+        # ── 17. Packages & Software ─────────────────────────────────────
         elif cat_id == "packages":
             frame = Gtk.Frame(label="Package Manager & Repositories (dpkg / apt)")
             vbox = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=10)
@@ -807,9 +882,9 @@ class SettingsAppWindow(Gtk.Window):
             frame.add(vbox)
             self.content_box.pack_start(frame, False, False, 0)
 
-        # ── 17. Storage & Disks ─────────────────────────────────────────
+        # ── 18. Storage & Disks ─────────────────────────────────────────
         elif cat_id == "storage":
-            frame = Gtk.Frame(label="Disks & Storage Devices (UDisks2)")
+            frame = Gtk.Frame(label="Disks & Storage Partitions (UDisks2)")
             vbox = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=10)
             vbox.set_border_width(16)
 
@@ -827,13 +902,13 @@ class SettingsAppWindow(Gtk.Window):
             vbox.pack_start(dlist, False, False, 4)
 
             usage = StorageAdapter.get_root_usage()
-            u_lbl = Gtk.Label(label=f"Root Partition: {usage['used']} used of {usage['total']} ({usage['percent']} full)", xalign=0)
+            u_lbl = Gtk.Label(label=f"Root Partition (/): {usage['used']} used of {usage['total']} ({usage['percent']} full)", xalign=0)
             vbox.pack_start(u_lbl, False, False, 0)
 
             frame.add(vbox)
             self.content_box.pack_start(frame, False, False, 0)
 
-        # ── 18. Printers & Scanners ─────────────────────────────────────
+        # ── 19. Printers & Scanners ─────────────────────────────────────
         elif cat_id == "printers":
             frame = Gtk.Frame(label="Printers & Scanners (CUPS)")
             vbox = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=10)
@@ -862,7 +937,7 @@ class SettingsAppWindow(Gtk.Window):
             frame.add(vbox)
             self.content_box.pack_start(frame, False, False, 0)
 
-        # ── 19. Cameras & Gamepads ──────────────────────────────────────
+        # ── 20. Cameras & Gamepads ──────────────────────────────────────
         elif cat_id == "devices":
             frame = Gtk.Frame(label="Input Peripherals & Gamepad Interfaces")
             vbox = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=10)
@@ -886,7 +961,7 @@ class SettingsAppWindow(Gtk.Window):
             frame.add(vbox)
             self.content_box.pack_start(frame, False, False, 0)
 
-        # ── 20. Accessibility ───────────────────────────────────────────
+        # ── 21. Accessibility ───────────────────────────────────────────
         elif cat_id == "accessibility":
             frame = Gtk.Frame(label="Visual & Input Assistance")
             vbox = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=10)
@@ -910,7 +985,7 @@ class SettingsAppWindow(Gtk.Window):
             frame.add(vbox)
             self.content_box.pack_start(frame, False, False, 0)
 
-        # ── 21. Date & Time ─────────────────────────────────────────────
+        # ── 22. Date & Time ─────────────────────────────────────────────
         elif cat_id == "datetime":
             frame = Gtk.Frame(label="Clock & Network Time (systemd-timesyncd)")
             vbox = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=10)
@@ -941,7 +1016,7 @@ class SettingsAppWindow(Gtk.Window):
             frame.add(vbox)
             self.content_box.pack_start(frame, False, False, 0)
 
-        # ── 22. Language & Region ───────────────────────────────────────
+        # ── 23. Language & Region ───────────────────────────────────────
         elif cat_id == "region":
             frame = Gtk.Frame(label="System Locale & Regional Formats")
             rgrid = Gtk.Grid()
@@ -966,7 +1041,7 @@ class SettingsAppWindow(Gtk.Window):
             frame.add(rgrid)
             self.content_box.pack_start(frame, False, False, 0)
 
-        # ── 23. System ──────────────────────────────────────────────────
+        # ── 24. System ──────────────────────────────────────────────────
         elif cat_id == "system":
             frame = Gtk.Frame(label="System Specifications")
             grid = Gtk.Grid()
@@ -993,7 +1068,7 @@ class SettingsAppWindow(Gtk.Window):
             frame.add(grid)
             self.content_box.pack_start(frame, False, False, 0)
 
-        # ── 24. Developer ───────────────────────────────────────────────
+        # ── 25. Developer ───────────────────────────────────────────────
         elif cat_id == "developer":
             frame = Gtk.Frame(label="Systemd Services & Diagnostic Tools")
             vbox = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=10)
@@ -1019,6 +1094,133 @@ class SettingsAppWindow(Gtk.Window):
             self.content_box.pack_start(frame, False, False, 0)
 
         self.content_box.show_all()
+
+    # ── Interactive Modals & Dialogs ─────────────────────────────────────────
+
+    def _show_wifi_connect_dialog(self, ssid):
+        dialog = Gtk.Dialog(title=f"Connect to {ssid}", parent=self, flags=0)
+        dialog.add_button(Gtk.STOCK_CANCEL, Gtk.ResponseType.CANCEL)
+        dialog.add_button("Connect", Gtk.ResponseType.OK)
+        dialog.set_default_size(360, 160)
+
+        box = dialog.get_content_area()
+        box.set_spacing(10)
+        box.set_border_width(16)
+
+        box.pack_start(Gtk.Label(label=f"Enter WPA/WPA2/WPA3 password for '{ssid}':", xalign=0), False, False, 0)
+        pwd_entry = Gtk.Entry()
+        pwd_entry.set_visibility(False)
+        box.pack_start(pwd_entry, False, False, 0)
+
+        show_cb = Gtk.CheckButton(label="Show Password")
+        show_cb.connect("toggled", lambda cb: pwd_entry.set_visibility(cb.get_active()))
+        box.pack_start(show_cb, False, False, 0)
+
+        dialog.show_all()
+        if dialog.run() == Gtk.ResponseType.OK:
+            password = pwd_entry.get_text()
+            NetworkAdapter.connect_wifi(ssid, password)
+            self._render_category_page("network", "Network", ["Wi-Fi", "Ethernet", "VPN"])
+        dialog.destroy()
+
+    def _show_add_vpn_dialog(self, btn):
+        dialog = Gtk.FileChooserDialog(
+            title="Import VPN Profile (.conf / .ovpn)",
+            parent=self,
+            action=Gtk.FileChooserAction.OPEN
+        )
+        dialog.add_button(Gtk.STOCK_CANCEL, Gtk.ResponseType.CANCEL)
+        dialog.add_button(Gtk.STOCK_OPEN, Gtk.ResponseType.ACCEPT)
+
+        filt = Gtk.FileFilter()
+        filt.set_name("VPN Configs (*.conf, *.ovpn)")
+        filt.add_pattern("*.conf")
+        filt.add_pattern("*.ovpn")
+        dialog.add_filter(filt)
+
+        if dialog.run() == Gtk.ResponseType.ACCEPT:
+            filename = dialog.get_filename()
+            subprocess.run(f"nmcli connection import type wireguard file {shlex.quote(filename)} || nmcli connection import type openvpn file {shlex.quote(filename)}", shell=True)
+            self._render_category_page("network", "Network", ["Wi-Fi", "Ethernet", "VPN"])
+        dialog.destroy()
+
+    def _show_add_firewall_rule_dialog(self, btn):
+        dialog = Gtk.Dialog(title="Add Firewall Rule", parent=self, flags=0)
+        dialog.add_button(Gtk.STOCK_CANCEL, Gtk.ResponseType.CANCEL)
+        dialog.add_button("Apply Rule", Gtk.ResponseType.OK)
+        dialog.set_default_size(360, 200)
+
+        box = dialog.get_content_area()
+        box.set_spacing(10)
+        box.set_border_width(16)
+
+        grid = Gtk.Grid()
+        grid.set_column_spacing(12)
+        grid.set_row_spacing(10)
+
+        grid.attach(Gtk.Label(label="Port Number / Service:", xalign=0), 0, 0, 1, 1)
+        port_entry = Gtk.Entry()
+        port_entry.set_text("22")
+        grid.attach(port_entry, 1, 0, 1, 1)
+
+        grid.attach(Gtk.Label(label="Protocol:", xalign=0), 0, 1, 1, 1)
+        proto_cb = Gtk.ComboBoxText()
+        proto_cb.append_text("tcp")
+        proto_cb.append_text("udp")
+        proto_cb.set_active(0)
+        grid.attach(proto_cb, 1, 1, 1, 1)
+
+        grid.attach(Gtk.Label(label="Action:", xalign=0), 0, 2, 1, 1)
+        act_cb = Gtk.ComboBoxText()
+        act_cb.append_text("allow")
+        act_cb.append_text("deny")
+        act_cb.set_active(0)
+        grid.attach(act_cb, 1, 2, 1, 1)
+
+        box.pack_start(grid, False, False, 0)
+        dialog.show_all()
+
+        if dialog.run() == Gtk.ResponseType.OK:
+            SecurityAdapter.add_firewall_rule(port_entry.get_text().strip(), proto_cb.get_active_text(), act_cb.get_active_text())
+            self._render_category_page("security", "Security", ["Firewall", "Encryption"])
+        dialog.destroy()
+
+    def _show_add_user_dialog(self, btn):
+        dialog = Gtk.Dialog(title="Add New User Account", parent=self, flags=0)
+        dialog.add_button(Gtk.STOCK_CANCEL, Gtk.ResponseType.CANCEL)
+        dialog.add_button("Create User", Gtk.ResponseType.OK)
+        dialog.set_default_size(380, 220)
+
+        box = dialog.get_content_area()
+        box.set_spacing(10)
+        box.set_border_width(16)
+
+        grid = Gtk.Grid()
+        grid.set_column_spacing(12)
+        grid.set_row_spacing(10)
+
+        grid.attach(Gtk.Label(label="Username:", xalign=0), 0, 0, 1, 1)
+        u_entry = Gtk.Entry()
+        grid.attach(u_entry, 1, 0, 1, 1)
+
+        grid.attach(Gtk.Label(label="Full Name:", xalign=0), 0, 1, 1, 1)
+        f_entry = Gtk.Entry()
+        grid.attach(f_entry, 1, 1, 1, 1)
+
+        grid.attach(Gtk.Label(label="Administrator:", xalign=0), 0, 2, 1, 1)
+        admin_cb = Gtk.CheckButton(label="Grant sudo root privileges")
+        grid.attach(admin_cb, 1, 2, 1, 1)
+
+        box.pack_start(grid, False, False, 0)
+        dialog.show_all()
+
+        if dialog.run() == Gtk.ResponseType.OK:
+            un = u_entry.get_text().strip()
+            fn = f_entry.get_text().strip()
+            if un:
+                SecurityAdapter.add_system_user(un, fn, admin_cb.get_active())
+                self._render_category_page("users", "Users & Accounts", ["Accounts", "Password"])
+        dialog.destroy()
 
     def _choose_wallpaper(self, btn):
         dialog = Gtk.FileChooserDialog(
