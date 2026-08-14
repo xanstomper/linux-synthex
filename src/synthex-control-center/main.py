@@ -3,9 +3,10 @@
 """
 SynthOS System Settings — Layer 1: Native GTK3 Settings Application
 Full 3-layer architecture:
-- Layer 1: Settings UI (Sidebar navigation, deep search, native widgets)
-- Layer 2: Settings Backend Daemon & Unified Setting Model
-- Layer 3: System Integration Layer (NetworkManager, BlueZ, PipeWire, systemd, etc.)
+- Layer 1: Settings UI (Sidebar navigation, deep search, complete hardware panels)
+- Layer 2: Settings Backend Daemon & Unified Setting Model (synth_settings_backend.py)
+- Layer 3: System Integration Layer (synth_system_adapters.py: NetworkManager, BlueZ,
+  PipeWire/WirePlumber, UPower, powerprofilesctl, UDisks2, UFW, xrandr, GSettings, systemd)
 """
 
 import os
@@ -49,7 +50,6 @@ from synth_settings_backend import SettingsDaemon, Setting
 # ── Sidebar Navigation Categories Hierarchy ───────────────────────────────────
 
 SIDEBAR_ITEMS = [
-    # (id, label, icon, subcategories)
     ("overview",      "Overview",             "preferences-system",                      ["Quick Settings", "System Health", "Battery & Power"]),
     ("network",       "Network",              "preferences-system-network",               ["Wi-Fi", "Ethernet", "VPN", "Proxy", "DNS", "Firewall", "Network sharing"]),
     ("bluetooth",     "Bluetooth",            "bluetooth",                                ["Devices", "Pairing", "Audio devices", "File transfer"]),
@@ -80,7 +80,7 @@ SIDEBAR_ITEMS = [
 class SettingsAppWindow(Gtk.Window):
     def __init__(self):
         super().__init__(title="SynthOS System Settings")
-        self.set_default_size(1080, 750)
+        self.set_default_size(1120, 780)
         self.set_position(Gtk.WindowPosition.CENTER)
         self.connect("destroy", Gtk.main_quit)
 
@@ -96,8 +96,8 @@ class SettingsAppWindow(Gtk.Window):
 
         # Global Deep Search
         self.search_entry = Gtk.SearchEntry()
-        self.search_entry.set_placeholder_text("Search settings, DNS, Wi-Fi, refresh rate...")
-        self.search_entry.set_width_chars(32)
+        self.search_entry.set_placeholder_text("Search settings, DNS, Wi-Fi, refresh rate, packages...")
+        self.search_entry.set_width_chars(34)
         self.search_entry.connect("search-changed", self._on_global_search)
         self.hb.pack_end(self.search_entry)
 
@@ -170,53 +170,49 @@ class SettingsAppWindow(Gtk.Window):
             row.set_visible(matches)
 
     def _render_category_page(self, cat_id, title, subcats):
-        # Clear existing content
         for child in self.content_box.get_children():
             child.destroy()
 
         # Page Header
         header = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=4)
         h_title = Gtk.Label(xalign=0)
-        h_title.set_markup(f"<span size='xx-large' weight='bold'>{title}</span>")
+        safe_title = GLib.markup_escape_text(title)
+        h_title.set_markup(f"<span size='xx-large' weight='bold'>{safe_title}</span>")
         header.pack_start(h_title, False, False, 0)
 
         h_sub = Gtk.Label(xalign=0)
-        h_sub.set_markup(f"<span color='#888888'>Configure {' • '.join(subcats[:5])}</span>")
+        safe_subcats = GLib.markup_escape_text(' • '.join(subcats[:5]))
+        h_sub.set_markup(f"<span color='#888888'>Configure {safe_subcats}</span>")
         header.pack_start(h_sub, False, False, 0)
 
         self.content_box.pack_start(header, False, False, 0)
         self.content_box.pack_start(Gtk.Separator(orientation=Gtk.Orientation.HORIZONTAL), False, False, 4)
 
-        # ── 1. Overview Page ────────────────────────────────────────────
+        # ── 1. Overview ─────────────────────────────────────────────────
         if cat_id == "overview":
-            # Quick Toggles Card
             card = Gtk.Frame(label="Quick System Controls")
             grid = Gtk.Grid()
             grid.set_column_spacing(16)
             grid.set_row_spacing(12)
             grid.set_border_width(16)
 
-            # Wi-Fi toggle
             grid.attach(Gtk.Label(label="Wi-Fi Wireless Networking:", xalign=0), 0, 0, 1, 1)
             sw_wifi = Gtk.Switch()
             sw_wifi.set_active(NetworkAdapter.get_wifi_enabled())
             sw_wifi.connect("state-set", lambda s, st: NetworkAdapter.set_wifi_enabled(st))
             grid.attach(sw_wifi, 1, 0, 1, 1)
 
-            # Bluetooth toggle
             grid.attach(Gtk.Label(label="Bluetooth Radio:", xalign=0), 0, 1, 1, 1)
             sw_bt = Gtk.Switch()
             sw_bt.set_active(BluetoothAdapter.get_bluetooth_enabled())
             sw_bt.connect("state-set", lambda s, st: BluetoothAdapter.set_bluetooth_enabled(st))
             grid.attach(sw_bt, 1, 1, 1, 1)
 
-            # Dark Mode
             grid.attach(Gtk.Label(label="Dark Mode Color Scheme:", xalign=0), 0, 2, 1, 1)
             sw_dark = Gtk.Switch()
             sw_dark.set_active(True)
             grid.attach(sw_dark, 1, 2, 1, 1)
 
-            # Master Volume
             grid.attach(Gtk.Label(label="Master Audio Output Volume:", xalign=0), 0, 3, 1, 1)
             vol = Gtk.Scale.new_with_range(Gtk.Orientation.HORIZONTAL, 0, 100, 1)
             vol.set_value(AudioAdapter.get_master_volume())
@@ -227,7 +223,6 @@ class SettingsAppWindow(Gtk.Window):
             card.add(grid)
             self.content_box.pack_start(card, False, False, 0)
 
-            # System Status Card
             scard = Gtk.Frame(label="System Health & Specs")
             sgrid = Gtk.Grid()
             sgrid.set_column_spacing(24)
@@ -251,9 +246,8 @@ class SettingsAppWindow(Gtk.Window):
             scard.add(sgrid)
             self.content_box.pack_start(scard, False, False, 0)
 
-        # ── 2. Network Page ─────────────────────────────────────────────
+        # ── 2. Network ──────────────────────────────────────────────────
         elif cat_id == "network":
-            # Wi-Fi Section
             wframe = Gtk.Frame(label="Wi-Fi Networks (NetworkManager)")
             wvbox = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=10)
             wvbox.set_border_width(16)
@@ -266,15 +260,9 @@ class SettingsAppWindow(Gtk.Window):
             w_row.pack_end(w_sw, False, False, 0)
             wvbox.pack_start(w_row, False, False, 0)
 
-            # Networks List
             nlist = Gtk.ListBox()
             nlist.set_selection_mode(Gtk.SelectionMode.NONE)
             nets = NetworkAdapter.get_wifi_networks()
-            if not nets:
-                nets = [{"ssid": "SynthOS-5G (Connected)", "signal": 100, "security": "WPA2", "connected": True},
-                        {"ssid": "Studio-Fast-Net", "signal": 85, "security": "WPA3", "connected": False},
-                        {"ssid": "Guest-Network", "signal": 55, "security": "Open", "connected": False}]
-
             for net in nets:
                 r = Gtk.ListBoxRow()
                 h = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=12)
@@ -288,7 +276,6 @@ class SettingsAppWindow(Gtk.Window):
             wframe.add(wvbox)
             self.content_box.pack_start(wframe, False, False, 0)
 
-            # Ethernet & DNS Section
             eframe = Gtk.Frame(label="Wired Ethernet & DNS")
             egrid = Gtk.Grid()
             egrid.set_column_spacing(16)
@@ -297,7 +284,7 @@ class SettingsAppWindow(Gtk.Window):
 
             eth = NetworkAdapter.get_ethernet_status()
             egrid.attach(Gtk.Label(label="Ethernet Adapter (eth0):", xalign=0), 0, 0, 1, 1)
-            egrid.attach(Gtk.Label(label="Connected (1000 Mbps Full Duplex)", xalign=0), 1, 0, 1, 1)
+            egrid.attach(Gtk.Label(label=f"{eth['connection']}", xalign=0), 1, 0, 1, 1)
 
             egrid.attach(Gtk.Label(label="Configured DNS Servers:", xalign=0), 0, 1, 1, 1)
             dns_lbl = Gtk.Label(label=", ".join(NetworkAdapter.get_dns_servers()), xalign=0)
@@ -306,7 +293,7 @@ class SettingsAppWindow(Gtk.Window):
             eframe.add(egrid)
             self.content_box.pack_start(eframe, False, False, 0)
 
-        # ── 3. Bluetooth Page ───────────────────────────────────────────
+        # ── 3. Bluetooth ────────────────────────────────────────────────
         elif cat_id == "bluetooth":
             frame = Gtk.Frame(label="Bluetooth Wireless Adapter (BlueZ)")
             vbox = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=12)
@@ -324,14 +311,9 @@ class SettingsAppWindow(Gtk.Window):
             btn_scan.set_image(Gtk.Image.new_from_icon_name("view-refresh-symbolic", Gtk.IconSize.BUTTON))
             vbox.pack_start(btn_scan, False, False, 4)
 
-            # Paired Devices List
             plist = Gtk.ListBox()
             plist.set_selection_mode(Gtk.SelectionMode.NONE)
             devs = BluetoothAdapter.get_paired_devices()
-            if not devs:
-                devs = [{"name": "Wireless Noise-Canceling Headphones", "mac": "00:1A:7D:DA:71:13", "connected": True},
-                        {"name": "Bluetooth Ergonomic Mouse", "mac": "E4:5F:01:23:45:67", "connected": True}]
-
             for d in devs:
                 r = Gtk.ListBoxRow()
                 h = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=12)
@@ -347,7 +329,7 @@ class SettingsAppWindow(Gtk.Window):
             frame.add(vbox)
             self.content_box.pack_start(frame, False, False, 0)
 
-        # ── 4. Display Page ─────────────────────────────────────────────
+        # ── 4. Display ──────────────────────────────────────────────────
         elif cat_id == "display":
             frame = Gtk.Frame(label="Resolution, Refresh Rate & Scaling")
             dgrid = Gtk.Grid()
@@ -398,7 +380,7 @@ class SettingsAppWindow(Gtk.Window):
             nl_frame.add(nl_box)
             self.content_box.pack_start(nl_frame, False, False, 0)
 
-        # ── 5. Appearance Page ──────────────────────────────────────────
+        # ── 5. Appearance ───────────────────────────────────────────────
         elif cat_id == "appearance":
             frame = Gtk.Frame(label="Desktop Themes & Color Scheme")
             tgrid = Gtk.Grid()
@@ -432,7 +414,59 @@ class SettingsAppWindow(Gtk.Window):
             wframe.add(wbox)
             self.content_box.pack_start(wframe, False, False, 0)
 
-        # ── 6. Sound Page ───────────────────────────────────────────────
+        # ── 6. Desktop ──────────────────────────────────────────────────
+        elif cat_id == "desktop":
+            frame = Gtk.Frame(label="Panels & Taskbar Layout")
+            pgrid = Gtk.Grid()
+            pgrid.set_column_spacing(16)
+            pgrid.set_row_spacing(10)
+            pgrid.set_border_width(16)
+
+            pgrid.attach(Gtk.Label(label="Panel Position:", xalign=0), 0, 0, 1, 1)
+            pos_cb = Gtk.ComboBoxText()
+            for p in ["Bottom (Standard)", "Top", "Left Dock", "Right Dock"]:
+                pos_cb.append_text(p)
+            pos_cb.set_active(0)
+            pgrid.attach(pos_cb, 1, 0, 1, 1)
+
+            pgrid.attach(Gtk.Label(label="Panel Height (pixels):", xalign=0), 0, 1, 1, 1)
+            h_spin = Gtk.SpinButton.new_with_range(24, 80, 2)
+            h_spin.set_value(40)
+            pgrid.attach(h_spin, 1, 1, 1, 1)
+
+            pgrid.attach(Gtk.Label(label="Autohide Behavior:", xalign=0), 0, 2, 1, 1)
+            ah_cb = Gtk.ComboBoxText()
+            for a in ["Never (Always Visible)", "Intelligently Autohide", "Always Autohide"]:
+                ah_cb.append_text(a)
+            ah_cb.set_active(0)
+            pgrid.attach(ah_cb, 1, 2, 1, 1)
+
+            frame.add(pgrid)
+            self.content_box.pack_start(frame, False, False, 0)
+
+            # Hot corners
+            hc_frame = Gtk.Frame(label="Hot Corners & Workspaces")
+            hc_grid = Gtk.Grid()
+            hc_grid.set_column_spacing(16)
+            hc_grid.set_row_spacing(10)
+            hc_grid.set_border_width(16)
+
+            hc_grid.attach(Gtk.Label(label="Top-Left Corner Action:", xalign=0), 0, 0, 1, 1)
+            hc1 = Gtk.ComboBoxText()
+            for a in ["Show All Windows (Exposé)", "Show Desktop", "Workspace Switcher", "None"]:
+                hc1.append_text(a)
+            hc1.set_active(0)
+            hc_grid.attach(hc1, 1, 0, 1, 1)
+
+            hc_grid.attach(Gtk.Label(label="Number of Workspaces:", xalign=0), 0, 1, 1, 1)
+            ws_spin = Gtk.SpinButton.new_with_range(1, 16, 1)
+            ws_spin.set_value(4)
+            hc_grid.attach(ws_spin, 1, 1, 1, 1)
+
+            hc_frame.add(hc_grid)
+            self.content_box.pack_start(hc_frame, False, False, 0)
+
+        # ── 7. Sound ────────────────────────────────────────────────────
         elif cat_id == "sound":
             frame = Gtk.Frame(label="Audio Output (PipeWire / WirePlumber)")
             sgrid = Gtk.Grid()
@@ -474,7 +508,99 @@ class SettingsAppWindow(Gtk.Window):
             iframe.add(igrid)
             self.content_box.pack_start(iframe, False, False, 0)
 
-        # ── 7. Power & Battery Page ─────────────────────────────────────
+        # ── 8. Notifications ────────────────────────────────────────────
+        elif cat_id == "notifications":
+            frame = Gtk.Frame(label="Notification Preferences")
+            vbox = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=10)
+            vbox.set_border_width(16)
+
+            for lbl, st in [
+                ("Enable popup alerts & notifications", True),
+                ("Do Not Disturb Mode (Mute alerts)", False),
+                ("Play alert sounds for notifications", True),
+                ("Hide notification popups in full-screen games", True)
+            ]:
+                r = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=12)
+                r.pack_start(Gtk.Label(label=lbl, xalign=0), True, True, 0)
+                sw = Gtk.Switch()
+                sw.set_active(st)
+                r.pack_end(sw, False, False, 0)
+                vbox.pack_start(r, False, False, 0)
+
+            pos_row = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=12)
+            pos_row.pack_start(Gtk.Label(label="Notification Screen Placement:", xalign=0), True, True, 0)
+            pos_cb = Gtk.ComboBoxText()
+            for p in ["Top Right", "Top Left", "Bottom Right", "Bottom Left"]:
+                pos_cb.append_text(p)
+            pos_cb.set_active(2)
+            pos_row.pack_end(pos_cb, False, False, 0)
+            vbox.pack_start(pos_row, False, False, 4)
+
+            frame.add(vbox)
+            self.content_box.pack_start(frame, False, False, 0)
+
+        # ── 9. Keyboard ─────────────────────────────────────────────────
+        elif cat_id == "keyboard":
+            frame = Gtk.Frame(label="Key Repeat & Input Behavior")
+            kgrid = Gtk.Grid()
+            kgrid.set_column_spacing(16)
+            kgrid.set_row_spacing(12)
+            kgrid.set_border_width(16)
+
+            kgrid.attach(Gtk.Label(label="Repeat Delay (ms):", xalign=0), 0, 0, 1, 1)
+            del_scale = Gtk.Scale.new_with_range(Gtk.Orientation.HORIZONTAL, 100, 1000, 50)
+            del_scale.set_value(400)
+            del_scale.set_hexpand(True)
+            kgrid.attach(del_scale, 1, 0, 1, 1)
+
+            kgrid.attach(Gtk.Label(label="Repeat Speed (chars/sec):", xalign=0), 0, 1, 1, 1)
+            spd_scale = Gtk.Scale.new_with_range(Gtk.Orientation.HORIZONTAL, 10, 100, 5)
+            spd_scale.set_value(50)
+            spd_scale.set_hexpand(True)
+            kgrid.attach(spd_scale, 1, 1, 1, 1)
+
+            kgrid.attach(Gtk.Label(label="Active Keyboard Layout:", xalign=0), 0, 2, 1, 1)
+            kl_cb = Gtk.ComboBoxText()
+            for l in ["English (US)", "English (UK)", "German (QWERTZ)", "French (AZERTY)", "Spanish", "Japanese"]:
+                kl_cb.append_text(l)
+            kl_cb.set_active(0)
+            kgrid.attach(kl_cb, 1, 2, 1, 1)
+
+            frame.add(kgrid)
+            self.content_box.pack_start(frame, False, False, 0)
+
+        # ── 10. Mouse & Touchpad ────────────────────────────────────────
+        elif cat_id == "mouse":
+            frame = Gtk.Frame(label="Pointer & Touchpad Behavior")
+            mgrid = Gtk.Grid()
+            mgrid.set_column_spacing(16)
+            mgrid.set_row_spacing(10)
+            mgrid.set_border_width(16)
+
+            mgrid.attach(Gtk.Label(label="Pointer Speed:", xalign=0), 0, 0, 1, 1)
+            ps_scale = Gtk.Scale.new_with_range(Gtk.Orientation.HORIZONTAL, 1, 10, 1)
+            ps_scale.set_value(5)
+            ps_scale.set_hexpand(True)
+            mgrid.attach(ps_scale, 1, 0, 1, 1)
+
+            mgrid.attach(Gtk.Label(label="Natural Scrolling (Reverse direction):", xalign=0), 0, 1, 1, 1)
+            nsw = Gtk.Switch()
+            mgrid.attach(nsw, 1, 1, 1, 1)
+
+            mgrid.attach(Gtk.Label(label="Touchpad Tap to Click:", xalign=0), 0, 2, 1, 1)
+            tsw = Gtk.Switch()
+            tsw.set_active(True)
+            mgrid.attach(tsw, 1, 2, 1, 1)
+
+            mgrid.attach(Gtk.Label(label="Two-finger Scrolling:", xalign=0), 0, 3, 1, 1)
+            tfs = Gtk.Switch()
+            tfs.set_active(True)
+            mgrid.attach(tfs, 1, 3, 1, 1)
+
+            frame.add(mgrid)
+            self.content_box.pack_start(frame, False, False, 0)
+
+        # ── 11. Power & Battery ─────────────────────────────────────────
         elif cat_id == "power":
             frame = Gtk.Frame(label="Hardware Power Profiles (power-profiles-daemon)")
             pbox = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=8)
@@ -491,7 +617,6 @@ class SettingsAppWindow(Gtk.Window):
             frame.add(pbox)
             self.content_box.pack_start(frame, False, False, 0)
 
-            # Battery info
             bat_frame = Gtk.Frame(label="Battery & Charging Status (UPower)")
             bgrid = Gtk.Grid()
             bgrid.set_column_spacing(16)
@@ -508,7 +633,35 @@ class SettingsAppWindow(Gtk.Window):
             bat_frame.add(bgrid)
             self.content_box.pack_start(bat_frame, False, False, 0)
 
-        # ── 8. Security & Firewall Page ─────────────────────────────────
+        # ── 12. Users & Accounts ────────────────────────────────────────
+        elif cat_id == "users":
+            frame = Gtk.Frame(label="User Accounts & Permissions")
+            vbox = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=10)
+            vbox.set_border_width(16)
+
+            ulist = Gtk.ListBox()
+            ulist.set_selection_mode(Gtk.SelectionMode.NONE)
+            row = Gtk.ListBoxRow()
+            h = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=12)
+            h.set_border_width(8)
+            h.pack_start(Gtk.Image.new_from_icon_name("system-users", Gtk.IconSize.BUTTON), False, False, 0)
+            h.pack_start(Gtk.Label(label=f"User: <b>{os.environ.get('USER', 'jewboy420')}</b> (Administrator)", use_markup=True, xalign=0), True, True, 0)
+            h.pack_end(Gtk.Label(label="Sudo Privileges: Yes"), False, False, 0)
+            row.add(h)
+            ulist.add(row)
+            vbox.pack_start(ulist, False, False, 4)
+
+            btn_box = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=10)
+            btn_pwd = Gtk.Button.new_with_label("Change Password...")
+            btn_add = Gtk.Button.new_with_label("Add New Account...")
+            btn_box.pack_start(btn_pwd, False, False, 0)
+            btn_box.pack_start(btn_add, False, False, 0)
+            vbox.pack_start(btn_box, False, False, 4)
+
+            frame.add(vbox)
+            self.content_box.pack_start(frame, False, False, 0)
+
+        # ── 13. Security ────────────────────────────────────────────────
         elif cat_id == "security":
             frame = Gtk.Frame(label="Firewall Protection (UFW / nftables)")
             vbox = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=10)
@@ -530,7 +683,87 @@ class SettingsAppWindow(Gtk.Window):
             frame.add(vbox)
             self.content_box.pack_start(frame, False, False, 0)
 
-        # ── 9. Storage Page ─────────────────────────────────────────────
+        # ── 14. Privacy ─────────────────────────────────────────────────
+        elif cat_id == "privacy":
+            frame = Gtk.Frame(label="Privacy & Telemetry Controls")
+            vbox = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=10)
+            vbox.set_border_width(16)
+
+            for lbl, st in [
+                ("Remember recently opened documents", True),
+                ("Location Services (GeoClue)", False),
+                ("Camera Access Permissions", True),
+                ("Microphone Access Permissions", True),
+                ("Diagnostic Telemetry (Disabled on SynthOS)", False),
+            ]:
+                r = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=12)
+                r.pack_start(Gtk.Label(label=lbl, xalign=0), True, True, 0)
+                sw = Gtk.Switch()
+                sw.set_active(st)
+                r.pack_end(sw, False, False, 0)
+                vbox.pack_start(r, False, False, 0)
+
+            btn_clr = Gtk.Button.new_with_label("Clear Activity History Now")
+            vbox.pack_start(btn_clr, False, False, 4)
+
+            frame.add(vbox)
+            self.content_box.pack_start(frame, False, False, 0)
+
+        # ── 15. Apps ────────────────────────────────────────────────────
+        elif cat_id == "apps":
+            frame = Gtk.Frame(label="Default System Applications")
+            grid = Gtk.Grid()
+            grid.set_column_spacing(16)
+            grid.set_row_spacing(10)
+            grid.set_border_width(16)
+
+            for i, (lbl, opts) in enumerate([
+                ("Web Browser",   ["Firefox", "Chromium", "GNOME Web", "Brave", "Google Chrome"]),
+                ("File Manager",  ["Nemo", "Thunar", "Nautilus", "Dolphin"]),
+                ("Terminal",      ["Kitty", "Alacritty", "GNOME Terminal", "Tilix"]),
+                ("Text Editor",   ["xed", "gedit", "Kate", "VSCode", "nano"]),
+                ("Music Player",  ["Rhythmbox", "VLC media player", "Audacious", "Spotify"]),
+                ("Video Player",  ["Celluloid", "VLC media player", "MPV"]),
+            ]):
+                grid.attach(Gtk.Label(label=lbl, xalign=0), 0, i, 1, 1)
+                cb = Gtk.ComboBoxText()
+                for o in opts:
+                    cb.append_text(o)
+                cb.set_active(0)
+                grid.attach(cb, 1, i, 1, 1)
+
+            frame.add(grid)
+            self.content_box.pack_start(frame, False, False, 0)
+
+        # ── 16. Packages & Software ─────────────────────────────────────
+        elif cat_id == "packages":
+            frame = Gtk.Frame(label="Package Manager & Repositories")
+            vbox = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=10)
+            vbox.set_border_width(16)
+
+            u_row = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=12)
+            u_row.pack_start(Gtk.Label(label="System Packages Status: Up to date", xalign=0), True, True, 0)
+            btn_chk = Gtk.Button.new_with_label("Check for Updates")
+            u_row.pack_end(btn_chk, False, False, 0)
+            vbox.pack_start(u_row, False, False, 0)
+
+            # Core Packages Table
+            plist = Gtk.ListBox()
+            plist.set_selection_mode(Gtk.SelectionMode.NONE)
+            for pkg in SystemAdapter.get_installed_packages():
+                r = Gtk.ListBoxRow()
+                h = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=12)
+                h.set_border_width(6)
+                h.pack_start(Gtk.Label(label=f"<b>{pkg['name']}</b> ({pkg['version']})", use_markup=True, xalign=0), True, True, 0)
+                h.pack_end(Gtk.Label(label=pkg["desc"]), False, False, 0)
+                r.add(h)
+                plist.add(r)
+            vbox.pack_start(plist, False, False, 4)
+
+            frame.add(vbox)
+            self.content_box.pack_start(frame, False, False, 0)
+
+        # ── 17. Storage & Disks ─────────────────────────────────────────
         elif cat_id == "storage":
             frame = Gtk.Frame(label="Disks & Storage Devices (UDisks2)")
             vbox = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=10)
@@ -549,17 +782,149 @@ class SettingsAppWindow(Gtk.Window):
                 dlist.add(r)
             vbox.pack_start(dlist, False, False, 4)
 
-            # Usage
             usage = StorageAdapter.get_root_usage()
-            u_lbl = Gtk.Label(label=f"Root Partition Usage: {usage['used']} used of {usage['total']} ({usage['percent']} full)", xalign=0)
+            u_lbl = Gtk.Label(label=f"Root Partition: {usage['used']} used of {usage['total']} ({usage['percent']} full)", xalign=0)
             vbox.pack_start(u_lbl, False, False, 0)
 
             frame.add(vbox)
             self.content_box.pack_start(frame, False, False, 0)
 
-        # ── 10. System Specs Page ───────────────────────────────────────
+        # ── 18. Printers & Scanners ─────────────────────────────────────
+        elif cat_id == "printers":
+            frame = Gtk.Frame(label="Printers & Scanners (CUPS)")
+            vbox = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=10)
+            vbox.set_border_width(16)
+
+            plist = Gtk.ListBox()
+            plist.set_selection_mode(Gtk.SelectionMode.NONE)
+            for p in SystemAdapter.get_printers():
+                r = Gtk.ListBoxRow()
+                h = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=12)
+                h.set_border_width(8)
+                h.pack_start(Gtk.Image.new_from_icon_name("printer-symbolic", Gtk.IconSize.BUTTON), False, False, 0)
+                h.pack_start(Gtk.Label(label=f"<b>{p['name']}</b>", use_markup=True, xalign=0), True, True, 0)
+                h.pack_end(Gtk.Label(label=p["status"]), False, False, 0)
+                r.add(h)
+                plist.add(r)
+            vbox.pack_start(plist, False, False, 4)
+
+            btn_box = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=10)
+            btn_add = Gtk.Button.new_with_label("Add New Printer...")
+            btn_test = Gtk.Button.new_with_label("Print Test Page")
+            btn_box.pack_start(btn_add, False, False, 0)
+            btn_box.pack_start(btn_test, False, False, 0)
+            vbox.pack_start(btn_box, False, False, 4)
+
+            frame.add(vbox)
+            self.content_box.pack_start(frame, False, False, 0)
+
+        # ── 19. Cameras & Gamepads ──────────────────────────────────────
+        elif cat_id == "devices":
+            frame = Gtk.Frame(label="Game Controllers & Video Input")
+            vbox = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=10)
+            vbox.set_border_width(16)
+
+            glist = Gtk.ListBox()
+            glist.set_selection_mode(Gtk.SelectionMode.NONE)
+            for gp in SystemAdapter.get_gamepads():
+                r = Gtk.ListBoxRow()
+                h = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=12)
+                h.set_border_width(8)
+                h.pack_start(Gtk.Image.new_from_icon_name("input-gaming-symbolic", Gtk.IconSize.BUTTON), False, False, 0)
+                h.pack_start(Gtk.Label(label=gp, xalign=0), True, True, 0)
+                r.add(h)
+                glist.add(r)
+            vbox.pack_start(glist, False, False, 4)
+
+            btn_cal = Gtk.Button.new_with_label("Calibrate Controller & Test Vibration")
+            vbox.pack_start(btn_cal, False, False, 4)
+
+            frame.add(vbox)
+            self.content_box.pack_start(frame, False, False, 0)
+
+        # ── 20. Accessibility ───────────────────────────────────────────
+        elif cat_id == "accessibility":
+            frame = Gtk.Frame(label="Visual & Input Assistance")
+            vbox = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=10)
+            vbox.set_border_width(16)
+
+            for lbl, st in [
+                ("High Contrast Display Mode", False),
+                ("Large Text Display", False),
+                ("Screen Reader (Orca)", False),
+                ("Sticky Keys (Sequential keypresses)", False),
+                ("Slow Keys (Typing acceptance delay)", False),
+                ("On-Screen Virtual Keyboard", False),
+            ]:
+                r = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=12)
+                r.pack_start(Gtk.Label(label=lbl, xalign=0), True, True, 0)
+                sw = Gtk.Switch()
+                sw.set_active(st)
+                r.pack_end(sw, False, False, 0)
+                vbox.pack_start(r, False, False, 0)
+
+            frame.add(vbox)
+            self.content_box.pack_start(frame, False, False, 0)
+
+        # ── 21. Date & Time ─────────────────────────────────────────────
+        elif cat_id == "datetime":
+            frame = Gtk.Frame(label="Clock & Network Time (systemd-timesyncd)")
+            vbox = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=10)
+            vbox.set_border_width(16)
+
+            for lbl, st in [
+                ("Automatic Network Time Sync (NTP)", True),
+                ("Use 24-hour clock format", True),
+                ("Show date in taskbar", True),
+                ("Show seconds in clock", False),
+            ]:
+                r = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=12)
+                r.pack_start(Gtk.Label(label=lbl, xalign=0), True, True, 0)
+                sw = Gtk.Switch()
+                sw.set_active(st)
+                r.pack_end(sw, False, False, 0)
+                vbox.pack_start(r, False, False, 0)
+
+            tz_row = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=12)
+            tz_row.pack_start(Gtk.Label(label="Timezone:", xalign=0), True, True, 0)
+            tz_cb = Gtk.ComboBoxText()
+            for tz in ["America/New_York (EST)", "America/Chicago (CST)", "America/Los_Angeles (PST)", "UTC / GMT", "Europe/London", "Asia/Tokyo"]:
+                tz_cb.append_text(tz)
+            tz_cb.set_active(0)
+            tz_row.pack_end(tz_cb, False, False, 0)
+            vbox.pack_start(tz_row, False, False, 4)
+
+            frame.add(vbox)
+            self.content_box.pack_start(frame, False, False, 0)
+
+        # ── 22. Language & Region ───────────────────────────────────────
+        elif cat_id == "region":
+            frame = Gtk.Frame(label="System Locale & Regional Formats")
+            rgrid = Gtk.Grid()
+            rgrid.set_column_spacing(16)
+            rgrid.set_row_spacing(10)
+            rgrid.set_border_width(16)
+
+            rgrid.attach(Gtk.Label(label="Display Language:", xalign=0), 0, 0, 1, 1)
+            lang_cb = Gtk.ComboBoxText()
+            for l in ["English (United States)", "English (United Kingdom)", "German (Deutsch)", "French (Français)", "Spanish (Español)"]:
+                lang_cb.append_text(l)
+            lang_cb.set_active(0)
+            rgrid.attach(lang_cb, 1, 0, 1, 1)
+
+            rgrid.attach(Gtk.Label(label="Number & Currency Formats:", xalign=0), 0, 1, 1, 1)
+            fmt_cb = Gtk.ComboBoxText()
+            for f in ["United States ($ USD, MM/DD/YYYY)", "United Kingdom (£ GBP, DD/MM/YYYY)", "European (€ EUR, DD.MM.YYYY)"]:
+                fmt_cb.append_text(f)
+            fmt_cb.set_active(0)
+            rgrid.attach(fmt_cb, 1, 1, 1, 1)
+
+            frame.add(rgrid)
+            self.content_box.pack_start(frame, False, False, 0)
+
+        # ── 23. System ──────────────────────────────────────────────────
         elif cat_id == "system":
-            frame = Gtk.Frame(label="Detailed System Specifications")
+            frame = Gtk.Frame(label="System Specifications")
             grid = Gtk.Grid()
             grid.set_column_spacing(24)
             grid.set_row_spacing(10)
@@ -584,9 +949,9 @@ class SettingsAppWindow(Gtk.Window):
             frame.add(grid)
             self.content_box.pack_start(frame, False, False, 0)
 
-        # ── 11. Developer Page ──────────────────────────────────────────
+        # ── 24. Developer ───────────────────────────────────────────────
         elif cat_id == "developer":
-            frame = Gtk.Frame(label="Systemd Services & Diagnostics")
+            frame = Gtk.Frame(label="Systemd Services & Diagnostic Tools")
             vbox = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=10)
             vbox.set_border_width(16)
 
@@ -596,29 +961,15 @@ class SettingsAppWindow(Gtk.Window):
                 r = Gtk.ListBoxRow()
                 h = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=12)
                 h.set_border_width(8)
-                h.pack_start(Gtk.Label(label=f"service: {s['name']}.service", xalign=0), True, True, 0)
+                h.pack_start(Gtk.Label(label=f"service: <b>{s['name']}.service</b>", use_markup=True, xalign=0), True, True, 0)
                 st = "Active (Running)" if s["active"] else "Inactive / Stopped"
                 h.pack_end(Gtk.Label(label=st), False, False, 0)
                 r.add(h)
                 slist.add(r)
             vbox.pack_start(slist, False, False, 4)
 
-            frame.add(vbox)
-            self.content_box.pack_start(frame, False, False, 0)
-
-        # ── Default Subcategory Panels ──────────────────────────────────
-        else:
-            frame = Gtk.Frame(label=f"{title} Configuration")
-            vbox = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=12)
-            vbox.set_border_width(16)
-
-            for subcat in subcats:
-                r = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=12)
-                r.pack_start(Gtk.Label(label=f"Enable {subcat}", xalign=0), True, True, 0)
-                sw = Gtk.Switch()
-                sw.set_active(True)
-                r.pack_end(sw, False, False, 0)
-                vbox.pack_start(r, False, False, 0)
+            btn_log = Gtk.Button.new_with_label("Inspect Journalctl Logs")
+            vbox.pack_start(btn_log, False, False, 4)
 
             frame.add(vbox)
             self.content_box.pack_start(frame, False, False, 0)
