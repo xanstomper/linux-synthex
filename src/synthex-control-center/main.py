@@ -1038,6 +1038,31 @@ class SettingsAppWindow(Gtk.Window):
 
         # ── 15. Security (Complete SynthOS Security Center) ────────────
         elif cat_id == "security":
+            # 0. Synthex Aegis Endpoint Protection Banner
+            aegis_frame = Gtk.Frame(label="Synthex Aegis — Endpoint Attack Prevention")
+            aegis_vbox = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=8)
+            aegis_vbox.set_border_width(16)
+
+            aegis_h = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=16)
+            aegis_h.pack_start(Gtk.Image.new_from_icon_name("security-high", Gtk.IconSize.DIALOG), False, False, 0)
+
+            atxt_box = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=2)
+            atxt_lbl = Gtk.Label(xalign=0)
+            atxt_lbl.set_markup("<span size='large' weight='bold' color='#2ecc71'>Aegis Real-Time Behavioral Attack Defense</span>")
+            atxt_box.pack_start(atxt_lbl, False, False, 0)
+            atxt_sub = Gtk.Label(label="Active behavioral defense blocking reverse shells, privilege escalation, memory tampering, and supply-chain exploits.", xalign=0)
+            atxt_sub.set_line_wrap(True)
+            atxt_box.pack_start(atxt_sub, False, False, 0)
+            aegis_h.pack_start(atxt_box, True, True, 0)
+
+            btn_open_aegis = Gtk.Button.new_with_label("Open Synthex Aegis Hub")
+            btn_open_aegis.connect("clicked", lambda b: subprocess.Popen(["python3", "/home/jewboy420/linux-synthex/src/synthex-aegis/aegis_gui.py"]))
+            aegis_h.pack_end(btn_open_aegis, False, False, 0)
+
+            aegis_vbox.pack_start(aegis_h, False, False, 0)
+            aegis_frame.add(aegis_vbox)
+            self.content_box.pack_start(aegis_frame, False, False, 0)
+
             # 1. Firewall Master & Active Rules Table
             fw_frame = Gtk.Frame(label="Firewall Protection & Port Filter (UFW / nftables)")
             fw_vbox = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=10)
