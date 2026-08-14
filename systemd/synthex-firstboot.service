@@ -1,12 +1,12 @@
 [Unit]
 Description=SynthOS First Boot Setup
-ConditionPathExists=!/var/lib/synthex/firstboot-done
+ConditionPathExists=!/var/lib/synthex/firstboot-complete
 After=display-manager.service
 
 [Service]
 Type=oneshot
-ExecStart=/usr/lib/synthex/synthex-firstboot
-ExecStartPost=/usr/bin/touch /var/lib/synthex/firstboot-done
+ExecStart=/usr/libexec/synthex/firstboot.sh
+ExecStartPost=/usr/bin/touch /var/lib/synthex/firstboot-complete
 RemainAfterExit=yes
 
 # ── Hardening ──────────────────────────────────────────────────────────────
