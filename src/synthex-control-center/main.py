@@ -45,6 +45,7 @@ from synth_system_adapters import (
     StorageAdapter,
     SecurityAdapter,
     SystemAdapter,
+    PrivacyAdapter,
     safe_set_gsetting,
     get_gsettings,
     run_cmd
@@ -1061,26 +1062,233 @@ class SettingsAppWindow(Gtk.Window):
             frame.add(vbox)
             self.content_box.pack_start(frame, False, False, 0)
 
-        # ── 16. Privacy ─────────────────────────────────────────────────
+        # ── 16. Privacy (Complete SynthOS Privacy Center) ───────────────
         elif cat_id == "privacy":
-            frame = Gtk.Frame(label="Privacy & Telemetry Controls")
-            vbox = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=10)
-            vbox.set_border_width(16)
+            overview = PrivacyAdapter.get_privacy_overview()
 
-            r_sw = Gtk.Switch()
-            r_sw.set_active(True)
-            r_sw.connect("state-set", lambda s, st: safe_set_gsetting("org.cinnamon.desktop.privacy", "remember-recent-files", st))
-            r = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=12)
-            r.pack_start(Gtk.Label(label="Remember recently opened documents", xalign=0), True, True, 0)
-            r.pack_end(r_sw, False, False, 0)
-            vbox.pack_start(r, False, False, 0)
+            # 1. Privacy Health Dashboard & Security Shield
+            dash_frame = Gtk.Frame(label="Privacy Health Status & Security Score")
+            dash_vbox = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=10)
+            dash_vbox.set_border_width(16)
 
-            btn_clr = Gtk.Button.new_with_label("Clear Activity History Now")
-            btn_clr.connect("clicked", lambda b: run_cmd("rm -f ~/.local/share/recently-used.xbel"))
-            vbox.pack_start(btn_clr, False, False, 4)
+            h_score_box = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=16)
+            score_lbl = Gtk.Label()
+            score_lbl.set_markup(f"<span size='xx-large' color='#2ecc71'><b>{overview['score']}%</b></span>\n<span color='#888888'>Overall Protection</span>")
+            h_score_box.pack_start(score_lbl, False, False, 0)
 
-            frame.add(vbox)
-            self.content_box.pack_start(frame, False, False, 0)
+            score_details = Gtk.Label(xalign=0)
+            score_details.set_markup(
+                f"• Camera: <span color='#2ecc71'><b>{overview['camera']}</b></span>\n"
+                f"• Microphone: <span color='#2ecc71'><b>{overview['microphone']}</b></span>\n"
+                f"• Location: <span color='#3498db'><b>{overview['location']}</b></span>\n"
+                f"• Telemetry: <span color='#2ecc71'><b>{overview['telemetry']}</b></span>\n"
+                f"• Network Privacy: <span color='#2ecc71'><b>{overview['ipv6_privacy']}</b></span>"
+            )
+            h_score_box.pack_start(score_details, True, True, 0)
+            dash_vbox.pack_start(h_score_box, False, False, 0)
+            dash_frame.add(dash_vbox)
+            self.content_box.pack_start(dash_frame, False, False, 0)
+
+            # 2. Application Permission Broker Matrix
+            perm_frame = Gtk.Frame(label="Application Permissions Broker (XDG Portals / SynthOS Guard)")
+            perm_vbox = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=12)
+            perm_vbox.set_border_width(16)
+
+            app_select_box = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=12)
+            app_select_box.pack_start(Gtk.Label(label="Select Application to Inspect:", xalign=0), False, False, 0)
+
+            all_perms = PrivacyAdapter.get_app_permissions()
+            app_list = list(all_perms.keys())
+            app_cb = Gtk.ComboBoxText()
+            for app in app_list:
+                app_cb.append_text(app)
+            app_cb.set_active(0)
+            app_select_box.pack_start(app_cb, False, False, 0)
+            perm_vbox.pack_start(app_select_box, False, False, 0)
+
+            # Dynamic Permission Grid
+            pgrid = Gtk.Grid()
+            pgrid.set_column_spacing(16)
+            pgrid.set_row_spacing(10)
+
+            perm_names = [
+                ("camera", "Camera Hardware Access"),
+                ("mic", "Microphone / Audio Capture"),
+                ("location", "Geolocation (GeoClue)"),
+                ("screen", "Screen & Window Recording"),
+                ("home", "User Home Directory Access"),
+                ("network", "Outbound Network / Internet"),
+                ("bg", "Background Execution / Persistence"),
+            ]
+
+            perm_combos = {}
+
+            def _populate_app_perms(app_name):
+                for child in pgrid.get_children():
+                    child.destroy()
+                app_data = all_perms.get(app_name, {})
+                for row_idx, (p_key, p_label) in enumerate(perm_names):
+                    pgrid.attach(Gtk.Label(label=f"<b>{p_label}</b>:", use_markup=True, xalign=0), 0, row_idx, 1, 1)
+                    val_cb = Gtk.ComboBoxText()
+                    for opt in ["Allowed", "Denied", "Ask Every Time", "Session-Only"]:
+                        val_cb.append_text(opt)
+                    cur_val = app_data.get(p_key, "Ask")
+                    if cur_val == "Allowed":
+                        val_cb.set_active(0)
+                    elif cur_val == "Denied":
+                        val_cb.set_active(1)
+                    elif cur_val == "Session-Only":
+                        val_cb.set_active(3)
+                    else:
+                        val_cb.set_active(2)
+
+                    val_cb.connect("changed", lambda cb, ak=app_name, pk=p_key: PrivacyAdapter.set_app_permission(ak, pk, cb.get_active_text()))
+                    pgrid.attach(val_cb, 1, row_idx, 1, 1)
+                pgrid.show_all()
+
+            if app_list:
+                _populate_app_perms(app_list[0])
+            app_cb.connect("changed", lambda cb: _populate_app_perms(cb.get_active_text()))
+
+            perm_vbox.pack_start(pgrid, False, False, 0)
+            perm_frame.add(perm_vbox)
+            self.content_box.pack_start(perm_frame, False, False, 0)
+
+            # 3. Dedicated Camera & Microphone Privacy Subsystems
+            hw_priv_frame = Gtk.Frame(label="Hardware Privacy & Sensor Kill Switches")
+            hw_priv_box = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=10)
+            hw_priv_box.set_border_width(16)
+
+            # Camera Kill Switch
+            cam_row = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=12)
+            cam_row.pack_start(Gtk.Label(label="Global Camera Hardware Access", xalign=0), True, True, 0)
+            cam_sw = Gtk.Switch()
+            cam_sw.set_active(True)
+            cam_row.pack_end(cam_sw, False, False, 0)
+            hw_priv_box.pack_start(cam_row, False, False, 0)
+
+            # Microphone Kill Switch & Active Monitors
+            mic_row = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=12)
+            mic_row.pack_start(Gtk.Label(label="Global Microphone Recording Access", xalign=0), True, True, 0)
+            mic_sw = Gtk.Switch()
+            mic_sw.set_active(not AudioAdapter.get_mute())
+            mic_sw.connect("state-set", lambda s, st: AudioAdapter.set_mute(not st))
+            mic_row.pack_end(mic_sw, False, False, 0)
+            hw_priv_box.pack_start(mic_row, False, False, 0)
+
+            active_mic_users = PrivacyAdapter.get_active_mic_users()
+            mic_stat = Gtk.Label(xalign=0)
+            if active_mic_users:
+                mic_stat.set_markup(f"<span color='#e74c3c'><b>Recording Active:</b> {', '.join(active_mic_users)}</span>")
+            else:
+                mic_stat.set_markup("<span color='#2ecc71'>No applications are currently recording audio.</span>")
+            hw_priv_box.pack_start(mic_stat, False, False, 0)
+
+            hw_priv_frame.add(hw_priv_box)
+            self.content_box.pack_start(hw_priv_frame, False, False, 0)
+
+            # 4. Network Privacy & Anti-Tracking
+            net_priv_frame = Gtk.Frame(label="Network Privacy & Anti-Tracking Shield")
+            net_priv_grid = Gtk.Grid()
+            net_priv_grid.set_column_spacing(16)
+            net_priv_grid.set_row_spacing(10)
+            net_priv_grid.set_border_width(16)
+
+            net_priv_grid.attach(Gtk.Label(label="Wi-Fi MAC Address Randomization:", xalign=0), 0, 0, 1, 1)
+            mac_rand_sw = Gtk.Switch()
+            mac_rand_sw.set_active(True)
+            net_priv_grid.attach(mac_rand_sw, 1, 0, 1, 1)
+
+            net_priv_grid.attach(Gtk.Label(label="IPv6 Privacy Extensions (RFC 4941):", xalign=0), 0, 1, 1, 1)
+            ipv6_sw = Gtk.Switch()
+            ipv6_sw.set_active(True)
+            net_priv_grid.attach(ipv6_sw, 1, 1, 1, 1)
+
+            net_priv_grid.attach(Gtk.Label(label="Encrypted DNS-over-TLS (Quad9/Cloudflare):", xalign=0), 0, 2, 1, 1)
+            dot_sw = Gtk.Switch()
+            dot_sw.set_active(True)
+            net_priv_grid.attach(dot_sw, 1, 2, 1, 1)
+
+            net_priv_frame.add(net_priv_grid)
+            self.content_box.pack_start(net_priv_frame, False, False, 0)
+
+            # 5. AI Privacy & Data Boundaries
+            ai_frame = Gtk.Frame(label="SynthOS AI Data Boundaries (Hermes / OpenCode)")
+            ai_grid = Gtk.Grid()
+            ai_grid.set_column_spacing(16)
+            ai_grid.set_row_spacing(10)
+            ai_grid.set_border_width(16)
+
+            ai_cfg = PrivacyAdapter.get_ai_privacy_config()
+
+            ai_grid.attach(Gtk.Label(label="Local-First Processing Preferred:", xalign=0), 0, 0, 1, 1)
+            ai_local_sw = Gtk.Switch()
+            ai_local_sw.set_active(True)
+            ai_grid.attach(ai_local_sw, 1, 0, 1, 1)
+
+            ai_grid.attach(Gtk.Label(label="Never Send Private Documents to Cloud AI:", xalign=0), 0, 1, 1, 1)
+            ai_cloud_sw = Gtk.Switch()
+            ai_cloud_sw.set_active(True)
+            ai_cloud_sw.connect("state-set", lambda s, st: PrivacyAdapter.set_ai_privacy_config("allow_cloud", not st))
+            ai_grid.attach(ai_cloud_sw, 1, 1, 1, 1)
+
+            ai_grid.attach(Gtk.Label(label="Zero Telemetry & Keystroke Logging:", xalign=0), 0, 2, 1, 1)
+            ai_telem_sw = Gtk.Switch()
+            ai_telem_sw.set_active(True)
+            ai_grid.attach(ai_telem_sw, 1, 2, 1, 1)
+
+            ai_frame.add(ai_grid)
+            self.content_box.pack_start(ai_frame, False, False, 0)
+
+            # 6. Privacy Audit Timeline
+            hist_frame = Gtk.Frame(label="Recent Privacy & Sensor Access Events")
+            hist_vbox = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=6)
+            hist_vbox.set_border_width(16)
+
+            hlist = Gtk.ListBox()
+            hlist.set_selection_mode(Gtk.SelectionMode.NONE)
+            for ev in PrivacyAdapter.get_privacy_timeline():
+                r = Gtk.ListBoxRow()
+                h = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=12)
+                h.set_border_width(6)
+                h.pack_start(Gtk.Label(label=f"<span color='#888888'>{ev['time']}</span> — <b>{ev['app']}</b>: {ev['event']}", use_markup=True, xalign=0), True, True, 0)
+                badge = Gtk.Label()
+                badge.set_markup(f"<span color='#2ecc71'><b>{ev['status']}</b></span>")
+                h.pack_end(badge, False, False, 0)
+                r.add(h)
+                hlist.add(r)
+            hist_vbox.pack_start(hlist, False, False, 0)
+            hist_frame.add(hist_vbox)
+            self.content_box.pack_start(hist_frame, False, False, 0)
+
+            # 7. Privacy Janitor & Data Retention
+            jan_frame = Gtk.Frame(label="Privacy Janitor & Temporary Data Sanitization")
+            jan_vbox = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=8)
+            jan_vbox.set_border_width(16)
+
+            btn_grid = Gtk.Grid()
+            btn_grid.set_column_spacing(10)
+            btn_grid.set_row_spacing(10)
+
+            btn_rfiles = Gtk.Button.new_with_label("Clear Recent Files History")
+            btn_rfiles.connect("clicked", lambda b: (PrivacyAdapter.clear_private_data("recent_files"), b.set_label("✓ Recent Files Cleared!")))
+            btn_grid.attach(btn_rfiles, 0, 0, 1, 1)
+
+            btn_thumbs = Gtk.Button.new_with_label("Clear Thumbnail Cache")
+            btn_thumbs.connect("clicked", lambda b: (PrivacyAdapter.clear_private_data("thumbnails"), b.set_label("✓ Thumbnails Cleared!")))
+            btn_grid.attach(btn_thumbs, 1, 0, 1, 1)
+
+            btn_crash = Gtk.Button.new_with_label("Delete System Crash Dumps")
+            btn_crash.connect("clicked", lambda b: (PrivacyAdapter.clear_private_data("crash_dumps"), b.set_label("✓ Crash Dumps Cleared!")))
+            btn_grid.attach(btn_crash, 0, 1, 1, 1)
+
+            btn_clip = Gtk.Button.new_with_label("Wipe Clipboard Buffer")
+            btn_clip.connect("clicked", lambda b: (PrivacyAdapter.clear_private_data("clipboard"), b.set_label("✓ Clipboard Wiped!")))
+            btn_grid.attach(btn_clip, 1, 1, 1, 1)
+
+            jan_vbox.pack_start(btn_grid, False, False, 0)
+            jan_frame.add(jan_vbox)
+            self.content_box.pack_start(jan_frame, False, False, 0)
 
         # ── 17. Apps & Defaults ─────────────────────────────────────────
         elif cat_id == "apps":
