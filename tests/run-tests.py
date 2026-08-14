@@ -983,6 +983,29 @@ check("no personal User= in units", len(_leak) == 0, str(_leak[:3]))
 for _f in ["build/scripts/make-srctars.sh", "build/scripts/local-repo.sh"]:
     check(f"pipeline: {_f}", _os.access(_os.path.join(ROOT, _f), _os.X_OK))
 
+# 71. Synthex Aegis Behavioral Attack Prevention Suite
+print("\n📋 Synthex Aegis Endpoint Security:")
+aegis_dir = os.path.join(ROOT, "src", "synthex-aegis")
+check("aegis engine exists", os.path.exists(os.path.join(aegis_dir, "aegis_engine.py")))
+check("aegis gui exists", os.path.exists(os.path.join(aegis_dir, "aegis_gui.py")))
+check("aegis daemon exists", os.path.exists(os.path.join(aegis_dir, "aegis_daemon.py")))
+check("aegis desktop launcher exists", os.path.exists(os.path.join(aegis_dir, "synthex-aegis.desktop")))
+
+# Verify Aegis Behavioral Engine functionality
+try:
+    sys.path.insert(0, aegis_dir)
+    from aegis_engine import AegisEngine
+    ae = AegisEngine.get_instance()
+    check("aegis engine instance initialized", ae is not None)
+    status = ae.get_status()
+    check("aegis realtime protection active", status.get("realtime_active") is True)
+    check("aegis reverse shell shield active", status.get("reverse_shell_shield") is True)
+    check("aegis memory integrity shield active", status.get("memory_integrity") is True)
+    check("aegis integrity baselines audit", isinstance(ae.audit_system_baselines(), list))
+    check("aegis SUID privilege escalation auditor", isinstance(ae.audit_suid_binaries(), list))
+except Exception as _e:
+    check("aegis engine functional validation", False, str(_e))
+
 # Summary
 print(f"\n{'='*50}")
 print(f"  RESULTS: {passed} passed, {failed} failed")
