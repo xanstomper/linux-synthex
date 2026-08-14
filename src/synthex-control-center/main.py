@@ -30,36 +30,56 @@ gi.require_version("Gtk", "3.0")
 from gi.repository import Gtk, Gdk, GLib, Gio
 
 MODULES = [
-    # (id, label, icon-name, description, category, [external commands to try])
-    ("backgrounds",  "Backgrounds",           "preferences-desktop-wallpaper",          "Desktop wallpaper",              "Appearance", None),
-    ("themes",       "Themes",                "preferences-desktop-theme",              "Window borders, icons, controls","Appearance", None),
-    ("fonts",        "Font Selection",         "preferences-desktop-font",               "System fonts",                   "Appearance", None),
-    ("effects",      "Effects",               "preferences-desktop-effects",             "Animations and transitions",     "Appearance", None),
+    # Appearance
+    ("backgrounds",  "Backgrounds",           "preferences-desktop-wallpaper",          "Desktop wallpaper",              "Appearance", ["cinnamon-settings backgrounds"]),
+    ("effects",      "Effects",               "preferences-desktop-effects",             "Animations and transitions",     "Appearance", ["cinnamon-settings effects"]),
+    ("fonts",        "Font Selection",         "preferences-desktop-font",               "System fonts",                   "Appearance", ["cinnamon-settings fonts"]),
+    ("themes",       "Themes",                "preferences-desktop-theme",              "Window borders, icons, controls","Appearance", ["cinnamon-settings themes"]),
 
-    ("account",      "Account Details",        "system-users",                           "User profile and password",      "Preferences", None),
-    ("datetime",     "Date & Time",            "preferences-system-time",                "Clock, timezone, NTP",           "Preferences", ["cinnamon-settings", "date"]),
-    ("preferred",    "Preferred Applications", "preferences-desktop-default-applications","Default browser, terminal",      "Preferences", None),
-    ("notifications","Notifications",          "preferences-desktop-notification",        "Popup settings",                 "Preferences", None),
-    ("privacy",      "Privacy",               "preferences-system-privacy",              "Permissions and history",        "Preferences", None),
-    ("startup",      "Startup Applications",  "session-properties",                      "Autostart programs",             "Preferences", None),
-    ("accessibility","Accessibility",          "preferences-desktop-accessibility",       "Visual and input aids",          "Preferences", None),
-    ("windows",      "Windows",               "preferences-system-windows",              "Focus, titlebar, alt-tab",       "Preferences", None),
-    ("workspaces",   "Workspaces",            "preferences-desktop-workspaces",           "Virtual desktops",               "Preferences", None),
+    # Preferences
+    ("accessibility","Accessibility",          "preferences-desktop-accessibility",       "Visual and input aids",          "Preferences", ["cinnamon-settings accessibility"]),
+    ("account",      "Account Details",        "system-users",                           "User profile and password",      "Preferences", ["cinnamon-settings user"]),
+    ("applets",      "Applets",               "cs-applets",                             "Panel applets",                  "Preferences", ["cinnamon-settings applets"]),
+    ("datetime",     "Date & Time",            "preferences-system-time",                "Clock, timezone, NTP",           "Preferences", ["cinnamon-settings calendar"]),
+    ("desklets",     "Desklets",              "cs-desklets",                            "Desktop widgets",                "Preferences", ["cinnamon-settings desklets"]),
+    ("desktop",      "Desktop",               "cs-desktop",                             "Desktop icons",                  "Preferences", ["cinnamon-settings desktop"]),
+    ("extensions",   "Extensions",            "cs-extensions",                          "Cinnamon extensions",            "Preferences", ["cinnamon-settings extensions"]),
+    ("general",      "General",               "cs-general",                             "General settings",               "Preferences", ["cinnamon-settings general"]),
+    ("hotcorners",   "Hot Corners",           "cs-hotcorners",                          "Screen corner actions",          "Preferences", ["cinnamon-settings hotcorner"]),
+    ("inputmethod",  "Input Method",          "cs-input-method",                        "Language input methods",         "Preferences", ["mintlocale-im"]),
+    ("languages",    "Languages",             "cs-language",                            "System language",                "Preferences", ["mintlocale"]),
+    ("notifications","Notifications",          "preferences-desktop-notification",        "Popup settings",                 "Preferences", ["cinnamon-settings notifications"]),
+    ("onlineacc",    "Online Accounts",       "gnome-online-accounts-gtk",              "Google, Nextcloud, etc.",        "Preferences", ["gnome-online-accounts-gtk"]),
+    ("panel",        "Panel",                 "cs-panel",                               "Taskbar settings",               "Preferences", ["cinnamon-settings panel"]),
+    ("preferred",    "Preferred Apps",        "preferences-desktop-default-applications","Default browser, terminal",      "Preferences", ["cinnamon-settings default"]),
+    ("privacy",      "Privacy",               "preferences-system-privacy",              "Permissions and history",        "Preferences", ["cinnamon-settings privacy"]),
+    ("screensaver",  "Screensaver",           "cs-screensaver",                         "Lock screen settings",           "Preferences", ["cinnamon-settings screensaver"]),
+    ("startup",      "Startup Apps",          "session-properties",                      "Autostart programs",             "Preferences", ["cinnamon-settings startup"]),
+    ("windows",      "Windows",               "preferences-system-windows",              "Focus, titlebar, alt-tab",       "Preferences", ["cinnamon-settings windows"]),
+    ("workspaces",   "Workspaces",            "preferences-desktop-workspaces",           "Virtual desktops",               "Preferences", ["cinnamon-settings workspaces"]),
 
-    ("display",      "Display",               "preferences-desktop-display",              "Resolution, scaling, layout",    "Hardware", ["wdisplays", "nwg-displays", "arandr"]),
-    ("network",      "Network",               "preferences-system-network",               "Wi-Fi, Ethernet, VPN",           "Hardware", ["nm-connection-editor"]),
-    ("bluetooth",    "Bluetooth",             "bluetooth",                                "Paired devices",                 "Hardware", ["blueman-manager"]),
-    ("sound",        "Sound",                 "multimedia-volume-control",                 "Volume, output, microphone",     "Hardware", ["pavucontrol"]),
-    ("power",        "Power Management",      "preferences-system-power",                 "Battery, sleep, profiles",       "Hardware", None),
-    ("keyboard",     "Keyboard",              "preferences-desktop-keyboard",              "Layouts and shortcuts",          "Hardware", None),
-    ("mouse",        "Mouse and Touchpad",    "input-mouse",                              "Speed, scrolling, gestures",     "Hardware", None),
-    ("sysinfo",      "System Info",           "dialog-information",                       "Hardware and OS details",        "Hardware", None),
+    # Hardware
+    ("bluetooth",    "Bluetooth",             "bluetooth",                                "Paired devices",                 "Hardware", ["blueman-manager", "blueberry"]),
+    ("color",        "Color",                 "cs-color",                               "Color profiles",                 "Hardware", ["cinnamon-settings color"]),
+    ("disks",        "Disks",                 "org.gnome.DiskUtility",                  "Drive management",               "Hardware", ["gnome-disks"]),
+    ("display",      "Display",               "preferences-desktop-display",              "Resolution, scaling, layout",    "Hardware", ["cinnamon-settings display"]),
+    ("keyboard",     "Keyboard",              "preferences-desktop-keyboard",              "Layouts and shortcuts",          "Hardware", ["cinnamon-settings keyboard"]),
+    ("mouse",        "Mouse and Touchpad",    "input-mouse",                              "Speed, scrolling, gestures",     "Hardware", ["cinnamon-settings mouse"]),
+    ("network",      "Network",               "preferences-system-network",               "Wi-Fi, Ethernet, VPN",           "Hardware", ["cinnamon-settings network"]),
+    ("power",        "Power Management",      "preferences-system-power",                 "Battery, sleep, profiles",       "Hardware", ["cinnamon-settings power"]),
+    ("printers",     "Printers",              "cs-printer",                             "Printers and queues",            "Hardware", ["system-config-printer"]),
+    ("sound",        "Sound",                 "multimedia-volume-control",                 "Volume, output, microphone",     "Hardware", ["cinnamon-settings sound"]),
+    ("sysinfo",      "System Info",           "dialog-information",                       "Hardware and OS details",        "Hardware", ["mintreport"]),
+    ("tablet",       "Graphics Tablet",       "cs-tablet",                              "Stylus and tablet mapping",      "Hardware", ["cinnamon-settings wacom"]),
 
-    ("update",       "Update Manager",        "system-software-update",                   "Package updates",                "Administration", ["mintupdate", "pamac-manager", "gnome-software"]),
-    ("driver",       "Driver Manager",        "application-x-firmware",                   "Hardware drivers",               "Administration", ["driver-manager", "software-properties-gtk"]),
-    ("firewall",     "Firewall",              "network-server",                            "Network security rules",         "Administration", ["gufw", "firewall-config"]),
-    ("backup",       "Backup Tool",           "drive-harddisk",                            "Snapshots and restore",          "Administration", ["timeshift-gtk", "timeshift"]),
-    ("users",        "Users and Groups",      "system-users",                              "System accounts",                "Administration", ["cinnamon-settings-users", "users-admin", "gnome-system-monitor"]),
+    # Administration
+    ("driver",       "Driver Manager",        "cs-drivers",                               "Hardware drivers",               "Administration", ["pkexec driver-manager", "driver-manager"]),
+    ("firewall",     "Firewall",              "cs-firewall",                              "Network security rules",         "Administration", ["gufw", "firewall-config"]),
+    ("login",        "Login Window",          "cs-login",                               "Login screen settings",          "Administration", ["pkexec lightdm-settings"]),
+    ("sources",      "Software Sources",      "cs-sources",                             "PPA and repositories",           "Administration", ["pkexec mintsources", "mintsources"]),
+    ("backup",       "Timeshift",             "timeshift",                              "Snapshots and restore",          "Administration", ["timeshift-launcher", "timeshift-gtk"]),
+    ("update",       "Update Manager",        "mintupdate",                             "Package updates",                "Administration", ["mintupdate"]),
+    ("users",        "Users and Groups",      "cs-user-accounts",                         "System accounts",                "Administration", ["cinnamon-settings-users", "users-admin"]),
 ]
 
 
@@ -173,15 +193,17 @@ class SettingsWindow(Gtk.Window):
     def _on_click(self, btn, mod_id, label, ext):
         # Try launching a real native tool first
         if ext:
-            for cmd in ext:
-                if shutil.which(cmd):
+            import shlex
+            for cmd_str in ext:
+                cmd_parts = shlex.split(cmd_str)
+                if cmd_parts and shutil.which(cmd_parts[0]):
                     try:
-                        subprocess.Popen([cmd])
+                        subprocess.Popen(cmd_parts)
                         return
                     except Exception:
                         pass
 
-        # Show built-in panel
+        # Show built-in panel as fallback
         self.hb.set_title(label)
         self.back_btn.show()
         self.search.hide()
