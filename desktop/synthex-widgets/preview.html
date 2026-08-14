@@ -85,12 +85,28 @@
     border: 1px solid var(--border-glass);
     box-shadow: inset 0 1px 0 var(--sheen-top), 0 20px 50px rgba(0, 0, 0, 0.55);
     border-radius: var(--radius-card);
-    transition: transform 0.28s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 0.28s ease, border-color 0.2s ease;
+    transition: transform 0.28s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 0.28s ease, border-color 0.2s ease, background 0.3s ease;
   }
   .liquid-glass:hover {
     transform: translateY(-4px) scale(1.015);
     border-color: var(--border-glass-hi);
     box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.35), 0 26px 65px rgba(0, 0, 0, 0.65);
+  }
+
+  /* Solid Matte Mode */
+  .desktop-viewport.matte-mode .liquid-glass {
+    background: #141923 !important;
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
+    border: 1px solid rgba(255, 255, 255, 0.08) !important;
+    box-shadow: 0 16px 36px rgba(0, 0, 0, 0.5) !important;
+  }
+  .desktop-viewport.matte-mode .top-pill,
+  .desktop-viewport.matte-mode .bottom-dock {
+    background: #12161F !important;
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
+    border: 1px solid rgba(255, 255, 255, 0.08) !important;
   }
 
   /* Top Status Pill */
@@ -684,6 +700,12 @@
 
   <!-- Live Customizer Switcher Bar -->
   <div class="control-strip">
+    <span style="font-size:12px; font-weight:700; color:var(--text-sub)">FINISH:</span>
+    <button class="strip-btn active" id="btnGlass" onclick="setStyle('glass', this)">✨ Liquid Glass</button>
+    <button class="strip-btn" id="btnMatte" onclick="setStyle('matte', this)">⬛ Solid Matte</button>
+
+    <div style="width:1px; height:20px; background:rgba(255,255,255,0.1)"></div>
+
     <span style="font-size:12px; font-weight:700; color:var(--text-sub)">WALLPAPER:</span>
     <button class="strip-btn active" onclick="setWallpaper('wp-nebula', this)">🌌 Nebula</button>
     <button class="strip-btn" onclick="setWallpaper('wp-cyber', this)">⚡ Cyber Wave</button>
@@ -730,9 +752,22 @@
     drawSpark('c2', '#BB9AF7', 'rgba(187, 154, 247, 0.25)', [0.4, 0.42, 0.5, 0.46, 0.52, 0.48, 0.62, 0.45, 0.46, 0.5, 0.46]);
     drawSpark('c3', '#E5A84B', 'rgba(229, 168, 75, 0.25)', [0.55, 0.6, 0.58, 0.61, 0.63, 0.6, 0.65, 0.62, 0.61, 0.61, 0.61]);
 
+    function setStyle(mode, btn) {
+      const vp = document.getElementById('viewport');
+      if (mode === 'matte') {
+        vp.classList.add('matte-mode');
+      } else {
+        vp.classList.remove('matte-mode');
+      }
+      document.getElementById('btnGlass').classList.remove('active');
+      document.getElementById('btnMatte').classList.remove('active');
+      btn.classList.add('active');
+    }
+
     function setWallpaper(wpClass, btn) {
       const vp = document.getElementById('viewport');
-      vp.className = 'desktop-viewport ' + wpClass;
+      const isMatte = vp.classList.contains('matte-mode');
+      vp.className = 'desktop-viewport ' + wpClass + (isMatte ? ' matte-mode' : '');
       document.querySelectorAll('.control-strip button').forEach(b => {
         if (b.innerText.includes('Nebula') || b.innerText.includes('Cyber') || b.innerText.includes('Sunset')) {
           b.classList.remove('active');

@@ -69,6 +69,121 @@ Rectangle {
                 width: root.width - 40
                 spacing: 18
 
+                // ── 0. Finish / Style (Liquid Glass vs Solid Matte) ────────
+                ColumnLayout {
+                    Layout.fillWidth: true
+                    spacing: 8
+
+                    Text {
+                        text: "FINISH & EFFECT"
+                        font.family: "Inter"
+                        font.pixelSize: 11
+                        font.bold: true
+                        color: (typeof systemBridge !== "undefined" && systemBridge) ? systemBridge.accentColor : "#7AA2F7"
+                    }
+
+                    RowLayout {
+                        Layout.fillWidth: true
+                        spacing: 12
+
+                        // Liquid Glass
+                        Rectangle {
+                            Layout.fillWidth: true
+                            Layout.preferredHeight: 52
+                            radius: 10
+                            color: ((!systemBridge || systemBridge.styleMode === "glass") ? "#257aa2f7" : "#08ffffff")
+                            border.color: ((!systemBridge || systemBridge.styleMode === "glass") ? ((typeof systemBridge !== "undefined" && systemBridge) ? systemBridge.accentColor : "#7AA2F7") : "#1fffffff")
+                            border.width: 1.5
+
+                            RowLayout {
+                                anchors.fill: parent
+                                anchors.margins: 10
+                                spacing: 10
+
+                                Text {
+                                    text: "✨"
+                                    font.pixelSize: 18
+                                }
+
+                                ColumnLayout {
+                                    spacing: 1
+                                    Layout.fillWidth: true
+
+                                    Text {
+                                        text: "Liquid Glass"
+                                        font.family: "Inter"
+                                        font.pixelSize: 12
+                                        font.bold: true
+                                        color: "#FFFFFF"
+                                    }
+                                    Text {
+                                        text: "Translucent sheen & blur"
+                                        font.family: "Inter"
+                                        font.pixelSize: 10
+                                        color: "#A0AAB8"
+                                    }
+                                }
+                            }
+
+                            MouseArea {
+                                anchors.fill: parent
+                                cursorShape: Qt.PointingHandCursor
+                                onClicked: {
+                                    if (typeof systemBridge !== "undefined" && systemBridge) systemBridge.setStyleMode("glass")
+                                }
+                            }
+                        }
+
+                        // Solid Matte
+                        Rectangle {
+                            Layout.fillWidth: true
+                            Layout.preferredHeight: 52
+                            radius: 10
+                            color: (systemBridge && systemBridge.styleMode === "matte") ? "#257aa2f7" : "#08ffffff"
+                            border.color: (systemBridge && systemBridge.styleMode === "matte") ? ((typeof systemBridge !== "undefined" && systemBridge) ? systemBridge.accentColor : "#7AA2F7") : "#1fffffff"
+                            border.width: 1.5
+
+                            RowLayout {
+                                anchors.fill: parent
+                                anchors.margins: 10
+                                spacing: 10
+
+                                Text {
+                                    text: "⬛"
+                                    font.pixelSize: 18
+                                }
+
+                                ColumnLayout {
+                                    spacing: 1
+                                    Layout.fillWidth: true
+
+                                    Text {
+                                        text: "Solid Matte"
+                                        font.family: "Inter"
+                                        font.pixelSize: 12
+                                        font.bold: true
+                                        color: "#FFFFFF"
+                                    }
+                                    Text {
+                                        text: "Deep slate, crisp focus"
+                                        font.family: "Inter"
+                                        font.pixelSize: 10
+                                        color: "#A0AAB8"
+                                    }
+                                }
+                            }
+
+                            MouseArea {
+                                anchors.fill: parent
+                                cursorShape: Qt.PointingHandCursor
+                                onClicked: {
+                                    if (typeof systemBridge !== "undefined" && systemBridge) systemBridge.setStyleMode("matte")
+                                }
+                            }
+                        }
+                    }
+                }
+
                 // ── 1. Preset Themes ───────────────────────────────────────
                 ColumnLayout {
                     Layout.fillWidth: true

@@ -107,11 +107,11 @@ cp -r desktop/hyprland/wofi-style.css \
     %{buildroot}%{_sysconfdir}/wofi/style.css
 
 # Mako
-install -m 0644 desktop/hyprland/mako-config \
+install -m 0644 desktop/hyprland/mako.conf \
     %{buildroot}%{_sysconfdir}/mako/config
 
 # Kitty
-cp -r desktop/hyprland/kitty/* \
+cp -r configs/terminal/kitty/kitty.conf configs/terminal/kitty/nova.conf \
     %{buildroot}%{_sysconfdir}/skel/.config/kitty/
 
 # Scripts
@@ -121,10 +121,30 @@ install -m 0755 desktop/hyprland/scripts/* \
 # Wayland session
 install -m 0644 desktop/hyprland/synthex-hyprland.desktop \
     %{buildroot}%{_datadir}/wayland-sessions/
+install -m 0755 desktop/hyprland/synthex-hyprland-session \
+    %{buildroot}%{_bindir}/synthex-hyprland-session
 
-# Skeleton configs
-cp -r desktop/hyprland/skel/* \
-    %{buildroot}%{_sysconfdir}/skel/.config/
+# Skeleton configs for new users (canonical sources)
+install -m 0644 desktop/hyprland/hyprland.conf \
+    %{buildroot}%{_sysconfdir}/skel/.config/hypr/hyprland.conf
+install -m 0644 desktop/hyprland/hyprpaper.conf \
+    %{buildroot}%{_sysconfdir}/skel/.config/hypr/hyprpaper.conf
+install -m 0644 desktop/hyprland/wofi-config \
+    %{buildroot}%{_sysconfdir}/skel/.config/wofi/config
+install -m 0644 desktop/hyprland/wofi-style.css \
+    %{buildroot}%{_sysconfdir}/skel/.config/wofi/style.css
+install -m 0644 desktop/hyprland/mako.conf \
+    %{buildroot}%{_sysconfdir}/skel/.config/mako/config
+install -m 0644 desktop/hyprland/waybar-config.jsonc \
+    %{buildroot}%{_sysconfdir}/skel/.config/waybar/config.jsonc
+install -m 0644 desktop/hyprland/waybar-style.css \
+    %{buildroot}%{_sysconfdir}/skel/.config/waybar/style.css
+install -Dm 0644 configs/terminal/fish/30-synthex.fish \
+    %{buildroot}%{_sysconfdir}/skel/.config/fish/conf.d/30-synthex.fish
+install -Dm 0644 configs/terminal/starship/starship.toml \
+    %{buildroot}%{_sysconfdir}/skel/.config/starship/starship.toml
+install -Dm 0644 configs/terminal/fastfetch/config.jsonc \
+    %{buildroot}%{_sysconfdir}/skel/.config/fastfetch/config.jsonc
 
 # ─── Post-install ─────────────────────────────────────────────────────────
 %post
@@ -147,6 +167,7 @@ mkdir -p /etc/skel/.config/hypr 2>/dev/null || true
 %dir %{_datadir}/synthex/hyprland
 %{_datadir}/synthex/hyprland/scripts/
 %{_datadir}/wayland-sessions/synthex-hyprland.desktop
+%{_bindir}/synthex-hyprland-session
 %config %{_sysconfdir}/skel/.config/
 %license LICENSE
 

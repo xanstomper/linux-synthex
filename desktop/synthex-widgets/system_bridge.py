@@ -87,6 +87,7 @@ THEME_PRESETS = {
 
 DEFAULT_CONFIG = {
     "theme": "nova",
+    "styleMode": "glass",  # "glass" or "matte"
     "accentColor": "#7AA2F7",
     "secondaryColor": "#BB9AF7",
     "surfaceColor": "#141923",
@@ -215,6 +216,10 @@ class SystemBridge(QObject):
     @Property(str, notify=configChanged)
     def currentTheme(self):
         return self._config.get("theme", "nova")
+
+    @Property(str, notify=configChanged)
+    def styleMode(self):
+        return self._config.get("styleMode", "glass")
 
     @Property(str, notify=configChanged)
     def accentColor(self):
@@ -417,6 +422,13 @@ class SystemBridge(QObject):
             self._config["secondaryColor"] = preset["secondary"]
             self._config["surfaceColor"] = preset["surface"]
             self._config["dockColor"] = preset["dock"]
+            self._save_config()
+            self.configChanged.emit()
+
+    @Slot(str)
+    def setStyleMode(self, mode: str):
+        if mode in ("glass", "matte"):
+            self._config["styleMode"] = mode
             self._save_config()
             self.configChanged.emit()
 

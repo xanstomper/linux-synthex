@@ -49,7 +49,9 @@ def load_config():
             "dock": True,
             "topPill": True
         },
+        "dockPosition": "bottom",
         "performanceMode": "balanced",
+        "styleMode": "glass",
         "eqPreset": "Balanced"
     }
 
@@ -64,6 +66,10 @@ def save_config(cfg):
 def main():
     parser = argparse.ArgumentParser(description="SynthOS Desktop Rice & Theme Customizer")
     subparsers = parser.add_subparsers(dest="command")
+
+    # Style command (Liquid Glass vs Solid Matte)
+    style_p = subparsers.add_parser("style", help="Set visual finish (glass vs matte)")
+    style_p.add_argument("mode", choices=["glass", "matte", "current"], help="Visual finish style")
 
     # Theme command
     theme_p = subparsers.add_parser("theme", help="Manage desktop themes")
@@ -85,7 +91,16 @@ def main():
     args = parser.parse_args()
     cfg = load_config()
 
-    if args.command == "theme":
+    if args.command == "style":
+        if args.mode == "current":
+            print(f"Current finish style: {cfg.get('styleMode', 'glass')}")
+        else:
+            cfg["styleMode"] = args.mode
+            save_config(cfg)
+            print(f"Finish style set to: \033[1m{args.mode.upper()}\033[0m")
+        return
+
+    elif args.command == "theme":
         if args.name == "list":
             print("\nAvailable SynthOS Themes:")
             for t in THEME_PRESETS:

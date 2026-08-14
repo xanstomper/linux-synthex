@@ -78,8 +78,6 @@ mkdir -p %{buildroot}%{_datadir}/kstyle/themes
 mkdir -p %{buildroot}%{_datadir}/color-schemes
 mkdir -p %{buildroot}%{_datadir}/aurorae/themes
 mkdir -p %{buildroot}%{_datadir}/kwin/effects
-mkdir -p %{buildroot}%{_datadir}/sddm/themes/synthex
-mkdir -p %{buildroot}%{_datadir}/wayland-sessions
 mkdir -p %{buildroot}%{_sysconfdir}/skel/.config
 
 # Default settings

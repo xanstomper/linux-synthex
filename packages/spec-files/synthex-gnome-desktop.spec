@@ -98,17 +98,9 @@ install -m 0644 desktop/gnome/synthex-shell.css \
 cp -r desktop/gnome/gdm-theme/* \
     %{buildroot}%{_datadir}/gdm/themes/synthex/
 
-# Extension presets (default configuration schemas)
-cp -r desktop/gnome/extension-schemas/* \
-    %{buildroot}%{_datadir}/synthex/gnome/extensions/
-
 # GSettings overrides (applied system-wide)
 install -m 0644 desktop/gnome/gsettings/10-synthex-gnome.gschema.override \
     %{buildroot}%{_datadir}/glib-2.0/schemas/
-
-# Synthex Extras config panel
-cp -r desktop/gnome/synthex-extras-panel/* \
-    %{buildroot}%{_datadir}/synthex/gnome/config/
 
 # Synthex-specific scripts (OOBE modifications)
 install -m 0755 desktop/gnome/scripts/* \
