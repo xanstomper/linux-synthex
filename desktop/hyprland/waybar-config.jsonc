@@ -1,165 +1,155 @@
 // ╔══════════════════════════════════════════════════════════════╗
-// ║  SynthOS Nova — Waybar dock configuration                      ║
-// ║  Layout from reference: TALL CENTERED FLOATING ICON DOCK      ║
-// ║  (bottom, ~85% width, big spaced icons, #161C22)              ║
+// ║  SynthOS Nova — Waybar Multi-Bar Configuration                  ║
+// ║  Exact match to reference rice:                                ║
+// ║  1. Top Floating Status Pill: [ ● Date  Time ]                ║
+// ║  2. Bottom Floating Island Dock:                              ║
+// ║     [ Left Tools | Center Pinned & Active Apps | Right Status]║
 // ╚══════════════════════════════════════════════════════════════╝
-{
-    "layer": "top",
-    "position": "bottom",
-    "height": 72,
-    // Floating dock: pulled off all edges, centered ~85% width
-    "margin-top": 0,
-    "margin-bottom": 12,
-    "margin-left": 140,
-    "margin-right": 140,
-    "mod": "JSONC",
-
-    // ─── Modules ──────────────────────────────────────────────────────────
-    "modules-left": [
-        "custom/launcher",
-        "hyprland/workspaces"
-    ],
-    "modules-center": [
-        "wlr/taskbar"
-    ],
-    "modules-right": [
-        "custom/media",
-        "gamemode",
-        "tray",
-        "pulseaudio",
-        "network",
-        "bluetooth",
-        "battery",
-        "clock"
-    ],
-
-    // ─── Workspaces (compact numerals at dock left) ───────────────────────
-    "hyprland/workspaces": {
-        "disable-scroll": false,
-        "all-outputs": false,
-        "format": "{icon}",
-        "format-icons": {
-            "1": "1", "2": "2", "3": "3", "4": "4",
-            "5": "5", "6": "6", "7": "7", "8": "8", "9": "9",
-            "urgent": "!",
-            "default": "{index}"
+[
+    // ─── 1. TOP FLOATING STATUS PILL ──────────────────────────────────────────
+    {
+        "name": "top-pill",
+        "layer": "top",
+        "position": "top",
+        "height": 38,
+        "width": 320,
+        "margin-top": 14,
+        "margin-bottom": 0,
+        "modules-center": [
+            "custom/top-dot",
+            "clock#top"
+        ],
+        "custom/top-dot": {
+            "format": "●",
+            "tooltip": "SynthOS Status: Active & Synced"
         },
-        "on-click": "hyprctl workspace {name}",
-        "persistent_workspaces": { "1": [], "2": [], "3": [], "4": [], "5": [] }
+        "clock#top": {
+            "format": "{:%a, %d %B %Y   %I:%M %p}",
+            "format-alt": "{:%Y-%m-%d  %H:%M:%S}",
+            "tooltip-format": "<big>{:%Y %B}</big>\n<tt><small>{calendar}</small></tt>",
+            "interval": 1
+        }
     },
 
-    // ─── Taskbar: ICON-ONLY, large, evenly spaced (reference dock) ────────
-    "wlr/taskbar": {
-        "format": "{icon}",
-        "icon-size": 34,
-        "icon-theme": "Papirus-Dark",
-        "tooltip": true,
-        "on-click": "activate",
-        "on-click-middle": "close",
-        "ignore-list": ["kitty"],
-        "app_ids-mapping": { "firefox": "firefox" }
-    },
+    // ─── 2. BOTTOM FLOATING ISLAND DOCK ───────────────────────────────────────
+    {
+        "name": "bottom-dock",
+        "layer": "top",
+        "position": "bottom",
+        "height": 64,
+        "margin-bottom": 16,
+        "margin-left": 180,
+        "margin-right": 180,
+        "modules-left": [
+            "custom/launcher",
+            "custom/search",
+            "custom/workspaces",
+            "custom/notifications"
+        ],
+        "modules-center": [
+            "wlr/taskbar"
+        ],
+        "modules-right": [
+            "network",
+            "bluetooth",
+            "pulseaudio",
+            "battery",
+            "clock#dock"
+        ],
 
-    // ─── Window title (hidden — dock is icon-driven) ──────────────────────
-    "hyprland/window": {
-        "format": "{}",
-        "max-length": 40,
-        "rewrite": { "": "" }
-    },
-
-    // ─── System tray ─────────────────────────────────────────────────────
-    "tray": { "icon-size": 20, "spacing": 10, "passive-items": true },
-
-    // ─── Audio ────────────────────────────────────────────────────────────
-    "pulseaudio": {
-        "format": "{icon}",
-        "format-bluetooth": "{icon}",
-        "format-muted": "󰖁",
-        "format-icons": {
-            "headphones": "󰋋",
-            "hands-free": "󰋎",
-            "headset": "󰋎",
-            "phone": "󰏘",
-            "portable": "󰏘",
-            "car": "󰄋",
-            "default": ["󰕿", "󰖀", "󰕾"]
+        // ── Left Utility Island ──────────────────────────────────────────────
+        "custom/launcher": {
+            "format": "󰕰",
+            "tooltip": "Application Launcher  (Super)",
+            "on-click": "wofi --show drun || rofi -show drun || synthex-launcher",
+            "interval": "once"
         },
-        "tooltip-format": "{desc}  {volume}%",
-        "on-click": "pavucontrol",
-        "on-scroll-up": "wpctl set-volume @DEFAULT_AUDIO_SINK@ 5%+",
-        "on-scroll-down": "wpctl set-volume @DEFAULT_AUDIO_SINK@ 5%-",
-        "scroll-step": 5
-    },
+        "custom/search": {
+            "format": "󰍉",
+            "tooltip": "Universal Search  (Super+Space)",
+            "on-click": "wofi --show run || rofi -show run",
+            "interval": "once"
+        },
+        "custom/workspaces": {
+            "format": "󰹟",
+            "tooltip": "Overview & Workspaces  (Super+Tab)",
+            "on-click": "hyprctl dispatch togglespecialworkspace",
+            "interval": "once"
+        },
+        "custom/notifications": {
+            "format": "󰂚",
+            "tooltip": "Notifications  (Super+N)",
+            "on-click": "makoctl dismiss -a || dunstctl close-all",
+            "interval": "once"
+        },
 
-    // ─── Network ─────────────────────────────────────────────────────────
-    "network": {
-        "format-wifi": "󰤨",
-        "format-ethernet": "󰈀",
-        "format-disconnected": "󰤭",
-        "format-linked": "󰤩",
-        "tooltip-format-wifi": "{essid}  ({signalStrength}%)\n{ipaddr}",
-        "tooltip-format-ethernet": "{ifname}\n{ipaddr}",
-        "on-click": "nm-connection-editor",
-        "max-length": 30
-    },
+        // ── Center Pinned & Running Apps ────────────────────────────────────
+        "wlr/taskbar": {
+            "format": "{icon}",
+            "icon-size": 32,
+            "icon-theme": "Papirus-Dark",
+            "tooltip-format": "{title}",
+            "on-click": "activate",
+            "on-click-middle": "close",
+            "ignore-list": ["kitty", "alacritty-rice"],
+            "app_ids-mapping": {
+                "firefox": "firefox",
+                "code": "visual-studio-code",
+                "spotify": "spotify",
+                "org.kde.dolphin": "system-file-manager",
+                "discord": "discord",
+                "Alacritty": "terminal"
+            }
+        },
 
-    // ─── Bluetooth ───────────────────────────────────────────────────────
-    "bluetooth": {
-        "format": "󰂯",
-        "format-disabled": "",
-        "format-connected": "󰂱",
-        "tooltip-format": "{controller_alias}",
-        "tooltip-format-connected": "{controller_alias}\n{device_enumerate}",
-        "tooltip-format-enumerate-connected": "{device_alias}",
-        "on-click": "blueman-manager"
-    },
+        // ── Right Status Island ─────────────────────────────────────────────
+        "network": {
+            "format-wifi": "󰤨",
+            "format-ethernet": "󰈀",
+            "format-disconnected": "󰤭",
+            "tooltip-format-wifi": "{essid} ({signalStrength}%)\nIP: {ipaddr}\nSpeed: ↓{bandwidthDownBytes} ↑{bandwidthUpBytes}",
+            "tooltip-format-ethernet": "{ifname}\nIP: {ipaddr}",
+            "on-click": "nm-connection-editor || synthex-control-center --page network"
+        },
 
-    // ─── Battery ─────────────────────────────────────────────────────────
-    "battery": {
-        "bat": "BAT0",
-        "adapter": "ADP1",
-        "states": { "warning": 30, "critical": 15 },
-        "format": "{icon}",
-        "format-charging": "󰂄",
-        "format-plugged": "󰚥",
-        "format-full": "󰁹",
-        "format-icons": ["󰁺", "󰁼", "󰁾", "󰁿", "󰂂"],
-        "interval": 30
-    },
+        "bluetooth": {
+            "format": "󰂯",
+            "format-disabled": "󰂲",
+            "format-connected": "󰂱",
+            "tooltip-format": "Bluetooth: {status}",
+            "tooltip-format-connected": "{controller_alias}\nConnected to: {device_alias}",
+            "on-click": "blueman-manager || synthex-control-center --page bluetooth"
+        },
 
-    // ─── Clock ───────────────────────────────────────────────────────────
-    "clock": {
-        "format": "{:%H:%M}",
-        "format-alt": "{:%a %d %b}",
-        "tooltip-format": "{:%A, %d %B %Y}\n{:%H:%M:%S}",
-        "interval": 30
-    },
+        "pulseaudio": {
+            "format": "{icon}",
+            "format-muted": "󰖁",
+            "format-icons": {
+                "default": ["󰕿", "󰖀", "󰕾"]
+            },
+            "tooltip-format": "Volume: {volume}% {desc}",
+            "on-click": "pavucontrol || synthex-control-center --page audio",
+            "on-scroll-up": "wpctl set-volume @DEFAULT_AUDIO_SINK@ 5%+",
+            "on-scroll-down": "wpctl set-volume @DEFAULT_AUDIO_SINK@ 5%-"
+        },
 
-    // ─── Media (MPRIS via playerctl) ─────────────────────────────────────
-    "custom/media": {
-        "format": "{}",
-        "return-type": "json",
-        "max-length": 40,
-        "interval": 2,
-        "exec": "playerctl metadata --format '{\"text\": \"{{artist}} — {{title}}\", \"class\": \"playing\"}' 2>/dev/null || echo '{\"text\": \"\", \"class\": \"stopped\"}'",
-        "on-click": "playerctl play-pause",
-        "on-scroll-up": "playerctl next",
-        "on-scroll-down": "playerctl previous"
-    },
+        "battery": {
+            "format": "{icon}",
+            "format-charging": "󰂄",
+            "format-plugged": "󰚥",
+            "format-icons": ["󰁺", "󰁼", "󰁾", "󰁿", "󰁹"],
+            "tooltip-format": "{capacity}%  {timeTo}",
+            "states": {
+                "warning": 30,
+                "critical": 15
+            }
+        },
 
-    // ─── Gamemode (real Feral gamemode indicator) ────────────────────────
-    "gamemode": {
-        "format": "{glyph}",
-        "glyph": "󰍶",
-        "tooltip": true,
-        "tooltip-format": "Gamemode: {status}"
-    },
-
-    // ─── Launcher (opens wofi app grid) ──────────────────────────────────
-    "custom/launcher": {
-        "format": "⬟",
-        "tooltip": "SynthOS — Applications  (Super+D)",
-        "on-click": "wofi --show drun",
-        "interval": "once"
+        "clock#dock": {
+            "format": "{:%I:%M %p}",
+            "format-alt": "{:%b %d, %I:%M %p}",
+            "tooltip-format": "{:%A, %d %B %Y}\n{:%H:%M:%S}",
+            "interval": 1
+        }
     }
-}
+]

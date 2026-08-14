@@ -1,174 +1,171 @@
 /* ═══════════════════════════════════════════════════════════════════════════
- *  SynthOS Nova — Waybar dock theme
- *  MATCHES REFERENCE: tall centered floating icon dock at the bottom.
- *  Bar bg #161C22 · thin hairline border · NO per-module pills (icons sit
- *  directly on the dock) · large evenly-spaced icons · slate-blue accent.
- *  Tokens: branding/theme/tokens/nova.json
+ *  SynthOS Nova — Waybar Multi-Bar Theme
+ *  Matches Reference Rice:
+ *  - Floating top center pill (#12161F, border, rounded pill)
+ *  - Floating bottom island dock (#12161F, border, rounded pill, big spaced icons)
  * ═══════════════════════════════════════════════════════════════════════════ */
 
 * {
-    font-family: "Inter", "Noto Sans", "Symbols Nerd Font";
-    font-size: 13px;
+    font-family: "Inter", "JetBrains Mono", "Symbols Nerd Font", sans-serif;
+    font-size: 14px;
+    font-weight: 500;
     min-height: 0;
-}
-
-/* ─── The dock (floating, bottom, centered) ──────────────────────────── */
-window#waybar {
-    background-color: #161C22;                            /* extracted bar bg */
-    color: #DDE3EB;
-    border: 1px solid rgba(255, 255, 255, 0.06);
-    border-radius: 18px;
-    box-shadow: 0 12px 32px rgba(0, 0, 0, 0.45);
-}
-window#waybar.hidden { opacity: 0; transition: opacity 200ms ease; }
-
-/* Modules: transparent on the dock (no pills), generous internal padding
-   so icons are evenly spaced like the reference. */
-#workspaces, #clock, #pulseaudio, #network, #bluetooth, #battery,
-#tray, #custom-media, #custom-launcher, #idle_inhibitor,
-#wlr/taskbar {
-    padding: 0 14px;
     margin: 0;
-    border-radius: 12px;
-    background-color: transparent;
-    border: none;
-    transition: background-color 140ms cubic-bezier(.4,0,.2,1),
-                color 140ms cubic-bezier(.4,0,.2,1);
+    padding: 0;
 }
 
-/* ─── Workspaces ─────────────────────────────────────────────────────── */
-#workspaces button {
-    padding: 0 6px;
-    min-width: 30px;
-    margin: 10px 2px;
-    background: transparent;
-    color: #67707D;
-    border-radius: 9px;
-    font-weight: 600;
-    transition: all 140ms cubic-bezier(.4,0,.2,1);
-}
-#workspaces button:hover {
-    background: rgba(255, 255, 255, 0.06);
+/* ─── Base Waybar Window Style ───────────────────────────────────────────── */
+window#waybar {
+    background-color: rgba(18, 22, 31, 0.88);
     color: #DDE3EB;
-}
-#workspaces button.active {
-    background: rgba(108, 136, 168, 0.18);                /* accent @ 18% */
-    color: #6C88A8;
-    box-shadow: inset 0 -2px 0 #6C88A8;
-}
-#workspaces button.urgent {
-    background: rgba(217, 124, 130, 0.18);
-    color: #D97C82;
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    box-shadow: 0 16px 36px rgba(0, 0, 0, 0.50);
 }
 
-/* ─── Running-app icons (the centerpiece of the reference dock) ──────── */
-#wlr/taskbar {
-    padding: 0 6px;
-}
-#wlr/taskbar button {
-    padding: 0 12px;
-    margin: 10px 3px;
-    background: transparent;
-    border: none;
-    border-radius: 12px;
-    transition: background-color 140ms cubic-bezier(.4,0,.2,1);
-}
-#wlr/taskbar button:hover {
-    background: rgba(255, 255, 255, 0.06);
-}
-#wlr/taskbar button.active {
-    background: rgba(108, 136, 168, 0.16);
-    box-shadow: inset 0 -2px 0 #6C88A8;
-}
-#wlr/taskbar button.urgent {
-    background: rgba(217, 124, 130, 0.16);
-}
-
-/* ─── Clock ──────────────────────────────────────────────────────────── */
-#clock {
-    color: #DDE3EB;
-    font-weight: 600;
+/* ─── 1. Top Pill Style ─────────────────────────────────────────────────── */
+window#waybar.top-pill {
+    border-radius: 9999px;
     padding: 0 18px;
 }
-#clock:hover { background-color: rgba(255,255,255,0.06); }
 
-/* ─── Audio ──────────────────────────────────────────────────────────── */
-#pulseaudio { color: #DDE3EB; padding: 0 12px; }
-#pulseaudio:hover { background-color: rgba(255,255,255,0.06); }
-#pulseaudio.muted { color: #D97C82; }
-
-/* ─── Network ────────────────────────────────────────────────────────── */
-#network { color: #7FBF8A; padding: 0 12px; }
-#network:hover { background-color: rgba(255,255,255,0.06); }
-#network.disconnected { color: #D97C82; }
-
-/* ─── Bluetooth ──────────────────────────────────────────────────────── */
-#bluetooth { color: #6C88A8; padding: 0 12px; }
-#bluetooth:hover { background-color: rgba(108,136,168,0.12); }
-#bluetooth.connected { color: #ABA2E4; }
-#bluetooth.disabled { color: #67707D; }
-
-/* ─── Battery ────────────────────────────────────────────────────────── */
-#battery { color: #7FBF8A; padding: 0 12px; }
-#battery:hover { background-color: rgba(255,255,255,0.06); }
-#battery.charging { color: #7FBF8A; box-shadow: inset 0 -2px 0 #7FBF8A; }
-#battery.warning { color: #D9B47E; }
-#battery.critical {
-    color: #D97C82;
-    animation: battery-blink 1.2s ease-in-out infinite;
-}
-@keyframes battery-blink {
-    50% { background-color: rgba(217, 124, 130, 0.16); }
+#custom-top-dot {
+    color: #7AA2F7;
+    font-size: 10px;
+    padding-right: 10px;
+    text-shadow: 0 0 8px rgba(122, 162, 247, 0.6);
 }
 
-/* ─── Tray ───────────────────────────────────────────────────────────── */
-#tray { padding: 0 10px; }
-#tray menu {
-    background: #1E242F; border: 1px solid rgba(255,255,255,0.10);
-    border-radius: 10px;
-}
-#tray > .passive { -gtk-icon-effect: dim; }
-#tray > .needs-attention { -gtk-icon-effect: highlight; }
-
-/* ─── Idle inhibitor ─────────────────────────────────────────────────── */
-#idle_inhibitor { color: #67707D; padding: 0 12px; }
-#idle_inhibitor.activated { color: #D9B47E; box-shadow: inset 0 -2px 0 #D9B47E; }
-
-/* ─── Gamemode (real Feral gamemode) ─────────────────────────────────── */
-#gamemode { color: #67707D; padding: 0 12px; }
-#gamemode.running {
-    background-color: rgba(127, 191, 138, 0.16);
-    color: #7FBF8A;
-    font-weight: 700;
+#clock.top {
+    color: #DDE3EB;
+    font-size: 13px;
+    font-weight: 600;
+    letter-spacing: 0.3px;
 }
 
-/* ─── Media (MPRIS) ──────────────────────────────────────────────────── */
-#custom-media {
-    color: #ABA2E4;                                       /* lavender */
-    font-style: italic;
-    max-width: 220px;
-    padding: 0 12px;
+/* ─── 2. Bottom Dock Style ──────────────────────────────────────────────── */
+window#waybar.bottom-dock {
+    border-radius: 9999px;
+    padding: 0 16px;
 }
-#custom-media:hover { background-color: rgba(171, 162, 228, 0.10); }
-#custom-media.paused { color: #67707D; }
 
-/* ─── Launcher ───────────────────────────────────────────────────────── */
+/* Left utility island buttons */
+#custom-launcher,
+#custom-search,
+#custom-workspaces,
+#custom-notifications {
+    font-size: 18px;
+    color: #9AA1AB;
+    padding: 10px 14px;
+    margin: 8px 3px;
+    border-radius: 9999px;
+    transition: all 180ms cubic-bezier(0.4, 0.0, 0.2, 1.0);
+}
+
+#custom-launcher:hover,
+#custom-search:hover,
+#custom-workspaces:hover,
+#custom-notifications:hover {
+    color: #FFFFFF;
+    background-color: rgba(255, 255, 255, 0.08);
+    transform: translateY(-2px);
+}
+
 #custom-launcher {
-    color: #6C88A8;
-    font-size: 22px;
-    font-weight: 800;
-    padding: 0 18px;
-}
-#custom-launcher:hover {
-    background-color: rgba(108, 136, 168, 0.14);
     color: #82A0BE;
 }
 
-/* ─── Tooltip ────────────────────────────────────────────────────────── */
-tooltip {
-    background: #1E242F;
-    border: 1px solid rgba(255, 255, 255, 0.10);
-    border-radius: 10px;
+/* Center taskbar & pinned apps */
+#wlr/taskbar {
+    padding: 0 12px;
+}
+
+#wlr/taskbar button {
+    padding: 6px 12px;
+    margin: 8px 4px;
+    border-radius: 14px;
+    background: transparent;
+    border: none;
+    transition: all 180ms cubic-bezier(0.4, 0.0, 0.2, 1.0);
+}
+
+#wlr/taskbar button:hover {
+    background: rgba(255, 255, 255, 0.10);
+    transform: scale(1.12);
+}
+
+#wlr/taskbar button.active {
+    background: rgba(108, 136, 168, 0.22);
+    box-shadow: inset 0 -3px 0 #7AA2F7;
+}
+
+#wlr/taskbar button.urgent {
+    background: rgba(217, 124, 130, 0.25);
+    box-shadow: inset 0 -3px 0 #D97C82;
+}
+
+/* Right status island */
+#network,
+#bluetooth,
+#pulseaudio,
+#battery {
+    font-size: 16px;
+    color: #9AA1AB;
+    padding: 8px 12px;
+    margin: 8px 2px;
+    border-radius: 9999px;
+    transition: all 180ms cubic-bezier(0.4, 0.0, 0.2, 1.0);
+}
+
+#network:hover,
+#bluetooth:hover,
+#pulseaudio:hover,
+#battery:hover {
+    color: #FFFFFF;
+    background-color: rgba(255, 255, 255, 0.08);
+}
+
+#pulseaudio.muted {
+    color: #D97C82;
+}
+
+#battery.warning {
+    color: #D9B47E;
+}
+
+#battery.critical {
+    color: #D97C82;
+}
+
+#battery.charging {
+    color: #7FBF8A;
+}
+
+#gamemode {
+    color: #6C88A8;
+    padding: 8px 10px;
+    font-size: 16px;
+}
+
+#gamemode.running {
+    color: #7AA2F7;
+    text-shadow: 0 0 6px rgba(108, 136, 168, 0.6);
+}
+
+#workspaces {
+    padding: 0 4px;
+}
+
+#clock.dock {
     color: #DDE3EB;
-    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.40);
+    font-size: 13px;
+    font-weight: 600;
+    padding: 8px 14px 8px 10px;
+    margin-left: 6px;
+    border-radius: 9999px;
+    transition: all 180ms ease;
+}
+
+#clock.dock:hover {
+    background-color: rgba(255, 255, 255, 0.08);
+    color: #FFFFFF;
 }
