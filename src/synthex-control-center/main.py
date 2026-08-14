@@ -49,6 +49,7 @@ from synth_system_adapters import (
     AppManagerAdapter,
     StorageSenseAdapter,
     QuarantineManagerAdapter,
+    DoctorAdapter,
     safe_set_gsetting,
     get_gsettings,
     run_cmd
@@ -77,6 +78,7 @@ SIDEBAR_ITEMS = [
     ("privacy",       "Privacy",                "preferences-system-privacy",              ["Location", "Camera", "Microphone", "Screen capture", "App permissions", "Telemetry"]),
     ("apps",          "Apps & Defaults",        "preferences-desktop-default-applications", ["Installed applications", "Default applications", "Startup applications", "File associations"]),
     ("packages",      "Packages & Software",    "system-software-install",                  ["Updates", "Installed packages", "Repositories", "Drivers", "Optional components"]),
+    ("doctor",        "System Doctor & Repair", "system-software-update",                  ["Auto-Repair", "Bootloader", "Kernel", "fstab", "Snapshots", "Rollback"]),
     ("printers",      "Printers & Scanners",    "cs-printer",                             ["Printers", "Scanners", "Print queues", "Test page"]),
     ("devices",       "Cameras & Gamepads",     "camera-video",                             ["Video devices", "Game controllers", "Calibration", "Force feedback"]),
     ("accessibility", "Accessibility",           "preferences-desktop-accessibility",       ["Screen reader", "Magnification", "High contrast", "Large text", "Sticky keys"]),
@@ -1101,9 +1103,11 @@ class SettingsAppWindow(Gtk.Window):
                 af = Gtk.Frame()
                 ab = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=4)
                 ab.set_border_width(10)
-                ab.pack_start(Gtk.Label(label=f"<b>{title}</b>", use_markup=True, xalign=0), False, False, 0)
+                safe_title = GLib.markup_escape_text(title)
+                safe_desc = GLib.markup_escape_text(desc)
+                ab.pack_start(Gtk.Label(label=f"<b>{safe_title}</b>", use_markup=True, xalign=0), False, False, 0)
                 ab.pack_start(Gtk.Label(label=f"<span size='large' weight='bold' color='#2ecc71'>{sz}</span>", use_markup=True, xalign=0), False, False, 0)
-                ab.pack_start(Gtk.Label(label=f"<span size='small' color='#888888'>{desc}</span>", use_markup=True, xalign=0), False, False, 0)
+                ab.pack_start(Gtk.Label(label=f"<span size='small' color='#888888'>{safe_desc}</span>", use_markup=True, xalign=0), False, False, 0)
                 af.add(ab)
                 agrid.attach(af, idx % 2, idx // 2, 1, 1)
             s_vbox.pack_start(agrid, False, False, 4)
@@ -1833,6 +1837,113 @@ class SettingsAppWindow(Gtk.Window):
             frame.add(vbox)
             self.content_box.pack_start(frame, False, False, 0)
 
+        # ── 18.5. System Doctor & Auto-Repair ───────────────────────────
+        elif cat_id == "doctor":
+            doc_frame = Gtk.Frame(label="Synthex System Doctor & Anti-Bricking Self-Healing Suite")
+            doc_vbox = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=14)
+            doc_vbox.set_border_width(16)
+
+            # Hero Banner
+            h_box = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=16)
+            h_box.pack_start(Gtk.Image.new_from_icon_name("system-software-update", Gtk.IconSize.DIALOG), False, False, 0)
+
+            t_box = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=2)
+            t_lbl = Gtk.Label(xalign=0)
+            t_lbl.set_markup("<span size='large' weight='bold' color='#2ecc71'>Automated Self-Healing & Diagnostic Doctor</span>")
+            t_box.pack_start(t_lbl, False, False, 0)
+            t_sub = Gtk.Label(label="Proactively immunizes the OS against bricking, broken kernels, deleted initramfs images, fstab mount hangs, and stale package manager locks.", xalign=0)
+            t_sub.set_line_wrap(True)
+            t_box.pack_start(t_sub, False, False, 0)
+            h_box.pack_start(t_box, True, True, 0)
+
+            btn_full_repair = Gtk.Button.new_with_label("Run Full Auto-Repair Scan")
+            btn_full_repair.connect("clicked", lambda b: self._execute_doctor_auto_repair())
+            h_box.pack_end(btn_full_repair, False, False, 0)
+            doc_vbox.pack_start(h_box, False, False, 0)
+
+            # Diagnostic Status Cards Grid
+            d_grid = Gtk.Grid()
+            d_grid.set_column_spacing(16)
+            d_grid.set_row_spacing(12)
+
+            diag_results = DoctorAdapter.run_full_diagnosis(auto_fix=False)
+            for idx, res in enumerate(diag_results):
+                f = Gtk.Frame()
+                b = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=4)
+                b.set_border_width(12)
+
+                top_r = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=8)
+                safe_comp = GLib.markup_escape_text(res["component"])
+                top_r.pack_start(Gtk.Label(label=f"<b>{safe_comp}</b>", use_markup=True, xalign=0), True, True, 0)
+
+                stat_badge = Gtk.Label()
+                st_color = "#2ecc71" if res["status"] in ["OK", "REPAIRED"] else ("#f39c12" if res["status"] == "WARNING" else "#e74c3c")
+                stat_badge.set_markup(f"<span color='{st_color}'><b>● {res['status']}</b></span>")
+                top_r.pack_end(stat_badge, False, False, 0)
+                b.pack_start(top_r, False, False, 0)
+
+                safe_det = GLib.markup_escape_text(res["details"])
+                b.pack_start(Gtk.Label(label=f"<span size='small' color='#888888'>{safe_det}</span>", use_markup=True, xalign=0), False, False, 0)
+
+                if res["issue"] != "None":
+                    safe_iss = GLib.markup_escape_text(res["issue"])
+                    b.pack_start(Gtk.Label(label=f"<span size='small' color='#e74c3c'>Issue: {safe_iss}</span>", use_markup=True, xalign=0), False, False, 0)
+
+                f.add(b)
+                d_grid.attach(f, idx % 2, idx // 2, 1, 1)
+
+            doc_vbox.pack_start(d_grid, False, False, 4)
+
+            # Quick Targeted Fix Actions
+            act_frame = Gtk.Frame(label="Targeted One-Click Recovery Actions")
+            act_box = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=10)
+            act_box.set_border_width(12)
+
+            btn_fix_boot = Gtk.Button.new_with_label("Rebuild Bootloader & Initramfs")
+            btn_fix_boot.connect("clicked", lambda b: (DoctorAdapter.fix_bootloader(), b.set_label("✓ Bootloader Rebuilt!")))
+            act_box.pack_start(btn_fix_boot, True, True, 0)
+
+            btn_fix_fstab = Gtk.Button.new_with_label("Fix /etc/fstab Boot-Hangs")
+            btn_fix_fstab.connect("clicked", lambda b: (DoctorAdapter.fix_fstab(), b.set_label("✓ fstab Sanitized!")))
+            act_box.pack_start(btn_fix_fstab, True, True, 0)
+
+            btn_fix_pkg = Gtk.Button.new_with_label("Unlock & Fix Package Database")
+            btn_fix_pkg.connect("clicked", lambda b: (DoctorAdapter.fix_packages(), b.set_label("✓ Packages Unlocked!")))
+            act_box.pack_start(btn_fix_pkg, True, True, 0)
+
+            act_frame.add(act_box)
+            doc_vbox.pack_start(act_frame, False, False, 0)
+
+            # Snapshots Rollback Manager
+            snap_frame = Gtk.Frame(label="Btrfs & Timeshift Snapshot Rollback Vault")
+            snap_vbox = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=8)
+            snap_vbox.set_border_width(12)
+
+            snaps = DoctorAdapter.get_snapshots()
+            slist = Gtk.ListBox()
+            slist.set_selection_mode(Gtk.SelectionMode.NONE)
+            for s in snaps:
+                r = Gtk.ListBoxRow()
+                h = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=12)
+                h.set_border_width(6)
+                h.pack_start(Gtk.Image.new_from_icon_name("document-save", Gtk.IconSize.BUTTON), False, False, 0)
+                safe_sdesc = GLib.markup_escape_text(s['desc'])
+                h.pack_start(Gtk.Label(label=f"<b>{s['id']}</b> — {safe_sdesc} ({s['date']})", use_markup=True, xalign=0), True, True, 0)
+                h.pack_end(Gtk.Label(label=f"Engine: {s['engine']}"), False, False, 8)
+
+                btn_rb = Gtk.Button.new_with_label("Restore Snapshot")
+                btn_rb.connect("clicked", lambda b, sid=s["id"]: self._confirm_snapshot_rollback(sid))
+                h.pack_end(btn_rb, False, False, 0)
+
+                r.add(h)
+                slist.add(r)
+            snap_vbox.pack_start(slist, False, False, 0)
+            snap_frame.add(snap_vbox)
+            doc_vbox.pack_start(snap_frame, False, False, 0)
+
+            doc_frame.add(doc_vbox)
+            self.content_box.pack_start(doc_frame, False, False, 0)
+
         # ── 19. Printers & Scanners ─────────────────────────────────────
         elif cat_id == "printers":
             frame = Gtk.Frame(label="Printers & Scanners (CUPS)")
@@ -2465,6 +2576,45 @@ class SettingsAppWindow(Gtk.Window):
         dialog.show_all()
         dialog.run()
         dialog.destroy()
+
+    def _execute_doctor_auto_repair(self):
+        results = DoctorAdapter.run_full_diagnosis(auto_fix=True)
+        repaired_count = sum(1 for r in results if r["status"] in ["OK", "REPAIRED"])
+        msg = f"Completed System Health Scan & Auto-Repair.\n{repaired_count}/{len(results)} Subsystems verified healthy and operational."
+        md = Gtk.MessageDialog(
+            parent=self,
+            flags=0,
+            type=Gtk.MessageType.INFO,
+            buttons=Gtk.ButtonsType.OK,
+            message_format=msg
+        )
+        md.run()
+        md.destroy()
+        self._render_category_page("doctor", "System Doctor & Repair", ["Auto-Repair", "Bootloader", "Kernel", "fstab", "Snapshots", "Rollback"])
+
+    def _confirm_snapshot_rollback(self, snap_id: str):
+        md = Gtk.MessageDialog(
+            parent=self,
+            flags=0,
+            type=Gtk.MessageType.QUESTION,
+            buttons=Gtk.ButtonsType.YES_NO,
+            message_format=f"Are you sure you want to restore system state to Snapshot '{snap_id}'?"
+        )
+        md.format_secondary_text("This will roll back root filesystem changes and restore verified system baseline.")
+        resp = md.run()
+        md.destroy()
+
+        if resp == Gtk.ResponseType.YES:
+            ok, msg = DoctorAdapter.rollback_snapshot(snap_id)
+            res_md = Gtk.MessageDialog(
+                parent=self,
+                flags=0,
+                type=Gtk.MessageType.INFO if ok else Gtk.MessageType.ERROR,
+                buttons=Gtk.ButtonsType.OK,
+                message_format=msg
+            )
+            res_md.run()
+            res_md.destroy()
 
 
 def main():

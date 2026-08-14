@@ -1006,6 +1006,27 @@ try:
 except Exception as _e:
     check("aegis engine functional validation", False, str(_e))
 
+# 72. Synthex System Doctor, Auto-Repair & Anti-Bricking Suite
+print("\n📋 Synthex System Doctor & Anti-Bricking Auto-Repair:")
+doc_dir = os.path.join(ROOT, "src", "synthex-doctor")
+check("synthex doctor script exists", os.path.exists(os.path.join(doc_dir, "synthex_doctor.py")))
+check("synthex doctor test suite exists", os.path.exists(os.path.join(ROOT, "tests", "test_synthex_doctor_repair.py")))
+
+try:
+    sys.path.insert(0, doc_dir)
+    from synthex_doctor import SynthexDoctor
+    doc = SynthexDoctor(dry_run=True)
+    check("synthex doctor initialized", doc is not None)
+    diag = doc.run_full_diagnosis(auto_fix=False)
+    check("synthex doctor full diagnostic pass", len(diag) >= 6)
+    check("synthex doctor bootloader check", any(d.component == "Bootloader & Initramfs" for d in diag))
+    check("synthex doctor fstab check", any(d.component == "Filesystem Mounts (/etc/fstab)" for d in diag))
+    check("synthex doctor package database check", any(d.component == "Package Manager Database" for d in diag))
+    snaps = SynthexDoctor.get_available_snapshots()
+    check("synthex doctor snapshots discovery", len(snaps) > 0)
+except Exception as _e:
+    check("synthex doctor functional validation", False, str(_e))
+
 # Summary
 print(f"\n{'='*50}")
 print(f"  RESULTS: {passed} passed, {failed} failed")
