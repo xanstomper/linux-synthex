@@ -134,6 +134,9 @@ synthex-update-manager
 @synthex-safety
 @synthex-essentials
 @synthex-creator-platform
+synthex-widgets
+synthex-blueprint
+synthex-boot
 @synthex-gaming-platform
 
 # Utilities

@@ -1,0 +1,12 @@
+[Unit]
+Description=Timer for Synthex Upstream Multi-Distro Drip-Feed Synchronizer
+Documentation=man:synthex-drip-sync(8)
+
+[Timer]
+OnBootSec=15min
+OnUnitActiveSec=4h
+Persistent=true
+RandomizedDelaySec=15min
+
+[Install]
+WantedBy=timers.target

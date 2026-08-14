@@ -62,6 +62,7 @@ cargo build --release --package %{crate_name} \
 %install
 install -Dm755 target/release/%{crate_name} \
     %{buildroot}/usr/lib/synthex/%{crate_name}
+install -Dm644 systemd/synthex-agent.sysusers %{buildroot}%{_sysusersdir}/synthex-agent.conf
 install -Dm644 systemd/%{service} \
     %{buildroot}/usr/lib/systemd/system/%{service}
 install -Dm644 dbus/%{dbus_conf} \

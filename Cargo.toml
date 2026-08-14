@@ -39,6 +39,7 @@ members = [
     "src/synthex-rust-tools/synthex-pkg",
     "src/synthex-rust-tools/synthex-update-manager",
     "src/synthex-rust-tools/synthex-driver-manager",
+    "src/synthex-rust-tools/synthex-drip-sync",
     # Niche feature daemons (packaged: deadman, meshnet, predictive)
     # synthex-temporal ships via its Python spec (synthex-temporal.spec); the
     # Rust crate remains an optional standalone build.

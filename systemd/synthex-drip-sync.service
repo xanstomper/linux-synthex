@@ -1,0 +1,22 @@
+[Unit]
+Description=Synthex Multi-Distro Upstream Drip-Feed Synchronizer
+Documentation=man:synthex-drip-sync(8)
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=oneshot
+ExecStart=/usr/bin/synthex-drip-sync apply --yes
+StandardOutput=journal
+StandardError=journal
+Nice=19
+IOSchedulingClass=idle
+
+# Security Hardening
+ProtectSystem=full
+ProtectHome=read-only
+NoNewPrivileges=yes
+PrivateTmp=yes
+
+[Install]
+WantedBy=multi-user.target

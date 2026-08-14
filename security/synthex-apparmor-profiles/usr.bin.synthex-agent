@@ -1,0 +1,17 @@
+#include <tunables/global>
+
+profile synthex-agent /usr/bin/synthex-agent {
+  #include <abstractions/base>
+  #include <abstractions/nameservice>
+
+  # Sandbox limits
+  /usr/bin/synthex-agent mr,
+  /etc/synthex/** r,
+  /var/lib/synthex/agent/** rwk,
+  /var/run/synthex/** rwk,
+
+  # Deny raw device access
+  deny /dev/sd* rw,
+  deny /dev/nvme* rw,
+  deny /dev/kmem rw,
+}

@@ -1,0 +1,27 @@
+Name:           synthex-perf-tuning-rs
+Version:        2026.10
+Release:        1%{?dist}
+Summary:        SynthOS performance tuning CLI — governor, I/O scheduler, sysctl profiles
+
+License:        GPL-3.0-or-later
+URL:            https://getsynthex.org
+Source0:        %{name}-%{version}.tar.gz
+BuildRequires:  rust-toolchain
+BuildRequires:  cargo
+
+%description
+SynthOS performance tuning CLI — governor, I/O scheduler, sysctl profiles. Part of the SynthOS Rust tools suite (replaces the earlier
+Python prototypes with a single fast static binary).
+
+%build
+cargo build --release
+
+%install
+install -Dm755 target/release/synthex-perf-tuning-rs %{buildroot}%{_bindir}/synthex-perf-tuning-rs
+
+%files
+%{_bindir}/synthex-perf-tuning-rs
+
+%changelog
+* Sun Aug 14 2026 SynthOS Team <team@synthex-os.org> - 2026.10-1
+- Initial synthex-perf-tuning-rs package

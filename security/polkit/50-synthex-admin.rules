@@ -1,0 +1,13 @@
+/* Polkit rules for Synthex System Administration
+ * Ensures administrative operations (package updates, power management, storage)
+ * are authenticated via standard wheel group privilege escalation.
+ */
+polkit.addRule(function(action, subject) {
+    if (action.id.indexOf("org.synthex.") == 0 ||
+        action.id.indexOf("org.freedesktop.packagekit.") == 0 ||
+        action.id.indexOf("org.freedesktop.systemd1.manage-units") == 0) {
+        if (subject.isInGroup("wheel")) {
+            return polkit.Result.YES;
+        }
+    }
+});

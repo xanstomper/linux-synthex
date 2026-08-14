@@ -38,6 +38,15 @@
           <packagereq type="mandatory">synthex-security-deploy</packagereq>
           <!-- VPN -->
           <packagereq type="default">synthex-vpn</packagereq>
+          <packagereq type="default">synthex-boot</packagereq>
+          <packagereq type="default">synthex-blueprint</packagereq>
+          <packagereq type="default">synthnet</packagereq>
+          <packagereq type="default">synthupdate</packagereq>
+          <packagereq type="default">synthbox</packagereq>
+          <packagereq type="default">synthex-predictive-launch</packagereq>
+          <packagereq type="default">synthex-webapp-engine</packagereq>
+          <packagereq type="default">synthex-app-manager</packagereq>
+          <packagereq type="default">synthex-widgets</packagereq>
           <!-- Desktop -->
           <packagereq type="mandatory">synthex-desktop-common</packagereq>
           <packagereq type="mandatory">synthex-themes</packagereq>
@@ -122,6 +131,7 @@
           <packagereq type="optional">heroic-games-launcher</packagereq>
           <packagereq type="optional">protontricks</packagereq>
           <packagereq type="optional">vulkan-tools</packagereq>
+          <packagereq type="default">synthex-proton-manager-rs</packagereq>
         </packagelist>
       </group>
 
@@ -146,6 +156,7 @@
           <packagereq type="default">libdvdread</packagereq>
           <packagereq type="default">libdvdnav</packagereq>
           <packagereq type="default">libdvdcss</packagereq>
+          <packagereq type="default">synthex-codec-installer-rs</packagereq>
         </packagelist>
       </group>
 
@@ -175,6 +186,8 @@
           <packagereq type="optional">distrobox</packagereq>
           <packagereq type="optional">neovim</packagereq>
           <packagereq type="optional">helix</packagereq>
+          <packagereq type="default">synthex-perf-tuning-rs</packagereq>
+  <packagereq type="default">synthex-system-report-rs</packagereq>
         </packagelist>
       </group>
 
@@ -235,6 +248,10 @@
         <default>true</default>
         <packagelist>
           <packagereq type="mandatory">synthex-safety-check</packagereq>
+          <packagereq type="default">synthguard</packagereq>
+          <packagereq type="default">synthshield</packagereq>
+          <packagereq type="default">synthvault</packagereq>
+          <packagereq type="default">synthidentity</packagereq>
           <packagereq type="mandatory">snapper</packagereq>
           <packagereq type="mandatory">btrfs-progs</packagereq>
           <packagereq type="default">timeshift</packagereq>
@@ -292,6 +309,10 @@
           <packagereq type="mandatory">synthex-core</packagereq>
           <packagereq type="mandatory">synthex-essentials</packagereq>
           <packagereq type="mandatory">synthex-safety-check</packagereq>
+          <packagereq type="default">synthguard</packagereq>
+          <packagereq type="default">synthshield</packagereq>
+          <packagereq type="default">synthvault</packagereq>
+          <packagereq type="default">synthidentity</packagereq>
           <packagereq type="default">blender</packagereq>
           <packagereq type="default">krita</packagereq>
           <packagereq type="default">gimp</packagereq>
@@ -315,6 +336,10 @@
           <packagereq type="mandatory">synthex-kernel</packagereq>
           <packagereq type="mandatory">synthex-essentials</packagereq>
           <packagereq type="mandatory">synthex-safety-check</packagereq>
+          <packagereq type="default">synthguard</packagereq>
+          <packagereq type="default">synthshield</packagereq>
+          <packagereq type="default">synthvault</packagereq>
+          <packagereq type="default">synthidentity</packagereq>
           <packagereq type="default">synthex-gaming-optimizations</packagereq>
           <packagereq type="default">steam</packagereq>
           <packagereq type="default">gamescope</packagereq>

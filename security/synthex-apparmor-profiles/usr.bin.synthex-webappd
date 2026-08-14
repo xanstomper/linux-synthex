@@ -1,0 +1,30 @@
+#include <tunables/global>
+
+profile synthex-webappd /usr/bin/synthex-webappd {
+  #include <abstractions/base>
+  #include <abstractions/nameservice>
+  #include <abstractions/ssl_certs>
+
+  # Capabilities
+  capability net_bind_service,
+  capability setuid,
+  capability setgid,
+
+  # Binary execution
+  /usr/bin/synthex-webappd mr,
+
+  # Config and assets
+  /etc/synthex/** r,
+  /usr/share/synthex/** r,
+  /var/lib/synthex/webapps/** rwk,
+  /var/log/synthex/webappd.log rw,
+
+  # Procfs access
+  /proc/sys/kernel/random/uuid r,
+
+  # Deny sensitive kernel / raw disk access
+  deny /dev/mem rw,
+  deny /dev/kmem rw,
+  deny /dev/port rw,
+  deny /boot/** rw,
+}
