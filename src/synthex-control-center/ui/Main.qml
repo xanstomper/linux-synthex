@@ -2,25 +2,25 @@ import QtQuick 2.15
 import QtQuick.Controls 2.15
 import QtQuick.Layouts 1.15
 import QtQuick.Window 2.15
-import org.synthex.Backend 1.0
 
 Window {
     id: mainWindow
     visible: true
     width: 1200
     height: 800
-    minimumWidth: 960
+    minimumWidth: 980
     minimumHeight: 640
-    title: "Synthex Control Center"
-    color: "#0C1116"
+    title: "SynthOS System Settings"
+    color: "#0D1117"
 
     property int activeNavIndex: 0
-    property string currentPage: "Dashboard"
+    property string currentPage: "Desktop"
+    property string searchQuery: ""
 
-    // Accent color
-    readonly property color accentColor: "#6C88A8"
-    readonly property color bgColor: "#0C1116"
-    readonly property color surfaceColor: "#171D24"
+    readonly property color accentColor: (typeof systemBridge !== "undefined" && systemBridge) ? systemBridge.accentColor : "#7AA2F7"
+    readonly property color bgColor: "#0D1117"
+    readonly property color sidebarBg: "#141A22"
+    readonly property color surfaceColor: "#161C24"
     readonly property color textColor: "#FFFFFF"
     readonly property color mutedText: "#9AA1AB"
 
@@ -28,54 +28,56 @@ Window {
         anchors.fill: parent
         spacing: 0
 
-        // Sidebar
+        // ── 1. Left Sidebar Navigation ─────────────────────────────────────
         Rectangle {
             id: sidebar
-            Layout.preferredWidth: 64
+            Layout.preferredWidth: 260
             Layout.fillHeight: true
-            color: "#161C22"
-            anchors.top: parent.top
-            anchors.bottom: parent.bottom
+            color: sidebarBg
 
             ColumnLayout {
                 anchors.fill: parent
                 spacing: 0
 
-                // Logo area
+                // Header Logo & Branding
                 Rectangle {
                     Layout.fillWidth: true
-                    Layout.preferredHeight: 80
+                    Layout.preferredHeight: 70
                     color: "transparent"
 
                     RowLayout {
-                        anchors.centerIn: parent
-                        spacing: 10
+                        anchors.fill: parent
+                        anchors.leftMargin: 18
+                        anchors.rightMargin: 18
+                        spacing: 12
 
                         Rectangle {
                             width: 36
                             height: 36
-                            radius: 8
+                            radius: 9
                             color: accentColor
+
                             Text {
-                                anchors.centerIn: parent
-                                text: "S"
-                                font.pixelSize: 22
-                                font.bold: true
+                                text: "󰒓"
+                                font.family: "Symbols Nerd Font"
+                                font.pixelSize: 20
                                 color: "#0C1116"
+                                anchors.centerIn: parent
                             }
                         }
 
                         ColumnLayout {
-                            visible: false
-                            spacing: 2
+                            spacing: 1
                             Text {
-                                text: "Synthex"
-                                font.pixelSize: 18
+                                text: "System Settings"
+                                font.family: "Inter"
+                                font.pixelSize: 15
                                 font.bold: true
                                 color: textColor
                             }
                             Text {
-                                text: "Control Center"
+                                text: "SynthOS Linux 2026"
+                                font.family: "Inter"
                                 font.pixelSize: 11
                                 color: mutedText
                             }
@@ -83,181 +85,150 @@ Window {
                     }
                 }
 
-                // Separator
+                // Search Bar
                 Rectangle {
                     Layout.fillWidth: true
-                    Layout.preferredHeight: 1
-                    color: "#12FFFFFF"
+                    Layout.preferredHeight: 36
                     Layout.leftMargin: 16
                     Layout.rightMargin: 16
+                    Layout.bottomMargin: 10
+                    radius: 8
+                    color: "#1c232e"
+                    border.color: "#25ffffff"
+
+                    RowLayout {
+                        anchors.fill: parent
+                        anchors.leftMargin: 10
+                        anchors.rightMargin: 10
+                        spacing: 8
+
+                        Text { text: "🔍"; font.pixelSize: 12; color: mutedText }
+                        TextInput {
+                            id: searchInput
+                            Layout.fillWidth: true
+                            font.family: "Inter"
+                            font.pixelSize: 12
+                            color: "#FFFFFF"
+                            selectByMouse: true
+                            onTextChanged: searchQuery = text.toLowerCase()
+                            Text {
+                                text: "Search settings..."
+                                font.family: "Inter"
+                                font.pixelSize: 12
+                                color: mutedText
+                                visible: !searchInput.text && !searchInput.activeFocus
+                            }
+                        }
+                    }
                 }
 
-                // Navigation items
+                // Navigation ListView
                 ListView {
                     id: navList
                     Layout.fillWidth: true
                     Layout.fillHeight: true
-                    Layout.topMargin: 12
                     clip: true
-                    interactive: false
+                    boundsBehavior: Flickable.StopAtBounds
+
                     model: ListModel {
-                        ListElement { name: "Dashboard"; icon: "\u{1F4CA}" }
-                        ListElement { name: "System"; icon: "\u{1F4BB}" }
-                        ListElement { name: "Performance"; icon: "\u{26A1}" }
-                        ListElement { name: "Gaming"; icon: "\u{1F3AE}" }
-                        ListElement { name: "Developer"; icon: "\u{1F4D1}" }
-                        ListElement { name: "Themes"; icon: "\u{1F3A8}" }
-                        ListElement { name: "Security"; icon: "\u{1F6E1}" }
-                        ListElement { name: "Updates"; icon: "\u{1F504}" }
-                        ListElement { name: "Drivers"; icon: "\u{1F527}" }
-                        ListElement { name: "RGB"; icon: "\u{1F308}" }
-                        ListElement { name: "Snapshots"; icon: "\u{1F4BE}" }
-                        ListElement { name: "Kernel"; icon: "\u{1F9A0}" }
-                        ListElement { name: "Controllers"; icon: "\u{1F579}" }
+                        // Connectivity
+                        ListElement { name: "Network"; label: "Wi-Fi & Internet"; icon: "󰤨"; category: "CONNECTIVITY" }
+                        ListElement { name: "Bluetooth"; label: "Bluetooth & Devices"; icon: "󰂯"; category: "CONNECTIVITY" }
+
+                        // Personalization
+                        ListElement { name: "Desktop"; label: "Desktop & Themes"; icon: "󰒓"; category: "PERSONALIZATION" }
+                        ListElement { name: "Displays"; label: "Displays & Monitors"; icon: "󰍹"; category: "PERSONALIZATION" }
+                        ListElement { name: "Sound"; label: "Sound & Audio"; icon: "󰕾"; category: "PERSONALIZATION" }
+
+                        // System & Power
+                        ListElement { name: "Power"; label: "Power & Battery"; icon: "󰁹"; category: "SYSTEM" }
+                        ListElement { name: "Apps"; label: "Applications & Defaults"; icon: "󰀻"; category: "SYSTEM" }
+                        ListElement { name: "Gaming"; label: "Gaming & Performance"; icon: "󰊴"; category: "SYSTEM" }
+                        ListElement { name: "Snapshots"; label: "Storage & Snapshots"; icon: "󰁯"; category: "SYSTEM" }
+
+                        // Security & Upgrades
+                        ListElement { name: "Security"; label: "Privacy & Security"; icon: "󰒃"; category: "MAINTENANCE" }
+                        ListElement { name: "Updates"; label: "System Updates"; icon: "󰚰"; category: "MAINTENANCE" }
+                        ListElement { name: "Drivers"; label: "Hardware & Drivers"; icon: "󰄛"; category: "MAINTENANCE" }
+                        ListElement { name: "About"; label: "About SynthOS"; icon: "󰋼"; category: "INFO" }
                     }
 
                     delegate: ItemDelegate {
-                        width: parent.width
-                        height: 44
+                        width: parent ? parent.width : 260
+                        height: 42
                         highlighted: ListView.isCurrentItem
-                        leftPadding: 0
-                        rightPadding: 0
+                        visible: searchQuery === "" || model.label.toLowerCase().indexOf(searchQuery) !== -1
 
                         background: Rectangle {
-                            color: highlighted ? Qt.rgba(0.42, 0.53, 0.66, 0.16) : (hovered ? "#1E2030" : "transparent")
+                            color: highlighted ? "#257aa2f7" : (hovered ? "#1a222c" : "transparent")
                             radius: 8
-                            anchors.leftMargin: 8
-                            anchors.rightMargin: 8
-                            Behavior on color { ColorAnimation { duration: 140 } }
+                            anchors.leftMargin: 12
+                            anchors.rightMargin: 12
+                            Behavior on color { ColorAnimation { duration: 120 } }
 
                             Rectangle {
                                 visible: highlighted
                                 width: 3
-                                height: 24
+                                height: 20
                                 color: accentColor
-                                radius: 2
+                                radius: 1.5
                                 anchors.verticalCenter: parent.verticalCenter
                                 anchors.left: parent.left
-                                anchors.leftMargin: 0
                             }
                         }
 
                         contentItem: RowLayout {
-                            spacing: 0
+                            anchors.fill: parent
+                            anchors.leftMargin: 20
+                            anchors.rightMargin: 16
+                            spacing: 12
+
                             Text {
                                 text: model.icon
-                                font.pixelSize: 18
+                                font.family: "Symbols Nerd Font"
+                                font.pixelSize: 17
+                                color: highlighted ? accentColor : mutedText
                             }
+
                             Text {
-                                visible: false
-                                text: model.name
-                                font.pixelSize: 14
-                                color: highlighted ? textColor : mutedText
+                                text: model.label
+                                font.family: "Inter"
+                                font.pixelSize: 13
                                 font.bold: highlighted
+                                color: highlighted ? textColor : "#C0CAD6"
+                                Layout.fillWidth: true
+                                elide: Text.ElideRight
                             }
-                            Item { Layout.fillWidth: true }
                         }
 
-                        ToolTip.visible: hovered
-                        ToolTip.text: model.name
-                        ToolTip.delay: 350
                         onClicked: {
-                            navList.currentIndex = index;
-                            activeNavIndex = index;
-                            currentPage = model.name;
-                            pageStack.replace(pageComponent, { pageName: model.name });
+                            navList.currentIndex = index
+                            activeNavIndex = index
+                            currentPage = model.name
+                            pageLoader.source = "pages/" + (model.name === "Desktop" ? "DesktopCustomization.qml" : (model.name + ".qml"))
                         }
                     }
                 }
-
-                // Footer
-                Rectangle {
-                    Layout.fillWidth: true
-                    Layout.preferredHeight: 1
-                    color: "#12FFFFFF"
-                    Layout.leftMargin: 16
-                    Layout.rightMargin: 16
-                }
-
-                Item { Layout.preferredHeight: 16 }
             }
         }
 
-        // Content area
+        // Divider
         Rectangle {
+            Layout.preferredWidth: 1
+            Layout.fillHeight: true
+            color: "#18ffffff"
+        }
+
+        // ── 2. Content View Area ───────────────────────────────────────────
+        Item {
             Layout.fillWidth: true
             Layout.fillHeight: true
-            color: bgColor
 
-            StackView {
-                id: pageStack
+            Loader {
+                id: pageLoader
                 anchors.fill: parent
-                anchors.margins: 24
-                initialItem: pageComponent
-
-                replaceEnter: Transition {
-                    NumberAnimation { property: "opacity"; from: 0; to: 1; duration: 200; easing.type: Easing.OutCubic }
-                }
-                replaceExit: Transition {
-                    NumberAnimation { property: "opacity"; from: 1; to: 0; duration: 150 }
-                }
-
-                Component {
-                    id: pageComponent
-                    Loader {
-                        property string pageName: "Dashboard"
-                        source: {
-                            switch(pageName) {
-                                case "Dashboard":    return "pages/Dashboard.qml";
-                                case "System":       return "pages/System.qml";
-                                case "Performance":  return "pages/Performance.qml";
-                                case "Gaming":       return "pages/Gaming.qml";
-                                case "Developer":    return "pages/Developer.qml";
-                                case "Desktop":      return "pages/DesktopCustomization.qml";
-                                case "Themes":       return "pages/DesktopCustomization.qml";
-                                case "Security":     return "pages/Security.qml";
-                                case "Updates":      return "pages/Updates.qml";
-                                case "Drivers":      return "pages/Drivers.qml";
-                                case "RGB":          return "pages/RGB.qml";
-                                case "Snapshots":    return "pages/Snapshots.qml";
-                                case "Kernel":       return "pages/Kernel.qml";
-                                case "Controllers":  return "pages/Controllers.qml";
-                                default:             return "pages/Dashboard.qml";
-                            }
-                        }
-                    }
-                }
+                source: "pages/DesktopCustomization.qml"
             }
         }
-    }
-
-    // Page title header
-    Rectangle {
-        id: pageHeader
-        anchors.top: parent.top
-        anchors.left: sidebar.right
-        anchors.right: parent.right
-        height: 60
-        color: "#161C22"
-        z: 10
-
-        Text {
-            anchors.left: parent.left
-            anchors.leftMargin: 24
-            anchors.verticalCenter: parent.verticalCenter
-            text: currentPage
-            font.pixelSize: 22
-            font.bold: true
-            color: textColor
-        }
-    }
-
-    // Adjust content area for header
-    onCurrentPageChanged: {
-        pageStack.anchors.topMargin = 60 + 24;
-    }
-
-    Component.onCompleted: {
-        pageStack.anchors.topMargin = 60 + 24;
     }
 }
