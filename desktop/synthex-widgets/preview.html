@@ -3,871 +3,734 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>SynthOS Linux 2026 — Desktop & System Settings</title>
+<title>Linux Mint Style System Settings — SynthOS Linux</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Ubuntu:wght@400;500;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
 <style>
   :root {
-    --accent: #3584e4;
-    --accent-hover: #1c71d8;
-    --bg-dark: #12151c;
-    --window-bg: #1c212b;
-    --sidebar-bg: #161a22;
-    --card-bg: #222834;
-    --card-hover: #28303e;
-    --border-color: rgba(255, 255, 255, 0.08);
-    --border-subtle: rgba(255, 255, 255, 0.05);
-    --text-primary: #ffffff;
-    --text-secondary: #9aa7b8;
-    --text-muted: #626f80;
-    --radius-window: 12px;
-    --radius-card: 10px;
-    --radius-btn: 6px;
-    --terminal-bg: #101318;
+    --mint-green: #92b15e;
+    --mint-green-hover: #a1c269;
+    --mint-green-active: #7d9b4c;
+    --mint-dark: #2f343f;
+    --mint-header: #262a33;
+    --mint-card: #383c4a;
+    --mint-card-hover: #404552;
+    --mint-border: #434857;
+    --mint-border-subtle: #313642;
+    --text-main: #d3dae3;
+    --text-white: #ffffff;
+    --text-muted: #8b95a5;
+    --window-radius: 8px;
+    --tile-radius: 6px;
   }
 
   * { box-sizing: border-box; margin: 0; padding: 0; }
   body {
-    font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-    color: var(--text-primary);
-    background: #080a0e;
+    font-family: 'Ubuntu', -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    color: var(--text-main);
+    background: #181b20;
     min-height: 100vh;
     display: flex;
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    padding: 24px;
+    padding: 20px;
     -webkit-font-smoothing: antialiased;
   }
 
-  /* ── 1. Desktop Shell Frame ─────────────────────────────────────────── */
-  .desktop-environment {
+  /* ── Desktop Viewport ───────────────────────────────────────────────── */
+  .desktop-viewport {
     position: relative;
     width: 100%;
-    max-width: 1440px;
+    max-width: 1400px;
     height: 880px;
-    border-radius: 16px;
+    border-radius: 10px;
     overflow: hidden;
-    box-shadow: 0 40px 100px rgba(0, 0, 0, 0.9), 0 0 0 1px rgba(255, 255, 255, 0.1);
-    background: #0f141d url('/branding/wallpaper/synthex-dark-4k.svg') center/cover no-repeat;
+    box-shadow: 0 30px 90px rgba(0, 0, 0, 0.85), 0 0 0 1px rgba(255, 255, 255, 0.08);
+    background: #252830 url('/branding/wallpaper/synthex-mint-dark.svg') center/cover no-repeat;
     display: flex;
     flex-direction: column;
   }
 
-  /* ── 2. Top Wayland Status Bar ──────────────────────────────────────── */
-  .top-bar {
-    height: 38px;
-    background: rgba(14, 18, 24, 0.85);
-    backdrop-filter: blur(20px);
-    -webkit-backdrop-filter: blur(20px);
-    border-bottom: 1px solid var(--border-color);
+  /* ── Bottom Panel (Linux Mint Cinnamon Panel) ────────────────────────── */
+  .cinnamon-panel {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: 40px;
+    background: #1e2229;
+    border-top: 1px solid rgba(0, 0, 0, 0.4);
     display: flex;
     align-items: center;
     justify-content: space-between;
-    padding: 0 16px;
+    padding: 0 10px;
+    z-index: 100;
+    user-select: none;
     font-size: 13px;
-    font-weight: 500;
-    z-index: 50;
-    user-select: none;
   }
-  .top-bar-left, .top-bar-right {
-    display: flex;
-    align-items: center;
-    gap: 16px;
-  }
-  .workspace-pill {
-    display: flex;
-    align-items: center;
-    gap: 6px;
-    background: rgba(255, 255, 255, 0.06);
-    padding: 3px 10px;
-    border-radius: 20px;
-  }
-  .ws-dot {
-    width: 7px;
-    height: 7px;
-    border-radius: 50%;
-    background: var(--text-muted);
-    transition: all 0.2s;
-  }
-  .ws-dot.active {
-    width: 18px;
-    border-radius: 4px;
-    background: var(--accent);
-  }
-  .top-clock {
-    font-weight: 600;
-    letter-spacing: 0.2px;
-  }
-  .status-indicators {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    color: var(--text-secondary);
-  }
-  .status-indicators svg {
-    width: 16px;
-    height: 16px;
-    fill: currentColor;
-  }
-
-  /* ── 3. Desktop Workspace Area ──────────────────────────────────────── */
-  .workspace-area {
-    position: relative;
-    flex: 1;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    padding: 24px;
-    gap: 24px;
-  }
-
-  /* ── 4. Authentic System Settings Window ────────────────────────────── */
-  .settings-window {
-    width: 860px;
-    height: 640px;
-    background: var(--window-bg);
-    border-radius: var(--radius-window);
-    box-shadow: 0 24px 60px rgba(0, 0, 0, 0.75), 0 0 0 1px var(--border-color);
-    display: flex;
-    flex-direction: column;
-    overflow: hidden;
-    z-index: 10;
-  }
-
-  /* Window Headerbar (CSD) */
-  .headerbar {
-    height: 48px;
-    background: var(--sidebar-bg);
-    border-bottom: 1px solid var(--border-color);
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    padding: 0 14px;
-    user-select: none;
-  }
-  .window-controls {
+  .panel-left {
     display: flex;
     align-items: center;
     gap: 8px;
   }
-  .win-btn {
-    width: 12px;
-    height: 12px;
-    border-radius: 50%;
+  .mint-menu-button {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    height: 32px;
+    padding: 0 12px;
+    background: transparent;
     border: none;
+    border-radius: 4px;
+    color: var(--text-white);
+    font-weight: 700;
+    font-size: 13px;
+    cursor: pointer;
+    transition: background 0.15s;
+  }
+  .mint-menu-button:hover {
+    background: rgba(255, 255, 255, 0.08);
+  }
+  .mint-logo-badge {
+    width: 20px;
+    height: 20px;
+    background: var(--mint-green);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #1e2229;
+    font-weight: 900;
+    font-size: 12px;
+  }
+  .running-tasks {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+  }
+  .task-item {
+    height: 32px;
+    padding: 0 12px;
+    background: rgba(255, 255, 255, 0.08);
+    border-bottom: 2px solid var(--mint-green);
+    border-radius: 4px 4px 0 0;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 12px;
+    color: var(--text-white);
     cursor: pointer;
   }
-  .win-close { background: #e05f54; }
-  .win-min { background: #f3be4d; }
-  .win-max { background: #57c158; }
-
-  .search-container {
-    position: relative;
-    width: 240px;
+  .panel-right {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    color: var(--text-main);
   }
-  .search-input {
+  .tray-icon {
+    width: 16px;
+    height: 16px;
+    fill: currentColor;
+  }
+
+  /* ── Linux Mint System Settings Window ──────────────────────────────── */
+  .mint-settings-window {
+    position: absolute;
+    top: 36px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 980px;
+    height: 760px;
+    background: var(--mint-dark);
+    border-radius: var(--window-radius);
+    border: 1px solid var(--mint-border);
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.7);
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    z-index: 50;
+  }
+
+  /* Window Header Bar */
+  .mint-headerbar {
+    height: 48px;
+    background: var(--mint-header);
+    border-bottom: 1px solid var(--mint-border-subtle);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 16px;
+    user-select: none;
+  }
+  .headerbar-left {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+  .back-btn {
+    display: none;
+    align-items: center;
+    gap: 6px;
+    padding: 5px 12px;
+    background: var(--mint-card);
+    border: 1px solid var(--mint-border);
+    border-radius: 4px;
+    color: var(--text-white);
+    font-size: 12px;
+    font-weight: 500;
+    cursor: pointer;
+  }
+  .back-btn:hover { background: var(--mint-card-hover); }
+  .headerbar-title {
+    font-size: 14px;
+    font-weight: 700;
+    color: var(--text-white);
+  }
+  .headerbar-right {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+  }
+  .mint-search-box {
+    position: relative;
+    width: 220px;
+  }
+  .mint-search-input {
     width: 100%;
-    height: 30px;
-    background: rgba(255, 255, 255, 0.06);
-    border: 1px solid var(--border-color);
-    border-radius: 6px;
-    padding: 0 10px 0 28px;
-    color: var(--text-primary);
+    height: 28px;
+    background: #1e2229;
+    border: 1px solid var(--mint-border);
+    border-radius: 4px;
+    padding: 0 10px 0 26px;
+    color: var(--text-white);
     font-size: 12px;
     font-family: inherit;
     outline: none;
   }
-  .search-input:focus {
-    border-color: var(--accent);
-    background: rgba(255, 255, 255, 0.09);
-  }
-  .search-icon {
+  .mint-search-input:focus { border-color: var(--mint-green); }
+  .search-svg {
     position: absolute;
     left: 8px;
-    top: 8px;
-    width: 14px;
-    height: 14px;
+    top: 7px;
+    width: 13px;
+    height: 13px;
     fill: var(--text-muted);
   }
-
-  /* Settings Main Body */
-  .settings-body {
-    flex: 1;
-    display: flex;
-    overflow: hidden;
-  }
-
-  /* Sidebar Navigation */
-  .settings-sidebar {
-    width: 240px;
-    background: var(--sidebar-bg);
-    border-right: 1px solid var(--border-color);
-    overflow-y: auto;
-    padding: 12px 8px;
-    display: flex;
-    flex-direction: column;
-    gap: 4px;
-  }
-  .sidebar-section-title {
-    font-size: 11px;
-    font-weight: 700;
-    color: var(--text-muted);
-    text-transform: uppercase;
-    letter-spacing: 0.5px;
-    padding: 10px 10px 4px 10px;
-  }
-  .nav-item {
+  .window-buttons {
     display: flex;
     align-items: center;
-    gap: 10px;
-    padding: 8px 12px;
-    border-radius: 6px;
-    font-size: 13px;
-    font-weight: 500;
-    color: var(--text-secondary);
+    gap: 8px;
+  }
+  .wb-btn {
+    width: 18px;
+    height: 18px;
+    border-radius: 50%;
+    background: #383c4a;
+    border: 1px solid #484e5e;
+    color: #a0aab8;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 10px;
     cursor: pointer;
-    transition: background 0.15s, color 0.15s;
-    user-select: none;
   }
-  .nav-item:hover {
-    background: rgba(255, 255, 255, 0.05);
-    color: var(--text-primary);
-  }
-  .nav-item.active {
-    background: var(--accent);
-    color: #ffffff;
-  }
-  .nav-item svg {
-    width: 16px;
-    height: 16px;
-    fill: currentColor;
-    flex-shrink: 0;
-  }
+  .wb-btn:hover { background: #484e5e; color: #fff; }
+  .wb-close:hover { background: #d9534f; border-color: #d9534f; }
 
-  /* Content Panel Area */
-  .settings-content {
+  /* Window Content Body */
+  .mint-content-body {
     flex: 1;
-    background: var(--window-bg);
     overflow-y: auto;
-    padding: 24px 28px;
-  }
-  .page-title {
-    font-size: 18px;
-    font-weight: 700;
-    margin-bottom: 4px;
-  }
-  .page-subtitle {
-    font-size: 13px;
-    color: var(--text-secondary);
-    margin-bottom: 20px;
+    padding: 20px 28px;
+    background: var(--mint-dark);
   }
 
-  /* Standard Libadwaita Preferences Group */
-  .pref-group {
+  /* Categorized Grid Sections */
+  .settings-category {
     margin-bottom: 24px;
   }
-  .pref-group-title {
+  .category-header {
     font-size: 12px;
     font-weight: 700;
-    color: var(--text-muted);
+    color: var(--mint-green);
     text-transform: uppercase;
-    letter-spacing: 0.4px;
-    margin-bottom: 8px;
-    padding-left: 2px;
+    letter-spacing: 0.6px;
+    border-bottom: 1px solid var(--mint-border-subtle);
+    padding-bottom: 6px;
+    margin-bottom: 14px;
   }
-  .pref-box {
-    background: var(--card-bg);
-    border: 1px solid var(--border-color);
-    border-radius: var(--radius-card);
+  .tiles-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
+    gap: 12px;
+  }
+  .tile-item {
+    background: var(--mint-card);
+    border: 1px solid var(--mint-border-subtle);
+    border-radius: var(--tile-radius);
+    padding: 16px 8px 12px 8px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    cursor: pointer;
+    transition: background 0.12s, border-color 0.12s, transform 0.1s;
+    user-select: none;
+    text-align: center;
+  }
+  .tile-item:hover {
+    background: var(--mint-card-hover);
+    border-color: var(--mint-green);
+    transform: translateY(-2px);
+  }
+  .tile-icon-wrapper {
+    width: 44px;
+    height: 44px;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .tile-icon-wrapper svg {
+    width: 32px;
+    height: 32px;
+    fill: var(--text-white);
+  }
+  .tile-label {
+    font-size: 12px;
+    font-weight: 500;
+    color: var(--text-main);
+    line-height: 1.2;
+  }
+
+  /* ── Sub-Page Module Views ──────────────────────────────────────────── */
+  .module-view {
+    display: none;
+  }
+  .module-view.active {
+    display: block;
+  }
+  .mint-group-box {
+    background: var(--mint-card);
+    border: 1px solid var(--mint-border);
+    border-radius: 6px;
+    margin-bottom: 20px;
     overflow: hidden;
   }
-  .pref-row {
+  .mint-group-header {
+    background: #313642;
+    padding: 10px 16px;
+    font-size: 12px;
+    font-weight: 700;
+    color: var(--text-white);
+    border-bottom: 1px solid var(--mint-border);
+  }
+  .mint-row {
     display: flex;
     align-items: center;
     justify-content: space-between;
     padding: 12px 16px;
-    border-bottom: 1px solid var(--border-subtle);
+    border-bottom: 1px solid var(--mint-border-subtle);
   }
-  .pref-row:last-child {
-    border-bottom: none;
-  }
-  .pref-row-info {
-    display: flex;
-    flex-direction: column;
-    gap: 2px;
-  }
-  .pref-label {
-    font-size: 13px;
-    font-weight: 500;
-    color: var(--text-primary);
-  }
-  .pref-sublabel {
-    font-size: 12px;
-    color: var(--text-secondary);
-  }
+  .mint-row:last-child { border-bottom: none; }
+  .mint-label { font-size: 13px; font-weight: 500; color: var(--text-white); }
+  .mint-sublabel { font-size: 12px; color: var(--text-muted); margin-top: 2px; }
 
-  /* Standard Linux Form Controls */
-  .switch {
+  .mint-switch {
     position: relative;
     width: 44px;
-    height: 24px;
+    height: 22px;
     display: inline-block;
   }
-  .switch input { opacity: 0; width: 0; height: 0; }
-  .slider {
+  .mint-switch input { opacity: 0; width: 0; height: 0; }
+  .mint-switch-slider {
     position: absolute;
     cursor: pointer;
     top: 0; left: 0; right: 0; bottom: 0;
-    background-color: #3b4252;
+    background-color: #262a33;
+    border: 1px solid var(--mint-border);
     transition: 0.2s;
-    border-radius: 24px;
+    border-radius: 22px;
   }
-  .slider:before {
+  .mint-switch-slider:before {
     position: absolute;
     content: "";
-    height: 18px; width: 18px;
+    height: 14px; width: 14px;
     left: 3px; bottom: 3px;
-    background-color: white;
+    background-color: #d3dae3;
     transition: 0.2s;
     border-radius: 50%;
   }
-  input:checked + .slider { background-color: var(--accent); }
-  input:checked + .slider:before { transform: translateX(20px); }
+  input:checked + .mint-switch-slider { background-color: var(--mint-green); border-color: var(--mint-green); }
+  input:checked + .mint-switch-slider:before { transform: translateX(22px); background-color: #ffffff; }
 
-  .select-box {
-    background: rgba(255, 255, 255, 0.06);
-    border: 1px solid var(--border-color);
-    color: var(--text-primary);
+  .mint-btn {
+    padding: 6px 14px;
+    background: #313642;
+    border: 1px solid var(--mint-border);
+    border-radius: 4px;
+    color: var(--text-white);
+    font-size: 12px;
+    font-weight: 500;
+    cursor: pointer;
+    font-family: inherit;
+  }
+  .mint-btn:hover { background: #404552; border-color: var(--mint-green); }
+
+  .mint-select {
     padding: 6px 12px;
-    border-radius: 6px;
-    font-size: 13px;
+    background: #262a33;
+    border: 1px solid var(--mint-border);
+    border-radius: 4px;
+    color: var(--text-white);
+    font-size: 12px;
     font-family: inherit;
     outline: none;
     cursor: pointer;
   }
-  .select-box:focus { border-color: var(--accent); }
-
-  .range-slider {
-    -webkit-appearance: none;
-    width: 140px;
-    height: 4px;
-    background: rgba(255, 255, 255, 0.15);
-    border-radius: 2px;
-    outline: none;
-  }
-  .range-slider::-webkit-slider-thumb {
-    -webkit-appearance: none;
-    width: 14px;
-    height: 14px;
-    border-radius: 50%;
-    background: var(--accent);
-    cursor: pointer;
-  }
-
-  /* ── 5. Terminal Window (Fastfetch) ─────────────────────────────────── */
-  .terminal-window {
-    width: 460px;
-    height: 480px;
-    background: var(--terminal-bg);
-    border-radius: var(--radius-window);
-    box-shadow: 0 20px 50px rgba(0, 0, 0, 0.7), 0 0 0 1px var(--border-color);
-    display: flex;
-    flex-direction: column;
-    overflow: hidden;
-    font-family: 'JetBrains Mono', monospace;
-    font-size: 12px;
-    line-height: 1.5;
-  }
-  .terminal-header {
-    height: 38px;
-    background: rgba(255, 255, 255, 0.03);
-    border-bottom: 1px solid var(--border-color);
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    padding: 0 14px;
-  }
-  .terminal-body {
-    flex: 1;
-    padding: 16px;
-    overflow-y: auto;
-    color: #d1d7e0;
-  }
-  .term-line { margin-bottom: 2px; }
-  .term-key { color: var(--accent); font-weight: 600; }
-  .term-val { color: #f0f4fc; }
-
-  /* ── 6. Bottom Dock ─────────────────────────────────────────────────── */
-  .bottom-dock {
-    height: 56px;
-    background: rgba(18, 22, 30, 0.88);
-    backdrop-filter: blur(24px);
-    -webkit-backdrop-filter: blur(24px);
-    border: 1px solid var(--border-color);
-    border-radius: 28px;
-    position: absolute;
-    bottom: 16px;
-    left: 50%;
-    transform: translateX(-50%);
-    display: flex;
-    align-items: center;
-    padding: 0 14px;
-    gap: 12px;
-    box-shadow: 0 12px 35px rgba(0, 0, 0, 0.6);
-    z-index: 40;
-  }
-  .dock-item {
-    width: 40px;
-    height: 40px;
-    border-radius: 10px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    background: rgba(255, 255, 255, 0.06);
-    cursor: pointer;
-    transition: transform 0.15s, background 0.15s;
-  }
-  .dock-item:hover {
-    transform: translateY(-4px) scale(1.1);
-    background: rgba(255, 255, 255, 0.12);
-  }
-  .dock-item.active-app {
-    background: var(--accent);
-  }
-  .dock-item svg {
-    width: 22px;
-    height: 22px;
-    fill: #ffffff;
-  }
-
-  /* ── 7. Clean Sub-Page Switching ────────────────────────────────────── */
-  .page-panel { display: none; }
-  .page-panel.active { display: block; }
+  .mint-select:focus { border-color: var(--mint-green); }
 </style>
 </head>
 <body>
 
-<div class="desktop-environment">
+<div class="desktop-viewport">
 
-  <!-- Top Wayland Status Bar -->
-  <div class="top-bar">
-    <div class="top-bar-left">
-      <div class="workspace-pill">
-        <div class="ws-dot active"></div>
-        <div class="ws-dot"></div>
-        <div class="ws-dot"></div>
+  <!-- Linux Mint Style System Settings Window -->
+  <div class="mint-settings-window">
+
+    <!-- Headerbar -->
+    <div class="mint-headerbar">
+      <div class="headerbar-left">
+        <button class="back-btn" id="btnBack" onclick="showMainGrid()">◀ All Settings</button>
+        <span class="headerbar-title" id="lblTitle">System Settings</span>
       </div>
-      <span style="color: var(--text-secondary); font-weight: 500;">SynthOS 2026.10 LTS</span>
+
+      <div class="headerbar-right">
+        <div class="mint-search-box">
+          <svg class="search-svg" viewBox="0 0 24 24"><path d="M15.5 14h-.79l-.28-.27A6.471 6.471 0 0 0 16 9.5 6.5 6.5 0 1 0 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"/></svg>
+          <input type="text" class="mint-search-input" id="searchBox" placeholder="Search..." oninput="filterTiles()">
+        </div>
+
+        <div class="window-buttons">
+          <button class="wb-btn">_</button>
+          <button class="wb-btn">□</button>
+          <button class="wb-btn wb-close">✕</button>
+        </div>
+      </div>
     </div>
 
-    <div class="top-clock" id="liveClock">Fri Aug 14 &nbsp; 04:04 PM</div>
+    <!-- Content Body -->
+    <div class="mint-content-body">
 
-    <div class="top-bar-right">
-      <div class="status-indicators">
-        <!-- Wi-Fi -->
-        <svg viewBox="0 0 24 24"><path d="M12 4C7.31 4 3.07 5.9 0 8.98L12 21 24 8.98C20.93 5.9 16.69 4 12 4zm0 3c3.75 0 7.17 1.48 9.72 3.89L12 18.66 2.28 10.89C4.83 8.48 8.25 7 12 7z"/></svg>
-        <!-- Volume -->
-        <svg viewBox="0 0 24 24"><path d="M3 9v6h4l5 5V4L7 9H3zm13.5 3c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02zM14 3.23v2.06c2.89.86 5 3.54 5 6.71s-2.11 5.85-5 6.71v2.06c4.01-.91 7-4.49 7-8.77s-2.99-7.86-7-8.77z"/></svg>
-        <!-- Battery -->
-        <svg viewBox="0 0 24 24"><path d="M15.67 4H14V2h-4v2H8.33C7.6 4 7 4.6 7 5.33v15.33C7 21.4 7.6 22 8.33 22h7.33c.74 0 1.34-.6 1.34-1.33V5.33C17 4.6 16.4 4 15.67 4zM11 20v-5.5H9L13 7v5.5h2L11 20z"/></svg>
-        <span style="font-size: 12px; color: var(--text-primary); font-weight: 600;">94%</span>
+      <!-- 1. MAIN CATEGORIZED GRID (CINNAMON SETTINGS HOME) -->
+      <div id="mainGrid">
+
+        <!-- Category: Appearance -->
+        <div class="settings-category">
+          <div class="category-header">Appearance</div>
+          <div class="tiles-grid">
+            <div class="tile-item" onclick="openModule('backgrounds', 'Backgrounds')">
+              <div class="tile-icon-wrapper" style="background:#406852;"><svg viewBox="0 0 24 24"><path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm0 16H5V5h14v14zm-5.04-6.71l-2.75 3.54-1.96-2.36L6.5 17h11l-3.54-4.71z"/></svg></div>
+              <div class="tile-label">Backgrounds</div>
+            </div>
+            <div class="tile-item" onclick="openModule('effects', 'Effects')">
+              <div class="tile-icon-wrapper" style="background:#5c548a;"><svg viewBox="0 0 24 24"><path d="M12 3c-4.97 0-9 4.03-9 9 0 2.12.74 4.07 1.97 5.61L4.35 19.4c-.39.39-.39 1.02 0 1.41.39.39 1.02.39 1.41 0l1.9-1.9C9.22 19.58 10.57 20 12 20c4.97 0 9-4.03 9-9s-4.03-9-9-9z"/></svg></div>
+              <div class="tile-label">Effects</div>
+            </div>
+            <div class="tile-item" onclick="openModule('fonts', 'Font Selection')">
+              <div class="tile-icon-wrapper" style="background:#7b6348;"><svg viewBox="0 0 24 24"><path d="M9.93 13.5h4.14L12 7.98zM20 2H4c-1.1 0-2 .9-2 2v16c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zm-4.05 16.5l-1.14-3H9.17l-1.12 3H5.96l5.11-13h1.86l5.11 13h-2.09z"/></svg></div>
+              <div class="tile-label">Font Selection</div>
+            </div>
+            <div class="tile-item" onclick="openModule('themes', 'Themes')">
+              <div class="tile-icon-wrapper" style="background:#3d6c82;"><svg viewBox="0 0 24 24"><path d="M12 3c-4.97 0-9 4.03-9 9 0 2.12.74 4.07 1.97 5.61L4.35 19.4c-.39.39-.39 1.02 0 1.41.39.39 1.02.39 1.41 0l1.9-1.9C9.22 19.58 10.57 20 12 20c4.97 0 9-4.03 9-9s-4.03-9-9-9z"/></svg></div>
+              <div class="tile-label">Themes</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Category: Preferences -->
+        <div class="settings-category">
+          <div class="category-header">Preferences</div>
+          <div class="tiles-grid">
+            <div class="tile-item" onclick="openModule('accessibility', 'Accessibility')">
+              <div class="tile-icon-wrapper" style="background:#546e7a;"><svg viewBox="0 0 24 24"><path d="M12 2c1.1 0 2 .9 2 2s-.9 2-2 2-2-.9-2-2 .9-2 2-2zm9 7h-6v13h-2v-6h-2v6H9V9H3V7h18v2z"/></svg></div>
+              <div class="tile-label">Accessibility</div>
+            </div>
+            <div class="tile-item" onclick="openModule('account', 'Account Details')">
+              <div class="tile-icon-wrapper" style="background:#3f51b5;"><svg viewBox="0 0 24 24"><path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/></svg></div>
+              <div class="tile-label">Account Details</div>
+            </div>
+            <div class="tile-item" onclick="openModule('datetime', 'Date & Time')">
+              <div class="tile-icon-wrapper" style="background:#e65100;"><svg viewBox="0 0 24 24"><path d="M11.99 2C6.47 2 2 6.48 2 12s4.47 10 9.99 10C17.52 22 22 17.52 22 12S17.52 2 11.99 2zM12 20c-4.42 0-8-3.58-8-8s3.58-8 8-8 8 3.58 8 8-3.58 8-8 8zm.5-13H11v6l5.25 3.15.75-1.23-4.5-2.67z"/></svg></div>
+              <div class="tile-label">Date & Time</div>
+            </div>
+            <div class="tile-item" onclick="openModule('desktop', 'Desktop')">
+              <div class="tile-icon-wrapper" style="background:#2e7d32;"><svg viewBox="0 0 24 24"><path d="M21 2H3c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h7v2H8v2h8v-2h-2v-2h7c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zm0 14H3V4h18v12z"/></svg></div>
+              <div class="tile-label">Desktop</div>
+            </div>
+            <div class="tile-item" onclick="openModule('notifications', 'Notifications')">
+              <div class="tile-icon-wrapper" style="background:#c2185b;"><svg viewBox="0 0 24 24"><path d="M12 22c1.1 0 2-.9 2-2h-4c0 1.1.89 2 2 2zm6-6v-5c0-3.07-1.64-5.64-4.5-6.32V4c0-.83-.67-1.5-1.5-1.5s-1.5.67-1.5 1.5v.68C7.63 5.36 6 7.92 6 11v5l-2 2v1h16v-1l-2-2z"/></svg></div>
+              <div class="tile-label">Notifications</div>
+            </div>
+            <div class="tile-item" onclick="openModule('preferred', 'Preferred Applications')">
+              <div class="tile-icon-wrapper" style="background:#00838f;"><svg viewBox="0 0 24 24"><path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z"/></svg></div>
+              <div class="tile-label">Preferred Applications</div>
+            </div>
+            <div class="tile-item" onclick="openModule('privacy', 'Privacy')">
+              <div class="tile-icon-wrapper" style="background:#4e342e;"><svg viewBox="0 0 24 24"><path d="M18 8h-1V6c0-2.76-2.24-5-5-5S7 3.24 7 6v2H6c-1.1 0-2 .9-2 2v10c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V10c0-1.1-.9-2-2-2zm-6 9c-1.1 0-2-.9-2-2s.9-2 2-2 2 .9 2 2-.9 2-2 2zm3.1-9H8.9V6c0-1.71 1.39-3.1 3.1-3.1 1.71 0 3.1 1.39 3.1 3.1v2z"/></svg></div>
+              <div class="tile-label">Privacy</div>
+            </div>
+            <div class="tile-item" onclick="openModule('startup', 'Startup Applications')">
+              <div class="tile-icon-wrapper" style="background:#558b2f;"><svg viewBox="0 0 24 24"><path d="M9.19 6.35c-2.04 2.29-3.44 5.58-3.57 9.15l2.12.11c.1-3.05 1.28-5.83 3.01-7.77L9.19 6.35zm5.62 0l-1.56 1.49c1.73 1.94 2.91 4.72 3.01 7.77l2.12-.11c-.13-3.57-1.53-6.86-3.57-9.15zM12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8z"/></svg></div>
+              <div class="tile-label">Startup Applications</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Category: Hardware -->
+        <div class="settings-category">
+          <div class="category-header">Hardware</div>
+          <div class="tiles-grid">
+            <div class="tile-item" onclick="openModule('bluetooth', 'Bluetooth')">
+              <div class="tile-icon-wrapper" style="background:#1565c0;"><svg viewBox="0 0 24 24"><path d="M17.71 7.71L12 2h-1v7.59L6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 11 14.41V22h1l5.71-5.71-4.3-4.29 4.3-4.29zM13 5.83l1.88 1.88L13 9.59V5.83zm1.88 10.46L13 18.17v-3.76l1.88 1.88z"/></svg></div>
+              <div class="tile-label">Bluetooth</div>
+            </div>
+            <div class="tile-item" onclick="openModule('display', 'Display')">
+              <div class="tile-icon-wrapper" style="background:#6a1b9a;"><svg viewBox="0 0 24 24"><path d="M21 3H3c-1.11 0-2 .89-2 2v12c0 1.1.89 2 2 2h7v2H8v2h8v-2h-2v-2h7c1.1 0 2-.9 2-2V5c0-1.11-.9-2-2-2zm0 14H3V5h18v12z"/></svg></div>
+              <div class="tile-label">Display</div>
+            </div>
+            <div class="tile-item" onclick="openModule('graphics', 'Graphics')">
+              <div class="tile-icon-wrapper" style="background:#2e7d32;"><svg viewBox="0 0 24 24"><path d="M21 6H3c-1.1 0-2 .9-2 2v8c0 1.1.9 2 2 2h18c1.1 0 2-.9 2-2V8c0-1.1-.9-2-2-2zm-10 7H8v3H6v-3H3v-2h3V8h2v3h3v2zm4.5 2c-.83 0-1.5-.67-1.5-1.5s.67-1.5 1.5-1.5 1.5.67 1.5 1.5-.67 1.5-1.5 1.5zm4-3c-.83 0-1.5-.67-1.5-1.5S18.67 9 19.5 9s1.5.67 1.5 1.5-.67 1.5-1.5 1.5z"/></svg></div>
+              <div class="tile-label">Graphics</div>
+            </div>
+            <div class="tile-item" onclick="openModule('keyboard', 'Keyboard')">
+              <div class="tile-icon-wrapper" style="background:#37474f;"><svg viewBox="0 0 24 24"><path d="M20 5H4c-1.1 0-1.99.9-1.99 2L2 17c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm-9 3h2v2h-2V8zm0 3h2v2h-2v-2zM8 8h2v2H8V8zm0 3h2v2H8v-2zm-1 2H5v-2h2v2zm0-3H5V8h2v2zm9 7H8v-2h8v2zm0-4h-2v-2h2v2zm0-3h-2V8h2v2zm3 3h-2v-2h2v2zm0-3h-2V8h2v2z"/></svg></div>
+              <div class="tile-label">Keyboard</div>
+            </div>
+            <div class="tile-item" onclick="openModule('mouse', 'Mouse and Touchpad')">
+              <div class="tile-icon-wrapper" style="background:#455a64;"><svg viewBox="0 0 24 24"><path d="M13 1.07V9h7c0-4.08-3.05-7.44-7-7.93zM4 15c0 4.42 3.58 8 8 8s8-3.58 8-8v-4H4v4zm7-13.93C7.05 1.56 4 4.92 4 9h7V1.07z"/></svg></div>
+              <div class="tile-label">Mouse & Touchpad</div>
+            </div>
+            <div class="tile-item" onclick="openModule('network', 'Network')">
+              <div class="tile-icon-wrapper" style="background:#0277bd;"><svg viewBox="0 0 24 24"><path d="M12 4C7.31 4 3.07 5.9 0 8.98L12 21 24 8.98C20.93 5.9 16.69 4 12 4z"/></svg></div>
+              <div class="tile-label">Network</div>
+            </div>
+            <div class="tile-item" onclick="openModule('power', 'Power Management')">
+              <div class="tile-icon-wrapper" style="background:#f57f17;"><svg viewBox="0 0 24 24"><path d="M15.67 4H14V2h-4v2H8.33C7.6 4 7 4.6 7 5.33v15.33C7 21.4 7.6 22 8.33 22h7.33c.74 0 1.34-.6 1.34-1.33V5.33C17 4.6 16.4 4 15.67 4z"/></svg></div>
+              <div class="tile-label">Power Management</div>
+            </div>
+            <div class="tile-item" onclick="openModule('sound', 'Sound')">
+              <div class="tile-icon-wrapper" style="background:#ad1457;"><svg viewBox="0 0 24 24"><path d="M3 9v6h4l5 5V4L7 9H3zm13.5 3c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02z"/></svg></div>
+              <div class="tile-label">Sound</div>
+            </div>
+            <div class="tile-item" onclick="openModule('sysinfo', 'System Info')">
+              <div class="tile-icon-wrapper" style="background:#00695c;"><svg viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-6h2v6zm0-8h-2V7h2v2z"/></svg></div>
+              <div class="tile-label">System Info</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Category: Administration -->
+        <div class="settings-category">
+          <div class="category-header">Administration</div>
+          <div class="tiles-grid">
+            <div class="tile-item" onclick="openModule('backup', 'Backup Tool')">
+              <div class="tile-icon-wrapper" style="background:#283593;"><svg viewBox="0 0 24 24"><path d="M19.35 10.04C18.67 6.59 15.64 4 12 4 9.11 4 6.6 5.64 5.35 8.04 2.34 8.36 0 10.91 0 14c0 3.31 2.69 6 6 6h13c2.76 0 5-2.24 5-5 0-2.64-2.05-4.78-4.65-4.96zM14 13v4h-4v-4H7l5-5 5 5h-3z"/></svg></div>
+              <div class="tile-label">Backup Tool</div>
+            </div>
+            <div class="tile-item" onclick="openModule('driver', 'Driver Manager')">
+              <div class="tile-icon-wrapper" style="background:#d84315;"><svg viewBox="0 0 24 24"><path d="M22.7 19l-9.1-9.1c.9-2.3.4-5-1.5-6.9-2-2-5-2.4-7.4-1.3L9 6 6 9 1.6 4.7C.4 7.1.9 10.1 2.9 12.1c1.9 1.9 4.6 2.4 6.9 1.5l9.1 9.1c.4.4 1 .4 1.4 0l2.3-2.3c.5-.4.5-1.1.1-1.4z"/></svg></div>
+              <div class="tile-label">Driver Manager</div>
+            </div>
+            <div class="tile-item" onclick="openModule('firewall', 'Firewall')">
+              <div class="tile-icon-wrapper" style="background:#c62828;"><svg viewBox="0 0 24 24"><path d="M12 1L3 5v6c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V5l-9-4zm0 10.99h7c-.53 4.12-3.28 7.79-7 8.94V12H5V6.3l7-3.11v8.8z"/></svg></div>
+              <div class="tile-label">Firewall</div>
+            </div>
+            <div class="tile-item" onclick="openModule('update', 'Update Manager')">
+              <div class="tile-icon-wrapper" style="background:#2e7d32;"><svg viewBox="0 0 24 24"><path d="M17.65 6.35C16.2 4.9 14.21 4 12 4c-4.42 0-7.99 3.58-7.99 8s3.57 8 7.99 8c3.73 0 6.84-2.55 7.73-6h-2.08c-.82 2.33-3.04 4-5.65 4-3.31 0-6-2.69-6-6s2.69-6 6-6c1.66 0 3.14.69 4.22 1.78L13 11h7V4l-2.35 2.35z"/></svg></div>
+              <div class="tile-label">Update Manager</div>
+            </div>
+            <div class="tile-item" onclick="openModule('users', 'Users and Groups')">
+              <div class="tile-icon-wrapper" style="background:#4e342e;"><svg viewBox="0 0 24 24"><path d="M16 11c1.66 0 2.99-1.34 2.99-3S17.66 5 16 5c-1.66 0-3 1.34-3 3s1.34 3 3 3zm-8 0c1.66 0 2.99-1.34 2.99-3S9.66 5 8 5C6.34 5 5 6.34 5 8s1.34 3 3 3zm0 2c-2.33 0-7 1.17-7 3.5V19h14v-2.5c0-2.33-4.67-3.5-7-3.5zm8 0c-.29 0-.62.02-.97.05 1.16.84 1.97 1.97 1.97 3.45V19h6v-2.5c0-2.33-4.67-3.5-7-3.5z"/></svg></div>
+              <div class="tile-label">Users & Groups</div>
+            </div>
+          </div>
+        </div>
+
       </div>
+
+      <!-- 2. SUB-PAGE MODULE VIEWS -->
+
+      <!-- MODULE: THEMES -->
+      <div class="module-view" id="mod-themes">
+        <div class="mint-group-box">
+          <div class="mint-group-header">Desktop Theme & Colors</div>
+          <div class="mint-row">
+            <div>
+              <div class="mint-label">Desktop Controls Style</div>
+              <div class="mint-sublabel">Mint-Y-Dark (Charcoal & Mint Leaf Green)</div>
+            </div>
+            <select class="mint-select">
+              <option>Mint-Y-Dark (Default)</option>
+              <option>Mint-Y-Teal</option>
+              <option>Mint-Y-Blue</option>
+              <option>Mint-Y-Aqua</option>
+              <option>Mint-X</option>
+            </select>
+          </div>
+          <div class="mint-row">
+            <div>
+              <div class="mint-label">Icon Theme</div>
+              <div class="mint-sublabel">Mint-Y High-DPI Vector Icons</div>
+            </div>
+            <select class="mint-select">
+              <option>Mint-Y</option>
+              <option>Mint-X</option>
+              <option>Papirus-Dark</option>
+            </select>
+          </div>
+          <div class="mint-row">
+            <div>
+              <div class="mint-label">Mouse Pointer</div>
+              <div class="mint-sublabel">Bibata-Modern-Classic (24px)</div>
+            </div>
+            <select class="mint-select">
+              <option>Bibata-Modern-Classic</option>
+              <option>DMZ-Black</option>
+            </select>
+          </div>
+        </div>
+      </div>
+
+      <!-- MODULE: NETWORK -->
+      <div class="module-view" id="mod-network">
+        <div class="mint-group-box">
+          <div class="mint-group-header">Wi-Fi (NetworkManager)</div>
+          <div class="mint-row">
+            <div>
+              <div class="mint-label">Enable Wireless Networking</div>
+              <div class="mint-sublabel">Connected to SynthNet-5G (Signal: 96%)</div>
+            </div>
+            <label class="mint-switch">
+              <input type="checkbox" checked>
+              <span class="mint-switch-slider"></span>
+            </label>
+          </div>
+          <div class="mint-row">
+            <div>
+              <div class="mint-label">IPv4 Address</div>
+              <div class="mint-sublabel">192.168.1.142 / 255.255.255.0 (Gateway: 192.168.1.1)</div>
+            </div>
+            <button class="mint-btn">Network Settings...</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- MODULE: SYSINFO -->
+      <div class="module-view" id="mod-sysinfo">
+        <div class="mint-group-box">
+          <div class="mint-group-header">Operating System & Hardware</div>
+          <div class="mint-row">
+            <div class="mint-label">Operating System</div>
+            <div style="font-weight:700; color:var(--mint-green)">SynthOS Linux 2026.10 LTS (Mint Edition)</div>
+          </div>
+          <div class="mint-row">
+            <div class="mint-label">Linux Kernel</div>
+            <div>6.13.0-cachyos-gaming (x86_64)</div>
+          </div>
+          <div class="mint-row">
+            <div class="mint-label">Processor</div>
+            <div>AMD Ryzen 9 7950X (32 Threads @ 5.7 GHz)</div>
+          </div>
+          <div class="mint-row">
+            <div class="mint-label">Memory</div>
+            <div>32.0 GB High-Speed DDR5</div>
+          </div>
+          <div class="mint-row">
+            <div class="mint-label">Graphics Card</div>
+            <div>NVIDIA GeForce RTX 4080 (Driver 570.86)</div>
+          </div>
+          <div class="mint-row">
+            <div class="mint-label">Hard Drives</div>
+            <div>2.0 TB NVMe PCIe 4.0 (Btrfs Rootfs + Timeshift)</div>
+          </div>
+        </div>
+      </div>
+
     </div>
   </div>
 
-  <!-- Main Desktop Space -->
-  <div class="workspace-area">
+  <!-- Bottom Cinnamon Panel -->
+  <div class="cinnamon-panel">
+    <div class="panel-left">
+      <button class="mint-menu-button">
+        <div class="mint-logo-badge">🌿</div>
+        <span>Menu</span>
+      </button>
 
-    <!-- 1. Authentic System Settings Window -->
-    <div class="settings-window">
-      <!-- Window Titlebar -->
-      <div class="headerbar">
-        <div class="window-controls">
-          <button class="win-btn win-close"></button>
-          <button class="win-btn win-min"></button>
-          <button class="win-btn win-max"></button>
-        </div>
-
-        <div class="search-container">
-          <svg class="search-icon" viewBox="0 0 24 24"><path d="M15.5 14h-.79l-.28-.27A6.471 6.471 0 0 0 16 9.5 6.5 6.5 0 1 0 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"/></svg>
-          <input type="text" class="search-input" placeholder="Search settings...">
-        </div>
-
-        <div style="width: 50px;"></div>
-      </div>
-
-      <!-- Settings Body with Sidebar -->
-      <div class="settings-body">
-        <!-- Sidebar Navigation -->
-        <div class="settings-sidebar">
-          <div class="sidebar-section-title">Connectivity</div>
-          <div class="nav-item active" onclick="switchTab('network', this)">
-            <svg viewBox="0 0 24 24"><path d="M12 4C7.31 4 3.07 5.9 0 8.98L12 21 24 8.98C20.93 5.9 16.69 4 12 4z"/></svg>
-            Wi-Fi & Network
-          </div>
-          <div class="nav-item" onclick="switchTab('bluetooth', this)">
-            <svg viewBox="0 0 24 24"><path d="M17.71 7.71L12 2h-1v7.59L6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 11 14.41V22h1l5.71-5.71-4.3-4.29 4.3-4.29zM13 5.83l1.88 1.88L13 9.59V5.83zm1.88 10.46L13 18.17v-3.76l1.88 1.88z"/></svg>
-            Bluetooth
-          </div>
-
-          <div class="sidebar-section-title">Personalization</div>
-          <div class="nav-item" onclick="switchTab('appearance', this)">
-            <svg viewBox="0 0 24 24"><path d="M12 3c-4.97 0-9 4.03-9 9 0 2.12.74 4.07 1.97 5.61L4.35 19.4c-.39.39-.39 1.02 0 1.41.39.39 1.02.39 1.41 0l1.9-1.9C9.22 19.58 10.57 20 12 20c4.97 0 9-4.03 9-9s-4.03-9-9-9z"/></svg>
-            Appearance & Themes
-          </div>
-          <div class="nav-item" onclick="switchTab('displays', this)">
-            <svg viewBox="0 0 24 24"><path d="M21 3H3c-1.11 0-2 .89-2 2v12c0 1.1.89 2 2 2h7v2H8v2h8v-2h-2v-2h7c1.1 0 2-.9 2-2V5c0-1.11-.9-2-2-2zm0 14H3V5h18v12z"/></svg>
-            Displays
-          </div>
-          <div class="nav-item" onclick="switchTab('sound', this)">
-            <svg viewBox="0 0 24 24"><path d="M3 9v6h4l5 5V4L7 9H3zm13.5 3c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02z"/></svg>
-            Sound & Audio
-          </div>
-
-          <div class="sidebar-section-title">System</div>
-          <div class="nav-item" onclick="switchTab('power', this)">
-            <svg viewBox="0 0 24 24"><path d="M15.67 4H14V2h-4v2H8.33C7.6 4 7 4.6 7 5.33v15.33C7 21.4 7.6 22 8.33 22h7.33c.74 0 1.34-.6 1.34-1.33V5.33C17 4.6 16.4 4 15.67 4z"/></svg>
-            Power & Battery
-          </div>
-          <div class="nav-item" onclick="switchTab('apps', this)">
-            <svg viewBox="0 0 24 24"><path d="M4 8h4V4H4v4zm6 12h4v-4h-4v4zm-6 0h4v-4H4v4zm0-6h4v-4H4v4zm6 0h4v-4h-4v4zm6-10v4h4V4h-4zm-6 4h4V4h-4v4zm6 6h4v-4h-4v4zm0 6h4v-4h-4v4z"/></svg>
-            Default Apps
-          </div>
-          <div class="nav-item" onclick="switchTab('about', this)">
-            <svg viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-6h2v6zm0-8h-2V7h2v2z"/></svg>
-            About System
-          </div>
-        </div>
-
-        <!-- Content Area -->
-        <div class="settings-content">
-
-          <!-- TAB: NETWORK -->
-          <div class="page-panel active" id="tab-network">
-            <div class="page-title">Wi-Fi & Network</div>
-            <div class="page-subtitle">Manage wireless connections and Ethernet adapters</div>
-
-            <div class="pref-group">
-              <div class="pref-group-title">Wireless Connection</div>
-              <div class="pref-box">
-                <div class="pref-row">
-                  <div class="pref-row-info">
-                    <div class="pref-label">Wi-Fi Adapter</div>
-                    <div class="pref-sublabel">Connected to SynthNet-5G (5 GHz)</div>
-                  </div>
-                  <label class="switch">
-                    <input type="checkbox" checked>
-                    <span class="slider"></span>
-                  </label>
-                </div>
-                <div class="pref-row">
-                  <div class="pref-row-info">
-                    <div class="pref-label">IPv4 Address</div>
-                    <div class="pref-sublabel">192.168.1.142 (DHCP)</div>
-                  </div>
-                  <button class="select-box" style="padding: 4px 10px; font-size: 11px;">Configure</button>
-                </div>
-                <div class="pref-row">
-                  <div class="pref-row-info">
-                    <div class="pref-label">DNS Servers</div>
-                    <div class="pref-sublabel">1.1.1.1, 8.8.8.8 (Encrypted DoT)</div>
-                  </div>
-                  <span style="font-size: 12px; color: #73DACA; font-weight: 500;">Active</span>
-                </div>
-              </div>
-            </div>
-
-            <div class="pref-group">
-              <div class="pref-group-title">Available Networks</div>
-              <div class="pref-box">
-                <div class="pref-row">
-                  <div class="pref-row-info">
-                    <div class="pref-label" style="font-weight: 600;">SynthNet-5G</div>
-                    <div class="pref-sublabel">WPA3 Personal • Strong Signal</div>
-                  </div>
-                  <span style="font-size: 12px; color: var(--accent); font-weight: 600;">Connected</span>
-                </div>
-                <div class="pref-row">
-                  <div class="pref-row-info">
-                    <div class="pref-label">Fiber_Office_Guest</div>
-                    <div class="pref-sublabel">WPA2 Personal • Good Signal</div>
-                  </div>
-                  <button class="select-box" style="padding: 4px 10px; font-size: 11px;">Connect</button>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          <!-- TAB: APPEARANCE -->
-          <div class="page-panel" id="tab-appearance">
-            <div class="page-title">Appearance & Themes</div>
-            <div class="page-subtitle">Customize desktop styles, colors, and wallpapers</div>
-
-            <div class="pref-group">
-              <div class="pref-group-title">Style Mode</div>
-              <div class="pref-box">
-                <div class="pref-row">
-                  <div class="pref-row-info">
-                    <div class="pref-label">Dark Theme</div>
-                    <div class="pref-sublabel">Reduces eye strain with high contrast dark palette</div>
-                  </div>
-                  <label class="switch">
-                    <input type="checkbox" checked>
-                    <span class="slider"></span>
-                  </label>
-                </div>
-                <div class="pref-row">
-                  <div class="pref-row-info">
-                    <div class="pref-label">Accent Color</div>
-                    <div class="pref-sublabel">System highlight color for controls and selections</div>
-                  </div>
-                  <div style="display: flex; gap: 6px;">
-                    <div style="width: 20px; height: 20px; border-radius: 50%; background: #3584e4; border: 2px solid white; cursor: pointer;"></div>
-                    <div style="width: 20px; height: 20px; border-radius: 50%; background: #9141ac; cursor: pointer;"></div>
-                    <div style="width: 20px; height: 20px; border-radius: 50%; background: #2ec27e; cursor: pointer;"></div>
-                    <div style="width: 20px; height: 20px; border-radius: 50%; background: #e5a50a; cursor: pointer;"></div>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            <div class="pref-group">
-              <div class="pref-group-title">Window Corner Radius</div>
-              <div class="pref-box">
-                <div class="pref-row">
-                  <div class="pref-row-info">
-                    <div class="pref-label">Rounding Geometry</div>
-                    <div class="pref-sublabel">12 px (Standard Libadwaita / Modern Tiling)</div>
-                  </div>
-                  <input type="range" min="0" max="24" value="12" class="range-slider">
-                </div>
-              </div>
-            </div>
-          </div>
-
-          <!-- TAB: ABOUT -->
-          <div class="page-panel" id="tab-about">
-            <div class="page-title">About SynthOS</div>
-            <div class="page-subtitle">Device specifications and operating system details</div>
-
-            <div class="pref-group">
-              <div class="pref-group-title">System Information</div>
-              <div class="pref-box">
-                <div class="pref-row">
-                  <div class="pref-row-info">
-                    <div class="pref-label">OS Name</div>
-                    <div class="pref-sublabel">SynthOS Linux 2026.10 LTS (64-bit)</div>
-                  </div>
-                </div>
-                <div class="pref-row">
-                  <div class="pref-row-info">
-                    <div class="pref-label">Kernel Version</div>
-                    <div class="pref-sublabel">Linux 6.13.0-cachyos-gaming</div>
-                  </div>
-                </div>
-                <div class="pref-row">
-                  <div class="pref-row-info">
-                    <div class="pref-label">Processor</div>
-                    <div class="pref-sublabel">AMD Ryzen 9 7950X (32 Threads @ 5.7 GHz)</div>
-                  </div>
-                </div>
-                <div class="pref-row">
-                  <div class="pref-row-info">
-                    <div class="pref-label">Memory</div>
-                    <div class="pref-sublabel">32.0 GB DDR5-6000</div>
-                  </div>
-                </div>
-                <div class="pref-row">
-                  <div class="pref-row-info">
-                    <div class="pref-label">Graphics</div>
-                    <div class="pref-sublabel">NVIDIA GeForce RTX 4080 (Driver 570.86)</div>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          <!-- TAB: DISPLAYS -->
-          <div class="page-panel" id="tab-displays">
-            <div class="page-title">Displays</div>
-            <div class="page-subtitle">Resolution, refresh rate, and scaling</div>
-            <div class="pref-group">
-              <div class="pref-group-title">Primary Monitor</div>
-              <div class="pref-box">
-                <div class="pref-row">
-                  <div class="pref-row-info"><div class="pref-label">Resolution</div></div>
-                  <select class="select-box"><option>3840 x 2160 (16:9 4K)</option><option>2560 x 1440 (16:9 2K)</option><option>1920 x 1080 (16:9 FHD)</option></select>
-                </div>
-                <div class="pref-row">
-                  <div class="pref-row-info"><div class="pref-label">Refresh Rate</div></div>
-                  <select class="select-box"><option>144 Hz (Variable Refresh)</option><option>120 Hz</option><option>60 Hz</option></select>
-                </div>
-                <div class="pref-row">
-                  <div class="pref-row-info"><div class="pref-label">Fractional Scale</div></div>
-                  <select class="select-box"><option>150% (Recommended)</option><option>100%</option><option>125%</option><option>200%</option></select>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          <!-- TAB: SOUND -->
-          <div class="page-panel" id="tab-sound">
-            <div class="page-title">Sound</div>
-            <div class="page-subtitle">Audio output devices and master volume</div>
-            <div class="pref-group">
-              <div class="pref-group-title">Output</div>
-              <div class="pref-box">
-                <div class="pref-row">
-                  <div class="pref-row-info"><div class="pref-label">Output Device</div></div>
-                  <select class="select-box"><option>Headphones (Sony WH-1000XM5 LDAC)</option><option>Built-in Realtek HD Audio</option></select>
-                </div>
-                <div class="pref-row">
-                  <div class="pref-row-info"><div class="pref-label">Master Volume</div><div class="pref-sublabel">75%</div></div>
-                  <input type="range" min="0" max="100" value="75" class="range-slider">
-                </div>
-              </div>
-            </div>
-          </div>
-
-          <!-- TAB: BLUETOOTH -->
-          <div class="page-panel" id="tab-bluetooth">
-            <div class="page-title">Bluetooth</div>
-            <div class="page-subtitle">Manage paired peripherals and audio devices</div>
-            <div class="pref-group">
-              <div class="pref-group-title">Paired Devices</div>
-              <div class="pref-box">
-                <div class="pref-row">
-                  <div class="pref-row-info"><div class="pref-label">Sony WH-1000XM5</div><div class="pref-sublabel">Connected • 85% Battery</div></div>
-                  <button class="select-box" style="padding: 4px 10px; font-size: 11px;">Disconnect</button>
-                </div>
-                <div class="pref-row">
-                  <div class="pref-row-info"><div class="pref-label">MX Master 3S</div><div class="pref-sublabel">Connected • 92% Battery</div></div>
-                  <button class="select-box" style="padding: 4px 10px; font-size: 11px;">Disconnect</button>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          <!-- TAB: POWER -->
-          <div class="page-panel" id="tab-power">
-            <div class="page-title">Power & Battery</div>
-            <div class="page-subtitle">Energy saving modes and battery health</div>
-            <div class="pref-group">
-              <div class="pref-group-title">Power Profile</div>
-              <div class="pref-box">
-                <div class="pref-row">
-                  <div class="pref-row-info"><div class="pref-label">Balanced Mode</div><div class="pref-sublabel">Standard dynamic frequency scaling</div></div>
-                  <input type="radio" name="powerprof" checked>
-                </div>
-                <div class="pref-row">
-                  <div class="pref-row-info"><div class="pref-label">Performance Mode</div><div class="pref-sublabel">High CPU clocks for intensive compute</div></div>
-                  <input type="radio" name="powerprof">
-                </div>
-                <div class="pref-row">
-                  <div class="pref-row-info"><div class="pref-label">Power Saver</div><div class="pref-sublabel">Reduces power draw to maximize battery life</div></div>
-                  <input type="radio" name="powerprof">
-                </div>
-              </div>
-            </div>
-          </div>
-
-          <!-- TAB: APPS -->
-          <div class="page-panel" id="tab-apps">
-            <div class="page-title">Default Applications</div>
-            <div class="page-subtitle">Set preferred programs for web, mail, and media</div>
-            <div class="pref-group">
-              <div class="pref-group-title">Standard Handlers</div>
-              <div class="pref-box">
-                <div class="pref-row">
-                  <div class="pref-row-info"><div class="pref-label">Web Browser</div></div>
-                  <select class="select-box"><option>Firefox</option><option>Chromium</option></select>
-                </div>
-                <div class="pref-row">
-                  <div class="pref-row-info"><div class="pref-label">File Manager</div></div>
-                  <select class="select-box"><option>COSMIC Files</option><option>Nautilus</option></select>
-                </div>
-                <div class="pref-row">
-                  <div class="pref-row-info"><div class="pref-label">Terminal</div></div>
-                  <select class="select-box"><option>Kitty</option><option>Alacritty</option></select>
-                </div>
-              </div>
-            </div>
-          </div>
-
+      <div class="running-tasks">
+        <div class="task-item">
+          <span style="color:var(--mint-green);">⚙️</span>
+          <span>System Settings</span>
         </div>
       </div>
     </div>
 
-    <!-- 2. Authentic Terminal Window -->
-    <div class="terminal-window">
-      <div class="terminal-header">
-        <div class="window-controls">
-          <button class="win-btn win-close"></button>
-          <button class="win-btn win-min"></button>
-          <button class="win-btn win-max"></button>
-        </div>
-        <span style="font-size: 11px; color: var(--text-secondary); font-family: 'Inter', sans-serif;">user@synthex-workstation: ~</span>
-        <div style="width: 40px;"></div>
-      </div>
-
-      <div class="terminal-body">
-        <div class="term-line" style="color: #626f80;">$ fastfetch</div>
-        <div class="term-line" style="margin-top: 8px;"><span class="term-key">OS:</span> <span class="term-val">SynthOS Linux 2026.10 LTS x86_64</span></div>
-        <div class="term-line"><span class="term-key">Host:</span> <span class="term-val">Zenith Workstation Edition</span></div>
-        <div class="term-line"><span class="term-key">Kernel:</span> <span class="term-val">6.13.0-cachyos-gaming</span></div>
-        <div class="term-line"><span class="term-key">Uptime:</span> <span class="term-val">3 hours, 28 mins</span></div>
-        <div class="term-line"><span class="term-key">Packages:</span> <span class="term-val">1248 (rpm), 14 (flatpak)</span></div>
-        <div class="term-line"><span class="term-key">Shell:</span> <span class="term-val">fish 3.7.1</span></div>
-        <div class="term-line"><span class="term-key">WM:</span> <span class="term-val">Hyprland (Wayland)</span></div>
-        <div class="term-line"><span class="term-key">Theme:</span> <span class="term-val">SynthOS-Adwaita-Dark [GTK3/4]</span></div>
-        <div class="term-line"><span class="term-key">Icons:</span> <span class="term-val">Papirus-Dark</span></div>
-        <div class="term-line"><span class="term-key">Terminal:</span> <span class="term-val">kitty 0.35.2</span></div>
-        <div class="term-line"><span class="term-key">CPU:</span> <span class="term-val">AMD Ryzen 9 7950X (32) @ 5.700GHz</span></div>
-        <div class="term-line"><span class="term-key">GPU:</span> <span class="term-val">NVIDIA GeForce RTX 4080 [Discrete]</span></div>
-        <div class="term-line"><span class="term-key">Memory:</span> <span class="term-val">7.24 GiB / 31.18 GiB (23%)</span></div>
-        <div class="term-line"><span class="term-key">Disk (/):</span> <span class="term-val">42.8 GiB / 1.8 TiB (Btrfs)</span></div>
-        
-        <div class="term-line" style="margin-top: 14px; color: #626f80;">user@synthex-workstation:~$ <span style="display:inline-block; width:7px; height:13px; background:var(--accent); vertical-align:middle;"></span></div>
-      </div>
+    <div class="panel-right">
+      <!-- Network Tray -->
+      <svg class="tray-icon" viewBox="0 0 24 24"><path d="M12 4C7.31 4 3.07 5.9 0 8.98L12 21 24 8.98C20.93 5.9 16.69 4 12 4z"/></svg>
+      <!-- Volume Tray -->
+      <svg class="tray-icon" viewBox="0 0 24 24"><path d="M3 9v6h4l5 5V4L7 9H3zm13.5 3c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02z"/></svg>
+      <!-- Shield Update Tray -->
+      <svg class="tray-icon" style="color:var(--mint-green);" viewBox="0 0 24 24"><path d="M12 1L3 5v6c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V5l-9-4z"/></svg>
+      <!-- Clock -->
+      <span style="font-weight:600; color:var(--text-white);" id="panelClock">16:04</span>
     </div>
-
-  </div>
-
-  <!-- Bottom App Dock -->
-  <div class="bottom-dock">
-    <!-- Files -->
-    <div class="dock-item"><svg viewBox="0 0 24 24"><path d="M10 4H4c-1.1 0-1.99.9-1.99 2L2 18c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V8c0-1.1-.9-2-2-2h-8l-2-2z"/></svg></div>
-    <!-- Terminal -->
-    <div class="dock-item active-app"><svg viewBox="0 0 24 24"><path d="M20 4H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 14H4V8h16v10zm-2-1h-6v-2h6v2zm-9.7-4.3L5.6 11.4 7 10l4.3 4.3L7 18.6l-1.4-1.4 2.7-2.9z"/></svg></div>
-    <!-- Browser -->
-    <div class="dock-item"><svg viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 17.93c-3.95-.49-7-3.85-7-7.93 0-.62.08-1.21.21-1.79L9 15v1c0 1.1.9 2 2 2v1.93zm6.9-2.54c-.26-.81-1-1.39-1.9-1.39h-1v-3c0-.55-.45-1-1-1H8v-2h2c.55 0 1-.45 1-1V7h2c1.1 0 2-.9 2-2v-.41c2.93 1.19 5 4.06 5 7.41 0 2.08-.8 3.97-2.1 5.39z"/></svg></div>
-    <!-- Code Editor -->
-    <div class="dock-item"><svg viewBox="0 0 24 24"><path d="M9.4 16.6L4.8 12l4.6-4.6L8 6l-6 6 6 6 1.4-1.4zm5.2 0l4.6-4.6-4.6-4.6L16 6l6 6-6 6-1.4-1.4z"/></svg></div>
-    <!-- Settings -->
-    <div class="dock-item active-app"><svg viewBox="0 0 24 24"><path d="M19.14 12.94c.04-.3.06-.61.06-.94 0-.32-.02-.64-.07-.94l2.03-1.58c.18-.14.23-.41.12-.61l-1.92-3.32c-.12-.22-.37-.29-.59-.22l-2.39.96c-.5-.38-1.03-.7-1.62-.94l-.36-2.54c-.04-.24-.24-.41-.48-.41h-3.84c-.24 0-.43.17-.47.41l-.36 2.54c-.59.24-1.13.57-1.62.94l-2.39-.96c-.22-.08-.47 0-.59.22L2.74 8.87c-.12.21-.08.47.12.61l2.03 1.58c-.05.3-.09.63-.09.94s.02.64.07.94l-2.03 1.58c-.18.14-.23.41-.12.61l1.92 3.32c.12.22.37.29.59.22l2.39-.96c.5.38 1.03.7 1.62.94l.36 2.54c.05.24.24.41.48.41h3.84c.24 0 .44-.17.47-.41l.36-2.54c.59-.24 1.13-.56 1.62-.94l2.39.96c.22.08.47 0 .59-.22l1.92-3.32c.12-.22.07-.47-.12-.61l-2.01-1.58zM12 15.6c-1.98 0-3.6-1.62-3.6-3.6s1.62-3.6 3.6-3.6 3.6 1.62 3.6 3.6-1.62 3.6-3.6 3.6z"/></svg></div>
   </div>
 
 </div>
 
 <script>
-  function switchTab(tabId, el) {
-    document.querySelectorAll('.settings-sidebar .nav-item').forEach(item => item.classList.remove('active'));
-    el.classList.add('active');
+  function openModule(modId, title) {
+    document.getElementById('mainGrid').style.display = 'none';
+    document.getElementById('btnBack').style.display = 'flex';
+    document.getElementById('lblTitle').innerText = title;
 
-    document.querySelectorAll('.settings-content .page-panel').forEach(page => page.classList.remove('active'));
-    const target = document.getElementById('tab-' + tabId);
-    if (target) target.classList.add('active');
+    document.querySelectorAll('.module-view').forEach(m => m.classList.remove('active'));
+    const target = document.getElementById('mod-' + modId);
+    if (target) {
+      target.classList.add('active');
+    } else {
+      // Generic fallback view for other tiles
+      const fb = document.getElementById('mod-sysinfo');
+      fb.classList.add('active');
+    }
   }
 
-  // Update clock
+  function showMainGrid() {
+    document.querySelectorAll('.module-view').forEach(m => m.classList.remove('active'));
+    document.getElementById('mainGrid').style.display = 'block';
+    document.getElementById('btnBack').style.display = 'none';
+    document.getElementById('lblTitle').innerText = 'System Settings';
+  }
+
+  function filterTiles() {
+    const q = document.getElementById('searchBox').value.toLowerCase();
+    document.querySelectorAll('.tile-item').forEach(tile => {
+      const text = tile.innerText.toLowerCase();
+      tile.style.display = (text.indexOf(q) !== -1) ? 'flex' : 'none';
+    });
+  }
+
   function updateClock() {
     const now = new Date();
-    const opts = { weekday: 'short', month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' };
-    document.getElementById('liveClock').innerText = now.toLocaleDateString('en-US', opts).replace(',', ' •');
+    document.getElementById('panelClock').innerText = now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
   }
   setInterval(updateClock, 1000);
+  updateClock();
 </script>
 
 </body>

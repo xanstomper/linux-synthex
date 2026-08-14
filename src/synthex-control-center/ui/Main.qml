@@ -6,228 +6,425 @@ import QtQuick.Window 2.15
 Window {
     id: mainWindow
     visible: true
-    width: 1200
-    height: 800
-    minimumWidth: 980
-    minimumHeight: 640
-    title: "SynthOS System Settings"
-    color: "#0D1117"
+    width: 1040
+    height: 760
+    minimumWidth: 840
+    minimumHeight: 600
+    title: "System Settings"
+    color: "#2f343f"
 
-    property int activeNavIndex: 0
-    property string currentPage: "Desktop"
+    property string currentPage: "home"
+    property string currentTitle: "System Settings"
     property string searchQuery: ""
 
-    readonly property color accentColor: (typeof systemBridge !== "undefined" && systemBridge) ? systemBridge.accentColor : "#7AA2F7"
-    readonly property color bgColor: "#0D1117"
-    readonly property color sidebarBg: "#141A22"
-    readonly property color surfaceColor: "#161C24"
+    readonly property color mintGreen: "#92b15e"
+    readonly property color mintDark: "#2f343f"
+    readonly property color mintHeader: "#262a33"
+    readonly property color mintCard: "#383c4a"
+    readonly property color mintCardHover: "#404552"
+    readonly property color mintBorder: "#434857"
     readonly property color textColor: "#FFFFFF"
-    readonly property color mutedText: "#9AA1AB"
+    readonly property color textMuted: "#9aa7b8"
 
-    RowLayout {
+    function openModule(pageFile, title) {
+        currentPage = pageFile
+        currentTitle = title
+        pageLoader.source = "pages/" + pageFile
+    }
+
+    function showHome() {
+        currentPage = "home"
+        currentTitle = "System Settings"
+        pageLoader.source = ""
+    }
+
+    ColumnLayout {
         anchors.fill: parent
         spacing: 0
 
-        // ── 1. Left Sidebar Navigation ─────────────────────────────────────
+        // ── 1. Linux Mint Style Header Bar ─────────────────────────────────
         Rectangle {
-            id: sidebar
-            Layout.preferredWidth: 260
-            Layout.fillHeight: true
-            color: sidebarBg
+            Layout.fillWidth: true
+            Layout.preferredHeight: 48
+            color: mintHeader
+            border.color: "#20000000"
 
-            ColumnLayout {
+            RowLayout {
                 anchors.fill: parent
-                spacing: 0
+                anchors.leftMargin: 16
+                anchors.rightMargin: 16
+                spacing: 12
 
-                // Header Logo & Branding
-                Rectangle {
-                    Layout.fillWidth: true
-                    Layout.preferredHeight: 70
-                    color: "transparent"
-
-                    RowLayout {
-                        anchors.fill: parent
-                        anchors.leftMargin: 18
-                        anchors.rightMargin: 18
-                        spacing: 12
-
-                        Rectangle {
-                            width: 36
-                            height: 36
-                            radius: 9
-                            color: accentColor
-
-                            Text {
-                                text: "󰒓"
-                                font.family: "Symbols Nerd Font"
-                                font.pixelSize: 20
-                                color: "#0C1116"
-                                anchors.centerIn: parent
-                            }
-                        }
-
-                        ColumnLayout {
-                            spacing: 1
-                            Text {
-                                text: "System Settings"
-                                font.family: "Inter"
-                                font.pixelSize: 15
-                                font.bold: true
-                                color: textColor
-                            }
-                            Text {
-                                text: "SynthOS Linux 2026"
-                                font.family: "Inter"
-                                font.pixelSize: 11
-                                color: mutedText
-                            }
-                        }
+                // Back to All Settings Button
+                Button {
+                    id: backBtn
+                    visible: currentPage !== "home"
+                    text: "◀ All Settings"
+                    contentItem: Text {
+                        text: parent.text
+                        font.family: "Ubuntu, Inter, sans-serif"
+                        font.pixelSize: 12
+                        font.bold: true
+                        color: "#FFFFFF"
                     }
+                    background: Rectangle {
+                        color: parent.hovered ? mintCardHover : mintCard
+                        border.color: mintBorder
+                        radius: 4
+                        implicitWidth: 100
+                        implicitHeight: 28
+                    }
+                    onClicked: showHome()
                 }
+
+                Text {
+                    text: currentTitle
+                    font.family: "Ubuntu, Inter, sans-serif"
+                    font.pixelSize: 14
+                    font.bold: true
+                    color: textColor
+                }
+
+                Item { Layout.fillWidth: true }
 
                 // Search Bar
                 Rectangle {
-                    Layout.fillWidth: true
-                    Layout.preferredHeight: 36
-                    Layout.leftMargin: 16
-                    Layout.rightMargin: 16
-                    Layout.bottomMargin: 10
-                    radius: 8
-                    color: "#1c232e"
-                    border.color: "#25ffffff"
+                    visible: currentPage === "home"
+                    width: 220
+                    height: 28
+                    radius: 4
+                    color: "#1e2229"
+                    border.color: searchInput.activeFocus ? mintGreen : mintBorder
 
                     RowLayout {
                         anchors.fill: parent
-                        anchors.leftMargin: 10
-                        anchors.rightMargin: 10
-                        spacing: 8
+                        anchors.leftMargin: 8
+                        anchors.rightMargin: 8
+                        spacing: 6
 
-                        Text { text: "🔍"; font.pixelSize: 12; color: mutedText }
+                        Text { text: "🔍"; font.pixelSize: 11; color: textMuted }
                         TextInput {
                             id: searchInput
                             Layout.fillWidth: true
-                            font.family: "Inter"
+                            font.family: "Ubuntu, Inter, sans-serif"
                             font.pixelSize: 12
                             color: "#FFFFFF"
                             selectByMouse: true
                             onTextChanged: searchQuery = text.toLowerCase()
                             Text {
-                                text: "Search settings..."
-                                font.family: "Inter"
+                                text: "Search..."
+                                font.family: "Ubuntu, Inter, sans-serif"
                                 font.pixelSize: 12
-                                color: mutedText
+                                color: textMuted
                                 visible: !searchInput.text && !searchInput.activeFocus
                             }
-                        }
-                    }
-                }
-
-                // Navigation ListView
-                ListView {
-                    id: navList
-                    Layout.fillWidth: true
-                    Layout.fillHeight: true
-                    clip: true
-                    boundsBehavior: Flickable.StopAtBounds
-
-                    model: ListModel {
-                        // Connectivity
-                        ListElement { name: "Network"; label: "Wi-Fi & Internet"; icon: "󰤨"; category: "CONNECTIVITY" }
-                        ListElement { name: "Bluetooth"; label: "Bluetooth & Devices"; icon: "󰂯"; category: "CONNECTIVITY" }
-
-                        // Personalization
-                        ListElement { name: "Desktop"; label: "Desktop & Themes"; icon: "󰒓"; category: "PERSONALIZATION" }
-                        ListElement { name: "Displays"; label: "Displays & Monitors"; icon: "󰍹"; category: "PERSONALIZATION" }
-                        ListElement { name: "Sound"; label: "Sound & Audio"; icon: "󰕾"; category: "PERSONALIZATION" }
-
-                        // System & Power
-                        ListElement { name: "Power"; label: "Power & Battery"; icon: "󰁹"; category: "SYSTEM" }
-                        ListElement { name: "Apps"; label: "Applications & Defaults"; icon: "󰀻"; category: "SYSTEM" }
-                        ListElement { name: "Gaming"; label: "Gaming & Performance"; icon: "󰊴"; category: "SYSTEM" }
-                        ListElement { name: "Snapshots"; label: "Storage & Snapshots"; icon: "󰁯"; category: "SYSTEM" }
-
-                        // Security & Upgrades
-                        ListElement { name: "Security"; label: "Privacy & Security"; icon: "󰒃"; category: "MAINTENANCE" }
-                        ListElement { name: "Updates"; label: "System Updates"; icon: "󰚰"; category: "MAINTENANCE" }
-                        ListElement { name: "Drivers"; label: "Hardware & Drivers"; icon: "󰄛"; category: "MAINTENANCE" }
-                        ListElement { name: "About"; label: "About SynthOS"; icon: "󰋼"; category: "INFO" }
-                    }
-
-                    delegate: ItemDelegate {
-                        width: parent ? parent.width : 260
-                        height: 42
-                        highlighted: ListView.isCurrentItem
-                        visible: searchQuery === "" || model.label.toLowerCase().indexOf(searchQuery) !== -1
-
-                        background: Rectangle {
-                            color: highlighted ? "#257aa2f7" : (hovered ? "#1a222c" : "transparent")
-                            radius: 8
-                            anchors.leftMargin: 12
-                            anchors.rightMargin: 12
-                            Behavior on color { ColorAnimation { duration: 120 } }
-
-                            Rectangle {
-                                visible: highlighted
-                                width: 3
-                                height: 20
-                                color: accentColor
-                                radius: 1.5
-                                anchors.verticalCenter: parent.verticalCenter
-                                anchors.left: parent.left
-                            }
-                        }
-
-                        contentItem: RowLayout {
-                            anchors.fill: parent
-                            anchors.leftMargin: 20
-                            anchors.rightMargin: 16
-                            spacing: 12
-
-                            Text {
-                                text: model.icon
-                                font.family: "Symbols Nerd Font"
-                                font.pixelSize: 17
-                                color: highlighted ? accentColor : mutedText
-                            }
-
-                            Text {
-                                text: model.label
-                                font.family: "Inter"
-                                font.pixelSize: 13
-                                font.bold: highlighted
-                                color: highlighted ? textColor : "#C0CAD6"
-                                Layout.fillWidth: true
-                                elide: Text.ElideRight
-                            }
-                        }
-
-                        onClicked: {
-                            navList.currentIndex = index
-                            activeNavIndex = index
-                            currentPage = model.name
-                            pageLoader.source = "pages/" + (model.name === "Desktop" ? "DesktopCustomization.qml" : (model.name + ".qml"))
                         }
                     }
                 }
             }
         }
 
-        // Divider
-        Rectangle {
-            Layout.preferredWidth: 1
-            Layout.fillHeight: true
-            color: "#18ffffff"
-        }
-
-        // ── 2. Content View Area ───────────────────────────────────────────
+        // ── 2. Content Area: Main Categorized Grid OR Active Module ────────
         Item {
             Layout.fillWidth: true
             Layout.fillHeight: true
 
+            // HOME VIEW: Categorized Grid (Linux Mint Cinnamon Settings Style)
+            ScrollView {
+                id: homeScroll
+                anchors.fill: parent
+                anchors.margins: 20
+                visible: currentPage === "home"
+                clip: true
+
+                ColumnLayout {
+                    width: mainWindow.width - 40
+                    spacing: 24
+
+                    // Category: Appearance
+                    ColumnLayout {
+                        Layout.fillWidth: true
+                        spacing: 10
+
+                        Text {
+                            text: "APPEARANCE"
+                            font.family: "Ubuntu, Inter, sans-serif"
+                            font.pixelSize: 11
+                            font.bold: true
+                            color: mintGreen
+                        }
+
+                        GridLayout {
+                            columns: 6
+                            rowSpacing: 12
+                            columnSpacing: 12
+                            Layout.fillWidth: true
+
+                            Repeater {
+                                model: [
+                                    { name: "Backgrounds", icon: "🖼️", color: "#406852", file: "Displays.qml" },
+                                    { name: "Themes", icon: "🎨", color: "#3d6c82", file: "DesktopCustomization.qml" },
+                                    { name: "Effects", icon: "✨", color: "#5c548a", file: "DesktopCustomization.qml" },
+                                    { name: "Font Selection", icon: "🔤", color: "#7b6348", file: "DesktopCustomization.qml" }
+                                ]
+
+                                Rectangle {
+                                    Layout.fillWidth: true
+                                    Layout.preferredHeight: 84
+                                    radius: 6
+                                    color: mintTileArea.containsMouse ? mintCardHover : mintCard
+                                    border.color: mintTileArea.containsMouse ? mintGreen : mintBorder
+                                    visible: searchQuery === "" || modelData.name.toLowerCase().indexOf(searchQuery) !== -1
+
+                                    ColumnLayout {
+                                        anchors.centerIn: parent
+                                        spacing: 6
+
+                                        Rectangle {
+                                            width: 38; height: 38; radius: 6
+                                            color: modelData.color
+                                            Layout.alignment: Qt.AlignHCenter
+                                            Text { text: modelData.icon; font.pixelSize: 18; anchors.centerIn: parent }
+                                        }
+
+                                        Text {
+                                            text: modelData.name
+                                            font.family: "Ubuntu, Inter, sans-serif"
+                                            font.pixelSize: 11
+                                            font.bold: true
+                                            color: textColor
+                                            Layout.alignment: Qt.AlignHCenter
+                                        }
+                                    }
+
+                                    MouseArea {
+                                        id: mintTileArea
+                                        anchors.fill: parent
+                                        hoverEnabled: true
+                                        cursorShape: Qt.PointingHandCursor
+                                        onClicked: openModule(modelData.file, modelData.name)
+                                    }
+                                }
+                            }
+                        }
+                    }
+
+                    // Category: Preferences
+                    ColumnLayout {
+                        Layout.fillWidth: true
+                        spacing: 10
+
+                        Text {
+                            text: "PREFERENCES"
+                            font.family: "Ubuntu, Inter, sans-serif"
+                            font.pixelSize: 11
+                            font.bold: true
+                            color: mintGreen
+                        }
+
+                        GridLayout {
+                            columns: 6
+                            rowSpacing: 12
+                            columnSpacing: 12
+                            Layout.fillWidth: true
+
+                            Repeater {
+                                model: [
+                                    { name: "Account Details", icon: "👤", color: "#3f51b5", file: "About.qml" },
+                                    { name: "Date & Time", icon: "🕒", color: "#e65100", file: "About.qml" },
+                                    { name: "Notifications", icon: "🔔", color: "#c2185b", file: "Apps.qml" },
+                                    { name: "Preferred Apps", icon: "⭐", color: "#00838f", file: "Apps.qml" },
+                                    { name: "Privacy", icon: "🔒", color: "#4e342e", file: "Security.qml" },
+                                    { name: "Startup Apps", icon: "🚀", color: "#558b2f", file: "Apps.qml" }
+                                ]
+
+                                Rectangle {
+                                    Layout.fillWidth: true
+                                    Layout.preferredHeight: 84
+                                    radius: 6
+                                    color: prefArea.containsMouse ? mintCardHover : mintCard
+                                    border.color: prefArea.containsMouse ? mintGreen : mintBorder
+                                    visible: searchQuery === "" || modelData.name.toLowerCase().indexOf(searchQuery) !== -1
+
+                                    ColumnLayout {
+                                        anchors.centerIn: parent
+                                        spacing: 6
+
+                                        Rectangle {
+                                            width: 38; height: 38; radius: 6
+                                            color: modelData.color
+                                            Layout.alignment: Qt.AlignHCenter
+                                            Text { text: modelData.icon; font.pixelSize: 18; anchors.centerIn: parent }
+                                        }
+
+                                        Text {
+                                            text: modelData.name
+                                            font.family: "Ubuntu, Inter, sans-serif"
+                                            font.pixelSize: 11
+                                            font.bold: true
+                                            color: textColor
+                                            Layout.alignment: Qt.AlignHCenter
+                                        }
+                                    }
+
+                                    MouseArea {
+                                        id: prefArea
+                                        anchors.fill: parent
+                                        hoverEnabled: true
+                                        cursorShape: Qt.PointingHandCursor
+                                        onClicked: openModule(modelData.file, modelData.name)
+                                    }
+                                }
+                            }
+                        }
+                    }
+
+                    // Category: Hardware
+                    ColumnLayout {
+                        Layout.fillWidth: true
+                        spacing: 10
+
+                        Text {
+                            text: "HARDWARE"
+                            font.family: "Ubuntu, Inter, sans-serif"
+                            font.pixelSize: 11
+                            font.bold: true
+                            color: mintGreen
+                        }
+
+                        GridLayout {
+                            columns: 6
+                            rowSpacing: 12
+                            columnSpacing: 12
+                            Layout.fillWidth: true
+
+                            Repeater {
+                                model: [
+                                    { name: "Bluetooth", icon: "ᛒ", color: "#1565c0", file: "Bluetooth.qml" },
+                                    { name: "Display", icon: "🖥️", color: "#6a1b9a", file: "Displays.qml" },
+                                    { name: "Graphics", icon: "🎮", color: "#2e7d32", file: "Gaming.qml" },
+                                    { name: "Network", icon: "📶", color: "#0277bd", file: "Network.qml" },
+                                    { name: "Power", icon: "🔋", color: "#f57f17", file: "Power.qml" },
+                                    { name: "Sound", icon: "🔊", color: "#ad1457", file: "Sound.qml" },
+                                    { name: "System Info", icon: "ℹ️", color: "#00695c", file: "About.qml" }
+                                ]
+
+                                Rectangle {
+                                    Layout.fillWidth: true
+                                    Layout.preferredHeight: 84
+                                    radius: 6
+                                    color: hwArea.containsMouse ? mintCardHover : mintCard
+                                    border.color: hwArea.containsMouse ? mintGreen : mintBorder
+                                    visible: searchQuery === "" || modelData.name.toLowerCase().indexOf(searchQuery) !== -1
+
+                                    ColumnLayout {
+                                        anchors.centerIn: parent
+                                        spacing: 6
+
+                                        Rectangle {
+                                            width: 38; height: 38; radius: 6
+                                            color: modelData.color
+                                            Layout.alignment: Qt.AlignHCenter
+                                            Text { text: modelData.icon; font.pixelSize: 18; anchors.centerIn: parent }
+                                        }
+
+                                        Text {
+                                            text: modelData.name
+                                            font.family: "Ubuntu, Inter, sans-serif"
+                                            font.pixelSize: 11
+                                            font.bold: true
+                                            color: textColor
+                                            Layout.alignment: Qt.AlignHCenter
+                                        }
+                                    }
+
+                                    MouseArea {
+                                        id: hwArea
+                                        anchors.fill: parent
+                                        hoverEnabled: true
+                                        cursorShape: Qt.PointingHandCursor
+                                        onClicked: openModule(modelData.file, modelData.name)
+                                    }
+                                }
+                            }
+                        }
+                    }
+
+                    // Category: Administration
+                    ColumnLayout {
+                        Layout.fillWidth: true
+                        spacing: 10
+
+                        Text {
+                            text: "ADMINISTRATION"
+                            font.family: "Ubuntu, Inter, sans-serif"
+                            font.pixelSize: 11
+                            font.bold: true
+                            color: mintGreen
+                        }
+
+                        GridLayout {
+                            columns: 6
+                            rowSpacing: 12
+                            columnSpacing: 12
+                            Layout.fillWidth: true
+
+                            Repeater {
+                                model: [
+                                    { name: "Backup / Snaps", icon: "💾", color: "#283593", file: "Snapshots.qml" },
+                                    { name: "Driver Manager", icon: "🔧", color: "#d84315", file: "Drivers.qml" },
+                                    { name: "Firewall", icon: "🧱", color: "#c62828", file: "Security.qml" },
+                                    { name: "Update Manager", icon: "🔄", color: "#2e7d32", file: "Updates.qml" }
+                                ]
+
+                                Rectangle {
+                                    Layout.fillWidth: true
+                                    Layout.preferredHeight: 84
+                                    radius: 6
+                                    color: adminArea.containsMouse ? mintCardHover : mintCard
+                                    border.color: adminArea.containsMouse ? mintGreen : mintBorder
+                                    visible: searchQuery === "" || modelData.name.toLowerCase().indexOf(searchQuery) !== -1
+
+                                    ColumnLayout {
+                                        anchors.centerIn: parent
+                                        spacing: 6
+
+                                        Rectangle {
+                                            width: 38; height: 38; radius: 6
+                                            color: modelData.color
+                                            Layout.alignment: Qt.AlignHCenter
+                                            Text { text: modelData.icon; font.pixelSize: 18; anchors.centerIn: parent }
+                                        }
+
+                                        Text {
+                                            text: modelData.name
+                                            font.family: "Ubuntu, Inter, sans-serif"
+                                            font.pixelSize: 11
+                                            font.bold: true
+                                            color: textColor
+                                            Layout.alignment: Qt.AlignHCenter
+                                        }
+                                    }
+
+                                    MouseArea {
+                                        id: adminArea
+                                        anchors.fill: parent
+                                        hoverEnabled: true
+                                        cursorShape: Qt.PointingHandCursor
+                                        onClicked: openModule(modelData.file, modelData.name)
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+
+            // MODULE VIEW: Loaded Sub-Page
             Loader {
                 id: pageLoader
                 anchors.fill: parent
-                source: "pages/DesktopCustomization.qml"
+                visible: currentPage !== "home"
             }
         }
     }
