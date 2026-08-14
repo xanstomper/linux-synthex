@@ -5,14 +5,14 @@ Summary:        Codec installer
 
 License:        MIT
 URL:            https://getsynthex.io
-Source0:        https://github.com/synthex-linux/synthex-codec-installer/archive/v%{version}.tar.gz
+Source0:        synthex-repo-%{version}.tar.gz
 Requires:       python3
 
 %description
 One-command multimedia codec installation.
 
 %prep
-%setup -q -n %{name}-%{version}
+%setup -q -n synthex-repo-%{version}
 
 %build
 # Pure Python package, nothing to compile

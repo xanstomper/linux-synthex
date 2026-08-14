@@ -60,7 +60,7 @@ Summary:        Security status dashboard for Linux Synthex
 Group:          System/Utilities
 License:        GPL-3.0-or-later
 URL:            https://github.com/synthex-project/security-dashboard
-Source0:        %{name}-%{version}.tar.xz
+Source0:        synthex-repo-%{version}.tar.gz
 Source1:        synthex-security-dashboard.service
 Source2:        synthex-security-dashboard.timer
 Source3:        org.synthex.security-dashboard.policy
@@ -134,7 +134,7 @@ and for integration with other monitoring tools.
 ###############################################################################
 
 %prep
-%setup -q -n %{name}-%{version}
+%setup -q -n synthex-repo-%{version}
 
 ###############################################################################
 # BUILD SECTION

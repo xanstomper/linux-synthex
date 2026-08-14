@@ -47,6 +47,8 @@
           <packagereq type="default">synthex-webapp-engine</packagereq>
           <packagereq type="default">synthex-app-manager</packagereq>
           <packagereq type="default">synthex-widgets</packagereq>
+          <packagereq type="default">synthex-rice</packagereq>
+          <packagereq type="optional">synthex-drip-sync</packagereq>
           <!-- Desktop -->
           <packagereq type="mandatory">synthex-desktop-common</packagereq>
           <packagereq type="mandatory">synthex-themes</packagereq>

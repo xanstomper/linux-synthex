@@ -5,8 +5,8 @@ Summary:        SynthOS handheld integration CLI — controllers, TDP, handheld 
 
 License:        GPL-3.0-or-later
 URL:            https://getsynthex.org
-Source0:        %{name}-%{version}.tar.gz
-BuildRequires:  rust-toolchain
+Source0:        synthex-repo-%{version}.tar.gz
+BuildRequires:  rust >= 1.75
 BuildRequires:  cargo
 
 %description

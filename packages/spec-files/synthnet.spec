@@ -5,9 +5,9 @@ Summary:        SynthOS synthnet
 
 License:        GPL-3.0-or-later
 URL:            https://getsynthex.org
-Source0:        %{name}-%{version}.tar.gz
+Source0:        synthex-repo-%{version}.tar.gz
 
-BuildRequires:  rust-toolchain
+BuildRequires:  rust >= 1.75
 BuildRequires:  cargo
 
 %description

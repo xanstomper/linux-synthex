@@ -5,9 +5,9 @@ Summary:        SynthShield — SynthOS file integrity & snapshot manager
 
 License:        GPL-3.0-or-later
 URL:            https://getsynthex.org
-Source0:        %{name}-%{version}.tar.gz
+Source0:        synthex-repo-%{version}.tar.gz
 
-BuildRequires:  rust-toolchain
+BuildRequires:  rust >= 1.75
 BuildRequires:  cargo
 BuildRequires:  systemd-rpm-macros
 Requires:       btrfs-progs

@@ -5,7 +5,7 @@ Summary:        SynthOS Studio — creative workstation launcher and profile man
 
 License:        GPL-3.0-or-later
 URL:            https://getsynthex.org
-Source0:        %{name}-%{version}.tar.gz
+Source0:        synthex-repo-%{version}.tar.gz
 BuildArch:      noarch
 Requires:       python3
 
@@ -15,8 +15,7 @@ graphics tool profiles with per-profile presets (presets/). Launches the real
 creative applications (Kdenlive, Krita, Blender, OBS) with tuned settings.
 
 %prep
-%setup -q
-
+%setup -q -n synthex-repo-%{version}
 %build
 # Python + QML; nothing to compile
 

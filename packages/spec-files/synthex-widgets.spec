@@ -5,7 +5,7 @@ Summary:        SynthOS Nova — floating desktop widget suite (clock, media, sy
 
 License:        GPL-3.0-or-later
 URL:            https://getsynthex.org
-Source0:        %{name}-%{version}.tar.gz
+Source0:        synthex-repo-%{version}.tar.gz
 BuildArch:      noarch
 Requires:       python3
 Requires:       (python3-pyside6 or python3-pyqt5)
@@ -18,14 +18,13 @@ Qt/QML (PySide6 with PyQt5 fallback), individually toggleable,
 launched via /usr/bin/synthex-widgets or the session autostart entry.
 
 %prep
-%setup -q
-
+%setup -q -n synthex-repo-%{version}
 %build
 # Python + QML; nothing to compile
 
 %install
 mkdir -p %{buildroot}%{_datadir}/synthex/widgets
-cp *.qml main.py %{buildroot}%{_datadir}/synthex/widgets/
+cp *.qml main.py system_bridge.py %{buildroot}%{_datadir}/synthex/widgets/
 cat > %{buildroot}%{_bindir}/synthex-widgets <<'LAUNCH'
 #!/usr/bin/env bash
 exec python3 /usr/share/synthex/widgets/main.py "$@"

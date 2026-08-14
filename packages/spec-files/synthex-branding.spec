@@ -29,7 +29,7 @@ Summary:        SynthOS brand identity assets — logos, themes, wallpapers, and
 
 License:        GPL-3.0+ AND CC-BY-SA-4.0
 URL:            https://synthex-os.org
-Source0:        synthex-branding-%{version}.tar.xz
+Source0:        synthex-repo-%{version}.tar.gz
 
 BuildArch:      noarch
 BuildRequires:  make
@@ -66,7 +66,7 @@ and are licensed under GPL-3.0+ (themes, scripts, specs) or
 CC-BY-SA-4.0 (wallpapers, photographs).
 
 %prep
-%setup -q -n synthex-branding-%{version}
+%setup -q -n synthex-repo-%{version}
 
 %build
 # --- Wallpaper generation ---

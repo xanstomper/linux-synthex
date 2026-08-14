@@ -11,7 +11,7 @@ Summary:        Synthex AI Platform — Meta-package for the complete local AI s
 
 License:        GPL-3.0-or-later AND Apache-2.0 AND MIT
 URL:            https://github.com/synthex-project/synthex-ai
-Source0:        %{name}-%{version}.tar.xz
+Source0:        synthex-repo-%{version}.tar.gz
 
 # ─── Core AI Stack ────────────────────────────────────────────
 Requires:       ollama
@@ -86,7 +86,7 @@ This will install the complete AI stack. Launch Synthex AI Hub from
 your applications menu to get started.
 
 %prep
-%setup -q -n %{name}-%{version}
+%setup -q -n synthex-repo-%{version}
 
 %build
 # Meta-package — no build steps required

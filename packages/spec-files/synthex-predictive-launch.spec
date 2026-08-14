@@ -5,7 +5,7 @@ Summary:        SynthOS Predictive Launcher — Markov-chain app pre-launching
 
 License:        GPL-3.0-or-later
 URL:            https://getsynthex.org
-Source0:        %{name}-%{version}.tar.gz
+Source0:        synthex-repo-%{version}.tar.gz
 BuildArch:      noarch
 Requires:       python3
 
@@ -15,8 +15,7 @@ transitions over application launch history) and pre-warms the predicted
 next app to cut perceived launch latency. Fully local — no telemetry.
 
 %prep
-%setup -q
-
+%setup -q -n synthex-repo-%{version}
 %build
 # Python; nothing to compile
 

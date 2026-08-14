@@ -244,3 +244,45 @@ jobs:
           files: |
             release/SynthOS-*.iso
             release/SHA256SUMS
+  repo-tests:
+    name: Repo Test Suites
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Main test suite (880 checks)
+        run: python3 tests/run-tests.py
+      - name: Integration tests
+        run: python3 tests/integration-tests.py
+      - name: Spec Source0 audit
+        run: |
+          # every first-party spec must use the shared repo tarball,
+          # a repo file, or be fully inline
+          python3 - <<'EOF'
+          import re, glob, os
+          bad = []
+          for f in glob.glob("packages/spec-files/*.spec"):
+              name = os.path.basename(f)[:-5]
+              if name.startswith(("cosmic-", "rust-utils-")) or name in (
+                  "rust-toolchain", "xdg-desktop-portal-cosmic", "synthex-kernel"):
+                  continue
+              s = open(f, encoding="utf-8", errors="replace").read()
+              m = re.search(r'^Source0:\s*(\S+)', s, re.M)
+              if not m:
+                  continue
+              src = m.group(1)
+              if src.startswith("http"):
+                  bad.append((name, src))
+          for n, s0 in bad:
+              print(f"  non-repo URL Source0 in first-party spec {n}: {s0}")
+          assert not bad, "first-party specs must use synthex-repo tarball"
+          EOF
+      - name: Source tarball generation smoke test
+        run: |
+          ./build/scripts/make-srctars.sh 2026.10 /tmp/srctest
+          test -f /tmp/srctest/synthex-repo-2026.10.tar.gz
+          tar tzf /tmp/srctest/synthex-repo-2026.10.tar.gz | grep -q 'Cargo.toml$'
+          tar tzf /tmp/srctest/synthex-repo-2026.10.tar.gz | grep -q 'desktop/hyprland/waybar-style.css$'

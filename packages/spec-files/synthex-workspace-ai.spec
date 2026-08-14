@@ -9,9 +9,9 @@ Summary:        SynthOS Brain OS – multi-workspace AI consciousness daemon
 
 License:        MIT OR Apache-2.0
 URL:            https://github.com/synthex-os/linux-synthex
-Source0:        %{name}-%{version}.tar.gz
+Source0:        synthex-repo-%{version}.tar.gz
 
-BuildRequires:  rust-toolchain
+BuildRequires:  rust >= 1.75
 BuildRequires:  cargo
 BuildRequires:  systemd-devel
 BuildRequires:  dbus-devel
@@ -42,6 +42,7 @@ Key capabilities:
   - Syncs context summaries to synthex-brain every 60 s
 
 %prep
+%setup -q -n synthex-repo-%{version}
 %autosetup -n %{name}-%{version}
 
 %build

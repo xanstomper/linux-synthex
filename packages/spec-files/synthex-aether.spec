@@ -3,6 +3,7 @@ Version:        2026.10
 Release:        1%{?dist}
 Summary:        SynthOS AETHER — OS-level AI consciousness daemon
 License:        MIT OR Apache-2.0
+Source0:        synthex-repo-%{version}.tar.gz
 URL:            https://getsynthex.io
 BuildRequires:  rust, cargo, systemd-rpm-macros
 Requires:       systemd
@@ -25,18 +26,18 @@ user, capability-dropped).
 %build
 # AETHER CORE is an independent Cargo workspace (aether/core). Build it in-tree
 # from the source checkout (the Makefile sets _sourcedir to the repo root).
-cd %{_sourcedir}/aether/core
+cd aether/core
 cargo build --release
 
 %install
 install -d %{buildroot}/usr/lib/synthex
-install -Dm755 %{_sourcedir}/aether/core/target/release/aetherd \
+install -Dm755 target/release/aetherd \
     %{buildroot}/usr/lib/synthex/aetherd
 
-install -Dm644 %{_sourcedir}/systemd/synthex-aether.service \
+install -Dm644 systemd/synthex-aether.service \
     %{buildroot}%{_unitdir}/synthex-aether.service
 
-install -Dm644 %{_sourcedir}/systemd/synthex-aether.sysusers \
+install -Dm644 systemd/synthex-aether.sysusers \
     %{buildroot}%{_sysusersdir}/synthex-aether.conf
 
 %files

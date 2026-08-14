@@ -6,10 +6,26 @@ Rectangle {
     id: root
     width: 460
     height: 280
-    radius: 18
-    color: "#12161F"
-    border.color: "#14ffffff"
+    radius: (typeof systemBridge !== "undefined" && systemBridge) ? systemBridge.cornerRadius : 18
+    color: "#a612161f"
+    border.color: "#28ffffff"
     border.width: 1
+
+    property string userHost: (typeof systemBridge !== "undefined" && systemBridge) ? ("~  " + systemBridge.username + "@" + systemBridge.hostname) : "~  user@synth"
+    property string kernelVal: (typeof systemBridge !== "undefined" && systemBridge) ? systemBridge.kernelStr : "6.3.9-synth"
+    property string ramVal: (typeof systemBridge !== "undefined" && systemBridge) ? (systemBridge.ramPct + "% in use") : "46% in use"
+    property string diskVal: (typeof systemBridge !== "undefined" && systemBridge) ? (systemBridge.diskPct + "% used") : "61% used"
+
+    // Liquid Glass Specular Top Highlight
+    Rectangle {
+        anchors.fill: parent
+        radius: root.radius
+        gradient: Gradient {
+            GradientStop { position: 0.0; color: "#22ffffff" }
+            GradientStop { position: 0.08; color: "#06ffffff" }
+            GradientStop { position: 1.0; color: "#00ffffff" }
+        }
+    }
 
     ColumnLayout {
         anchors.fill: parent
@@ -20,7 +36,7 @@ Rectangle {
             Layout.fillWidth: true
             Layout.preferredHeight: 34
             color: "#08ffffff"
-            radius: 18
+            radius: root.radius
 
             RowLayout {
                 anchors.fill: parent
@@ -39,7 +55,7 @@ Rectangle {
 
                 // Prompt Title
                 Text {
-                    text: "~  xanstomper@synth"
+                    text: root.userHost
                     font.family: "JetBrains Mono"
                     font.pixelSize: 12
                     color: "#9AA1AB"
@@ -66,7 +82,7 @@ Rectangle {
                     font.family: "JetBrains Mono"
                     font.pixelSize: 13
                     font.bold: true
-                    color: "#7AA2F7"
+                    color: (typeof systemBridge !== "undefined" && systemBridge) ? systemBridge.accentColor : "#7AA2F7"
                 }
 
                 RowLayout {
@@ -95,13 +111,13 @@ Rectangle {
                         Repeater {
                             model: [
                                 { k: "os", v: "synth OS", color: "#F7768E" },
-                                { k: "ker", v: "6.3.9-synth", color: "#FF9E64" },
+                                { k: "ker", v: root.kernelVal, color: "#FF9E64" },
                                 { k: "pkgs", v: "1247", color: "#E0AF68" },
                                 { k: "sh", v: "fish", color: "#9ECE6A" },
                                 { k: "wm", v: "Hyprland", color: "#73DACA" },
                                 { k: "term", v: "alacritty", color: "#7AA2F7" },
-                                { k: "ram", v: "5.21G / 15.6G", color: "#BB9AF7" },
-                                { k: "disk", v: "82G / 232G", color: "#F7768E" }
+                                { k: "ram", v: root.ramVal, color: "#BB9AF7" },
+                                { k: "disk", v: root.diskVal, color: "#F7768E" }
                             ]
 
                             RowLayout {

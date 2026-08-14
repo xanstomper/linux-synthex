@@ -5,7 +5,7 @@ Summary:        SynthOS WebApp Engine — turn websites into sandboxed desktop a
 
 License:        GPL-3.0-or-later
 URL:            https://getsynthex.org
-Source0:        %{name}-%{version}.tar.gz
+Source0:        synthex-repo-%{version}.tar.gz
 BuildArch:      noarch
 Requires:       python3
 Requires:       python3-gobject
@@ -17,8 +17,7 @@ separate profiles, user agents and window geometry — real web app support
 without full browser overhead.
 
 %prep
-%setup -q
-
+%setup -q -n synthex-repo-%{version}
 %build
 # Python + GTK WebKit; nothing to compile
 

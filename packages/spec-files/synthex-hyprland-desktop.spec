@@ -13,7 +13,7 @@ Summary:    SynthOS — Hyprland desktop edition configuration
 
 License:    MIT
 URL:        https://github.com/synthex-linux/synthex-desktop
-Source0:    %{name}-%{version}.tar.gz
+Source0:        synthex-repo-%{version}.tar.gz
 
 BuildArch:  noarch
 
@@ -66,6 +66,7 @@ configuration, including:
 
 # ─── Prep ────────────────────────────────────────────────────────────────
 %prep
+%setup -q -n synthex-repo-%{version}
 %autosetup -n %{name}-%{version}
 
 # ─── Build ───────────────────────────────────────────────────────────────

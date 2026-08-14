@@ -15,7 +15,7 @@ Summary:        Synthex AI Hub — Central GUI for AI model management and chat
 
 License:        GPL-3.0-or-later
 URL:            https://github.com/synthex-project/synthex-ai-hub
-Source0:        %{name}-%{version}.tar.xz
+Source0:        synthex-repo-%{version}.tar.gz
 
 # Build dependencies
 BuildRequires:  meson >= 1.0.0
@@ -65,8 +65,7 @@ Features:
 - Privacy-first: everything runs locally, no telemetry
 
 %prep
-%setup -q
-
+%setup -q -n synthex-repo-%{version}
 %build
 %meson
 %meson_build

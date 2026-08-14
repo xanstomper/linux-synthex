@@ -16,7 +16,7 @@ Summary:    Synthex GPU Drivers — detection, configuration, and switching
 Group:      System/Libraries
 License:    MIT
 URL:        https://getsynthex.com/gaming
-Source0:    %{name}-%{version}.tar.xz
+Source0:        synthex-repo-%{version}.tar.gz
 
 BuildArch:  noarch
 BuildRequires: systemd
@@ -72,7 +72,7 @@ Includes:
 - Driver switching between Nouveau and proprietary NVIDIA drivers
 
 %prep
-%setup -q -n %{name}-%{version}
+%setup -q -n synthex-repo-%{version}
 
 %build
 # No compilation — shell scripts and config files

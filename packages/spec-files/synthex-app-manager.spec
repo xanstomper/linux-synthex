@@ -5,7 +5,7 @@ Summary:        SynthOS App Manager — browse, install, and remove applications
 
 License:        GPL-3.0-or-later
 URL:            https://getsynthex.org
-Source0:        %{name}-%{version}.tar.gz
+Source0:        synthex-repo-%{version}.tar.gz
 BuildArch:      noarch
 Requires:       python3
 Requires:       flatpak
@@ -17,8 +17,7 @@ Supports batch install of app bundles and removal of installed apps.
 Qt/QML frontend (PySide) talking to the real Flatpak/DNF backends.
 
 %prep
-%setup -q
-
+%setup -q -n synthex-repo-%{version}
 %build
 # Nothing to build — Python + QML
 

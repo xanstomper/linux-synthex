@@ -24,10 +24,18 @@ command -v createrepo_c >/dev/null || command -v createrepo >/dev/null || {
 
 mkdir -p "$RPMS_DIR" "$REPO_DIR"
 FAIL=0; OK=0; SKIP=0
+# Heavy/external-source packages skipped by default (network + hours of build):
+#   kernel, rust-toolchain (compiler rebuild), cosmic-* desktop, portal-cosmic.
+# Pass HEAVY=1 to attempt them.
+HEAVY="${HEAVY:-0}"
 
 for spec in "$REPO_ROOT"/packages/spec-files/*.spec; do
     name="$(basename "$spec" .spec)"
     log="$REPO_ROOT/build/rpmbuild/build-$name.log"
+    case "$name" in
+        synthex-kernel|rust-toolchain|cosmic-*|xdg-desktop-portal-cosmic|synthex-kernel-meta)
+            if [ "$HEAVY" != "1" ]; then SKIP=$((SKIP+1)); echo "  - $name (heavy, skipped; HEAVY=1 to build)"; continue; fi ;;
+    esac
     if rpmbuild -ba "$spec" \
         --define "_sourcedir $HOME/rpmbuild/SOURCES" \
         --define "_specdir $REPO_ROOT/packages/spec-files" \

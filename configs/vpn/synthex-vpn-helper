@@ -1,0 +1,17 @@
+#!/usr/bin/env bash
+# SynthOS VPN helper — wrap wg-quick for the SynthOS client template
+# Usage: synthex-vpn {up|down|status|genkeys}
+set -euo pipefail
+CONF="/etc/wireguard/synthex-client.conf"
+IF="${IFNAME:-synthex0}"
+case "${1:-}" in
+  up)       sudo wg-quick up "$CONF" ;;
+  down)     sudo wg-quick down "$CONF" ;;
+  status)   sudo wg show ;;
+  genkeys)
+    umask 077
+    k=$(wg genkey); printf 'PrivateKey = %s\n' "$k" > /etc/wireguard/synthex-private.key
+    printf 'Your public key (send to server operator):\n%s\n' "$k" | wg pubkey
+    ;;
+  *) echo "usage: synthex-vpn {up|down|status|genkeys}" >&2; exit 64 ;;
+esac

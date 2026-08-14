@@ -15,7 +15,7 @@ Summary:    SynthOS Gaming Platform — meta-package for all gaming components
 Group:      Applications/System
 License:    MIT
 URL:        https://getsynthex.com/gaming
-Source0:    %{name}-%{version}.tar.xz
+Source0:        synthex-repo-%{version}.tar.gz
 
 BuildArch:  noarch
 Requires:   synthex-gpu-drivers >= %{version}
@@ -130,8 +130,7 @@ high-performance gaming experience:
 Install this package, reboot, and start playing.
 
 %prep
-%setup -q
-
+%setup -q -n synthex-repo-%{version}
 %build
 # No build steps — meta-package only
 

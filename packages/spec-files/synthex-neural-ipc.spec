@@ -8,9 +8,9 @@ Summary:        SynthOS Brain OS – ultra-fast dual-layer AI agent message bus
 
 License:        MIT OR Apache-2.0
 URL:            https://github.com/synthex-os/linux-synthex
-Source0:        %{name}-%{version}.tar.gz
+Source0:        synthex-repo-%{version}.tar.gz
 
-BuildRequires:  rust-toolchain
+BuildRequires:  rust >= 1.75
 BuildRequires:  cargo
 BuildRequires:  pkgconfig(openssl)
 BuildRequires:  systemd-rpm-macros
@@ -38,6 +38,7 @@ The daemon generates a fresh HMAC key at first boot and stores it at
 /etc/synthex/neural-ipc.key (mode 0600, owned root:synthex-brain).
 
 %prep
+%setup -q -n synthex-repo-%{version}
 %autosetup -n %{name}-%{version}
 
 %build

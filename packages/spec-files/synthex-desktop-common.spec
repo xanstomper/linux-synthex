@@ -13,7 +13,7 @@ Summary:    SynthOS — common desktop configuration and design assets
 
 License:    MIT
 URL:        https://github.com/synthex-linux/synthex-desktop
-Source0:    %{name}-%{version}.tar.gz
+Source0:        synthex-repo-%{version}.tar.gz
 
 BuildArch:  noarch
 
@@ -33,6 +33,7 @@ SynthOS common desktop configuration shared across all desktop editions
 
 # ─── Prep ────────────────────────────────────────────────────────────────
 %prep
+%setup -q -n synthex-repo-%{version}
 %autosetup -n %{name}-%{version}
 
 # ─── Build ───────────────────────────────────────────────────────────────

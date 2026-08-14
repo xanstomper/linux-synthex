@@ -5,7 +5,7 @@ Summary:        SynthOS Blueprint — declarative system snapshot/restore (.zbp 
 
 License:        GPL-3.0-or-later
 URL:            https://getsynthex.org
-Source0:        %{name}-%{version}.tar.gz
+Source0:        synthex-repo-%{version}.tar.gz
 BuildArch:      noarch
 Requires:       python3
 Requires:       systemd
@@ -19,8 +19,7 @@ another SynthOS machine. Ships synthex-blueprint.service (on-demand export
 to /var/backups/synthex/system.zbp) and a nightly timer.
 
 %prep
-%setup -q
-
+%setup -q -n synthex-repo-%{version}
 %build
 # Python; nothing to compile
 

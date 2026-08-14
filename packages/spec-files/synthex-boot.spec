@@ -5,7 +5,7 @@ Summary:        SynthOS Boot — first-boot finalizer, GRUB generator, initramfs
 
 License:        GPL-3.0-or-later
 URL:            https://getsynthex.org
-Source0:        %{name}-%{version}.tar.gz
+Source0:        synthex-repo-%{version}.tar.gz
 BuildArch:      noarch
 Requires:       python3
 Requires:       grub2-tools
@@ -17,8 +17,7 @@ generator (grub-generator.sh), the initramfs recovery hook
 (initramfs-recovery.sh) and the synthex-bootctl control script.
 
 %prep
-%setup -q
-
+%setup -q -n synthex-repo-%{version}
 %build
 # Python + shell; nothing to compile
 

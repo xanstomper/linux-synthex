@@ -16,7 +16,7 @@ Summary:    Synthex Gaming Control Center — GUI for gaming optimization
 Group:      Applications/System
 License:    MIT
 URL:        https://getsynthex.com/gaming
-Source0:    %{name}-%{version}.tar.xz
+Source0:        synthex-repo-%{version}.tar.gz
 
 # Build dependencies
 BuildRequires:  rust >= 1.75
@@ -71,7 +71,7 @@ Features:
 - System tray quick profile switching
 
 %prep
-%setup -q -n %{name}-%{version}
+%setup -q -n synthex-repo-%{version}
 
 %build
 # Build Rust backend
