@@ -1024,6 +1024,17 @@ try:
     check("synthex doctor package database check", any(d.component == "Package Manager Database" for d in diag))
     snaps = SynthexDoctor.get_available_snapshots()
     check("synthex doctor snapshots discovery", len(snaps) > 0)
+    
+    # Kernel-Level Doctor checks
+    from kernel_doctor import KernelDoctor
+    kdoc = KernelDoctor(dry_run=True)
+    check("kernel doctor initialized", kdoc is not None)
+    kdiag = kdoc.run_full_kernel_diagnostics(auto_patch=False)
+    check("kernel doctor full diagnostics pass", len(kdiag) >= 5)
+    check("kernel doctor taint diagnostic", any(k.subsystem == "Kernel Core & Taint Health" for k in kdiag))
+    check("kernel doctor cmdline patcher", any(k.subsystem == "Kernel Boot Parameters (cmdline)" for k in kdiag))
+    check("kernel doctor sysrq recovery", any(k.subsystem == "Magic SysRq Emergency Recovery" for k in kdiag))
+    check("kernel doctor dracut hook check", any(k.subsystem == "Dracut Early-Boot Auto-Healer" for k in kdiag))
 except Exception as _e:
     check("synthex doctor functional validation", False, str(_e))
 

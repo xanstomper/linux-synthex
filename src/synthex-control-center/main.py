@@ -1914,6 +1914,56 @@ class SettingsAppWindow(Gtk.Window):
             act_frame.add(act_box)
             doc_vbox.pack_start(act_frame, False, False, 0)
 
+            # Kernel-Level Doctor & Dynamic Patcher Section
+            k_frame = Gtk.Frame(label="Kernel-Level Doctor & Dynamic Patcher (Early-Boot, Panic & Taints)")
+            k_vbox = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=10)
+            k_vbox.set_border_width(12)
+
+            k_grid = Gtk.Grid()
+            k_grid.set_column_spacing(16)
+            k_grid.set_row_spacing(10)
+
+            kdiag_results = DoctorAdapter.get_kernel_diagnostics(auto_patch=False)
+            for kidx, kres in enumerate(kdiag_results):
+                kf = Gtk.Frame()
+                kb = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=4)
+                kb.set_border_width(10)
+
+                ktop = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=8)
+                safe_ksub = GLib.markup_escape_text(kres["subsystem"])
+                ktop.pack_start(Gtk.Label(label=f"<b>{safe_ksub}</b>", use_markup=True, xalign=0), True, True, 0)
+
+                kstat = Gtk.Label()
+                kst_color = "#2ecc71" if kres["status"] in ["OK", "REPAIRED"] else ("#f39c12" if kres["status"] == "WARNING" else "#e74c3c")
+                kstat.set_markup(f"<span color='{kst_color}'><b>● {kres['status']}</b></span>")
+                ktop.pack_end(kstat, False, False, 0)
+                kb.pack_start(ktop, False, False, 0)
+
+                safe_kdet = GLib.markup_escape_text(kres["technical_details"])
+                kb.pack_start(Gtk.Label(label=f"<span size='small' color='#888888'>{safe_kdet}</span>", use_markup=True, xalign=0), False, False, 0)
+
+                kf.add(kb)
+                k_grid.attach(kf, kidx % 2, kidx // 2, 1, 1)
+
+            k_vbox.pack_start(k_grid, False, False, 2)
+
+            k_actions = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=10)
+            btn_kpatch = Gtk.Button.new_with_label("Inject Resilient Kernel Flags (panic=10, fsck.repair)")
+            btn_kpatch.connect("clicked", lambda b: (DoctorAdapter.patch_kernel_cmdline(), b.set_label("✓ Kernel Flags Patched!")))
+            k_actions.pack_start(btn_kpatch, True, True, 0)
+
+            btn_dracut = Gtk.Button.new_with_label("Install Dracut Early-Boot Auto-Healer Hook")
+            btn_dracut.connect("clicked", lambda b: (DoctorAdapter.install_dracut_early_hook(), b.set_label("✓ Dracut Hook Installed!")))
+            k_actions.pack_start(btn_dracut, True, True, 0)
+
+            btn_sysrq = Gtk.Button.new_with_label("Enable Magic SysRq (REISUB)")
+            btn_sysrq.connect("clicked", lambda b: (DoctorAdapter.enable_magic_sysrq(), b.set_label("✓ SysRq Enabled!")))
+            k_actions.pack_start(btn_sysrq, True, True, 0)
+
+            k_vbox.pack_start(k_actions, False, False, 0)
+            k_frame.add(k_vbox)
+            doc_vbox.pack_start(k_frame, False, False, 0)
+
             # Snapshots Rollback Manager
             snap_frame = Gtk.Frame(label="Btrfs & Timeshift Snapshot Rollback Vault")
             snap_vbox = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=8)
