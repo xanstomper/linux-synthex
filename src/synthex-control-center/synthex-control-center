@@ -1,10 +1,40 @@
 #!/usr/bin/env bash
 # SynthOS System Settings Launcher
+# Prioritizes the official upstream desktop settings manager (cosmic-settings, systemsettings, gnome-control-center)
+# based on the active session, with fallback to the native SynthOS Control Center hub.
 set -euo pipefail
 
 HERE="$(cd "$(dirname "$0")" && pwd)"
 REPO_ROOT="$(cd "$HERE/../.." && pwd)"
 
+CURRENT_DESKTOP="${XDG_CURRENT_DESKTOP:-}"
+DESKTOP_SESSION="${DESKTOP_SESSION:-}"
+
+# 1. Check COSMIC Desktop Session
+if [[ "$CURRENT_DESKTOP" =~ COSMIC ]] && command -v cosmic-settings &>/dev/null; then
+    exec cosmic-settings "$@"
+fi
+
+# 2. Check KDE Plasma Desktop Session
+if [[ "$CURRENT_DESKTOP" =~ KDE|Plasma ]] && (command -v systemsettings &>/dev/null || command -v systemsettings5 &>/dev/null); then
+    if command -v systemsettings &>/dev/null; then
+        exec systemsettings "$@"
+    else
+        exec systemsettings5 "$@"
+    fi
+fi
+
+# 3. Check GNOME Desktop Session
+if [[ "$CURRENT_DESKTOP" =~ GNOME ]] && command -v gnome-control-center &>/dev/null; then
+    exec gnome-control-center "$@"
+fi
+
+# 4. Check Pop!_OS / COSMIC standalone in Wayland
+if command -v cosmic-settings &>/dev/null; then
+    exec cosmic-settings "$@"
+fi
+
+# 5. Launch Native SynthOS Control Center Hub
 if [ -f "$REPO_ROOT/.venv/bin/python" ]; then
     exec "$REPO_ROOT/.venv/bin/python" "$HERE/main.py" "$@"
 else
