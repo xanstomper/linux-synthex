@@ -10,6 +10,7 @@ xrandr, GSettings, PackageKit/apt, and procfs/sysfs.
 import json
 import os
 import re
+import shlex
 import shutil
 import subprocess
 import sys
@@ -30,6 +31,30 @@ def get_gsettings(schema_id):
     except Exception:
         pass
     return None
+
+
+def safe_set_gsetting(schema_id: str, key: str, value):
+    """Safely set a GSettings value after checking key existence to prevent crashes."""
+    try:
+        source = Gio.SettingsSchemaSource.get_default()
+        if not source:
+            return False
+        schema_obj = source.lookup(schema_id, True)
+        if not schema_obj or not schema_obj.has_key(key):
+            return False
+        settings = Gio.Settings.new(schema_id)
+        if isinstance(value, bool):
+            settings.set_boolean(key, value)
+        elif isinstance(value, int):
+            settings.set_int(key, value)
+        elif isinstance(value, float):
+            settings.set_double(key, value)
+        elif isinstance(value, str):
+            settings.set_string(key, value)
+        return True
+    except Exception as e:
+        print(f"[GSettings] Safe set error for {schema_id}.{key}: {e}")
+        return False
 
 
 def run_cmd(cmd, timeout=5):
@@ -416,25 +441,18 @@ class ThemeAdapter:
 
     @staticmethod
     def set_gtk_theme(theme_name: str):
-        for schema in ["org.cinnamon.desktop.interface", "org.gnome.desktop.interface"]:
-            iface = get_gsettings(schema)
-            if iface:
-                try:
-                    iface.set_string("gtk-theme", theme_name)
-                    iface.set_string("gtk-application-prefer-dark-theme", "1" if "dark" in theme_name.lower() else "0")
-                except Exception:
-                    pass
+        safe_set_gsetting("org.cinnamon.desktop.interface", "gtk-theme", theme_name)
+        safe_set_gsetting("org.gnome.desktop.interface", "gtk-theme", theme_name)
+        if "dark" in theme_name.lower():
+            safe_set_gsetting("org.gnome.desktop.interface", "color-scheme", "prefer-dark")
+        else:
+            safe_set_gsetting("org.gnome.desktop.interface", "color-scheme", "default")
         return True
 
     @staticmethod
     def set_icon_theme(icon_name: str):
-        for schema in ["org.cinnamon.desktop.interface", "org.gnome.desktop.interface"]:
-            iface = get_gsettings(schema)
-            if iface:
-                try:
-                    iface.set_string("icon-theme", icon_name)
-                except Exception:
-                    pass
+        safe_set_gsetting("org.cinnamon.desktop.interface", "icon-theme", icon_name)
+        safe_set_gsetting("org.gnome.desktop.interface", "icon-theme", icon_name)
         return True
 
 
