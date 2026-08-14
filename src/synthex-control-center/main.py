@@ -46,6 +46,9 @@ from synth_system_adapters import (
     SecurityAdapter,
     SystemAdapter,
     PrivacyAdapter,
+    AppManagerAdapter,
+    StorageSenseAdapter,
+    QuarantineManagerAdapter,
     safe_set_gsetting,
     get_gsettings,
     run_cmd
@@ -1065,8 +1068,108 @@ class SettingsAppWindow(Gtk.Window):
             p_hw_frame.add(p_hw_grid)
             self.content_box.pack_start(p_hw_frame, False, False, 0)
 
-        # ── 13. Storage & Disks ─────────────────────────────────────────
+        # ── 13. Storage & Space Reclaimer (Storage Sense) ───────────────
         elif cat_id == "storage":
+            # 1. Visual Drive Storage Breakdown
+            breakdown = StorageSenseAdapter.get_disk_breakdown()
+
+            s_frame = Gtk.Frame(label="System Drive Storage & Space Allocation")
+            s_vbox = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=12)
+            s_vbox.set_border_width(16)
+
+            top_h = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=12)
+            top_h.pack_start(Gtk.Label(label=f"<b>Primary Drive (/):</b> {breakdown['used_gb']} used of {breakdown['total_gb']} ({breakdown['free_gb']} free)", use_markup=True, xalign=0), True, True, 0)
+            s_vbox.pack_start(top_h, False, False, 0)
+
+            # Progress Bar
+            pbar = Gtk.ProgressBar()
+            pbar.set_fraction(breakdown['percentage'] / 100.0)
+            s_vbox.pack_start(pbar, False, False, 0)
+
+            # Allocation Cards Grid
+            agrid = Gtk.Grid()
+            agrid.set_column_spacing(16)
+            agrid.set_row_spacing(10)
+
+            allocs = [
+                ("Installed Apps & Packages", breakdown['apps_gb'], "Software, libraries, flatpaks"),
+                ("Downloads & Temp Files", breakdown['downloads_gb'], "ISO images, installers, cache"),
+                ("System Logs & Caches", breakdown['system_cache_gb'], "Journal logs, apt cache, thumbs"),
+                ("User Documents & Media", breakdown['user_data_gb'], "Pictures, videos, code projects"),
+            ]
+            for idx, (title, sz, desc) in enumerate(allocs):
+                af = Gtk.Frame()
+                ab = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=4)
+                ab.set_border_width(10)
+                ab.pack_start(Gtk.Label(label=f"<b>{title}</b>", use_markup=True, xalign=0), False, False, 0)
+                ab.pack_start(Gtk.Label(label=f"<span size='large' weight='bold' color='#2ecc71'>{sz}</span>", use_markup=True, xalign=0), False, False, 0)
+                ab.pack_start(Gtk.Label(label=f"<span size='small' color='#888888'>{desc}</span>", use_markup=True, xalign=0), False, False, 0)
+                af.add(ab)
+                agrid.attach(af, idx % 2, idx // 2, 1, 1)
+            s_vbox.pack_start(agrid, False, False, 4)
+
+            s_frame.add(s_vbox)
+            self.content_box.pack_start(s_frame, False, False, 0)
+
+            # 2. Large & Downloaded Files Cleaner (Free Up Space)
+            lg_frame = Gtk.Frame(label="Large & Downloaded Files (Free Up Storage Space)")
+            lg_vbox = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=8)
+            lg_vbox.set_border_width(16)
+
+            large_files = StorageSenseAdapter.scan_large_downloaded_files(min_size_mb=50)
+            if not large_files:
+                lg_vbox.pack_start(Gtk.Label(label="✓ No large files (>50MB) found in Downloads or temporary caches.", xalign=0), False, False, 4)
+            else:
+                llist = Gtk.ListBox()
+                llist.set_selection_mode(Gtk.SelectionMode.NONE)
+                for lf in large_files[:8]:
+                    r = Gtk.ListBoxRow()
+                    h = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=12)
+                    h.set_border_width(6)
+                    h.pack_start(Gtk.Label(label=f"📄 <b>{lf['name']}</b> ({lf['dir']})", use_markup=True, xalign=0), True, True, 0)
+                    h.pack_end(Gtk.Label(label=f"<b>{lf['size_str']}</b>", use_markup=True), False, False, 8)
+
+                    btn_del_file = Gtk.Button.new_with_label("Delete")
+                    btn_del_file.connect("clicked", lambda b, fp=lf["path"]: (StorageSenseAdapter.delete_file(fp), self._render_category_page("storage", "Storage & Disks", ["Disks", "Partitions", "Clean"])))
+                    h.pack_end(btn_del_file, False, False, 0)
+
+                    r.add(h)
+                    llist.add(r)
+                lg_vbox.pack_start(llist, False, False, 4)
+
+            lg_frame.add(lg_vbox)
+            self.content_box.pack_start(lg_frame, False, False, 0)
+
+            # 3. One-Click Storage Sense System Cleaner
+            cln_frame = Gtk.Frame(label="Storage Sense — System Junk & Cache Cleaner")
+            cln_vbox = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=8)
+            cln_vbox.set_border_width(16)
+
+            cgrid = Gtk.Grid()
+            cgrid.set_column_spacing(12)
+            cgrid.set_row_spacing(10)
+
+            btn_cln_pkg = Gtk.Button.new_with_label("Clean Package Caches & Unused Flatpaks")
+            btn_cln_pkg.connect("clicked", lambda b: (StorageSenseAdapter.clean_system_junk("package_cache"), b.set_label("✓ Package Cache Cleaned!")))
+            cgrid.attach(btn_cln_pkg, 0, 0, 1, 1)
+
+            btn_cln_logs = Gtk.Button.new_with_label("Vacuum System Journal Logs (Limit to 50MB)")
+            btn_cln_logs.connect("clicked", lambda b: (StorageSenseAdapter.clean_system_junk("journal_logs"), b.set_label("✓ Logs Vacuumed!")))
+            cgrid.attach(btn_cln_logs, 1, 0, 1, 1)
+
+            btn_cln_thumbs = Gtk.Button.new_with_label("Clear Thumbnail Cache")
+            btn_cln_thumbs.connect("clicked", lambda b: (StorageSenseAdapter.clean_system_junk("thumbnails"), b.set_label("✓ Thumbnails Cleared!")))
+            cgrid.attach(btn_cln_thumbs, 0, 1, 1, 1)
+
+            btn_cln_tmp = Gtk.Button.new_with_label("Purge Temporary Build Files (/tmp)")
+            btn_cln_tmp.connect("clicked", lambda b: (StorageSenseAdapter.clean_system_junk("tmp_files"), b.set_label("✓ Temp Files Cleaned!")))
+            cgrid.attach(btn_cln_tmp, 1, 1, 1, 1)
+
+            cln_vbox.pack_start(cgrid, False, False, 0)
+            cln_frame.add(cln_vbox)
+            self.content_box.pack_start(cln_frame, False, False, 0)
+
+            # 4. Physical Disks & Partition Tables
             frame = Gtk.Frame(label="Physical Disks & Partition Tables (UDisks2)")
             vbox = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=10)
             vbox.set_border_width(16)
@@ -1169,6 +1272,54 @@ class SettingsAppWindow(Gtk.Window):
             aegis_vbox.pack_start(aegis_h, False, False, 0)
             aegis_frame.add(aegis_vbox)
             self.content_box.pack_start(aegis_frame, False, False, 0)
+
+            # 0.5. Malware & Infostealer Quarantine Vault
+            q_frame = Gtk.Frame(label="Aegis Malware & Infostealer Quarantine Vault")
+            q_vbox = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=8)
+            q_vbox.set_border_width(16)
+
+            q_items = QuarantineManagerAdapter.get_quarantined_items()
+            if not q_items:
+                q_vbox.pack_start(Gtk.Label(label="✓ Quarantine vault is empty. No infected payloads or malicious scripts isolated.", xalign=0), False, False, 4)
+            else:
+                q_vbox.pack_start(Gtk.Label(label=f"<b>{len(q_items)} Suspicious / Malicious Payloads Quarantined (Mode 000 Locked):</b>", use_markup=True, xalign=0), False, False, 0)
+                qlist = Gtk.ListBox()
+                qlist.set_selection_mode(Gtk.SelectionMode.NONE)
+                for item in q_items:
+                    r = Gtk.ListBoxRow()
+                    h = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=12)
+                    h.set_border_width(6)
+                    h.pack_start(Gtk.Image.new_from_icon_name("dialog-warning", Gtk.IconSize.BUTTON), False, False, 0)
+
+                    vb = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=2)
+                    safe_orig = GLib.markup_escape_text(item["original_path"])
+                    safe_qname = GLib.markup_escape_text(item["quarantine_name"])
+                    vb.pack_start(Gtk.Label(label=f"<b>{safe_orig}</b>", use_markup=True, xalign=0), False, False, 0)
+                    vb.pack_start(Gtk.Label(label=f"<span size='small' color='#888888'>Vault ID: {safe_qname} • Size: {item['size_str']} • Detected: {item['timestamp']}</span>", use_markup=True, xalign=0), False, False, 0)
+                    h.pack_start(vb, True, True, 0)
+
+                    btn_inspect = Gtk.Button.new_with_label("Inspect Forensics")
+                    btn_inspect.connect("clicked", lambda b, qn=item["quarantine_name"], op=item["original_path"]: self._show_quarantine_inspect_dialog(qn, op))
+                    h.pack_end(btn_inspect, False, False, 2)
+
+                    btn_restore = Gtk.Button.new_with_label("Restore")
+                    btn_restore.connect("clicked", lambda b, qn=item["quarantine_name"]: (QuarantineManagerAdapter.restore_quarantined_file(qn), self._render_category_page("security", "Security", ["Firewall", "SSH", "Quarantine"])))
+                    h.pack_end(btn_restore, False, False, 2)
+
+                    btn_shred = Gtk.Button.new_with_label("Permanently Delete")
+                    btn_shred.connect("clicked", lambda b, qn=item["quarantine_name"]: (QuarantineManagerAdapter.delete_quarantined_file(qn), self._render_category_page("security", "Security", ["Firewall", "SSH", "Quarantine"])))
+                    h.pack_end(btn_shred, False, False, 2)
+
+                    r.add(h)
+                    qlist.add(r)
+                q_vbox.pack_start(qlist, False, False, 4)
+
+                btn_del_all = Gtk.Button.new_with_label("Permanently Delete All Quarantined Threats")
+                btn_del_all.connect("clicked", lambda b: (QuarantineManagerAdapter.delete_all_quarantine(), self._render_category_page("security", "Security", ["Firewall", "SSH", "Quarantine"])))
+                q_vbox.pack_start(btn_del_all, False, False, 4)
+
+            q_frame.add(q_vbox)
+            self.content_box.pack_start(q_frame, False, False, 0)
 
             # 1. Firewall Master & Active Rules Table
             fw_frame = Gtk.Frame(label="Firewall Protection & Port Filter (UFW / nftables)")
@@ -1525,8 +1676,86 @@ class SettingsAppWindow(Gtk.Window):
             jan_frame.add(jan_vbox)
             self.content_box.pack_start(jan_frame, False, False, 0)
 
-        # ── 17. Apps & Defaults ─────────────────────────────────────────
+        # ── 17. Apps & Software Manager (Installed Apps) ───────────────
         elif cat_id == "apps":
+            # 1. Installed Applications Hub
+            app_frame = Gtk.Frame(label="Installed Applications & Software Management")
+            app_vbox = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=10)
+            app_vbox.set_border_width(16)
+
+            # Search & Filter Controls
+            top_filter_box = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=12)
+            search_entry = Gtk.SearchEntry()
+            search_entry.set_placeholder_text("Search installed software and applications...")
+            search_entry.set_hexpand(True)
+            top_filter_box.pack_start(search_entry, True, True, 0)
+
+            app_vbox.pack_start(top_filter_box, False, False, 0)
+
+            # Scrolled App List
+            app_sw = Gtk.ScrolledWindow()
+            app_sw.set_policy(Gtk.PolicyType.NEVER, Gtk.PolicyType.AUTOMATIC)
+            app_sw.set_min_content_height(320)
+
+            app_listbox = Gtk.ListBox()
+            app_listbox.set_selection_mode(Gtk.SelectionMode.NONE)
+
+            all_installed = AppManagerAdapter.get_installed_applications()
+
+            def _populate_installed_apps(q=""):
+                for c in app_listbox.get_children():
+                    c.destroy()
+                filtered = [a for a in all_installed if not q or q.lower() in a["name"].lower() or q.lower() in a["category"].lower()]
+                for app in filtered[:40]:
+                    r = Gtk.ListBoxRow()
+                    h = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=12)
+                    h.set_border_width(8)
+
+                    # Icon
+                    icon_img = Gtk.Image.new_from_icon_name(app["icon"], Gtk.IconSize.DND)
+                    h.pack_start(icon_img, False, False, 0)
+
+                    # Details
+                    vb = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=2)
+                    safe_app_name = GLib.markup_escape_text(app["name"])
+                    safe_cat = GLib.markup_escape_text(app["category"])
+                    vb.pack_start(Gtk.Label(label=f"<b>{safe_app_name}</b>", use_markup=True, xalign=0), False, False, 0)
+                    vb.pack_start(Gtk.Label(label=f"<span size='small' color='#888888'>{safe_cat} • Version: {app['version']}</span>", use_markup=True, xalign=0), False, False, 0)
+                    h.pack_start(vb, True, True, 0)
+
+                    # Format Badge
+                    badge = Gtk.Label()
+                    badge_color = "#3498db" if app["type"] == "Flatpak" else ("#e67e22" if app["type"] == "Snap" else "#2ecc71")
+                    badge.set_markup(f"<span color='{badge_color}'><b>{app['type']}</b></span>")
+                    h.pack_end(badge, False, False, 4)
+
+                    # Storage Size
+                    h.pack_end(Gtk.Label(label=f"<b>{app['size']}</b>", use_markup=True), False, False, 8)
+
+                    # Reset Cache Action
+                    btn_cache = Gtk.Button.new_with_label("Clear Cache")
+                    btn_cache.connect("clicked", lambda b, ap=app: (AppManagerAdapter.reset_app_cache(ap), b.set_label("✓ Cleared!")))
+                    h.pack_end(btn_cache, False, False, 2)
+
+                    # Uninstall Action
+                    btn_uninst = Gtk.Button.new_with_label("Uninstall")
+                    btn_uninst.connect("clicked", lambda b, ap=app: self._confirm_uninstall_app(ap))
+                    h.pack_end(btn_uninst, False, False, 2)
+
+                    r.add(h)
+                    app_listbox.add(r)
+                app_listbox.show_all()
+
+            _populate_installed_apps()
+            search_entry.connect("search-changed", lambda se: _populate_installed_apps(se.get_text()))
+
+            app_sw.add(app_listbox)
+            app_vbox.pack_start(app_sw, True, True, 4)
+
+            app_frame.add(app_vbox)
+            self.content_box.pack_start(app_frame, False, False, 0)
+
+            # 2. Default System Applications
             frame = Gtk.Frame(label="Default System Applications")
             grid = Gtk.Grid()
             grid.set_column_spacing(16)
@@ -1551,7 +1780,7 @@ class SettingsAppWindow(Gtk.Window):
             frame.add(grid)
             self.content_box.pack_start(frame, False, False, 0)
 
-            # Startup Applications list
+            # 3. Startup Applications list
             st_frame = Gtk.Frame(label="Startup Applications (Autostart)")
             st_box = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=6)
             st_box.set_border_width(16)
@@ -2180,6 +2409,62 @@ class SettingsAppWindow(Gtk.Window):
             ])
         except Exception:
             pass
+
+    def _confirm_uninstall_app(self, app_info: dict):
+        md = Gtk.MessageDialog(
+            parent=self,
+            flags=0,
+            type=Gtk.MessageType.QUESTION,
+            buttons=Gtk.ButtonsType.YES_NO,
+            message_format=f"Are you sure you want to uninstall '{app_info.get('name')}'?"
+        )
+        md.format_secondary_text(f"Format: {app_info.get('type')}\nReclaimed space: ~{app_info.get('size')}\nThis will remove the application binary and desktop integrations.")
+        resp = md.run()
+        md.destroy()
+
+        if resp == Gtk.ResponseType.YES:
+            ok, msg = AppManagerAdapter.uninstall_application(app_info)
+            res_md = Gtk.MessageDialog(
+                parent=self,
+                flags=0,
+                type=Gtk.MessageType.INFO if ok else Gtk.MessageType.ERROR,
+                buttons=Gtk.ButtonsType.OK,
+                message_format=msg
+            )
+            res_md.run()
+            res_md.destroy()
+            self._render_category_page("apps", "Apps & Defaults", ["Installed Apps", "Defaults", "Autostart"])
+
+    def _show_quarantine_inspect_dialog(self, qname: str, orig_path: str):
+        dialog = Gtk.Dialog(
+            title=f"Quarantine Forensics — {os.path.basename(orig_path)}",
+            parent=self,
+            flags=0
+        )
+        dialog.add_button("Close", Gtk.ResponseType.CLOSE)
+        dialog.set_default_size(600, 360)
+
+        box = dialog.get_content_area()
+        box.set_spacing(10)
+        box.set_border_width(12)
+
+        box.pack_start(Gtk.Label(label=f"<b>Original Path:</b> <tt>{orig_path}</tt>", use_markup=True, xalign=0), False, False, 0)
+        box.pack_start(Gtk.Label(label=f"<b>Vault ID:</b> <tt>{qname}</tt> (Mode 000 Locked)", use_markup=True, xalign=0), False, False, 0)
+        box.pack_start(Gtk.Label(label="<b>Payload Forensics & Content Preview:</b>", use_markup=True, xalign=0), False, False, 0)
+
+        sw = Gtk.ScrolledWindow()
+        tv = Gtk.TextView()
+        tv.set_editable(False)
+        tv.set_monospace(True)
+        buf = tv.get_buffer()
+        preview_text = QuarantineManagerAdapter.inspect_quarantined_payload(qname)
+        buf.set_text(preview_text)
+        sw.add(tv)
+        box.pack_start(sw, True, True, 0)
+
+        dialog.show_all()
+        dialog.run()
+        dialog.destroy()
 
 
 def main():
