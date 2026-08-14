@@ -174,6 +174,14 @@ class DisplayAdapter:
         return False
 
     @staticmethod
+    def set_monitor_rotation(output_name: str, rotation: str = "normal"):
+        return run_cmd(f"xrandr --output {output_name} --rotate {rotation}")[0]
+
+    @staticmethod
+    def set_primary_monitor(output_name: str):
+        return run_cmd(f"xrandr --output {output_name} --primary")[0]
+
+    @staticmethod
     def is_hdr_supported():
         ok, out, _ = run_cmd("grep -l 'HDR_OUTPUT_METADATA' /sys/class/drm/*/enabled 2>/dev/null")
         return ok

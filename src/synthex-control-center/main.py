@@ -3,10 +3,11 @@
 """
 SynthOS System Settings — Layer 1: Native GTK3 Settings Application
 Full 3-layer architecture:
-- Layer 1: Settings UI (Sidebar navigation, deep search, complete hardware panels)
+- Layer 1: Settings UI (Visual multi-monitor canvas, confirmation countdown with rollback,
+  tier filters, deep search, hardware control surfaces)
 - Layer 2: Settings Backend Daemon & Unified Setting Model (synth_settings_backend.py)
-- Layer 3: System Integration Layer (synth_system_adapters.py: NetworkManager, BlueZ,
-  PipeWire/WirePlumber, UPower, powerprofilesctl, UDisks2, UFW, xrandr, GSettings, systemd)
+- Layer 3: System Integration Layer (synth_system_adapters.py: DRM/KMS, xrandr, NetworkManager,
+  BlueZ, PipeWire/WirePlumber, UPower, powerprofilesctl, UDisks2, UFW, GSettings, systemd)
 """
 
 import os
@@ -55,29 +56,29 @@ from synth_settings_backend import SettingsDaemon, Setting
 
 SIDEBAR_ITEMS = [
     ("overview",      "Overview",               "preferences-system",                      ["Quick Settings", "System Health", "Battery & Power"]),
+    ("display",       "Display",                "preferences-desktop-display",              ["Resolution", "Refresh rate", "Arrangement", "Scaling", "HDR", "Night light", "VRR", "Rotation"]),
     ("gaming",        "Gaming & Performance",   "applications-games",                      ["CPU Governor", "BORE Scheduler", "GameMode", "ZRAM Compression", "GPU Latency"]),
     ("network",       "Network",                "preferences-system-network",               ["Wi-Fi", "Ethernet", "VPN", "Proxy", "DNS", "Firewall", "Network sharing"]),
     ("bluetooth",     "Bluetooth",              "bluetooth",                                ["Devices", "Pairing", "Audio devices", "File transfer"]),
-    ("display",       "Display",                "preferences-desktop-display",              ["Resolution", "Refresh rate", "Scaling", "HDR", "Night light", "Color profiles", "Multiple monitors", "VRR"]),
-    ("appearance",    "Appearance",             "preferences-desktop-theme",                ["Theme", "Dark/Light", "Accent", "Wallpaper", "Icons", "Cursor", "Fonts", "Animations", "Effects"]),
+    ("sound",         "Sound",                  "multimedia-volume-control",                 ["Output", "Input", "Volume", "Per-app audio", "Microphone", "Audio test", "PipeWire"]),
+    ("appearance",    "Appearance",             "preferences-desktop-theme",                ["Theme", "Dark/Light", "Accent", "Wallpaper", "Icons", "Cursor", "Fonts", "Animations"]),
     ("desktop",       "Desktop",                "cs-desktop",                             ["Panels", "Dock", "Workspaces", "Window behavior", "Virtual desktops", "Hot corners"]),
-    ("sound",         "Sound",                  "multimedia-volume-control",                 ["Output", "Input", "Volume", "Per-app audio", "Microphone", "Audio effects", "Bluetooth audio"]),
     ("notifications", "Notifications",           "preferences-desktop-notification",        ["Global notifications", "Per-app permissions", "Do Not Disturb", "Notification sounds"]),
     ("keyboard",      "Keyboard",               "preferences-desktop-keyboard",              ["Layout", "Shortcuts", "Compose key", "Repeat rate", "Accessibility"]),
-    ("mouse",         "Mouse & Touchpad",       "input-mouse",                              ["Pointer speed", "Acceleration", "Natural scrolling", "Gestures", "Tap-to-click", "Touchscreen / Pen"]),
-    ("power",         "Power & Battery",        "preferences-system-power",                 ["Power profiles", "Sleep", "Hibernate", "Screen timeout", "Lid behavior", "Battery health", "Usage"]),
+    ("mouse",         "Mouse & Touchpad",       "input-mouse",                              ["Pointer speed", "Acceleration", "Natural scrolling", "Gestures", "Tap-to-click"]),
+    ("power",         "Power & Battery",        "preferences-system-power",                 ["Power profiles", "Sleep", "Hibernate", "Screen timeout", "Lid behavior", "Battery health"]),
+    ("storage",       "Storage & Disks",        "drive-harddisk",                           ["Disks", "Partitions", "Mounts", "Filesystems", "External drives", "TRIM"]),
     ("users",         "Users & Accounts",       "system-users",                             ["Accounts", "Password", "Administrator privileges", "Login behavior", "Profile"]),
     ("security",      "Security",               "cs-firewall",                              ["Firewall", "Encryption", "Secure Boot status", "Permissions", "Authentication", "Screen lock"]),
-    ("privacy",       "Privacy",                "preferences-system-privacy",              ["Location", "Camera", "Microphone", "Screen capture", "App permissions", "Telemetry", "Recent access"]),
+    ("privacy",       "Privacy",                "preferences-system-privacy",              ["Location", "Camera", "Microphone", "Screen capture", "App permissions", "Telemetry"]),
     ("apps",          "Apps",                   "preferences-desktop-default-applications", ["Installed applications", "Default applications", "Startup applications", "File associations"]),
     ("packages",      "Packages & Software",    "system-software-install",                  ["Updates", "Installed packages", "Repositories", "Drivers", "Optional components"]),
-    ("storage",       "Storage & Disks",        "drive-harddisk",                           ["Disks", "Partitions", "Mounts", "Filesystems", "External drives", "SMART health"]),
     ("printers",      "Printers & Scanners",    "cs-printer",                             ["Printers", "Scanners", "Print queues", "Test page"]),
     ("devices",       "Cameras & Gamepads",     "camera-video",                             ["Video devices", "Game controllers", "Calibration", "Force feedback"]),
-    ("accessibility", "Accessibility",           "preferences-desktop-accessibility",       ["Screen reader", "Magnification", "High contrast", "Large text", "Sticky keys", "Slow keys"]),
+    ("accessibility", "Accessibility",           "preferences-desktop-accessibility",       ["Screen reader", "Magnification", "High contrast", "Large text", "Sticky keys"]),
     ("datetime",      "Date & Time",             "preferences-system-time",                 ["Timezone", "NTP network sync", "12/24 hour format", "Automatic time"]),
     ("region",        "Language & Region",      "cs-language",                            ["Language", "Locale", "Keyboard layouts", "Regional formats"]),
-    ("system",        "System",                 "dialog-information",                       ["Hostname", "About", "Kernel", "Hardware", "Drivers", "System specs"]),
+    ("system",        "System",                 "dialog-information",                       ["Diagnostics", "Hostname", "About", "Kernel", "Hardware", "Drivers", "Specs"]),
     ("developer",     "Developer",              "utilities-terminal",                       ["Developer mode", "Logs", "Services", "Debugging", "Experimental features"]),
 ]
 
@@ -85,12 +86,13 @@ SIDEBAR_ITEMS = [
 class SettingsAppWindow(Gtk.Window):
     def __init__(self, initial_page="overview"):
         super().__init__(title="SynthOS System Settings")
-        self.set_default_size(1200, 860)
+        self.set_default_size(1220, 880)
         self.set_position(Gtk.WindowPosition.CENTER)
         self.connect("destroy", Gtk.main_quit)
 
         self.daemon = SettingsDaemon.get_instance()
         self.current_cat_id = initial_page
+        self.current_tier = "all"  # basic, advanced, developer, all
 
         # ── Header Bar ──────────────────────────────────────────────────
         self.hb = Gtk.HeaderBar()
@@ -101,7 +103,7 @@ class SettingsAppWindow(Gtk.Window):
 
         # Global Deep Search
         self.search_entry = Gtk.SearchEntry()
-        self.search_entry.set_placeholder_text("Search settings, GPU, Wi-Fi, refresh rate, PipeWire, CPU governor...")
+        self.search_entry.set_placeholder_text("Search settings, 100Hz, GPU, Wi-Fi, PipeWire, CPU governor, TRIM...")
         self.search_entry.set_width_chars(38)
         self.search_entry.connect("search-changed", self._on_global_search)
         self.hb.pack_end(self.search_entry)
@@ -170,9 +172,18 @@ class SettingsAppWindow(Gtk.Window):
                 row.set_visible(True)
             return
 
-        for row in self.sidebar_rows.values():
-            matches = (query in row.label.lower() or any(query in sc.lower() for sc in row.subcats))
-            row.set_visible(matches)
+        # Query Universal Deep Search Index
+        matches = self.daemon.search(query)
+        matched_cat_ids = set([m["cat_id"] for m in matches])
+
+        for cat_id, row in self.sidebar_rows.items():
+            is_direct_match = (query in row.label.lower() or any(query in sc.lower() for sc in row.subcats))
+            row.set_visible(is_direct_match or cat_id in matched_cat_ids)
+
+        if matched_cat_ids:
+            first_cat = list(matched_cat_ids)[0]
+            if first_cat in self.sidebar_rows:
+                self.sidebar_list.select_row(self.sidebar_rows[first_cat])
 
     def _render_category_page(self, cat_id, title, subcats):
         for child in self.content_box.get_children():
@@ -252,7 +263,171 @@ class SettingsAppWindow(Gtk.Window):
             scard.add(sgrid)
             self.content_box.pack_start(scard, False, False, 0)
 
-        # ── 2. Gaming & Performance Tuning ──────────────────────────────
+        # ── 2. Display (Complete Display Management Panel) ───────────────
+        elif cat_id == "display":
+            monitors = DisplayAdapter.get_connected_monitors()
+
+            # 1. Visual Multi-Monitor Arrangement Canvas
+            arr_frame = Gtk.Frame(label="Visual Display Arrangement")
+            arr_vbox = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=12)
+            arr_vbox.set_border_width(16)
+
+            canvas_box = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=16)
+            for mname, mdata in monitors.items():
+                m_card = Gtk.Frame()
+                m_vbox = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=4)
+                m_vbox.set_border_width(12)
+                m_vbox.set_size_request(180, 100)
+
+                m_lbl = Gtk.Label()
+                m_lbl.set_markup(f"<b>{mname}</b> {'<span color=\"#3498db\">(Primary)</span>' if mdata['primary'] else ''}")
+                m_vbox.pack_start(m_lbl, False, False, 0)
+
+                m_mode_lbl = Gtk.Label(label=f"{mdata['current_res']} @ {mdata['current_hz']} Hz")
+                m_vbox.pack_start(m_mode_lbl, False, False, 0)
+
+                m_card.add(m_vbox)
+                canvas_box.pack_start(m_card, False, False, 0)
+
+            arr_vbox.pack_start(canvas_box, False, False, 0)
+
+            if len(monitors) > 1:
+                btn_arr_box = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=10)
+                btn_ext_r = Gtk.Button.new_with_label("Extend Displays (Side by Side)")
+                btn_ext_r.connect("clicked", lambda b: DisplayAdapter.set_display_layout("HDMI-2", "HDMI-1", "extend-right"))
+                btn_mir = Gtk.Button.new_with_label("Mirror Displays (Clone View)")
+                btn_mir.connect("clicked", lambda b: DisplayAdapter.set_display_layout("HDMI-2", "HDMI-1", "mirror"))
+                btn_arr_box.pack_start(btn_ext_r, False, False, 0)
+                btn_arr_box.pack_start(btn_mir, False, False, 0)
+                arr_vbox.pack_start(btn_arr_box, False, False, 4)
+
+            arr_frame.add(arr_vbox)
+            self.content_box.pack_start(arr_frame, False, False, 0)
+
+            # 2. Per-Monitor Controls & Mode Configuration
+            cfg_frame = Gtk.Frame(label="Resolution, Refresh Rate & Scaling (DRM/KMS)")
+            dgrid = Gtk.Grid()
+            dgrid.set_column_spacing(16)
+            dgrid.set_row_spacing(12)
+            dgrid.set_border_width(16)
+
+            # Monitor Selector
+            dgrid.attach(Gtk.Label(label="Select Display Monitor:", xalign=0), 0, 0, 1, 1)
+            mon_cb = Gtk.ComboBoxText()
+            mon_list = list(monitors.keys())
+            for mname in mon_list:
+                mdata = monitors[mname]
+                label_txt = f"{mname} {'(Primary)' if mdata['primary'] else ''} — {mdata['current_res']} @ {mdata['current_hz']} Hz"
+                mon_cb.append_text(label_txt)
+            mon_cb.set_active(0)
+            dgrid.attach(mon_cb, 1, 0, 1, 1)
+
+            prim_name = mon_list[0]
+
+            # Resolution Dropdown
+            dgrid.attach(Gtk.Label(label="Screen Resolution:", xalign=0), 0, 1, 1, 1)
+            res_cb = Gtk.ComboBoxText()
+            unique_resolutions = sorted(list(set([m[0] for m in monitors[prim_name]["modes"]])), reverse=True)
+            for r in unique_resolutions:
+                res_cb.append_text(r)
+            if not unique_resolutions:
+                res_cb.append_text("1920x1080")
+            res_cb.set_active(0)
+            dgrid.attach(res_cb, 1, 1, 1, 1)
+
+            # Refresh Rate Dropdown
+            dgrid.attach(Gtk.Label(label="Refresh Rate:", xalign=0), 0, 2, 1, 1)
+            hz_cb = Gtk.ComboBoxText()
+            rates = sorted(list(set([m[1] for m in monitors[prim_name]["modes"] if m[1]])), reverse=True)
+            for h in rates:
+                hz_cb.append_text(f"{h} Hz")
+            if not rates:
+                hz_cb.append_text("100.00 Hz")
+            hz_cb.set_active(0)
+            dgrid.attach(hz_cb, 1, 2, 1, 1)
+
+            # Orientation / Rotation
+            dgrid.attach(Gtk.Label(label="Display Orientation:", xalign=0), 0, 3, 1, 1)
+            rot_cb = Gtk.ComboBoxText()
+            for rot_lbl, rot_val in [("Standard Landscape (0°)", "normal"), ("Portrait (90° Clockwise)", "right"), ("Inverted Landscape (180°)", "inverted"), ("Portrait (270° Counter-Clockwise)", "left")]:
+                rot_cb.append_text(rot_lbl)
+            rot_cb.set_active(0)
+            rot_cb.connect("changed", lambda cb: DisplayAdapter.set_monitor_rotation(prim_name, "normal" if cb.get_active() == 0 else ("right" if cb.get_active() == 1 else ("inverted" if cb.get_active() == 2 else "left"))))
+            dgrid.attach(rot_cb, 1, 3, 1, 1)
+
+            # UI Scaling
+            dgrid.attach(Gtk.Label(label="UI Scaling Factor:", xalign=0), 0, 4, 1, 1)
+            sc_cb = Gtk.ComboBoxText()
+            for s in ["100% (Standard)", "125% (Fractional)", "150%", "200% (HiDPI)"]:
+                sc_cb.append_text(s)
+            sc_cb.set_active(0)
+            sc_cb.connect("changed", lambda cb: safe_set_gsetting("org.cinnamon.desktop.interface", "text-scaling-factor", 1.25 if "125" in cb.get_active_text() else (1.5 if "150" in cb.get_active_text() else (2.0 if "200" in cb.get_active_text() else 1.0))))
+            dgrid.attach(sc_cb, 1, 4, 1, 1)
+
+            # Hardware Brightness Slider
+            dgrid.attach(Gtk.Label(label="Hardware Brightness:", xalign=0), 0, 5, 1, 1)
+            br_scale = Gtk.Scale.new_with_range(Gtk.Orientation.HORIZONTAL, 0.2, 1.4, 0.05)
+            br_scale.set_value(1.0)
+            br_scale.set_hexpand(True)
+            br_scale.connect("value-changed", lambda sc: DisplayAdapter.set_monitor_brightness(prim_name, sc.get_value()))
+            dgrid.attach(br_scale, 1, 5, 1, 1)
+
+            # Apply with Confirmation Countdown Dialog
+            btn_apply_box = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=10)
+            btn_apply = Gtk.Button.new_with_label("Apply Display Settings (with 15s Confirmation)")
+            btn_apply.connect("clicked", lambda b: self._apply_display_mode_with_confirmation(prim_name, res_cb.get_active_text(), hz_cb.get_active_text().replace(" Hz", "")))
+            btn_apply_box.pack_start(btn_apply, False, False, 0)
+            dgrid.attach(btn_apply_box, 0, 6, 2, 1)
+
+            cfg_frame.add(dgrid)
+            self.content_box.pack_start(cfg_frame, False, False, 0)
+
+            # 3. Night Light & Color Temperature
+            nl_frame = Gtk.Frame(label="Night Light & Color Temperature")
+            nl_box = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=8)
+            nl_box.set_border_width(16)
+
+            nl_r = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=12)
+            nl_r.pack_start(Gtk.Label(label="Enable Night Light (reduces blue light eye strain)", xalign=0), True, True, 0)
+            nl_sw = Gtk.Switch()
+            nl_r.pack_end(nl_sw, False, False, 0)
+            nl_box.pack_start(nl_r, False, False, 0)
+
+            w_scale = Gtk.Scale.new_with_range(Gtk.Orientation.HORIZONTAL, 1500, 6500, 100)
+            w_scale.set_value(4000)
+            w_scale.set_hexpand(True)
+            nl_box.pack_start(w_scale, False, False, 0)
+
+            nl_frame.add(nl_box)
+            self.content_box.pack_start(nl_frame, False, False, 0)
+
+            # 4. Deep Display Hardware Details
+            disp_hw_frame = Gtk.Frame(label="Display Stack & GPU Architecture Details")
+            disp_hw_grid = Gtk.Grid()
+            disp_hw_grid.set_column_spacing(24)
+            disp_hw_grid.set_row_spacing(8)
+            disp_hw_grid.set_border_width(16)
+
+            dhw = DisplayAdapter.get_hardware_info()
+            dhw_rows = [
+                ("Graphics Processing Unit (GPU)", dhw["gpu"]),
+                ("Display Driver", dhw["driver"]),
+                ("OpenGL Architecture", dhw["opengl"]),
+                ("Vulkan Graphics API", dhw["vulkan"]),
+                ("Variable Refresh Rate (VRR)", "Supported (Adaptive Sync Available)" if dhw["vrr_supported"] else "Standard V-Sync"),
+                ("HDR Metadata Passthrough", "Hardware Supported" if dhw["hdr_supported"] else "Standard SDR 8-Bit RGB"),
+                ("Primary Connector", f"{prim_name} (Physical Panel 476mm x 268mm)"),
+            ]
+            for i, (k, v) in enumerate(dhw_rows):
+                disp_hw_grid.attach(Gtk.Label(label=f"<b>{k}</b>", use_markup=True, xalign=0), 0, i, 1, 1)
+                vl = Gtk.Label(label=v, xalign=0)
+                vl.set_selectable(True)
+                disp_hw_grid.attach(vl, 1, i, 1, 1)
+
+            disp_hw_frame.add(disp_hw_grid)
+            self.content_box.pack_start(disp_hw_frame, False, False, 0)
+
+        # ── 3. Gaming & Performance Tuning ──────────────────────────────
         elif cat_id == "gaming":
             frame = Gtk.Frame(label="CPU Frequency Governor & BORE Scheduler")
             ggrid = Gtk.Grid()
@@ -312,7 +487,7 @@ class SettingsAppWindow(Gtk.Window):
             zframe.add(zgrid)
             self.content_box.pack_start(zframe, False, False, 0)
 
-        # ── 3. Network ──────────────────────────────────────────────────
+        # ── 4. Network ──────────────────────────────────────────────────
         elif cat_id == "network":
             wframe = Gtk.Frame(label="Wi-Fi Networks (NetworkManager)")
             wvbox = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=10)
@@ -395,7 +570,7 @@ class SettingsAppWindow(Gtk.Window):
             hw_frame.add(hw_grid)
             self.content_box.pack_start(hw_frame, False, False, 0)
 
-        # ── 4. Bluetooth ────────────────────────────────────────────────
+        # ── 5. Bluetooth ────────────────────────────────────────────────
         elif cat_id == "bluetooth":
             frame = Gtk.Frame(label="Bluetooth Wireless Adapter (BlueZ)")
             vbox = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=12)
@@ -436,220 +611,7 @@ class SettingsAppWindow(Gtk.Window):
             frame.add(vbox)
             self.content_box.pack_start(frame, False, False, 0)
 
-        # ── 5. Display ──────────────────────────────────────────────────
-        elif cat_id == "display":
-            monitors = DisplayAdapter.get_connected_monitors()
-
-            frame = Gtk.Frame(label="Monitors, Resolution & Refresh Rate (xrandr / DRM)")
-            dgrid = Gtk.Grid()
-            dgrid.set_column_spacing(16)
-            dgrid.set_row_spacing(12)
-            dgrid.set_border_width(16)
-
-            # Monitor Selector
-            dgrid.attach(Gtk.Label(label="Select Display Monitor:", xalign=0), 0, 0, 1, 1)
-            mon_cb = Gtk.ComboBoxText()
-            for mname, mdata in monitors.items():
-                label_txt = f"{mname} {'(Primary)' if mdata['primary'] else ''} — {mdata['current_res']} @ {mdata['current_hz']} Hz"
-                mon_cb.append_text(label_txt)
-            mon_cb.set_active(0)
-            dgrid.attach(mon_cb, 1, 0, 1, 1)
-
-            # Resolution
-            dgrid.attach(Gtk.Label(label="Screen Resolution:", xalign=0), 0, 1, 1, 1)
-            res_cb = Gtk.ComboBoxText()
-            prim_name = list(monitors.keys())[0]
-            unique_resolutions = sorted(list(set([m[0] for m in monitors[prim_name]["modes"]])), reverse=True)
-            for r in unique_resolutions:
-                res_cb.append_text(r)
-            if not unique_resolutions:
-                res_cb.append_text("1920x1080")
-            res_cb.set_active(0)
-            dgrid.attach(res_cb, 1, 1, 1, 1)
-
-            # Refresh Rate
-            dgrid.attach(Gtk.Label(label="Refresh Rate:", xalign=0), 0, 2, 1, 1)
-            hz_cb = Gtk.ComboBoxText()
-            rates = sorted(list(set([m[1] for m in monitors[prim_name]["modes"] if m[1]])), reverse=True)
-            for h in rates:
-                hz_cb.append_text(f"{h} Hz")
-            if not rates:
-                hz_cb.append_text("60.00 Hz")
-            hz_cb.set_active(0)
-            dgrid.attach(hz_cb, 1, 2, 1, 1)
-
-            # Scaling
-            dgrid.attach(Gtk.Label(label="UI Scaling:", xalign=0), 0, 3, 1, 1)
-            sc_cb = Gtk.ComboBoxText()
-            for s in ["100% (Standard)", "125% (Fractional)", "150%", "200% (HiDPI)"]:
-                sc_cb.append_text(s)
-            sc_cb.set_active(0)
-            sc_cb.connect("changed", lambda cb: safe_set_gsetting("org.cinnamon.desktop.interface", "text-scaling-factor", 1.25 if "125" in cb.get_active_text() else (1.5 if "150" in cb.get_active_text() else (2.0 if "200" in cb.get_active_text() else 1.0))))
-            dgrid.attach(sc_cb, 1, 3, 1, 1)
-
-            # Brightness Slider
-            dgrid.attach(Gtk.Label(label="Hardware Brightness:", xalign=0), 0, 4, 1, 1)
-            br_scale = Gtk.Scale.new_with_range(Gtk.Orientation.HORIZONTAL, 0.2, 1.4, 0.05)
-            br_scale.set_value(1.0)
-            br_scale.set_hexpand(True)
-            br_scale.connect("value-changed", lambda sc: DisplayAdapter.set_monitor_brightness(prim_name, sc.get_value()))
-            dgrid.attach(br_scale, 1, 4, 1, 1)
-
-            # Apply Button
-            btn_apply = Gtk.Button.new_with_label("Apply Display Mode")
-            btn_apply.connect("clicked", lambda b: DisplayAdapter.set_monitor_mode(prim_name, res_cb.get_active_text(), hz_cb.get_active_text().replace(" Hz", "")))
-            dgrid.attach(btn_apply, 0, 5, 2, 1)
-
-            frame.add(dgrid)
-            self.content_box.pack_start(frame, False, False, 0)
-
-            # Multi-Monitor Layout Canvas
-            if len(monitors) > 1:
-                lay_frame = Gtk.Frame(label="Multi-Monitor Arrangement")
-                lay_box = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=16)
-                lay_box.set_border_width(16)
-                btn_ext_r = Gtk.Button.new_with_label("Extend HDMI-1 to Right of HDMI-2")
-                btn_ext_r.connect("clicked", lambda b: DisplayAdapter.set_display_layout("HDMI-2", "HDMI-1", "extend-right"))
-                btn_mir = Gtk.Button.new_with_label("Mirror Displays (Same as HDMI-2)")
-                btn_mir.connect("clicked", lambda b: DisplayAdapter.set_display_layout("HDMI-2", "HDMI-1", "mirror"))
-                lay_box.pack_start(btn_ext_r, False, False, 0)
-                lay_box.pack_start(btn_mir, False, False, 0)
-                lay_frame.add(lay_box)
-                self.content_box.pack_start(lay_frame, False, False, 0)
-
-            # Night Light & Color Temp
-            nl_frame = Gtk.Frame(label="Night Light & Color Temperature")
-            nl_box = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=8)
-            nl_box.set_border_width(16)
-
-            nl_r = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=12)
-            nl_r.pack_start(Gtk.Label(label="Enable Night Light (reduces blue light eye strain)", xalign=0), True, True, 0)
-            nl_sw = Gtk.Switch()
-            nl_r.pack_end(nl_sw, False, False, 0)
-            nl_box.pack_start(nl_r, False, False, 0)
-
-            w_scale = Gtk.Scale.new_with_range(Gtk.Orientation.HORIZONTAL, 1500, 6500, 100)
-            w_scale.set_value(4000)
-            w_scale.set_hexpand(True)
-            nl_box.pack_start(w_scale, False, False, 0)
-
-            nl_frame.add(nl_box)
-            self.content_box.pack_start(nl_frame, False, False, 0)
-
-            # Advanced Display Hardware Info
-            disp_hw_frame = Gtk.Frame(label="Display Stack & GPU Architecture Details")
-            disp_hw_grid = Gtk.Grid()
-            disp_hw_grid.set_column_spacing(24)
-            disp_hw_grid.set_row_spacing(8)
-            disp_hw_grid.set_border_width(16)
-
-            dhw = DisplayAdapter.get_hardware_info()
-            dhw_rows = [
-                ("Graphics Processing Unit (GPU)", dhw["gpu"]),
-                ("Display Driver", dhw["driver"]),
-                ("OpenGL Architecture", dhw["opengl"]),
-                ("Vulkan Graphics API", dhw["vulkan"]),
-                ("Variable Refresh Rate (VRR)", "Supported (Adaptive Sync Available)" if dhw["vrr_supported"] else "Standard V-Sync"),
-                ("HDR Metadata Passthrough", "Hardware Supported" if dhw["hdr_supported"] else "Standard SDR 8-Bit RGB"),
-            ]
-            for i, (k, v) in enumerate(dhw_rows):
-                disp_hw_grid.attach(Gtk.Label(label=f"<b>{k}</b>", use_markup=True, xalign=0), 0, i, 1, 1)
-                vl = Gtk.Label(label=v, xalign=0)
-                vl.set_selectable(True)
-                disp_hw_grid.attach(vl, 1, i, 1, 1)
-
-            disp_hw_frame.add(disp_hw_grid)
-            self.content_box.pack_start(disp_hw_frame, False, False, 0)
-
-        # ── 6. Appearance ───────────────────────────────────────────────
-        elif cat_id == "appearance":
-            installed_themes = ThemeAdapter.get_installed_themes()
-            installed_icons = ThemeAdapter.get_installed_icons()
-            cur_theme = ThemeAdapter.get_current_gtk_theme()
-
-            frame = Gtk.Frame(label="Desktop Themes & Color Scheme")
-            tgrid = Gtk.Grid()
-            tgrid.set_column_spacing(16)
-            tgrid.set_row_spacing(10)
-            tgrid.set_border_width(16)
-
-            # Controls Theme
-            tgrid.attach(Gtk.Label(label="Window Controls (GTK):", xalign=0), 0, 0, 1, 1)
-            theme_cb = Gtk.ComboBoxText()
-            theme_idx = 0
-            for i, t in enumerate(installed_themes):
-                theme_cb.append_text(t)
-                if t == cur_theme:
-                    theme_idx = i
-            theme_cb.set_active(theme_idx)
-            theme_cb.connect("changed", lambda cb: ThemeAdapter.set_gtk_theme(cb.get_active_text()))
-            tgrid.attach(theme_cb, 1, 0, 1, 1)
-
-            # Icon Theme
-            tgrid.attach(Gtk.Label(label="Icon Set:", xalign=0), 0, 1, 1, 1)
-            icon_cb = Gtk.ComboBoxText()
-            for i, ic in enumerate(installed_icons):
-                icon_cb.append_text(ic)
-            icon_cb.set_active(0)
-            icon_cb.connect("changed", lambda cb: ThemeAdapter.set_icon_theme(cb.get_active_text()))
-            tgrid.attach(icon_cb, 1, 1, 1, 1)
-
-            # Mouse Cursor
-            tgrid.attach(Gtk.Label(label="Mouse Cursor:", xalign=0), 0, 2, 1, 1)
-            cur_cb = Gtk.ComboBoxText()
-            for c in ["Bibata-Modern-Classic", "DMZ-Black", "Adwaita", "breeze_cursors"]:
-                cur_cb.append_text(c)
-            cur_cb.set_active(0)
-            cur_cb.connect("changed", lambda cb: safe_set_gsetting("org.cinnamon.desktop.interface", "cursor-theme", cb.get_active_text()))
-            tgrid.attach(cur_cb, 1, 2, 1, 1)
-
-            frame.add(tgrid)
-            self.content_box.pack_start(frame, False, False, 0)
-
-            # Wallpaper button
-            wframe = Gtk.Frame(label="Wallpaper")
-            wbox = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=8)
-            wbox.set_border_width(16)
-            btn_wp = Gtk.Button.new_with_label("Select Wallpaper Image from Files...")
-            btn_wp.connect("clicked", self._choose_wallpaper)
-            wbox.pack_start(btn_wp, False, False, 0)
-            wframe.add(wbox)
-            self.content_box.pack_start(wframe, False, False, 0)
-
-        # ── 7. Desktop ──────────────────────────────────────────────────
-        elif cat_id == "desktop":
-            frame = Gtk.Frame(label="Panels & Taskbar Layout")
-            pgrid = Gtk.Grid()
-            pgrid.set_column_spacing(16)
-            pgrid.set_row_spacing(10)
-            pgrid.set_border_width(16)
-
-            pgrid.attach(Gtk.Label(label="Window Titlebar Layout:", xalign=0), 0, 0, 1, 1)
-            layout_cb = Gtk.ComboBoxText()
-            layout_cb.append_text("Right Side (menu:minimize,maximize,close)")
-            layout_cb.append_text("Left Side (close,minimize,maximize:menu)")
-            layout_cb.set_active(0)
-            layout_cb.connect("changed", lambda cb: safe_set_gsetting("org.cinnamon.desktop.wm.preferences", "button-layout", "menu:minimize,maximize,close" if cb.get_active() == 0 else "close,minimize,maximize:menu"))
-            pgrid.attach(layout_cb, 1, 0, 1, 1)
-
-            pgrid.attach(Gtk.Label(label="Window Focus Mode:", xalign=0), 0, 1, 1, 1)
-            focus_cb = Gtk.ComboBoxText()
-            focus_cb.append_text("Click to Focus (Standard)")
-            focus_cb.append_text("Focus Follows Mouse (Sloppy)")
-            focus_cb.set_active(0)
-            focus_cb.connect("changed", lambda cb: safe_set_gsetting("org.cinnamon.desktop.wm.preferences", "focus-mode", "click" if cb.get_active() == 0 else "sloppy"))
-            pgrid.attach(focus_cb, 1, 1, 1, 1)
-
-            pgrid.attach(Gtk.Label(label="Number of Workspaces:", xalign=0), 0, 2, 1, 1)
-            ws_spin = Gtk.SpinButton.new_with_range(1, 16, 1)
-            ws_spin.set_value(4)
-            ws_spin.connect("value-changed", lambda sp: safe_set_gsetting("org.cinnamon.desktop.wm.preferences", "num-workspaces", int(sp.get_value())))
-            pgrid.attach(ws_spin, 1, 2, 1, 1)
-
-            frame.add(pgrid)
-            self.content_box.pack_start(frame, False, False, 0)
-
-        # ── 8. Sound ────────────────────────────────────────────────────
+        # ── 6. Sound ────────────────────────────────────────────────────
         elif cat_id == "sound":
             frame = Gtk.Frame(label="Audio Output (PipeWire / WirePlumber)")
             sgrid = Gtk.Grid()
@@ -717,6 +679,94 @@ class SettingsAppWindow(Gtk.Window):
 
             aud_hw_frame.add(aud_hw_grid)
             self.content_box.pack_start(aud_hw_frame, False, False, 0)
+
+        # ── 7. Appearance ───────────────────────────────────────────────
+        elif cat_id == "appearance":
+            installed_themes = ThemeAdapter.get_installed_themes()
+            installed_icons = ThemeAdapter.get_installed_icons()
+            cur_theme = ThemeAdapter.get_current_gtk_theme()
+
+            frame = Gtk.Frame(label="Desktop Themes & Color Scheme")
+            tgrid = Gtk.Grid()
+            tgrid.set_column_spacing(16)
+            tgrid.set_row_spacing(10)
+            tgrid.set_border_width(16)
+
+            # Controls Theme
+            tgrid.attach(Gtk.Label(label="Window Controls (GTK):", xalign=0), 0, 0, 1, 1)
+            theme_cb = Gtk.ComboBoxText()
+            theme_idx = 0
+            for i, t in enumerate(installed_themes):
+                theme_cb.append_text(t)
+                if t == cur_theme:
+                    theme_idx = i
+            theme_cb.set_active(theme_idx)
+            theme_cb.connect("changed", lambda cb: ThemeAdapter.set_gtk_theme(cb.get_active_text()))
+            tgrid.attach(theme_cb, 1, 0, 1, 1)
+
+            # Icon Theme
+            tgrid.attach(Gtk.Label(label="Icon Set:", xalign=0), 0, 1, 1, 1)
+            icon_cb = Gtk.ComboBoxText()
+            for i, ic in enumerate(installed_icons):
+                icon_cb.append_text(ic)
+            icon_cb.set_active(0)
+            icon_cb.connect("changed", lambda cb: ThemeAdapter.set_icon_theme(cb.get_active_text()))
+            tgrid.attach(icon_cb, 1, 1, 1, 1)
+
+            # Mouse Cursor
+            tgrid.attach(Gtk.Label(label="Mouse Cursor:", xalign=0), 0, 2, 1, 1)
+            cur_cb = Gtk.ComboBoxText()
+            for c in ["Bibata-Modern-Classic", "DMZ-Black", "Adwaita", "breeze_cursors"]:
+                cur_cb.append_text(c)
+            cur_cb.set_active(0)
+            cur_cb.connect("changed", lambda cb: safe_set_gsetting("org.cinnamon.desktop.interface", "cursor-theme", cb.get_active_text()))
+            tgrid.attach(cur_cb, 1, 2, 1, 1)
+
+            frame.add(tgrid)
+            self.content_box.pack_start(frame, False, False, 0)
+
+            # Wallpaper button
+            wframe = Gtk.Frame(label="Wallpaper")
+            wbox = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=8)
+            wbox.set_border_width(16)
+            btn_wp = Gtk.Button.new_with_label("Select Wallpaper Image from Files...")
+            btn_wp.connect("clicked", self._choose_wallpaper)
+            wbox.pack_start(btn_wp, False, False, 0)
+            wframe.add(wbox)
+            self.content_box.pack_start(wframe, False, False, 0)
+
+        # ── 8. Desktop ──────────────────────────────────────────────────
+        elif cat_id == "desktop":
+            frame = Gtk.Frame(label="Panels & Taskbar Layout")
+            pgrid = Gtk.Grid()
+            pgrid.set_column_spacing(16)
+            pgrid.set_row_spacing(10)
+            pgrid.set_border_width(16)
+
+            pgrid.attach(Gtk.Label(label="Window Titlebar Layout:", xalign=0), 0, 0, 1, 1)
+            layout_cb = Gtk.ComboBoxText()
+            layout_cb.append_text("Right Side (menu:minimize,maximize,close)")
+            layout_cb.append_text("Left Side (close,minimize,maximize:menu)")
+            layout_cb.set_active(0)
+            layout_cb.connect("changed", lambda cb: safe_set_gsetting("org.cinnamon.desktop.wm.preferences", "button-layout", "menu:minimize,maximize,close" if cb.get_active() == 0 else "close,minimize,maximize:menu"))
+            pgrid.attach(layout_cb, 1, 0, 1, 1)
+
+            pgrid.attach(Gtk.Label(label="Window Focus Mode:", xalign=0), 0, 1, 1, 1)
+            focus_cb = Gtk.ComboBoxText()
+            focus_cb.append_text("Click to Focus (Standard)")
+            focus_cb.append_text("Focus Follows Mouse (Sloppy)")
+            focus_cb.set_active(0)
+            focus_cb.connect("changed", lambda cb: safe_set_gsetting("org.cinnamon.desktop.wm.preferences", "focus-mode", "click" if cb.get_active() == 0 else "sloppy"))
+            pgrid.attach(focus_cb, 1, 1, 1, 1)
+
+            pgrid.attach(Gtk.Label(label="Number of Workspaces:", xalign=0), 0, 2, 1, 1)
+            ws_spin = Gtk.SpinButton.new_with_range(1, 16, 1)
+            ws_spin.set_value(4)
+            ws_spin.connect("value-changed", lambda sp: safe_set_gsetting("org.cinnamon.desktop.wm.preferences", "num-workspaces", int(sp.get_value())))
+            pgrid.attach(ws_spin, 1, 2, 1, 1)
+
+            frame.add(pgrid)
+            self.content_box.pack_start(frame, False, False, 0)
 
         # ── 9. Notifications ────────────────────────────────────────────
         elif cat_id == "notifications":
@@ -862,138 +912,7 @@ class SettingsAppWindow(Gtk.Window):
             p_hw_frame.add(p_hw_grid)
             self.content_box.pack_start(p_hw_frame, False, False, 0)
 
-        # ── 13. Users & Accounts ────────────────────────────────────────
-        elif cat_id == "users":
-            frame = Gtk.Frame(label="User Accounts & Permissions")
-            vbox = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=10)
-            vbox.set_border_width(16)
-
-            ulist = Gtk.ListBox()
-            ulist.set_selection_mode(Gtk.SelectionMode.NONE)
-            row = Gtk.ListBoxRow()
-            h = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=12)
-            h.set_border_width(8)
-            h.pack_start(Gtk.Image.new_from_icon_name("system-users", Gtk.IconSize.BUTTON), False, False, 0)
-            h.pack_start(Gtk.Label(label=f"User: <b>{os.environ.get('USER', 'jewboy420')}</b> (Administrator)", use_markup=True, xalign=0), True, True, 0)
-            h.pack_end(Gtk.Label(label="Sudo Privileges: Yes"), False, False, 0)
-            row.add(h)
-            ulist.add(row)
-            vbox.pack_start(ulist, False, False, 4)
-
-            btn_box = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=10)
-            btn_pwd = Gtk.Button.new_with_label("Change Password...")
-            btn_add = Gtk.Button.new_with_label("Add New Account...")
-            btn_add.connect("clicked", self._show_add_user_dialog)
-            btn_box.pack_start(btn_pwd, False, False, 0)
-            btn_box.pack_start(btn_add, False, False, 0)
-            vbox.pack_start(btn_box, False, False, 4)
-
-            frame.add(vbox)
-            self.content_box.pack_start(frame, False, False, 0)
-
-        # ── 14. Security ────────────────────────────────────────────────
-        elif cat_id == "security":
-            frame = Gtk.Frame(label="Firewall Protection (UFW / nftables)")
-            vbox = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=10)
-            vbox.set_border_width(16)
-
-            fw_r = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=12)
-            fw_r.pack_start(Gtk.Label(label="Firewall Active Status", xalign=0), True, True, 0)
-            fw_sw = Gtk.Switch()
-            fw_sw.set_active(SecurityAdapter.get_firewall_status())
-            fw_sw.connect("state-set", lambda s, st: SecurityAdapter.set_firewall_status(st))
-            fw_r.pack_end(fw_sw, False, False, 0)
-            vbox.pack_start(fw_r, False, False, 0)
-
-            btn_add_rule = Gtk.Button.new_with_label("Add Port Rule (Allow / Block)...")
-            btn_add_rule.connect("clicked", self._show_add_firewall_rule_dialog)
-            vbox.pack_start(btn_add_rule, False, False, 4)
-
-            sb_r = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=12)
-            sb_r.pack_start(Gtk.Label(label="Secure Boot Status:", xalign=0), True, True, 0)
-            sb_r.pack_end(Gtk.Label(label=SecurityAdapter.get_secure_boot_status()), False, False, 0)
-            vbox.pack_start(sb_r, False, False, 0)
-
-            frame.add(vbox)
-            self.content_box.pack_start(frame, False, False, 0)
-
-        # ── 15. Privacy ─────────────────────────────────────────────────
-        elif cat_id == "privacy":
-            frame = Gtk.Frame(label="Privacy & Telemetry Controls")
-            vbox = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=10)
-            vbox.set_border_width(16)
-
-            r_sw = Gtk.Switch()
-            r_sw.set_active(True)
-            r_sw.connect("state-set", lambda s, st: safe_set_gsetting("org.cinnamon.desktop.privacy", "remember-recent-files", st))
-            r = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=12)
-            r.pack_start(Gtk.Label(label="Remember recently opened documents", xalign=0), True, True, 0)
-            r.pack_end(r_sw, False, False, 0)
-            vbox.pack_start(r, False, False, 0)
-
-            btn_clr = Gtk.Button.new_with_label("Clear Activity History Now")
-            btn_clr.connect("clicked", lambda b: run_cmd("rm -f ~/.local/share/recently-used.xbel"))
-            vbox.pack_start(btn_clr, False, False, 4)
-
-            frame.add(vbox)
-            self.content_box.pack_start(frame, False, False, 0)
-
-        # ── 16. Apps ────────────────────────────────────────────────────
-        elif cat_id == "apps":
-            frame = Gtk.Frame(label="Default System Applications")
-            grid = Gtk.Grid()
-            grid.set_column_spacing(16)
-            grid.set_row_spacing(10)
-            grid.set_border_width(16)
-
-            for i, (lbl, opts) in enumerate([
-                ("Web Browser",   ["Firefox", "Chromium", "GNOME Web", "Brave", "Google Chrome"]),
-                ("File Manager",  ["Nemo", "Thunar", "Nautilus", "Dolphin"]),
-                ("Terminal",      ["Kitty", "Alacritty", "GNOME Terminal", "Tilix"]),
-                ("Text Editor",   ["xed", "gedit", "Kate", "VSCode", "nano"]),
-                ("Music Player",  ["Rhythmbox", "VLC media player", "Audacious", "Spotify"]),
-                ("Video Player",  ["Celluloid", "VLC media player", "MPV"]),
-            ]):
-                grid.attach(Gtk.Label(label=lbl, xalign=0), 0, i, 1, 1)
-                cb = Gtk.ComboBoxText()
-                for o in opts:
-                    cb.append_text(o)
-                cb.set_active(0)
-                grid.attach(cb, 1, i, 1, 1)
-
-            frame.add(grid)
-            self.content_box.pack_start(frame, False, False, 0)
-
-        # ── 17. Packages & Software ─────────────────────────────────────
-        elif cat_id == "packages":
-            frame = Gtk.Frame(label="Package Manager & Repositories (dpkg / apt)")
-            vbox = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=10)
-            vbox.set_border_width(16)
-
-            u_row = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=12)
-            u_row.pack_start(Gtk.Label(label="System Packages Status: 100% Up to Date", xalign=0), True, True, 0)
-            btn_chk = Gtk.Button.new_with_label("Check for Updates")
-            btn_chk.connect("clicked", lambda b: subprocess.Popen(["pkexec", "apt", "update"]))
-            u_row.pack_end(btn_chk, False, False, 0)
-            vbox.pack_start(u_row, False, False, 0)
-
-            # Core Packages Table
-            plist = Gtk.ListBox()
-            plist.set_selection_mode(Gtk.SelectionMode.NONE)
-            for pkg in SystemAdapter.get_installed_packages_sample(limit=12):
-                r = Gtk.ListBoxRow()
-                h = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=12)
-                h.set_border_width(6)
-                h.pack_start(Gtk.Label(label=f"<b>{pkg['name']}</b>", use_markup=True, xalign=0), True, True, 0)
-                h.pack_end(Gtk.Label(label=f"v{pkg['version']} • [{pkg['section']}]"), False, False, 0)
-                r.add(h)
-                plist.add(r)
-            vbox.pack_start(plist, False, False, 4)
-
-            frame.add(vbox)
-            self.content_box.pack_start(frame, False, False, 0)
-
-        # ── 18. Storage & Disks ─────────────────────────────────────────
+        # ── 13. Storage & Disks ─────────────────────────────────────────
         elif cat_id == "storage":
             frame = Gtk.Frame(label="Physical Disks & Partition Tables (UDisks2)")
             vbox = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=10)
@@ -1038,6 +957,137 @@ class SettingsAppWindow(Gtk.Window):
             btn_trim = Gtk.Button.new_with_label("Run SSD TRIM / Discard Optimization Now")
             btn_trim.connect("clicked", lambda b: StorageAdapter.run_fstrim())
             vbox.pack_start(btn_trim, False, False, 4)
+
+            frame.add(vbox)
+            self.content_box.pack_start(frame, False, False, 0)
+
+        # ── 14. Users & Accounts ────────────────────────────────────────
+        elif cat_id == "users":
+            frame = Gtk.Frame(label="User Accounts & Permissions")
+            vbox = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=10)
+            vbox.set_border_width(16)
+
+            ulist = Gtk.ListBox()
+            ulist.set_selection_mode(Gtk.SelectionMode.NONE)
+            row = Gtk.ListBoxRow()
+            h = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=12)
+            h.set_border_width(8)
+            h.pack_start(Gtk.Image.new_from_icon_name("system-users", Gtk.IconSize.BUTTON), False, False, 0)
+            h.pack_start(Gtk.Label(label=f"User: <b>{os.environ.get('USER', 'jewboy420')}</b> (Administrator)", use_markup=True, xalign=0), True, True, 0)
+            h.pack_end(Gtk.Label(label="Sudo Privileges: Yes"), False, False, 0)
+            row.add(h)
+            ulist.add(row)
+            vbox.pack_start(ulist, False, False, 4)
+
+            btn_box = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=10)
+            btn_pwd = Gtk.Button.new_with_label("Change Password...")
+            btn_add = Gtk.Button.new_with_label("Add New Account...")
+            btn_add.connect("clicked", self._show_add_user_dialog)
+            btn_box.pack_start(btn_pwd, False, False, 0)
+            btn_box.pack_start(btn_add, False, False, 0)
+            vbox.pack_start(btn_box, False, False, 4)
+
+            frame.add(vbox)
+            self.content_box.pack_start(frame, False, False, 0)
+
+        # ── 15. Security ────────────────────────────────────────────────
+        elif cat_id == "security":
+            frame = Gtk.Frame(label="Firewall Protection (UFW / nftables)")
+            vbox = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=10)
+            vbox.set_border_width(16)
+
+            fw_r = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=12)
+            fw_r.pack_start(Gtk.Label(label="Firewall Active Status", xalign=0), True, True, 0)
+            fw_sw = Gtk.Switch()
+            fw_sw.set_active(SecurityAdapter.get_firewall_status())
+            fw_sw.connect("state-set", lambda s, st: SecurityAdapter.set_firewall_status(st))
+            fw_r.pack_end(fw_sw, False, False, 0)
+            vbox.pack_start(fw_r, False, False, 0)
+
+            btn_add_rule = Gtk.Button.new_with_label("Add Port Rule (Allow / Block)...")
+            btn_add_rule.connect("clicked", self._show_add_firewall_rule_dialog)
+            vbox.pack_start(btn_add_rule, False, False, 4)
+
+            sb_r = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=12)
+            sb_r.pack_start(Gtk.Label(label="Secure Boot Status:", xalign=0), True, True, 0)
+            sb_r.pack_end(Gtk.Label(label=SecurityAdapter.get_secure_boot_status()), False, False, 0)
+            vbox.pack_start(sb_r, False, False, 0)
+
+            frame.add(vbox)
+            self.content_box.pack_start(frame, False, False, 0)
+
+        # ── 16. Privacy ─────────────────────────────────────────────────
+        elif cat_id == "privacy":
+            frame = Gtk.Frame(label="Privacy & Telemetry Controls")
+            vbox = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=10)
+            vbox.set_border_width(16)
+
+            r_sw = Gtk.Switch()
+            r_sw.set_active(True)
+            r_sw.connect("state-set", lambda s, st: safe_set_gsetting("org.cinnamon.desktop.privacy", "remember-recent-files", st))
+            r = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=12)
+            r.pack_start(Gtk.Label(label="Remember recently opened documents", xalign=0), True, True, 0)
+            r.pack_end(r_sw, False, False, 0)
+            vbox.pack_start(r, False, False, 0)
+
+            btn_clr = Gtk.Button.new_with_label("Clear Activity History Now")
+            btn_clr.connect("clicked", lambda b: run_cmd("rm -f ~/.local/share/recently-used.xbel"))
+            vbox.pack_start(btn_clr, False, False, 4)
+
+            frame.add(vbox)
+            self.content_box.pack_start(frame, False, False, 0)
+
+        # ── 17. Apps ────────────────────────────────────────────────────
+        elif cat_id == "apps":
+            frame = Gtk.Frame(label="Default System Applications")
+            grid = Gtk.Grid()
+            grid.set_column_spacing(16)
+            grid.set_row_spacing(10)
+            grid.set_border_width(16)
+
+            for i, (lbl, opts) in enumerate([
+                ("Web Browser",   ["Firefox", "Chromium", "GNOME Web", "Brave", "Google Chrome"]),
+                ("File Manager",  ["Nemo", "Thunar", "Nautilus", "Dolphin"]),
+                ("Terminal",      ["Kitty", "Alacritty", "GNOME Terminal", "Tilix"]),
+                ("Text Editor",   ["xed", "gedit", "Kate", "VSCode", "nano"]),
+                ("Music Player",  ["Rhythmbox", "VLC media player", "Audacious", "Spotify"]),
+                ("Video Player",  ["Celluloid", "VLC media player", "MPV"]),
+            ]):
+                grid.attach(Gtk.Label(label=lbl, xalign=0), 0, i, 1, 1)
+                cb = Gtk.ComboBoxText()
+                for o in opts:
+                    cb.append_text(o)
+                cb.set_active(0)
+                grid.attach(cb, 1, i, 1, 1)
+
+            frame.add(grid)
+            self.content_box.pack_start(frame, False, False, 0)
+
+        # ── 18. Packages & Software ─────────────────────────────────────
+        elif cat_id == "packages":
+            frame = Gtk.Frame(label="Package Manager & Repositories (dpkg / apt)")
+            vbox = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=10)
+            vbox.set_border_width(16)
+
+            u_row = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=12)
+            u_row.pack_start(Gtk.Label(label="System Packages Status: 100% Up to Date", xalign=0), True, True, 0)
+            btn_chk = Gtk.Button.new_with_label("Check for Updates")
+            btn_chk.connect("clicked", lambda b: subprocess.Popen(["pkexec", "apt", "update"]))
+            u_row.pack_end(btn_chk, False, False, 0)
+            vbox.pack_start(u_row, False, False, 0)
+
+            # Core Packages Table
+            plist = Gtk.ListBox()
+            plist.set_selection_mode(Gtk.SelectionMode.NONE)
+            for pkg in SystemAdapter.get_installed_packages_sample(limit=12):
+                r = Gtk.ListBoxRow()
+                h = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=12)
+                h.set_border_width(6)
+                h.pack_start(Gtk.Label(label=f"<b>{pkg['name']}</b>", use_markup=True, xalign=0), True, True, 0)
+                h.pack_end(Gtk.Label(label=f"v{pkg['version']} • [{pkg['section']}]"), False, False, 0)
+                r.add(h)
+                plist.add(r)
+            vbox.pack_start(plist, False, False, 4)
 
             frame.add(vbox)
             self.content_box.pack_start(frame, False, False, 0)
@@ -1175,9 +1225,33 @@ class SettingsAppWindow(Gtk.Window):
             frame.add(rgrid)
             self.content_box.pack_start(frame, False, False, 0)
 
-        # ── 24. System ──────────────────────────────────────────────────
+        # ── 24. System (Health Matrix & Diagnostics) ────────────────────
         elif cat_id == "system":
-            frame = Gtk.Frame(label="System Specifications")
+            # Diagnostics & Health Dashboard
+            diag_frame = Gtk.Frame(label="Settings Health & Subsystems Status")
+            diag_vbox = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=8)
+            diag_vbox.set_border_width(16)
+
+            diag_list = Gtk.ListBox()
+            diag_list.set_selection_mode(Gtk.SelectionMode.NONE)
+            for item in self.daemon.get_system_health():
+                r = Gtk.ListBoxRow()
+                h = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=12)
+                h.set_border_width(6)
+                icon_name = "emblem-default" if item["healthy"] else "dialog-warning"
+                h.pack_start(Gtk.Image.new_from_icon_name(icon_name, Gtk.IconSize.BUTTON), False, False, 0)
+                h.pack_start(Gtk.Label(label=f"<b>{item['name']}</b> — {item['desc']}", use_markup=True, xalign=0), True, True, 0)
+                st_lbl = Gtk.Label()
+                st_lbl.set_markup("<span color='#2ecc71'><b>Operational</b></span>" if item["healthy"] else "<span color='#e74c3c'><b>Degraded</b></span>")
+                h.pack_end(st_lbl, False, False, 0)
+                r.add(h)
+                diag_list.add(r)
+            diag_vbox.pack_start(diag_list, False, False, 0)
+            diag_frame.add(diag_vbox)
+            self.content_box.pack_start(diag_frame, False, False, 0)
+
+            # System Specifications
+            frame = Gtk.Frame(label="System Hardware Inventory")
             grid = Gtk.Grid()
             grid.set_column_spacing(24)
             grid.set_row_spacing(10)
@@ -1235,7 +1309,60 @@ class SettingsAppWindow(Gtk.Window):
 
         self.content_box.show_all()
 
-    # ── Interactive Modals & Dialogs ─────────────────────────────────────────
+    # ── Interactive Modals & Safe Confirmation Rollback ──────────────────────
+
+    def _apply_display_mode_with_confirmation(self, mon_name, res, hz):
+        # Save previous mode for rollback
+        monitors = DisplayAdapter.get_connected_monitors()
+        prev_res = monitors.get(mon_name, {}).get("current_res", "1920x1080")
+        prev_hz = monitors.get(mon_name, {}).get("current_hz", "60.00")
+
+        # Apply new mode
+        DisplayAdapter.set_monitor_mode(mon_name, res, hz)
+
+        # Launch Confirmation Modal with 15-second auto-rollback timer
+        dialog = Gtk.Dialog(title="Keep Display Settings?", parent=self, flags=0)
+        btn_revert = dialog.add_button("Revert Now", Gtk.ResponseType.REJECT)
+        btn_keep = dialog.add_button("Keep Changes", Gtk.ResponseType.ACCEPT)
+        dialog.set_default_size(400, 160)
+
+        box = dialog.get_content_area()
+        box.set_spacing(12)
+        box.set_border_width(16)
+
+        msg_lbl = Gtk.Label(xalign=0)
+        msg_lbl.set_markup(f"<b>Keep these display settings for {mon_name}?</b>\nNew resolution: <b>{res} @ {hz} Hz</b>")
+        box.pack_start(msg_lbl, False, False, 0)
+
+        timer_lbl = Gtk.Label(xalign=0)
+        timer_lbl.set_markup("<span color='#e67e22'>Reverting automatically in <b>15</b> seconds...</span>")
+        box.pack_start(timer_lbl, False, False, 0)
+
+        dialog.show_all()
+
+        countdown = [15]
+        timer_id = [None]
+
+        def _on_tick():
+            countdown[0] -= 1
+            if countdown[0] <= 0:
+                dialog.response(Gtk.ResponseType.REJECT)
+                return False
+            timer_lbl.set_markup(f"<span color='#e67e22'>Reverting automatically in <b>{countdown[0]}</b> seconds...</span>")
+            return True
+
+        timer_id[0] = GLib.timeout_add(1000, _on_tick)
+        response = dialog.run()
+
+        if timer_id[0]:
+            GLib.source_remove(timer_id[0])
+
+        if response != Gtk.ResponseType.ACCEPT:
+            # Revert to previous safe mode
+            DisplayAdapter.set_monitor_mode(mon_name, prev_res, prev_hz)
+
+        dialog.destroy()
+        self._render_category_page("display", "Display", ["Resolution", "Refresh rate", "Arrangement"])
 
     def _show_wifi_connect_dialog(self, ssid):
         dialog = Gtk.Dialog(title=f"Connect to {ssid}", parent=self, flags=0)
