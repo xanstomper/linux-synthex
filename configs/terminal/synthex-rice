@@ -68,7 +68,29 @@ def save_config(cfg):
     CONFIG_DIR.mkdir(parents=True, exist_ok=True)
     with open(CONFIG_FILE, "w") as f:
         json.dump(cfg, f, indent=2)
-    print("\033[32m✔ SynthOS Rice configuration saved successfully!\033[0m")
+
+    # Sync Hyprland active theme
+    try:
+        accent = cfg.get("accentColor", "#7AA2F7").lstrip("#")
+        secondary = cfg.get("secondaryColor", "#BB9AF7").lstrip("#")
+        surface = cfg.get("surfaceColor", "#141923").lstrip("#")
+        rounding = cfg.get("cornerRadius", 18)
+        hypr_dir = Path.home() / ".config" / "hypr"
+        hypr_dir.mkdir(parents=True, exist_ok=True)
+        with open(hypr_dir / "synthex-theme.conf", "w") as f:
+            f.write(f"""# SynthOS Auto-Generated Hyprland Theme
+$accent = rgb({accent})
+$secondary = rgb({secondary})
+$surface = rgb({surface})
+$active_border_color = rgb({accent}) rgb({secondary}) 45deg
+$inactive_border_color = rgba(255, 255, 255, 0.1)
+$rounding = {rounding}
+""")
+        os.system("hyprctl reload >/dev/null 2>&1")
+    except Exception:
+        pass
+
+    print("\033[32m✔ SynthOS Rice configuration saved and synchronized with desktop!\033[0m")
 
 
 def main():

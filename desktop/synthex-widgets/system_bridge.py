@@ -677,6 +677,44 @@ class SystemBridge(QObject):
             CONFIG_DIR.mkdir(parents=True, exist_ok=True)
             with open(CONFIG_FILE, "w") as f:
                 json.dump(self._config, f, indent=2)
+            self._apply_theme_to_system()
+        except Exception:
+            pass
+
+    def _apply_theme_to_system(self):
+        try:
+            theme_key = self._config.get("theme", "nova")
+            accent = self._config.get("accentColor", "#7AA2F7").lstrip("#")
+            secondary = self._config.get("secondaryColor", "#BB9AF7").lstrip("#")
+            surface = self._config.get("surfaceColor", "#141923").lstrip("#")
+            rounding = self._config.get("cornerRadius", 18)
+
+            # 1. Update Hyprland Theme Config
+            hypr_dir = Path.home() / ".config" / "hypr"
+            hypr_dir.mkdir(parents=True, exist_ok=True)
+            hypr_conf = hypr_dir / "synthex-theme.conf"
+            with open(hypr_conf, "w") as f:
+                f.write(f"""# SynthOS Auto-Generated Hyprland Theme
+$accent = rgb({accent})
+$secondary = rgb({secondary})
+$surface = rgb({surface})
+$active_border_color = rgb({accent}) rgb({secondary}) 45deg
+$inactive_border_color = rgba(255, 255, 255, 0.1)
+$rounding = {rounding}
+""")
+            # Reload Hyprland if active
+            subprocess.Popen(["hyprctl", "reload"], stderr=subprocess.DEVNULL, stdout=subprocess.DEVNULL)
+
+            # 2. Update GTK 3/4 Accent Theme
+            gtk4_dir = Path.home() / ".config" / "gtk-4.0"
+            gtk4_dir.mkdir(parents=True, exist_ok=True)
+            with open(gtk4_dir / "gtk.css", "w") as f:
+                f.write(f"@define-color accent_color #{accent};\n@define-color accent_bg_color #{accent};\n")
+
+            # 3. Apply Wallpaper if set
+            wall = self._config.get("wallpaperPath", "").replace("file://", "")
+            if wall and os.path.exists(wall):
+                subprocess.Popen(f"swww img '{wall}' --transition-type wipe || feh --bg-fill '{wall}'", shell=True, stderr=subprocess.DEVNULL, stdout=subprocess.DEVNULL)
         except Exception:
             pass
 
