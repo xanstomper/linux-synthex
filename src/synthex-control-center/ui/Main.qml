@@ -213,7 +213,8 @@ Window {
                                 case "Performance":  return "pages/Performance.qml";
                                 case "Gaming":       return "pages/Gaming.qml";
                                 case "Developer":    return "pages/Developer.qml";
-                                case "Themes":       return "pages/Themes.qml";
+                                case "Desktop":      return "pages/DesktopCustomization.qml";
+                                case "Themes":       return "pages/DesktopCustomization.qml";
                                 case "Security":     return "pages/Security.qml";
                                 case "Updates":      return "pages/Updates.qml";
                                 case "Drivers":      return "pages/Drivers.qml";
