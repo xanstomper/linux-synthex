@@ -3,798 +3,872 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>SynthOS Zenith Rice — Liquid Glass & Animated Desktop Preview</title>
+<title>SynthOS Linux 2026 — Desktop & System Settings</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
 <style>
   :root {
-    --accent: #7AA2F7;
-    --accent-purple: #BB9AF7;
-    --accent-gold: #E5A84B;
-    --accent-teal: #73DACA;
-    --accent-cyan: #2AC3DE;
-    --accent-pink: #F7768E;
-    
-    --bg-glass: rgba(18, 22, 31, 0.65);
-    --bg-glass-card: rgba(20, 25, 35, 0.68);
-    --bg-glass-dock: rgba(16, 20, 28, 0.72);
-    
-    --border-glass: rgba(255, 255, 255, 0.14);
-    --border-glass-hi: rgba(255, 255, 255, 0.28);
-    --sheen-top: rgba(255, 255, 255, 0.18);
-    
-    --text-main: #FFFFFF;
-    --text-sub: #A0AAB8;
-    --text-dim: #67707D;
-    
-    --radius-card: 20px;
-    --radius-dock: 32px;
+    --accent: #3584e4;
+    --accent-hover: #1c71d8;
+    --bg-dark: #12151c;
+    --window-bg: #1c212b;
+    --sidebar-bg: #161a22;
+    --card-bg: #222834;
+    --card-hover: #28303e;
+    --border-color: rgba(255, 255, 255, 0.08);
+    --border-subtle: rgba(255, 255, 255, 0.05);
+    --text-primary: #ffffff;
+    --text-secondary: #9aa7b8;
+    --text-muted: #626f80;
+    --radius-window: 12px;
+    --radius-card: 10px;
+    --radius-btn: 6px;
+    --terminal-bg: #101318;
   }
 
   * { box-sizing: border-box; margin: 0; padding: 0; }
   body {
-    font-family: 'Inter', sans-serif;
-    color: var(--text-main);
-    background: #090C10;
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    color: var(--text-primary);
+    background: #080a0e;
     min-height: 100vh;
     display: flex;
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    overflow-x: hidden;
-    padding: 24px 16px;
+    padding: 24px;
+    -webkit-font-smoothing: antialiased;
   }
 
-  /* Desktop Viewport Canvas */
-  .desktop-viewport {
+  /* ── 1. Desktop Shell Frame ─────────────────────────────────────────── */
+  .desktop-environment {
     position: relative;
     width: 100%;
-    max-width: 1400px;
-    height: 860px;
-    border-radius: 28px;
+    max-width: 1440px;
+    height: 880px;
+    border-radius: 16px;
     overflow: hidden;
-    box-shadow: 0 35px 100px rgba(0, 0, 0, 0.85), 0 0 0 1px rgba(255, 255, 255, 0.1);
-    background-size: cover;
-    background-position: center;
-    transition: background-image 0.5s ease;
+    box-shadow: 0 40px 100px rgba(0, 0, 0, 0.9), 0 0 0 1px rgba(255, 255, 255, 0.1);
+    background: #0f141d url('/branding/wallpaper/synthex-dark-4k.svg') center/cover no-repeat;
+    display: flex;
+    flex-direction: column;
   }
 
-  /* Dynamic Wallpapers */
-  .wp-nebula {
-    background-image: radial-gradient(circle at 20% 30%, rgba(122, 162, 247, 0.25) 0%, transparent 50%),
-                      radial-gradient(circle at 80% 70%, rgba(187, 154, 247, 0.22) 0%, transparent 50%),
-                      linear-gradient(135deg, #0B0E14 0%, #111722 50%, #0D121B 100%);
-  }
-  .wp-cyber {
-    background-image: radial-gradient(circle at 75% 25%, rgba(0, 240, 255, 0.25) 0%, transparent 45%),
-                      radial-gradient(circle at 25% 75%, rgba(255, 0, 127, 0.22) 0%, transparent 45%),
-                      linear-gradient(135deg, #060810 0%, #0F1026 50%, #080612 100%);
-  }
-  .wp-sunset {
-    background-image: radial-gradient(circle at 50% 80%, rgba(229, 168, 75, 0.3) 0%, transparent 50%),
-                      radial-gradient(circle at 30% 20%, rgba(247, 118, 142, 0.2) 0%, transparent 45%),
-                      linear-gradient(135deg, #120E18 0%, #1E1322 50%, #0D0B12 100%);
-  }
-  .wp-minimal {
-    background-image: radial-gradient(circle at 50% 50%, rgba(122, 162, 247, 0.08) 0%, transparent 60%),
-                      linear-gradient(135deg, #07090E 0%, #0D1117 50%, #040608 100%);
-  }
-
-  /* Liquid Glass Base */
-  .liquid-glass {
-    background: var(--bg-glass-card);
-    backdrop-filter: blur(28px) saturate(190%) contrast(105%);
-    -webkit-backdrop-filter: blur(28px) saturate(190%) contrast(105%);
-    border: 1px solid var(--border-glass);
-    box-shadow: inset 0 1px 0 var(--sheen-top), 0 20px 50px rgba(0, 0, 0, 0.55);
-    border-radius: var(--radius-card);
-    transition: transform 0.28s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 0.28s ease, border-color 0.2s ease, background 0.3s ease;
-  }
-  .liquid-glass:hover {
-    transform: translateY(-4px) scale(1.015);
-    border-color: var(--border-glass-hi);
-    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.35), 0 26px 65px rgba(0, 0, 0, 0.65);
-  }
-
-  /* Solid Matte Mode */
-  .desktop-viewport.matte-mode .liquid-glass {
-    background: #141923 !important;
-    backdrop-filter: none !important;
-    -webkit-backdrop-filter: none !important;
-    border: 1px solid rgba(255, 255, 255, 0.08) !important;
-    box-shadow: 0 16px 36px rgba(0, 0, 0, 0.5) !important;
-  }
-  .desktop-viewport.matte-mode .top-pill,
-  .desktop-viewport.matte-mode .bottom-dock {
-    background: #12161F !important;
-    backdrop-filter: none !important;
-    -webkit-backdrop-filter: none !important;
-    border: 1px solid rgba(255, 255, 255, 0.08) !important;
-  }
-
-  /* Top Status Pill */
-  .top-pill {
-    position: absolute;
-    top: 20px;
-    left: 50%;
-    transform: translateX(-50%);
+  /* ── 2. Top Wayland Status Bar ──────────────────────────────────────── */
+  .top-bar {
     height: 38px;
-    padding: 0 22px;
-    border-radius: 9999px;
-    background: var(--bg-glass-dock);
-    backdrop-filter: blur(24px) saturate(180%);
-    border: 1px solid var(--border-glass);
-    box-shadow: inset 0 1px 0 var(--sheen-top), 0 10px 30px rgba(0, 0, 0, 0.5);
+    background: rgba(14, 18, 24, 0.85);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border-bottom: 1px solid var(--border-color);
     display: flex;
     align-items: center;
-    gap: 10px;
-    font-size: 13px;
-    font-weight: 600;
-    z-index: 10;
-  }
-  .status-dot {
-    width: 8px;
-    height: 8px;
-    border-radius: 50%;
-    background: var(--accent);
-    box-shadow: 0 0 10px var(--accent);
-    animation: pulseDot 2.2s infinite ease-in-out;
-  }
-  @keyframes pulseDot {
-    0%, 100% { opacity: 1; transform: scale(1); }
-    50% { opacity: 0.5; transform: scale(0.85); }
-  }
-
-  /* Desktop Grid Layout */
-  .desktop-layout {
-    position: absolute;
-    inset: 0;
-    padding: 76px 36px 110px 36px;
-    display: grid;
-    grid-template-columns: 340px 1fr 370px;
-    gap: 20px;
-    pointer-events: none;
-  }
-  .desktop-layout > * { pointer-events: auto; }
-
-  .col-left, .col-right {
-    display: flex;
-    flex-direction: column;
-    gap: 16px;
-  }
-  .col-center {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-  }
-
-  /* Clock Widget */
-  .clock-card {
-    padding: 18px 22px;
-    display: flex;
-    flex-direction: column;
-    gap: 2px;
-  }
-  .time-row {
-    display: flex;
-    align-items: baseline;
-    gap: 6px;
-  }
-  .time-val {
-    font-size: 38px;
-    font-weight: 800;
-    color: var(--accent);
-    letter-spacing: -1px;
-    text-shadow: 0 2px 14px rgba(122, 162, 247, 0.4);
-  }
-  .time-ampm {
-    font-size: 14px;
-    font-weight: 700;
-    color: #6C88A8;
-  }
-  .date-val {
+    justify-content: space-between;
+    padding: 0 16px;
     font-size: 13px;
     font-weight: 500;
-    color: var(--text-sub);
+    z-index: 50;
+    user-select: none;
   }
-
-  /* Weather Widget */
-  .weather-card {
-    padding: 16px 20px;
+  .top-bar-left, .top-bar-right {
     display: flex;
     align-items: center;
     gap: 16px;
   }
-  .weather-icon-temp {
+  .workspace-pill {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    background: rgba(255, 255, 255, 0.06);
+    padding: 3px 10px;
+    border-radius: 20px;
+  }
+  .ws-dot {
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+    background: var(--text-muted);
+    transition: all 0.2s;
+  }
+  .ws-dot.active {
+    width: 18px;
+    border-radius: 4px;
+    background: var(--accent);
+  }
+  .top-clock {
+    font-weight: 600;
+    letter-spacing: 0.2px;
+  }
+  .status-indicators {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    color: var(--text-secondary);
+  }
+  .status-indicators svg {
+    width: 16px;
+    height: 16px;
+    fill: currentColor;
+  }
+
+  /* ── 3. Desktop Workspace Area ──────────────────────────────────────── */
+  .workspace-area {
+    position: relative;
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 24px;
+    gap: 24px;
+  }
+
+  /* ── 4. Authentic System Settings Window ────────────────────────────── */
+  .settings-window {
+    width: 860px;
+    height: 640px;
+    background: var(--window-bg);
+    border-radius: var(--radius-window);
+    box-shadow: 0 24px 60px rgba(0, 0, 0, 0.75), 0 0 0 1px var(--border-color);
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    z-index: 10;
+  }
+
+  /* Window Headerbar (CSD) */
+  .headerbar {
+    height: 48px;
+    background: var(--sidebar-bg);
+    border-bottom: 1px solid var(--border-color);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 14px;
+    user-select: none;
+  }
+  .window-controls {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .win-btn {
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    border: none;
+    cursor: pointer;
+  }
+  .win-close { background: #e05f54; }
+  .win-min { background: #f3be4d; }
+  .win-max { background: #57c158; }
+
+  .search-container {
+    position: relative;
+    width: 240px;
+  }
+  .search-input {
+    width: 100%;
+    height: 30px;
+    background: rgba(255, 255, 255, 0.06);
+    border: 1px solid var(--border-color);
+    border-radius: 6px;
+    padding: 0 10px 0 28px;
+    color: var(--text-primary);
+    font-size: 12px;
+    font-family: inherit;
+    outline: none;
+  }
+  .search-input:focus {
+    border-color: var(--accent);
+    background: rgba(255, 255, 255, 0.09);
+  }
+  .search-icon {
+    position: absolute;
+    left: 8px;
+    top: 8px;
+    width: 14px;
+    height: 14px;
+    fill: var(--text-muted);
+  }
+
+  /* Settings Main Body */
+  .settings-body {
+    flex: 1;
+    display: flex;
+    overflow: hidden;
+  }
+
+  /* Sidebar Navigation */
+  .settings-sidebar {
+    width: 240px;
+    background: var(--sidebar-bg);
+    border-right: 1px solid var(--border-color);
+    overflow-y: auto;
+    padding: 12px 8px;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+  }
+  .sidebar-section-title {
+    font-size: 11px;
+    font-weight: 700;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    padding: 10px 10px 4px 10px;
+  }
+  .nav-item {
     display: flex;
     align-items: center;
     gap: 10px;
-  }
-  .weather-glyph {
-    font-size: 36px;
-    color: var(--accent-gold);
-    filter: drop-shadow(0 2px 8px rgba(229, 168, 75, 0.4));
-  }
-  .weather-temp {
-    font-size: 32px;
-    font-weight: 800;
-  }
-  .weather-info {
-    font-size: 12px;
-    color: var(--text-sub);
-    line-height: 1.45;
-  }
-  .weather-city {
+    padding: 8px 12px;
+    border-radius: 6px;
     font-size: 13px;
-    font-weight: 700;
-    color: #FFFFFF;
-    margin-bottom: 2px;
+    font-weight: 500;
+    color: var(--text-secondary);
+    cursor: pointer;
+    transition: background 0.15s, color 0.15s;
+    user-select: none;
+  }
+  .nav-item:hover {
+    background: rgba(255, 255, 255, 0.05);
+    color: var(--text-primary);
+  }
+  .nav-item.active {
+    background: var(--accent);
+    color: #ffffff;
+  }
+  .nav-item svg {
+    width: 16px;
+    height: 16px;
+    fill: currentColor;
+    flex-shrink: 0;
   }
 
-  /* Terminal Card */
-  .terminal-card {
-    padding: 14px 18px;
+  /* Content Panel Area */
+  .settings-content {
+    flex: 1;
+    background: var(--window-bg);
+    overflow-y: auto;
+    padding: 24px 28px;
+  }
+  .page-title {
+    font-size: 18px;
+    font-weight: 700;
+    margin-bottom: 4px;
+  }
+  .page-subtitle {
+    font-size: 13px;
+    color: var(--text-secondary);
+    margin-bottom: 20px;
+  }
+
+  /* Standard Libadwaita Preferences Group */
+  .pref-group {
+    margin-bottom: 24px;
+  }
+  .pref-group-title {
+    font-size: 12px;
+    font-weight: 700;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.4px;
+    margin-bottom: 8px;
+    padding-left: 2px;
+  }
+  .pref-box {
+    background: var(--card-bg);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-card);
+    overflow: hidden;
+  }
+  .pref-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 12px 16px;
+    border-bottom: 1px solid var(--border-subtle);
+  }
+  .pref-row:last-child {
+    border-bottom: none;
+  }
+  .pref-row-info {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+  }
+  .pref-label {
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--text-primary);
+  }
+  .pref-sublabel {
+    font-size: 12px;
+    color: var(--text-secondary);
+  }
+
+  /* Standard Linux Form Controls */
+  .switch {
+    position: relative;
+    width: 44px;
+    height: 24px;
+    display: inline-block;
+  }
+  .switch input { opacity: 0; width: 0; height: 0; }
+  .slider {
+    position: absolute;
+    cursor: pointer;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background-color: #3b4252;
+    transition: 0.2s;
+    border-radius: 24px;
+  }
+  .slider:before {
+    position: absolute;
+    content: "";
+    height: 18px; width: 18px;
+    left: 3px; bottom: 3px;
+    background-color: white;
+    transition: 0.2s;
+    border-radius: 50%;
+  }
+  input:checked + .slider { background-color: var(--accent); }
+  input:checked + .slider:before { transform: translateX(20px); }
+
+  .select-box {
+    background: rgba(255, 255, 255, 0.06);
+    border: 1px solid var(--border-color);
+    color: var(--text-primary);
+    padding: 6px 12px;
+    border-radius: 6px;
+    font-size: 13px;
+    font-family: inherit;
+    outline: none;
+    cursor: pointer;
+  }
+  .select-box:focus { border-color: var(--accent); }
+
+  .range-slider {
+    -webkit-appearance: none;
+    width: 140px;
+    height: 4px;
+    background: rgba(255, 255, 255, 0.15);
+    border-radius: 2px;
+    outline: none;
+  }
+  .range-slider::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    width: 14px;
+    height: 14px;
+    border-radius: 50%;
+    background: var(--accent);
+    cursor: pointer;
+  }
+
+  /* ── 5. Terminal Window (Fastfetch) ─────────────────────────────────── */
+  .terminal-window {
+    width: 460px;
+    height: 480px;
+    background: var(--terminal-bg);
+    border-radius: var(--radius-window);
+    box-shadow: 0 20px 50px rgba(0, 0, 0, 0.7), 0 0 0 1px var(--border-color);
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
     font-family: 'JetBrains Mono', monospace;
     font-size: 12px;
-    background: rgba(14, 18, 26, 0.75);
+    line-height: 1.5;
   }
-  .term-header {
+  .terminal-header {
+    height: 38px;
+    background: rgba(255, 255, 255, 0.03);
+    border-bottom: 1px solid var(--border-color);
     display: flex;
     align-items: center;
-    gap: 8px;
-    margin-bottom: 12px;
-  }
-  .traffic-dot {
-    width: 10px;
-    height: 10px;
-    border-radius: 50%;
-  }
-  .term-title {
-    color: var(--text-dim);
-    font-size: 11px;
-    margin-left: auto;
-  }
-  .term-body {
-    display: flex;
-    gap: 18px;
-    line-height: 1.4;
-  }
-  .term-logo { color: var(--accent); white-space: pre; }
-  .term-specs { color: #DDE3EB; }
-  .term-spec-k { font-weight: 700; color: var(--accent-purple); display: inline-block; width: 44px; }
-  .term-rainbow { margin-top: 6px; letter-spacing: 2px; }
-
-  /* Media Center */
-  .media-card {
-    padding: 14px 16px;
-    display: flex;
-    flex-direction: column;
-    gap: 10px;
-  }
-  .media-tabs {
-    display: flex;
-    gap: 6px;
-  }
-  .media-tab {
-    flex: 1;
-    text-align: center;
-    padding: 4px 8px;
-    border-radius: 6px;
-    font-size: 11px;
-    font-weight: 600;
-    color: var(--text-sub);
-    background: rgba(255, 255, 255, 0.04);
-    cursor: pointer;
-    transition: all 0.2s;
-  }
-  .media-tab.active {
-    color: #FFFFFF;
-    background: rgba(122, 162, 247, 0.22);
-    border: 1px solid var(--accent);
-  }
-  .media-main {
-    display: flex;
-    gap: 14px;
-    align-items: center;
-  }
-  .album-art {
-    width: 90px;
-    height: 90px;
-    border-radius: 12px;
-    background: linear-gradient(135deg, #0B0E14, #182236);
-    border: 1px solid var(--border-glass);
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    position: relative;
-    overflow: hidden;
-  }
-  .moon-art {
-    width: 28px;
-    height: 28px;
-    border-radius: 50%;
-    background: #E2E8F0;
-    box-shadow: 0 0 16px #93C5FD;
-    margin-bottom: 8px;
-  }
-  .visualizer-bars {
-    display: flex;
-    gap: 3px;
-    align-items: flex-end;
-    height: 18px;
-  }
-  .v-bar {
-    width: 3px;
-    background: var(--accent);
-    border-radius: 1.5px;
-    animation: vBarBounce 1.2s infinite ease-in-out alternate;
-  }
-  @keyframes vBarBounce {
-    0% { height: 4px; }
-    100% { height: 16px; }
-  }
-  .media-details {
-    flex: 1;
-    display: flex;
-    flex-direction: column;
-    gap: 4px;
-  }
-  .media-title { font-size: 14px; font-weight: 700; }
-  .media-artist { font-size: 11px; color: var(--text-sub); }
-  .media-scrubber {
-    width: 100%;
-    height: 4px;
-    background: #1E2633;
-    border-radius: 2px;
-    margin: 8px 0 4px 0;
-    position: relative;
-    cursor: pointer;
-  }
-  .media-progress {
-    width: 35%;
-    height: 100%;
-    background: var(--accent);
-    border-radius: 2px;
-  }
-  .media-controls {
-    display: flex;
-    justify-content: center;
-    gap: 16px;
-    font-size: 18px;
-    color: var(--text-sub);
-    cursor: pointer;
-  }
-  .media-controls span:hover { color: #FFFFFF; }
-
-  /* Quick Settings */
-  .qs-card {
-    padding: 14px 16px;
-    display: flex;
-    flex-direction: column;
-    gap: 12px;
-  }
-  .slider-group { display: flex; flex-direction: column; gap: 8px; }
-  .slider-row { display: flex; align-items: center; gap: 10px; font-size: 13px; }
-  .slider-bar-track {
-    flex: 1;
-    height: 8px;
-    background: #1E2633;
-    border-radius: 4px;
-    overflow: hidden;
-    cursor: pointer;
-  }
-  .slider-bar-fill { height: 100%; border-radius: 4px; }
-  .qs-tiles {
-    display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    gap: 8px;
-  }
-  .qs-tile {
-    height: 44px;
-    border-radius: 10px;
-    background: rgba(255, 255, 255, 0.04);
-    border: 1px solid rgba(255, 255, 255, 0.08);
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    gap: 2px;
-    font-size: 10px;
-    font-weight: 600;
-    cursor: pointer;
-    transition: all 0.2s;
-  }
-  .qs-tile.active {
-    background: rgba(122, 162, 247, 0.2);
-    border-color: var(--accent);
-  }
-
-  /* System Monitor */
-  .sysmon-card {
-    padding: 16px 18px;
-    display: flex;
-    flex-direction: column;
-    gap: 12px;
-  }
-  .spark-row {
-    display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    gap: 12px;
-  }
-  .spark-card {
-    display: flex;
-    flex-direction: column;
-    gap: 4px;
-  }
-  .spark-header { display: flex; justify-content: space-between; font-size: 11px; font-weight: 700; }
-  .spark-header span:last-child { color: var(--text-sub); font-weight: 500; }
-  .spark-canvas {
-    width: 100%;
-    height: 34px;
-    border-radius: 4px;
-    background: rgba(255, 255, 255, 0.02);
-  }
-  .sysmon-footer {
-    display: flex;
     justify-content: space-between;
-    font-size: 11px;
-    color: var(--text-sub);
-    padding-top: 6px;
-    border-top: 1px solid rgba(255, 255, 255, 0.06);
+    padding: 0 14px;
   }
+  .terminal-body {
+    flex: 1;
+    padding: 16px;
+    overflow-y: auto;
+    color: #d1d7e0;
+  }
+  .term-line { margin-bottom: 2px; }
+  .term-key { color: var(--accent); font-weight: 600; }
+  .term-val { color: #f0f4fc; }
 
-  /* Floating Island Dock */
+  /* ── 6. Bottom Dock ─────────────────────────────────────────────────── */
   .bottom-dock {
+    height: 56px;
+    background: rgba(18, 22, 30, 0.88);
+    backdrop-filter: blur(24px);
+    -webkit-backdrop-filter: blur(24px);
+    border: 1px solid var(--border-color);
+    border-radius: 28px;
     position: absolute;
-    bottom: 22px;
+    bottom: 16px;
     left: 50%;
     transform: translateX(-50%);
-    height: 64px;
-    padding: 0 20px;
-    border-radius: var(--radius-dock);
-    background: var(--bg-glass-dock);
-    backdrop-filter: blur(30px) saturate(200%);
-    border: 1px solid var(--border-glass);
-    box-shadow: inset 0 1px 0 var(--sheen-top), 0 20px 60px rgba(0, 0, 0, 0.65);
     display: flex;
     align-items: center;
-    gap: 20px;
-    z-index: 20;
-    transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+    padding: 0 14px;
+    gap: 12px;
+    box-shadow: 0 12px 35px rgba(0, 0, 0, 0.6);
+    z-index: 40;
   }
-  .dock-section { display: flex; align-items: center; gap: 12px; font-size: 16px; color: var(--text-sub); }
-  .dock-icon-btn {
+  .dock-item {
     width: 40px;
     height: 40px;
-    border-radius: 12px;
+    border-radius: 10px;
     display: flex;
     align-items: center;
     justify-content: center;
-    font-size: 18px;
-    color: #FFFFFF;
+    background: rgba(255, 255, 255, 0.06);
     cursor: pointer;
-    transition: transform 0.22s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 0.2s;
+    transition: transform 0.15s, background 0.15s;
   }
-  .dock-icon-btn:hover {
-    transform: translateY(-8px) scale(1.18);
-    box-shadow: 0 10px 20px rgba(0, 0, 0, 0.4);
+  .dock-item:hover {
+    transform: translateY(-4px) scale(1.1);
+    background: rgba(255, 255, 255, 0.12);
+  }
+  .dock-item.active-app {
+    background: var(--accent);
+  }
+  .dock-item svg {
+    width: 22px;
+    height: 22px;
+    fill: #ffffff;
   }
 
-  /* Customizer Control Bar (Top Level) */
-  .control-strip {
-    margin-top: 16px;
-    display: flex;
-    align-items: center;
-    gap: 14px;
-    padding: 10px 20px;
-    border-radius: 9999px;
-    background: rgba(18, 22, 31, 0.85);
-    border: 1px solid var(--border-glass);
-    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
-  }
-  .strip-btn {
-    padding: 6px 14px;
-    border-radius: 20px;
-    font-size: 12px;
-    font-weight: 600;
-    background: rgba(255, 255, 255, 0.05);
-    border: 1px solid rgba(255, 255, 255, 0.1);
-    color: #FFFFFF;
-    cursor: pointer;
-    transition: all 0.2s;
-  }
-  .strip-btn:hover, .strip-btn.active {
-    background: var(--accent);
-    color: #000000;
-    border-color: var(--accent);
-  }
+  /* ── 7. Clean Sub-Page Switching ────────────────────────────────────── */
+  .page-panel { display: none; }
+  .page-panel.active { display: block; }
 </style>
 </head>
 <body>
 
-  <!-- Desktop Viewport Simulation -->
-  <div class="desktop-viewport wp-nebula" id="viewport">
+<div class="desktop-environment">
 
-    <!-- Top Status Pill -->
-    <div class="top-pill">
-      <div class="status-dot"></div>
-      <span id="pillDateTime">Tue, 09 August 2022 &nbsp; 04:44 PM</span>
+  <!-- Top Wayland Status Bar -->
+  <div class="top-bar">
+    <div class="top-bar-left">
+      <div class="workspace-pill">
+        <div class="ws-dot active"></div>
+        <div class="ws-dot"></div>
+        <div class="ws-dot"></div>
+      </div>
+      <span style="color: var(--text-secondary); font-weight: 500;">SynthOS 2026.10 LTS</span>
     </div>
 
-    <!-- Desktop Grid Layout -->
-    <div class="desktop-layout">
+    <div class="top-clock" id="liveClock">Fri Aug 14 &nbsp; 04:04 PM</div>
 
-      <!-- Left Column: Clock, Weather, Terminal Rice -->
-      <div class="col-left">
+    <div class="top-bar-right">
+      <div class="status-indicators">
+        <!-- Wi-Fi -->
+        <svg viewBox="0 0 24 24"><path d="M12 4C7.31 4 3.07 5.9 0 8.98L12 21 24 8.98C20.93 5.9 16.69 4 12 4zm0 3c3.75 0 7.17 1.48 9.72 3.89L12 18.66 2.28 10.89C4.83 8.48 8.25 7 12 7z"/></svg>
+        <!-- Volume -->
+        <svg viewBox="0 0 24 24"><path d="M3 9v6h4l5 5V4L7 9H3zm13.5 3c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02zM14 3.23v2.06c2.89.86 5 3.54 5 6.71s-2.11 5.85-5 6.71v2.06c4.01-.91 7-4.49 7-8.77s-2.99-7.86-7-8.77z"/></svg>
+        <!-- Battery -->
+        <svg viewBox="0 0 24 24"><path d="M15.67 4H14V2h-4v2H8.33C7.6 4 7 4.6 7 5.33v15.33C7 21.4 7.6 22 8.33 22h7.33c.74 0 1.34-.6 1.34-1.33V5.33C17 4.6 16.4 4 15.67 4zM11 20v-5.5H9L13 7v5.5h2L11 20z"/></svg>
+        <span style="font-size: 12px; color: var(--text-primary); font-weight: 600;">94%</span>
+      </div>
+    </div>
+  </div>
 
-        <div class="liquid-glass clock-card">
-          <div class="time-row">
-            <span class="time-val" id="clockVal">04:44</span>
-            <span class="time-ampm">PM</span>
-          </div>
-          <span class="date-val">Tue, 09 August 2022</span>
+  <!-- Main Desktop Space -->
+  <div class="workspace-area">
+
+    <!-- 1. Authentic System Settings Window -->
+    <div class="settings-window">
+      <!-- Window Titlebar -->
+      <div class="headerbar">
+        <div class="window-controls">
+          <button class="win-btn win-close"></button>
+          <button class="win-btn win-min"></button>
+          <button class="win-btn win-max"></button>
         </div>
 
-        <div class="liquid-glass weather-card">
-          <div class="weather-icon-temp">
-            <span class="weather-glyph">⛅</span>
-            <span class="weather-temp">34°</span>
-          </div>
-          <div>
-            <div class="weather-city">Ajmer is now Clouds.</div>
-            <div class="weather-info">Wind speed is 4.49 m/s<br>And Humidity is 49%</div>
-          </div>
+        <div class="search-container">
+          <svg class="search-icon" viewBox="0 0 24 24"><path d="M15.5 14h-.79l-.28-.27A6.471 6.471 0 0 0 16 9.5 6.5 6.5 0 1 0 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"/></svg>
+          <input type="text" class="search-input" placeholder="Search settings...">
         </div>
 
-        <div class="liquid-glass terminal-card">
-          <div class="term-header">
-            <span class="traffic-dot" style="background:#ED6A5E"></span>
-            <span class="traffic-dot" style="background:#F5BF4F"></span>
-            <span class="traffic-dot" style="background:#61C554"></span>
-            <span class="term-title">rxfetch</span>
-          </div>
-          <div class="term-body">
-            <div class="term-logo">
-   .---.   
- /       \ 
-|   .--.  |
-`--'   / / 
-      / /  
- .---' /   
-|  .--'    
- \       / 
-  `-----'  </div>
-            <div class="term-specs">
-              <div><span class="term-spec-k">os</span> synth OS</div>
-              <div><span class="term-spec-k">ker</span> 6.3.9-synth</div>
-              <div><span class="term-spec-k">pkgs</span> 1247</div>
-              <div><span class="term-spec-k">sh</span> fish</div>
-              <div><span class="term-spec-k">wm</span> Hyprland</div>
-              <div><span class="term-spec-k">ram</span> 4.62G / 11.4G</div>
-              <div class="term-rainbow">████████</div>
-            </div>
-          </div>
-        </div>
-
+        <div style="width: 50px;"></div>
       </div>
 
-      <!-- Center Application Space -->
-      <div class="col-center"></div>
-
-      <!-- Right Column: Quick Settings, Media Center, System Monitor -->
-      <div class="col-right">
-
-        <!-- Quick Settings -->
-        <div class="liquid-glass qs-card">
-          <div class="slider-group">
-            <div class="slider-row">
-              <span style="color:var(--accent-gold)">󰃠</span>
-              <div class="slider-bar-track"><div class="slider-bar-fill" style="width:52%; background:var(--accent-gold)"></div></div>
-              <span style="width:32px; color:var(--text-sub)">52%</span>
-            </div>
-            <div class="slider-row">
-              <span style="color:var(--accent-cyan)">󰕾</span>
-              <div class="slider-bar-track"><div class="slider-bar-fill" style="width:100%; background:var(--accent-cyan)"></div></div>
-              <span style="width:32px; color:var(--text-sub)">100%</span>
-            </div>
+      <!-- Settings Body with Sidebar -->
+      <div class="settings-body">
+        <!-- Sidebar Navigation -->
+        <div class="settings-sidebar">
+          <div class="sidebar-section-title">Connectivity</div>
+          <div class="nav-item active" onclick="switchTab('network', this)">
+            <svg viewBox="0 0 24 24"><path d="M12 4C7.31 4 3.07 5.9 0 8.98L12 21 24 8.98C20.93 5.9 16.69 4 12 4z"/></svg>
+            Wi-Fi & Network
+          </div>
+          <div class="nav-item" onclick="switchTab('bluetooth', this)">
+            <svg viewBox="0 0 24 24"><path d="M17.71 7.71L12 2h-1v7.59L6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 11 14.41V22h1l5.71-5.71-4.3-4.29 4.3-4.29zM13 5.83l1.88 1.88L13 9.59V5.83zm1.88 10.46L13 18.17v-3.76l1.88 1.88z"/></svg>
+            Bluetooth
           </div>
 
-          <div class="qs-tiles">
-            <div class="qs-tile active"><span>󰤨</span><span>Wi-Fi</span></div>
-            <div class="qs-tile active"><span>󰂯</span><span>Bluetooth</span></div>
-            <div class="qs-tile" onclick="this.classList.toggle('active')"><span>⚡</span><span>Game Mode</span></div>
-            <div class="qs-tile" onclick="this.classList.toggle('active')"><span>󰛨</span><span>Night Light</span></div>
-            <div class="qs-tile" onclick="this.classList.toggle('active')"><span>󰂛</span><span>DND</span></div>
-            <div class="qs-tile"><span>󰖂</span><span>VPN</span></div>
+          <div class="sidebar-section-title">Personalization</div>
+          <div class="nav-item" onclick="switchTab('appearance', this)">
+            <svg viewBox="0 0 24 24"><path d="M12 3c-4.97 0-9 4.03-9 9 0 2.12.74 4.07 1.97 5.61L4.35 19.4c-.39.39-.39 1.02 0 1.41.39.39 1.02.39 1.41 0l1.9-1.9C9.22 19.58 10.57 20 12 20c4.97 0 9-4.03 9-9s-4.03-9-9-9z"/></svg>
+            Appearance & Themes
+          </div>
+          <div class="nav-item" onclick="switchTab('displays', this)">
+            <svg viewBox="0 0 24 24"><path d="M21 3H3c-1.11 0-2 .89-2 2v12c0 1.1.89 2 2 2h7v2H8v2h8v-2h-2v-2h7c1.1 0 2-.9 2-2V5c0-1.11-.9-2-2-2zm0 14H3V5h18v12z"/></svg>
+            Displays
+          </div>
+          <div class="nav-item" onclick="switchTab('sound', this)">
+            <svg viewBox="0 0 24 24"><path d="M3 9v6h4l5 5V4L7 9H3zm13.5 3c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02z"/></svg>
+            Sound & Audio
+          </div>
+
+          <div class="sidebar-section-title">System</div>
+          <div class="nav-item" onclick="switchTab('power', this)">
+            <svg viewBox="0 0 24 24"><path d="M15.67 4H14V2h-4v2H8.33C7.6 4 7 4.6 7 5.33v15.33C7 21.4 7.6 22 8.33 22h7.33c.74 0 1.34-.6 1.34-1.33V5.33C17 4.6 16.4 4 15.67 4z"/></svg>
+            Power & Battery
+          </div>
+          <div class="nav-item" onclick="switchTab('apps', this)">
+            <svg viewBox="0 0 24 24"><path d="M4 8h4V4H4v4zm6 12h4v-4h-4v4zm-6 0h4v-4H4v4zm0-6h4v-4H4v4zm6 0h4v-4h-4v4zm6-10v4h4V4h-4zm-6 4h4V4h-4v4zm6 6h4v-4h-4v4zm0 6h4v-4h-4v4z"/></svg>
+            Default Apps
+          </div>
+          <div class="nav-item" onclick="switchTab('about', this)">
+            <svg viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-6h2v6zm0-8h-2V7h2v2z"/></svg>
+            About System
           </div>
         </div>
 
-        <!-- Media Center -->
-        <div class="liquid-glass media-card">
-          <div class="media-tabs">
-            <div class="media-tab active">󰝚 Playing</div>
-            <div class="media-tab">󰒮 Queue</div>
-            <div class="media-tab">󰓃 EQ</div>
-          </div>
+        <!-- Content Area -->
+        <div class="settings-content">
 
-          <div class="media-main">
-            <div class="album-art">
-              <div class="moon-art"></div>
-              <div class="visualizer-bars">
-                <div class="v-bar" style="animation-delay: 0.1s"></div>
-                <div class="v-bar" style="animation-delay: 0.3s"></div>
-                <div class="v-bar" style="animation-delay: 0.5s"></div>
-                <div class="v-bar" style="animation-delay: 0.2s"></div>
-                <div class="v-bar" style="animation-delay: 0.4s"></div>
-                <div class="v-bar" style="animation-delay: 0.6s"></div>
+          <!-- TAB: NETWORK -->
+          <div class="page-panel active" id="tab-network">
+            <div class="page-title">Wi-Fi & Network</div>
+            <div class="page-subtitle">Manage wireless connections and Ethernet adapters</div>
+
+            <div class="pref-group">
+              <div class="pref-group-title">Wireless Connection</div>
+              <div class="pref-box">
+                <div class="pref-row">
+                  <div class="pref-row-info">
+                    <div class="pref-label">Wi-Fi Adapter</div>
+                    <div class="pref-sublabel">Connected to SynthNet-5G (5 GHz)</div>
+                  </div>
+                  <label class="switch">
+                    <input type="checkbox" checked>
+                    <span class="slider"></span>
+                  </label>
+                </div>
+                <div class="pref-row">
+                  <div class="pref-row-info">
+                    <div class="pref-label">IPv4 Address</div>
+                    <div class="pref-sublabel">192.168.1.142 (DHCP)</div>
+                  </div>
+                  <button class="select-box" style="padding: 4px 10px; font-size: 11px;">Configure</button>
+                </div>
+                <div class="pref-row">
+                  <div class="pref-row-info">
+                    <div class="pref-label">DNS Servers</div>
+                    <div class="pref-sublabel">1.1.1.1, 8.8.8.8 (Encrypted DoT)</div>
+                  </div>
+                  <span style="font-size: 12px; color: #73DACA; font-weight: 500;">Active</span>
+                </div>
               </div>
             </div>
 
-            <div class="media-details">
-              <div class="media-title">After Dark</div>
-              <div class="media-artist">Sweater Weather</div>
-              <div class="media-scrubber"><div class="media-progress"></div></div>
-              <div class="media-controls">
-                <span>󰒮</span>
-                <span style="color:#FFF">󰏤</span>
-                <span>󰒭</span>
+            <div class="pref-group">
+              <div class="pref-group-title">Available Networks</div>
+              <div class="pref-box">
+                <div class="pref-row">
+                  <div class="pref-row-info">
+                    <div class="pref-label" style="font-weight: 600;">SynthNet-5G</div>
+                    <div class="pref-sublabel">WPA3 Personal • Strong Signal</div>
+                  </div>
+                  <span style="font-size: 12px; color: var(--accent); font-weight: 600;">Connected</span>
+                </div>
+                <div class="pref-row">
+                  <div class="pref-row-info">
+                    <div class="pref-label">Fiber_Office_Guest</div>
+                    <div class="pref-sublabel">WPA2 Personal • Good Signal</div>
+                  </div>
+                  <button class="select-box" style="padding: 4px 10px; font-size: 11px;">Connect</button>
+                </div>
               </div>
             </div>
           </div>
-        </div>
 
-        <!-- System Monitor -->
-        <div class="liquid-glass sysmon-card">
-          <div class="spark-row">
-            <div class="spark-card">
-              <div class="spark-header"><span>CPU</span><span>32%</span></div>
-              <canvas class="spark-canvas" id="c1"></canvas>
+          <!-- TAB: APPEARANCE -->
+          <div class="page-panel" id="tab-appearance">
+            <div class="page-title">Appearance & Themes</div>
+            <div class="page-subtitle">Customize desktop styles, colors, and wallpapers</div>
+
+            <div class="pref-group">
+              <div class="pref-group-title">Style Mode</div>
+              <div class="pref-box">
+                <div class="pref-row">
+                  <div class="pref-row-info">
+                    <div class="pref-label">Dark Theme</div>
+                    <div class="pref-sublabel">Reduces eye strain with high contrast dark palette</div>
+                  </div>
+                  <label class="switch">
+                    <input type="checkbox" checked>
+                    <span class="slider"></span>
+                  </label>
+                </div>
+                <div class="pref-row">
+                  <div class="pref-row-info">
+                    <div class="pref-label">Accent Color</div>
+                    <div class="pref-sublabel">System highlight color for controls and selections</div>
+                  </div>
+                  <div style="display: flex; gap: 6px;">
+                    <div style="width: 20px; height: 20px; border-radius: 50%; background: #3584e4; border: 2px solid white; cursor: pointer;"></div>
+                    <div style="width: 20px; height: 20px; border-radius: 50%; background: #9141ac; cursor: pointer;"></div>
+                    <div style="width: 20px; height: 20px; border-radius: 50%; background: #2ec27e; cursor: pointer;"></div>
+                    <div style="width: 20px; height: 20px; border-radius: 50%; background: #e5a50a; cursor: pointer;"></div>
+                  </div>
+                </div>
+              </div>
             </div>
-            <div class="spark-card">
-              <div class="spark-header"><span>RAM</span><span>46%</span></div>
-              <canvas class="spark-canvas" id="c2"></canvas>
-            </div>
-            <div class="spark-card">
-              <div class="spark-header"><span>DISK</span><span>61%</span></div>
-              <canvas class="spark-canvas" id="c3"></canvas>
+
+            <div class="pref-group">
+              <div class="pref-group-title">Window Corner Radius</div>
+              <div class="pref-box">
+                <div class="pref-row">
+                  <div class="pref-row-info">
+                    <div class="pref-label">Rounding Geometry</div>
+                    <div class="pref-sublabel">12 px (Standard Libadwaita / Modern Tiling)</div>
+                  </div>
+                  <input type="range" min="0" max="24" value="12" class="range-slider">
+                </div>
+              </div>
             </div>
           </div>
 
-          <div class="sysmon-footer">
-            <span style="color:var(--accent-teal)">NETWORK ↓ 128 KB/s ↑ 42 KB/s</span>
-            <span>UPTIME 2h 15m</span>
-          </div>
-        </div>
+          <!-- TAB: ABOUT -->
+          <div class="page-panel" id="tab-about">
+            <div class="page-title">About SynthOS</div>
+            <div class="page-subtitle">Device specifications and operating system details</div>
 
+            <div class="pref-group">
+              <div class="pref-group-title">System Information</div>
+              <div class="pref-box">
+                <div class="pref-row">
+                  <div class="pref-row-info">
+                    <div class="pref-label">OS Name</div>
+                    <div class="pref-sublabel">SynthOS Linux 2026.10 LTS (64-bit)</div>
+                  </div>
+                </div>
+                <div class="pref-row">
+                  <div class="pref-row-info">
+                    <div class="pref-label">Kernel Version</div>
+                    <div class="pref-sublabel">Linux 6.13.0-cachyos-gaming</div>
+                  </div>
+                </div>
+                <div class="pref-row">
+                  <div class="pref-row-info">
+                    <div class="pref-label">Processor</div>
+                    <div class="pref-sublabel">AMD Ryzen 9 7950X (32 Threads @ 5.7 GHz)</div>
+                  </div>
+                </div>
+                <div class="pref-row">
+                  <div class="pref-row-info">
+                    <div class="pref-label">Memory</div>
+                    <div class="pref-sublabel">32.0 GB DDR5-6000</div>
+                  </div>
+                </div>
+                <div class="pref-row">
+                  <div class="pref-row-info">
+                    <div class="pref-label">Graphics</div>
+                    <div class="pref-sublabel">NVIDIA GeForce RTX 4080 (Driver 570.86)</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- TAB: DISPLAYS -->
+          <div class="page-panel" id="tab-displays">
+            <div class="page-title">Displays</div>
+            <div class="page-subtitle">Resolution, refresh rate, and scaling</div>
+            <div class="pref-group">
+              <div class="pref-group-title">Primary Monitor</div>
+              <div class="pref-box">
+                <div class="pref-row">
+                  <div class="pref-row-info"><div class="pref-label">Resolution</div></div>
+                  <select class="select-box"><option>3840 x 2160 (16:9 4K)</option><option>2560 x 1440 (16:9 2K)</option><option>1920 x 1080 (16:9 FHD)</option></select>
+                </div>
+                <div class="pref-row">
+                  <div class="pref-row-info"><div class="pref-label">Refresh Rate</div></div>
+                  <select class="select-box"><option>144 Hz (Variable Refresh)</option><option>120 Hz</option><option>60 Hz</option></select>
+                </div>
+                <div class="pref-row">
+                  <div class="pref-row-info"><div class="pref-label">Fractional Scale</div></div>
+                  <select class="select-box"><option>150% (Recommended)</option><option>100%</option><option>125%</option><option>200%</option></select>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- TAB: SOUND -->
+          <div class="page-panel" id="tab-sound">
+            <div class="page-title">Sound</div>
+            <div class="page-subtitle">Audio output devices and master volume</div>
+            <div class="pref-group">
+              <div class="pref-group-title">Output</div>
+              <div class="pref-box">
+                <div class="pref-row">
+                  <div class="pref-row-info"><div class="pref-label">Output Device</div></div>
+                  <select class="select-box"><option>Headphones (Sony WH-1000XM5 LDAC)</option><option>Built-in Realtek HD Audio</option></select>
+                </div>
+                <div class="pref-row">
+                  <div class="pref-row-info"><div class="pref-label">Master Volume</div><div class="pref-sublabel">75%</div></div>
+                  <input type="range" min="0" max="100" value="75" class="range-slider">
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- TAB: BLUETOOTH -->
+          <div class="page-panel" id="tab-bluetooth">
+            <div class="page-title">Bluetooth</div>
+            <div class="page-subtitle">Manage paired peripherals and audio devices</div>
+            <div class="pref-group">
+              <div class="pref-group-title">Paired Devices</div>
+              <div class="pref-box">
+                <div class="pref-row">
+                  <div class="pref-row-info"><div class="pref-label">Sony WH-1000XM5</div><div class="pref-sublabel">Connected • 85% Battery</div></div>
+                  <button class="select-box" style="padding: 4px 10px; font-size: 11px;">Disconnect</button>
+                </div>
+                <div class="pref-row">
+                  <div class="pref-row-info"><div class="pref-label">MX Master 3S</div><div class="pref-sublabel">Connected • 92% Battery</div></div>
+                  <button class="select-box" style="padding: 4px 10px; font-size: 11px;">Disconnect</button>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- TAB: POWER -->
+          <div class="page-panel" id="tab-power">
+            <div class="page-title">Power & Battery</div>
+            <div class="page-subtitle">Energy saving modes and battery health</div>
+            <div class="pref-group">
+              <div class="pref-group-title">Power Profile</div>
+              <div class="pref-box">
+                <div class="pref-row">
+                  <div class="pref-row-info"><div class="pref-label">Balanced Mode</div><div class="pref-sublabel">Standard dynamic frequency scaling</div></div>
+                  <input type="radio" name="powerprof" checked>
+                </div>
+                <div class="pref-row">
+                  <div class="pref-row-info"><div class="pref-label">Performance Mode</div><div class="pref-sublabel">High CPU clocks for intensive compute</div></div>
+                  <input type="radio" name="powerprof">
+                </div>
+                <div class="pref-row">
+                  <div class="pref-row-info"><div class="pref-label">Power Saver</div><div class="pref-sublabel">Reduces power draw to maximize battery life</div></div>
+                  <input type="radio" name="powerprof">
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- TAB: APPS -->
+          <div class="page-panel" id="tab-apps">
+            <div class="page-title">Default Applications</div>
+            <div class="page-subtitle">Set preferred programs for web, mail, and media</div>
+            <div class="pref-group">
+              <div class="pref-group-title">Standard Handlers</div>
+              <div class="pref-box">
+                <div class="pref-row">
+                  <div class="pref-row-info"><div class="pref-label">Web Browser</div></div>
+                  <select class="select-box"><option>Firefox</option><option>Chromium</option></select>
+                </div>
+                <div class="pref-row">
+                  <div class="pref-row-info"><div class="pref-label">File Manager</div></div>
+                  <select class="select-box"><option>COSMIC Files</option><option>Nautilus</option></select>
+                </div>
+                <div class="pref-row">
+                  <div class="pref-row-info"><div class="pref-label">Terminal</div></div>
+                  <select class="select-box"><option>Kitty</option><option>Alacritty</option></select>
+                </div>
+              </div>
+            </div>
+          </div>
+
+        </div>
       </div>
-
     </div>
 
-    <!-- Floating Island Dock -->
-    <div class="bottom-dock">
-      <div class="dock-section">
-        <span>󰀻</span>
-        <span>󰍉</span>
-        <span>󰹟</span>
-        <span>󰒓</span>
+    <!-- 2. Authentic Terminal Window -->
+    <div class="terminal-window">
+      <div class="terminal-header">
+        <div class="window-controls">
+          <button class="win-btn win-close"></button>
+          <button class="win-btn win-min"></button>
+          <button class="win-btn win-max"></button>
+        </div>
+        <span style="font-size: 11px; color: var(--text-secondary); font-family: 'Inter', sans-serif;">user@synthex-workstation: ~</span>
+        <div style="width: 40px;"></div>
       </div>
 
-      <div class="dock-section" style="gap:14px">
-        <div class="dock-icon-btn" style="background:#FF7139">󰈹</div>
-        <div class="dock-icon-btn" style="background:#007ACC">󰨞</div>
-        <div class="dock-icon-btn" style="background:#24292E">󰆍</div>
-        <div class="dock-icon-btn" style="background:#4A90E2">󰉋</div>
-        <div class="dock-icon-btn" style="background:#30D158">󰍹</div>
-        <div class="dock-icon-btn" style="background:#1DB954">󰓇</div>
-        <div class="dock-icon-btn" style="background:#5865F2">󰙯</div>
-      </div>
-
-      <div class="dock-section">
-        <span>󰤨</span>
-        <span>󰂯</span>
-        <span>󰕾</span>
-        <span>󰁹</span>
-        <span style="font-size:13px; font-weight:700; color:#FFF">04:44 PM</span>
+      <div class="terminal-body">
+        <div class="term-line" style="color: #626f80;">$ fastfetch</div>
+        <div class="term-line" style="margin-top: 8px;"><span class="term-key">OS:</span> <span class="term-val">SynthOS Linux 2026.10 LTS x86_64</span></div>
+        <div class="term-line"><span class="term-key">Host:</span> <span class="term-val">Zenith Workstation Edition</span></div>
+        <div class="term-line"><span class="term-key">Kernel:</span> <span class="term-val">6.13.0-cachyos-gaming</span></div>
+        <div class="term-line"><span class="term-key">Uptime:</span> <span class="term-val">3 hours, 28 mins</span></div>
+        <div class="term-line"><span class="term-key">Packages:</span> <span class="term-val">1248 (rpm), 14 (flatpak)</span></div>
+        <div class="term-line"><span class="term-key">Shell:</span> <span class="term-val">fish 3.7.1</span></div>
+        <div class="term-line"><span class="term-key">WM:</span> <span class="term-val">Hyprland (Wayland)</span></div>
+        <div class="term-line"><span class="term-key">Theme:</span> <span class="term-val">SynthOS-Adwaita-Dark [GTK3/4]</span></div>
+        <div class="term-line"><span class="term-key">Icons:</span> <span class="term-val">Papirus-Dark</span></div>
+        <div class="term-line"><span class="term-key">Terminal:</span> <span class="term-val">kitty 0.35.2</span></div>
+        <div class="term-line"><span class="term-key">CPU:</span> <span class="term-val">AMD Ryzen 9 7950X (32) @ 5.700GHz</span></div>
+        <div class="term-line"><span class="term-key">GPU:</span> <span class="term-val">NVIDIA GeForce RTX 4080 [Discrete]</span></div>
+        <div class="term-line"><span class="term-key">Memory:</span> <span class="term-val">7.24 GiB / 31.18 GiB (23%)</span></div>
+        <div class="term-line"><span class="term-key">Disk (/):</span> <span class="term-val">42.8 GiB / 1.8 TiB (Btrfs)</span></div>
+        
+        <div class="term-line" style="margin-top: 14px; color: #626f80;">user@synthex-workstation:~$ <span style="display:inline-block; width:7px; height:13px; background:var(--accent); vertical-align:middle;"></span></div>
       </div>
     </div>
 
   </div>
 
-  <!-- Live Customizer Switcher Bar -->
-  <div class="control-strip">
-    <span style="font-size:12px; font-weight:700; color:var(--text-sub)">FINISH:</span>
-    <button class="strip-btn active" id="btnGlass" onclick="setStyle('glass', this)">✨ Liquid Glass</button>
-    <button class="strip-btn" id="btnMatte" onclick="setStyle('matte', this)">⬛ Solid Matte</button>
-
-    <div style="width:1px; height:20px; background:rgba(255,255,255,0.1)"></div>
-
-    <span style="font-size:12px; font-weight:700; color:var(--text-sub)">WALLPAPER:</span>
-    <button class="strip-btn active" onclick="setWallpaper('wp-nebula', this)">🌌 Nebula</button>
-    <button class="strip-btn" onclick="setWallpaper('wp-cyber', this)">⚡ Cyber Wave</button>
-    <button class="strip-btn" onclick="setWallpaper('wp-sunset', this)">🌅 Sunset</button>
-    <button class="strip-btn" onclick="setWallpaper('wp-minimal', this)">⬛ Minimal</button>
-
-    <div style="width:1px; height:20px; background:rgba(255,255,255,0.1)"></div>
-
-    <span style="font-size:12px; font-weight:700; color:var(--text-sub)">THEME:</span>
-    <button class="strip-btn active" onclick="setTheme('#7AA2F7', '#BB9AF7', this)">Nova Ice</button>
-    <button class="strip-btn" onclick="setTheme('#89B4FA', '#CBA6F7', this)">Catppuccin</button>
-    <button class="strip-btn" onclick="setTheme('#00F0FF', '#FF007F', this)">Neon Cyber</button>
-    <button class="strip-btn" onclick="setTheme('#88C0D0', '#81A1C1', this)">Nord Frost</button>
-    <button class="strip-btn" onclick="setTheme('#D79921', '#FE8019', this)">Gruvbox</button>
-    <button class="strip-btn" onclick="setTheme('#FF71CE', '#01CDFE', this)">Synthwave</button>
+  <!-- Bottom App Dock -->
+  <div class="bottom-dock">
+    <!-- Files -->
+    <div class="dock-item"><svg viewBox="0 0 24 24"><path d="M10 4H4c-1.1 0-1.99.9-1.99 2L2 18c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V8c0-1.1-.9-2-2-2h-8l-2-2z"/></svg></div>
+    <!-- Terminal -->
+    <div class="dock-item active-app"><svg viewBox="0 0 24 24"><path d="M20 4H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 14H4V8h16v10zm-2-1h-6v-2h6v2zm-9.7-4.3L5.6 11.4 7 10l4.3 4.3L7 18.6l-1.4-1.4 2.7-2.9z"/></svg></div>
+    <!-- Browser -->
+    <div class="dock-item"><svg viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 17.93c-3.95-.49-7-3.85-7-7.93 0-.62.08-1.21.21-1.79L9 15v1c0 1.1.9 2 2 2v1.93zm6.9-2.54c-.26-.81-1-1.39-1.9-1.39h-1v-3c0-.55-.45-1-1-1H8v-2h2c.55 0 1-.45 1-1V7h2c1.1 0 2-.9 2-2v-.41c2.93 1.19 5 4.06 5 7.41 0 2.08-.8 3.97-2.1 5.39z"/></svg></div>
+    <!-- Code Editor -->
+    <div class="dock-item"><svg viewBox="0 0 24 24"><path d="M9.4 16.6L4.8 12l4.6-4.6L8 6l-6 6 6 6 1.4-1.4zm5.2 0l4.6-4.6-4.6-4.6L16 6l6 6-6 6-1.4-1.4z"/></svg></div>
+    <!-- Settings -->
+    <div class="dock-item active-app"><svg viewBox="0 0 24 24"><path d="M19.14 12.94c.04-.3.06-.61.06-.94 0-.32-.02-.64-.07-.94l2.03-1.58c.18-.14.23-.41.12-.61l-1.92-3.32c-.12-.22-.37-.29-.59-.22l-2.39.96c-.5-.38-1.03-.7-1.62-.94l-.36-2.54c-.04-.24-.24-.41-.48-.41h-3.84c-.24 0-.43.17-.47.41l-.36 2.54c-.59.24-1.13.57-1.62.94l-2.39-.96c-.22-.08-.47 0-.59.22L2.74 8.87c-.12.21-.08.47.12.61l2.03 1.58c-.05.3-.09.63-.09.94s.02.64.07.94l-2.03 1.58c-.18.14-.23.41-.12.61l1.92 3.32c.12.22.37.29.59.22l2.39-.96c.5.38 1.03.7 1.62.94l.36 2.54c.05.24.24.41.48.41h3.84c.24 0 .44-.17.47-.41l.36-2.54c.59-.24 1.13-.56 1.62-.94l2.39.96c.22.08.47 0 .59-.22l1.92-3.32c.12-.22.07-.47-.12-.61l-2.01-1.58zM12 15.6c-1.98 0-3.6-1.62-3.6-3.6s1.62-3.6 3.6-3.6 3.6 1.62 3.6 3.6-1.62 3.6-3.6 3.6z"/></svg></div>
   </div>
 
-  <script>
-    // Draw Canvas Sparklines
-    function drawSpark(id, color, fillRgba, pts) {
-      const c = document.getElementById(id);
-      if (!c) return;
-      const ctx = c.getContext('2d');
-      const w = c.width = c.clientWidth * 2;
-      const h = c.height = c.clientHeight * 2;
-      const step = w / (pts.length - 1);
+</div>
 
-      ctx.clearRect(0, 0, w, h);
-      ctx.beginPath();
-      ctx.moveTo(0, h);
-      pts.forEach((p, i) => ctx.lineTo(i * step, h * (1.0 - p * 0.9)));
-      ctx.lineTo(w, h);
-      ctx.closePath();
-      ctx.fillStyle = fillRgba;
-      ctx.fill();
+<script>
+  function switchTab(tabId, el) {
+    document.querySelectorAll('.settings-sidebar .nav-item').forEach(item => item.classList.remove('active'));
+    el.classList.add('active');
 
-      ctx.beginPath();
-      pts.forEach((p, i) => {
-        if (i === 0) ctx.moveTo(0, h * (1.0 - p * 0.9));
-        else ctx.lineTo(i * step, h * (1.0 - p * 0.9));
-      });
-      ctx.strokeStyle = color;
-      ctx.lineWidth = 3;
-      ctx.stroke();
-    }
+    document.querySelectorAll('.settings-content .page-panel').forEach(page => page.classList.remove('active'));
+    const target = document.getElementById('tab-' + tabId);
+    if (target) target.classList.add('active');
+  }
 
-    drawSpark('c1', '#7AA2F7', 'rgba(122, 162, 247, 0.25)', [0.2, 0.35, 0.28, 0.5, 0.32, 0.45, 0.6, 0.4, 0.32, 0.55, 0.32]);
-    drawSpark('c2', '#BB9AF7', 'rgba(187, 154, 247, 0.25)', [0.4, 0.42, 0.5, 0.46, 0.52, 0.48, 0.62, 0.45, 0.46, 0.5, 0.46]);
-    drawSpark('c3', '#E5A84B', 'rgba(229, 168, 75, 0.25)', [0.55, 0.6, 0.58, 0.61, 0.63, 0.6, 0.65, 0.62, 0.61, 0.61, 0.61]);
+  // Update clock
+  function updateClock() {
+    const now = new Date();
+    const opts = { weekday: 'short', month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' };
+    document.getElementById('liveClock').innerText = now.toLocaleDateString('en-US', opts).replace(',', ' •');
+  }
+  setInterval(updateClock, 1000);
+</script>
 
-    function setStyle(mode, btn) {
-      const vp = document.getElementById('viewport');
-      if (mode === 'matte') {
-        vp.classList.add('matte-mode');
-      } else {
-        vp.classList.remove('matte-mode');
-      }
-      document.getElementById('btnGlass').classList.remove('active');
-      document.getElementById('btnMatte').classList.remove('active');
-      btn.classList.add('active');
-    }
-
-    function setWallpaper(wpClass, btn) {
-      const vp = document.getElementById('viewport');
-      const isMatte = vp.classList.contains('matte-mode');
-      vp.className = 'desktop-viewport ' + wpClass + (isMatte ? ' matte-mode' : '');
-      document.querySelectorAll('.control-strip button').forEach(b => {
-        if (b.innerText.includes('Nebula') || b.innerText.includes('Cyber') || b.innerText.includes('Sunset')) {
-          b.classList.remove('active');
-        }
-      });
-      btn.classList.add('active');
-    }
-
-    function setTheme(accent, secondary, btn) {
-      document.documentElement.style.setProperty('--accent', accent);
-      document.documentElement.style.setProperty('--accent-purple', secondary);
-      document.querySelectorAll('.control-strip button').forEach(b => {
-        if (b.innerText.includes('Nova') || b.innerText.includes('Neon') || b.innerText.includes('Nord')) {
-          b.classList.remove('active');
-        }
-      });
-      btn.classList.add('active');
-      drawSpark('c1', accent, 'rgba(122, 162, 247, 0.25)', [0.2, 0.35, 0.28, 0.5, 0.32, 0.45, 0.6, 0.4, 0.32, 0.55, 0.32]);
-    }
-  </script>
 </body>
 </html>
