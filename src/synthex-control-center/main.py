@@ -726,20 +726,23 @@ class SettingsAppWindow(Gtk.Window):
             aud_hw_frame.add(aud_hw_grid)
             self.content_box.pack_start(aud_hw_frame, False, False, 0)
 
-        # ── 7. Appearance ───────────────────────────────────────────────
+        # ── 7. Appearance (Full System & Rice Customization Studio) ────
         elif cat_id == "appearance":
             installed_themes = ThemeAdapter.get_installed_themes()
             installed_icons = ThemeAdapter.get_installed_icons()
+            installed_cursors = ThemeAdapter.get_installed_cursors()
+            installed_fonts = ThemeAdapter.get_installed_fonts()
             cur_theme = ThemeAdapter.get_current_gtk_theme()
 
-            frame = Gtk.Frame(label="Desktop Themes & Color Scheme")
+            # 1. Desktop Themes & Typography Hub
+            frame = Gtk.Frame(label="System Themes, Icons & Typography")
             tgrid = Gtk.Grid()
             tgrid.set_column_spacing(16)
             tgrid.set_row_spacing(10)
             tgrid.set_border_width(16)
 
             # Controls Theme
-            tgrid.attach(Gtk.Label(label="Window Controls (GTK):", xalign=0), 0, 0, 1, 1)
+            tgrid.attach(Gtk.Label(label="Window Controls (GTK Theme):", xalign=0), 0, 0, 1, 1)
             theme_cb = Gtk.ComboBoxText()
             theme_idx = 0
             for i, t in enumerate(installed_themes):
@@ -751,7 +754,7 @@ class SettingsAppWindow(Gtk.Window):
             tgrid.attach(theme_cb, 1, 0, 1, 1)
 
             # Icon Theme
-            tgrid.attach(Gtk.Label(label="Icon Set:", xalign=0), 0, 1, 1, 1)
+            tgrid.attach(Gtk.Label(label="System Icon Pack:", xalign=0), 0, 1, 1, 1)
             icon_cb = Gtk.ComboBoxText()
             for i, ic in enumerate(installed_icons):
                 icon_cb.append_text(ic)
@@ -760,19 +763,123 @@ class SettingsAppWindow(Gtk.Window):
             tgrid.attach(icon_cb, 1, 1, 1, 1)
 
             # Mouse Cursor
-            tgrid.attach(Gtk.Label(label="Mouse Cursor:", xalign=0), 0, 2, 1, 1)
+            tgrid.attach(Gtk.Label(label="Mouse Cursor Theme:", xalign=0), 0, 2, 1, 1)
             cur_cb = Gtk.ComboBoxText()
-            for c in ["Bibata-Modern-Classic", "DMZ-Black", "Adwaita", "breeze_cursors"]:
+            for c in installed_cursors:
                 cur_cb.append_text(c)
             cur_cb.set_active(0)
-            cur_cb.connect("changed", lambda cb: safe_set_gsetting("org.cinnamon.desktop.interface", "cursor-theme", cb.get_active_text()))
+            cur_cb.connect("changed", lambda cb: ThemeAdapter.set_cursor_theme(cb.get_active_text()))
             tgrid.attach(cur_cb, 1, 2, 1, 1)
+
+            # System Font
+            tgrid.attach(Gtk.Label(label="System Typography (Font):", xalign=0), 0, 3, 1, 1)
+            f_box = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=8)
+            font_cb = Gtk.ComboBoxText()
+            for f in installed_fonts:
+                font_cb.append_text(f)
+            font_cb.set_active(0)
+            f_box.pack_start(font_cb, True, True, 0)
+
+            f_spin = Gtk.SpinButton.new_with_range(8, 24, 1)
+            f_spin.set_value(10)
+            f_box.pack_start(f_spin, False, False, 0)
+            font_cb.connect("changed", lambda cb: ThemeAdapter.set_system_font(cb.get_active_text(), int(f_spin.get_value())))
+            f_spin.connect("value-changed", lambda sp: ThemeAdapter.set_system_font(font_cb.get_active_text() or "Ubuntu", int(sp.get_value())))
+            tgrid.attach(f_box, 1, 3, 1, 1)
+
+            # Install Custom Theme / Icon / Font Buttons
+            btn_add_box = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=10)
+            btn_inst_theme = Gtk.Button.new_with_label("Install Custom Theme / Icon (.tar.xz, .zip)...")
+            btn_inst_theme.connect("clicked", self._install_custom_theme_dialog)
+            btn_inst_font = Gtk.Button.new_with_label("Install Custom Font (.ttf, .otf)...")
+            btn_inst_font.connect("clicked", self._install_custom_font_dialog)
+            btn_add_box.pack_start(btn_inst_theme, False, False, 0)
+            btn_add_box.pack_start(btn_inst_font, False, False, 0)
+            tgrid.attach(btn_add_box, 0, 4, 2, 1)
 
             frame.add(tgrid)
             self.content_box.pack_start(frame, False, False, 0)
 
-            # Wallpaper button
-            wframe = Gtk.Frame(label="Wallpaper")
+            # 2. Synthex Rice Customization Studio
+            rice_frame = Gtk.Frame(label="Synthex Rice Customization & Styling Studio")
+            rice_vbox = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=12)
+            rice_vbox.set_border_width(16)
+
+            # Accent Color Swatches
+            acc_box = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=12)
+            acc_box.pack_start(Gtk.Label(label="<b>System Accent Color:</b>", use_markup=True, xalign=0), False, False, 0)
+
+            accents = [
+                ("Synth Pink", "#ff007f"),
+                ("Frost Blue", "#88c0d0"),
+                ("Lavender", "#cba6f7"),
+                ("Tokyo Blue", "#7aa2f7"),
+                ("Retro Gold", "#fabd2f"),
+                ("Electric Cyan", "#00ffcc"),
+            ]
+            for acc_name, acc_hex in accents:
+                btn_acc = Gtk.Button.new_with_label(acc_name)
+                btn_acc.connect("clicked", lambda b, hx=acc_hex: (ThemeAdapter.set_accent_color(hx), self._show_accent_applied_toast(hx)))
+                acc_box.pack_start(btn_acc, False, False, 0)
+
+            btn_custom_col = Gtk.Button.new_with_label("Custom Color...")
+            btn_custom_col.connect("clicked", self._pick_custom_accent_color)
+            acc_box.pack_start(btn_custom_col, False, False, 0)
+            rice_vbox.pack_start(acc_box, False, False, 0)
+
+            # Window Corner Radius Slider
+            cr_box = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=12)
+            cr_box.pack_start(Gtk.Label(label="Window Corner Rounding (Radius):", xalign=0), False, False, 0)
+            cr_scale = Gtk.Scale.new_with_range(Gtk.Orientation.HORIZONTAL, 0, 24, 2)
+            cr_scale.set_value(12)
+            cr_scale.set_hexpand(True)
+            cr_scale.connect("value-changed", lambda sc: ThemeAdapter.set_window_corner_radius(int(sc.get_value())))
+            cr_box.pack_start(cr_scale, True, True, 0)
+            rice_vbox.pack_start(cr_box, False, False, 0)
+
+            rice_frame.add(rice_vbox)
+            self.content_box.pack_start(rice_frame, False, False, 0)
+
+            # 3. Curated Rice Presets & Portable Profiles
+            preset_frame = Gtk.Frame(label="Aesthetic Rice Presets & Portable Profiles")
+            preset_vbox = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=10)
+            preset_vbox.set_border_width(16)
+
+            pgrid = Gtk.Grid()
+            pgrid.set_column_spacing(16)
+            pgrid.set_row_spacing(10)
+
+            for idx, p in enumerate(ThemeAdapter.get_rice_presets()):
+                pf = Gtk.Frame()
+                pb = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=6)
+                pb.set_border_width(10)
+                pb.pack_start(Gtk.Label(label=f"<b>{p['name']}</b>", use_markup=True, xalign=0), False, False, 0)
+                pb.pack_start(Gtk.Label(label=f"<span size='small' color='#888888'>{p['desc']}</span>", use_markup=True, xalign=0), False, False, 0)
+
+                btn_apply_p = Gtk.Button.new_with_label(f"Apply {p['name']}")
+                btn_apply_p.connect("clicked", lambda b, pid=p["id"]: (ThemeAdapter.apply_rice_preset(pid), self._render_category_page("appearance", "Appearance", ["Themes", "Icons", "Fonts", "Rice"])))
+                pb.pack_start(btn_apply_p, False, False, 0)
+
+                pf.add(pb)
+                pgrid.attach(pf, idx % 2, idx // 2, 1, 1)
+
+            preset_vbox.pack_start(pgrid, False, False, 4)
+
+            # Profile Export & Import
+            exp_box = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=10)
+            btn_exp = Gtk.Button.new_with_label("Export Current Rice Profile (.synthrice)...")
+            btn_exp.connect("clicked", self._export_rice_dialog)
+            btn_imp = Gtk.Button.new_with_label("Import Rice Profile (.synthrice)...")
+            btn_imp.connect("clicked", self._import_rice_dialog)
+            exp_box.pack_start(btn_exp, False, False, 0)
+            exp_box.pack_start(btn_imp, False, False, 0)
+            preset_vbox.pack_start(exp_box, False, False, 4)
+
+            preset_frame.add(preset_vbox)
+            self.content_box.pack_start(preset_frame, False, False, 0)
+
+            # 4. Wallpaper Selection
+            wframe = Gtk.Frame(label="Desktop Wallpaper")
             wbox = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=8)
             wbox.set_border_width(16)
             btn_wp = Gtk.Button.new_with_label("Select Wallpaper Image from Files...")
@@ -1932,6 +2039,147 @@ class SettingsAppWindow(Gtk.Window):
                 except Exception:
                     pass
         dialog.destroy()
+
+    def _install_custom_theme_dialog(self, btn):
+        dialog = Gtk.FileChooserDialog(
+            title="Install Custom GTK Theme or Icon Pack (.tar.xz, .tar.gz, .zip)",
+            parent=self,
+            action=Gtk.FileChooserAction.OPEN
+        )
+        dialog.add_button(Gtk.STOCK_CANCEL, Gtk.ResponseType.CANCEL)
+        dialog.add_button("Install Archive", Gtk.ResponseType.ACCEPT)
+
+        filt = Gtk.FileFilter()
+        filt.set_name("Theme Archives (*.tar.xz, *.tar.gz, *.zip)")
+        filt.add_pattern("*.tar.xz")
+        filt.add_pattern("*.tar.gz")
+        filt.add_pattern("*.tar.bz2")
+        filt.add_pattern("*.zip")
+        dialog.add_filter(filt)
+
+        if dialog.run() == Gtk.ResponseType.ACCEPT:
+            filename = dialog.get_filename()
+            res = ThemeAdapter.install_theme_or_icon_archive(filename)
+            md = Gtk.MessageDialog(
+                parent=self,
+                flags=0,
+                type=Gtk.MessageType.INFO if res.get("status") == "success" else Gtk.MessageType.ERROR,
+                buttons=Gtk.ButtonsType.OK,
+                message_format=res.get("message", "Operation finished.")
+            )
+            md.run()
+            md.destroy()
+            self._render_category_page("appearance", "Appearance", ["Themes", "Icons", "Fonts", "Rice"])
+        dialog.destroy()
+
+    def _install_custom_font_dialog(self, btn):
+        dialog = Gtk.FileChooserDialog(
+            title="Install Custom Typography Font (.ttf, .otf)",
+            parent=self,
+            action=Gtk.FileChooserAction.OPEN
+        )
+        dialog.add_button(Gtk.STOCK_CANCEL, Gtk.ResponseType.CANCEL)
+        dialog.add_button("Install Font", Gtk.ResponseType.ACCEPT)
+
+        filt = Gtk.FileFilter()
+        filt.set_name("Font Files (*.ttf, *.otf, *.woff2)")
+        filt.add_pattern("*.ttf")
+        filt.add_pattern("*.otf")
+        filt.add_pattern("*.woff")
+        filt.add_pattern("*.woff2")
+        dialog.add_filter(filt)
+
+        if dialog.run() == Gtk.ResponseType.ACCEPT:
+            filename = dialog.get_filename()
+            res = ThemeAdapter.install_font_file(filename)
+            md = Gtk.MessageDialog(
+                parent=self,
+                flags=0,
+                type=Gtk.MessageType.INFO if res.get("status") == "success" else Gtk.MessageType.ERROR,
+                buttons=Gtk.ButtonsType.OK,
+                message_format=res.get("message", "Font installed.")
+            )
+            md.run()
+            md.destroy()
+            self._render_category_page("appearance", "Appearance", ["Themes", "Icons", "Fonts", "Rice"])
+        dialog.destroy()
+
+    def _export_rice_dialog(self, btn):
+        dialog = Gtk.FileChooserDialog(
+            title="Export Current Rice Profile (.synthrice)",
+            parent=self,
+            action=Gtk.FileChooserAction.SAVE
+        )
+        dialog.add_button(Gtk.STOCK_CANCEL, Gtk.ResponseType.CANCEL)
+        dialog.add_button("Save Profile", Gtk.ResponseType.ACCEPT)
+        dialog.set_current_name(f"my_rice_profile_{int(time.time())}.synthrice")
+
+        if dialog.run() == Gtk.ResponseType.ACCEPT:
+            filename = dialog.get_filename()
+            ok = ThemeAdapter.export_rice_profile(filename)
+            md = Gtk.MessageDialog(
+                parent=self,
+                flags=0,
+                type=Gtk.MessageType.INFO if ok else Gtk.MessageType.ERROR,
+                buttons=Gtk.ButtonsType.OK,
+                message_format=f"Exported Rice Profile to {filename}" if ok else "Failed to export profile."
+            )
+            md.run()
+            md.destroy()
+        dialog.destroy()
+
+    def _import_rice_dialog(self, btn):
+        dialog = Gtk.FileChooserDialog(
+            title="Import Rice Profile (.synthrice)",
+            parent=self,
+            action=Gtk.FileChooserAction.OPEN
+        )
+        dialog.add_button(Gtk.STOCK_CANCEL, Gtk.ResponseType.CANCEL)
+        dialog.add_button("Apply Profile", Gtk.ResponseType.ACCEPT)
+
+        filt = Gtk.FileFilter()
+        filt.set_name("SynthOS Rice Profiles (*.synthrice, *.json)")
+        filt.add_pattern("*.synthrice")
+        filt.add_pattern("*.json")
+        dialog.add_filter(filt)
+
+        if dialog.run() == Gtk.ResponseType.ACCEPT:
+            filename = dialog.get_filename()
+            ok = ThemeAdapter.import_rice_profile(filename)
+            md = Gtk.MessageDialog(
+                parent=self,
+                flags=0,
+                type=Gtk.MessageType.INFO if ok else Gtk.MessageType.ERROR,
+                buttons=Gtk.ButtonsType.OK,
+                message_format="Successfully imported and applied Rice Profile!" if ok else "Failed to apply profile."
+            )
+            md.run()
+            md.destroy()
+            self._render_category_page("appearance", "Appearance", ["Themes", "Icons", "Fonts", "Rice"])
+        dialog.destroy()
+
+    def _pick_custom_accent_color(self, btn):
+        dialog = Gtk.ColorChooserDialog(title="Select Custom Accent Color", parent=self)
+        if dialog.run() == Gtk.ResponseType.OK:
+            rgba = dialog.get_rgba()
+            r = int(rgba.red * 255)
+            g = int(rgba.green * 255)
+            b = int(rgba.blue * 255)
+            hex_code = f"#{r:02x}{g:02x}{b:02x}"
+            ThemeAdapter.set_accent_color(hex_code)
+            self._show_accent_applied_toast(hex_code)
+        dialog.destroy()
+
+    def _show_accent_applied_toast(self, hex_code):
+        try:
+            subprocess.Popen([
+                "notify-send",
+                "-i", "preferences-desktop-theme",
+                "Accent Color Updated",
+                f"Active GTK accent color set to {hex_code}"
+            ])
+        except Exception:
+            pass
 
 
 def main():

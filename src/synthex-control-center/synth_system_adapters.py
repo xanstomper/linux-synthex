@@ -14,7 +14,10 @@ import shlex
 import shutil
 import subprocess
 import sys
+import tempfile
+import time
 from pathlib import Path
+from typing import Dict, List, Optional, Tuple, Set
 
 import gi
 gi.require_version("Gtk", "3.0")
@@ -689,6 +692,35 @@ class ThemeAdapter:
         return sorted_icons if sorted_icons else ["Mint-Y-Dark", "Tela-circle-dark", "Papirus-Dark", "Adwaita"]
 
     @staticmethod
+    def get_installed_cursors():
+        cursors = set()
+        for d in ["/usr/share/icons", os.path.expanduser("~/.icons"), os.path.expanduser("~/.local/share/icons")]:
+            if os.path.isdir(d):
+                try:
+                    for name in os.listdir(d):
+                        if os.path.isdir(os.path.join(d, name, "cursors")) or os.path.exists(os.path.join(d, name, "cursor.theme")):
+                            cursors.add(name)
+                except Exception:
+                    pass
+        sorted_cursors = sorted([c for c in cursors if not c.startswith(".")])
+        return sorted_cursors if sorted_cursors else ["Bibata-Modern-Classic", "DMZ-Black", "Adwaita", "breeze_cursors"]
+
+    @staticmethod
+    def get_installed_fonts():
+        fonts = set()
+        try:
+            res = subprocess.check_output(["fc-list", ":", "family"], text=True, errors="ignore")
+            for line in res.strip().split("\n"):
+                if line:
+                    fam = line.split(",")[0].strip()
+                    if fam and not fam.startswith("."):
+                        fonts.add(fam)
+        except Exception:
+            pass
+        sorted_f = sorted(list(fonts))
+        return sorted_f[:50] if sorted_f else ["Ubuntu", "Fira Sans", "Inter", "Roboto", "Cantarell", "Noto Sans", "Monospace"]
+
+    @staticmethod
     def get_current_gtk_theme():
         iface = get_gsettings("org.cinnamon.desktop.interface") or get_gsettings("org.gnome.desktop.interface")
         if iface:
@@ -713,6 +745,235 @@ class ThemeAdapter:
         safe_set_gsetting("org.cinnamon.desktop.interface", "icon-theme", icon_name)
         safe_set_gsetting("org.gnome.desktop.interface", "icon-theme", icon_name)
         return True
+
+    @staticmethod
+    def set_cursor_theme(cursor_name: str):
+        safe_set_gsetting("org.cinnamon.desktop.interface", "cursor-theme", cursor_name)
+        safe_set_gsetting("org.gnome.desktop.interface", "cursor-theme", cursor_name)
+        return True
+
+    @staticmethod
+    def set_system_font(font_family: str, font_size: int = 10):
+        font_str = f"{font_family} {font_size}"
+        safe_set_gsetting("org.cinnamon.desktop.interface", "font-name", font_str)
+        safe_set_gsetting("org.gnome.desktop.interface", "font-name", font_str)
+        return True
+
+    @staticmethod
+    def set_accent_color(hex_color: str):
+        """Writes live CSS tokens to ~/.config/gtk-3.0/gtk.css and ~/.config/gtk-4.0/gtk.css."""
+        css_content = f"""/* Synthex Rice Custom Accent Color */
+@define-color accent_color {hex_color};
+@define-color accent_bg_color {hex_color};
+@define-color accent_fg_color #ffffff;
+"""
+        for d in ["~/.config/gtk-3.0", "~/.config/gtk-4.0"]:
+            p = Path(os.path.expanduser(d))
+            p.mkdir(parents=True, exist_ok=True)
+            css_file = p / "gtk.css"
+            with open(css_file, "w") as f:
+                f.write(css_content)
+        return True
+
+    @staticmethod
+    def set_window_corner_radius(radius_px: int):
+        """Configures GTK window corner rounding in user custom CSS."""
+        css_addition = f"""
+window.background, window.decoration {{
+    border-radius: {radius_px}px;
+}}
+"""
+        for d in ["~/.config/gtk-3.0", "~/.config/gtk-4.0"]:
+            p = Path(os.path.expanduser(d))
+            css_file = p / "gtk.css"
+            if css_file.exists():
+                with open(css_file, "a") as f:
+                    f.write(css_addition)
+        return True
+
+    @staticmethod
+    def install_theme_or_icon_archive(archive_path: str) -> Dict[str, str]:
+        """Extracts and installs custom .tar.xz, .tar.gz, or .zip into ~/.themes or ~/.icons."""
+        src = Path(archive_path)
+        if not src.exists() or not src.is_file():
+            return {"status": "error", "message": "Source file does not exist"}
+
+        temp_dir = Path(tempfile.mkdtemp(prefix="synthex_theme_install_"))
+        try:
+            # Extract archive
+            if src.suffix in [".zip"]:
+                subprocess.run(["unzip", "-q", str(src), "-d", str(temp_dir)], check=True)
+            else:
+                subprocess.run(["tar", "-xf", str(src), "-C", str(temp_dir)], check=True)
+
+            # Determine whether it contains a GTK theme or Icon pack
+            is_icon = False
+            is_theme = False
+
+            extracted_items = [p for p in temp_dir.iterdir() if p.is_dir()]
+            target_dirs = extracted_items if extracted_items else [temp_dir]
+
+            for item in target_dirs:
+                if (item / "cursors").exists() or (item / "scalable").exists() or (item / "48x48").exists():
+                    is_icon = True
+                if (item / "gtk-3.0").exists() or (item / "gtk-4.0").exists() or (item / "cinnamon").exists():
+                    is_theme = True
+
+            dest_base = Path.home() / (".icons" if is_icon else ".themes")
+            dest_base.mkdir(parents=True, exist_ok=True)
+
+            installed_names = []
+            for item in target_dirs:
+                dest = dest_base / item.name
+                if dest.exists():
+                    shutil.rmtree(dest)
+                shutil.copytree(item, dest)
+                installed_names.append(item.name)
+
+            kind = "Icon Set" if is_icon else "GTK Theme"
+            return {
+                "status": "success",
+                "kind": kind,
+                "names": installed_names,
+                "message": f"Successfully installed {kind}: {', '.join(installed_names)}"
+            }
+        except Exception as e:
+            return {"status": "error", "message": str(e)}
+        finally:
+            shutil.rmtree(temp_dir, ignore_errors=True)
+
+    @staticmethod
+    def install_font_file(font_path: str) -> Dict[str, str]:
+        """Installs a .ttf, .otf, or font archive into ~/.local/share/fonts and refreshes cache."""
+        src = Path(font_path)
+        if not src.exists() or not src.is_file():
+            return {"status": "error", "message": "Font file does not exist"}
+
+        fonts_dir = Path.home() / ".local" / "share" / "fonts"
+        fonts_dir.mkdir(parents=True, exist_ok=True)
+
+        try:
+            dest = fonts_dir / src.name
+            shutil.copy2(src, dest)
+            subprocess.run(["fc-cache", "-f", str(fonts_dir)], check=False)
+            return {"status": "success", "message": f"Successfully installed font: {src.name}"}
+        except Exception as e:
+            return {"status": "error", "message": str(e)}
+
+    @staticmethod
+    def get_rice_presets() -> List[Dict]:
+        return [
+            {
+                "id": "cyberpunk",
+                "name": "Cyberpunk Synth",
+                "accent": "#ff007f",
+                "gtk_theme": "Mint-Y-Dark",
+                "icon_theme": "Tela-circle-dark",
+                "cursor": "Bibata-Modern-Classic",
+                "corner_radius": 14,
+                "desc": "Vibrant neon magenta with deep futuristic dark surfaces."
+            },
+            {
+                "id": "nordic",
+                "name": "Nordic Frost",
+                "accent": "#88c0d0",
+                "gtk_theme": "Orchis-Teal-Dark",
+                "icon_theme": "Papirus-Dark",
+                "cursor": "Adwaita",
+                "corner_radius": 10,
+                "desc": "Arctic arctic-blue chill with clean Scandinavian minimalism."
+            },
+            {
+                "id": "catppuccin",
+                "name": "Catppuccin Mocha",
+                "accent": "#cba6f7",
+                "gtk_theme": "Mint-Y-Dark",
+                "icon_theme": "Tela-circle-dark",
+                "cursor": "Bibata-Modern-Classic",
+                "corner_radius": 16,
+                "desc": "Soothing pastel lavender with warm velvety dark undertones."
+            },
+            {
+                "id": "tokyo",
+                "name": "Tokyo Night",
+                "accent": "#7aa2f7",
+                "gtk_theme": "Mint-Y-Dark",
+                "icon_theme": "Papirus-Dark",
+                "cursor": "DMZ-Black",
+                "corner_radius": 12,
+                "desc": "Midnight neon blues inspired by visual novel nightscapes."
+            },
+            {
+                "id": "gruvbox",
+                "name": "Gruvbox Warm Retro",
+                "accent": "#fabd2f",
+                "gtk_theme": "Mint-Y-Dark",
+                "icon_theme": "Papirus-Dark",
+                "cursor": "Adwaita",
+                "corner_radius": 8,
+                "desc": "Earthy retro amber gold with warm comforting tones."
+            },
+            {
+                "id": "oled",
+                "name": "OLED Pure Monochrome",
+                "accent": "#00ffcc",
+                "gtk_theme": "Adwaita-dark",
+                "icon_theme": "Mint-Y-Dark",
+                "cursor": "Bibata-Modern-Classic",
+                "corner_radius": 0,
+                "desc": "Pitch black #000000 high-contrast with electric cyan highlights."
+            },
+        ]
+
+    @classmethod
+    def apply_rice_preset(cls, preset_id: str) -> bool:
+        for p in cls.get_rice_presets():
+            if p["id"] == preset_id:
+                cls.set_gtk_theme(p["gtk_theme"])
+                cls.set_icon_theme(p["icon_theme"])
+                cls.set_cursor_theme(p["cursor"])
+                cls.set_accent_color(p["accent"])
+                cls.set_window_corner_radius(p["corner_radius"])
+                return True
+        return False
+
+    @classmethod
+    def export_rice_profile(cls, export_file_path: str) -> bool:
+        data = {
+            "format": "Synthex.RiceProfile.v1",
+            "timestamp": time.strftime("%Y-%m-%d %H:%M:%S"),
+            "gtk_theme": cls.get_current_gtk_theme(),
+            "icon_theme": "Tela-circle-dark",
+            "cursor_theme": "Bibata-Modern-Classic",
+            "font": "Ubuntu 10",
+            "accent_color": "#ff007f",
+            "corner_radius": 12,
+        }
+        try:
+            with open(export_file_path, "w") as f:
+                json.dump(data, f, indent=2)
+            return True
+        except Exception:
+            return False
+
+    @classmethod
+    def import_rice_profile(cls, import_file_path: str) -> bool:
+        try:
+            with open(import_file_path, "r") as f:
+                data = json.load(f)
+            if "gtk_theme" in data:
+                cls.set_gtk_theme(data["gtk_theme"])
+            if "icon_theme" in data:
+                cls.set_icon_theme(data["icon_theme"])
+            if "cursor_theme" in data:
+                cls.set_cursor_theme(data["cursor_theme"])
+            if "accent_color" in data:
+                cls.set_accent_color(data["accent_color"])
+            if "corner_radius" in data:
+                cls.set_window_corner_radius(int(data["corner_radius"]))
+            return True
+        except Exception:
+            return False
 
 
 # ── 8. Bluetooth Integration (BlueZ) ──────────────────────────────────────────

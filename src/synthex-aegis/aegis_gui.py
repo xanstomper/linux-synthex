@@ -246,13 +246,17 @@ class AegisMainWindow(Gtk.Window):
                     b.set_border_width(8)
 
                     h = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=12)
-                    h.pack_start(Gtk.Label(label=f"<b>{inc.get('category')}</b>", use_markup=True, xalign=0), True, True, 0)
+                    safe_cat = GLib.markup_escape_text(str(inc.get('category', 'Threat')))
+                    h.pack_start(Gtk.Label(label=f"<b>{safe_cat}</b>", use_markup=True, xalign=0), True, True, 0)
                     sev_lbl = Gtk.Label()
-                    sev_lbl.set_markup(f"<span color='#e74c3c'><b>{inc.get('severity')}</b></span>")
+                    sev_lbl.set_markup(f"<span color='#e74c3c'><b>{inc.get('severity', 'High')}</b></span>")
                     h.pack_end(sev_lbl, False, False, 0)
                     b.pack_start(h, False, False, 0)
 
-                    detail = f"<span color='#888888'>{inc.get('timestamp')}</span> • Process: <b>{inc.get('process_name')}</b> (PID: {inc.get('pid')})\nMITRE: {inc.get('tactic')}\nAction: <span color='#2ecc71'>{inc.get('action_taken')}</span>"
+                    safe_proc = GLib.markup_escape_text(str(inc.get('process_name', 'unknown')))
+                    safe_tac = GLib.markup_escape_text(str(inc.get('tactic', 'Execution')))
+                    safe_act = GLib.markup_escape_text(str(inc.get('action_taken', 'Blocked')))
+                    detail = f"<span color='#888888'>{inc.get('timestamp')}</span> • Process: <b>{safe_proc}</b> (PID: {inc.get('pid')})\nMITRE: {safe_tac}\nAction: <span color='#2ecc71'>{safe_act}</span>"
                     b.pack_start(Gtk.Label(label=detail, use_markup=True, xalign=0), False, False, 0)
                     r.add(b)
                     ilist.add(r)
