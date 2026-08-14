@@ -13,7 +13,7 @@ BOLD   := \033[1m
 RESET  := \033[0m
 
 .PHONY: all help rust iso iso-all iso-plasma iso-hyprland iso-gnome iso-gaming iso-minimal \
-        ks-validate rpms clean clean-iso srctars release docs \
+        ks-validate rpms srctars local-repo clean clean-iso release docs \
         aether sentinel
 
 help:
@@ -108,14 +108,14 @@ iso-all:
 # ── RPM packages ──────────────────────────────────────────────────────────────
 srctars:
 	@echo -e "$(GREEN)[SRC]$(RESET) Creating source tarballs..."
-	@mkdir -p ~/rpmbuild/SOURCES
-	@tar czf ~/rpmbuild/SOURCES/synthex-installer-$(VERSION).tar.gz \
-	    --transform "s|^installer/|synthex-installer-$(VERSION)/|" installer/
-	@tar czf ~/rpmbuild/SOURCES/synthex-branding-$(VERSION).tar.gz \
-	    --transform "s|^branding/|synthex-branding-$(VERSION)/|" branding/
-	@tar czf ~/rpmbuild/SOURCES/synthex-desktop-$(VERSION).tar.gz \
-	    --transform "s|^desktop/|synthex-desktop-$(VERSION)/|" desktop/
+	@bash build/scripts/make-srctars.sh
 	@echo -e "$(GREEN)[OK]$(RESET)    Source tarballs in ~/rpmbuild/SOURCES/"
+
+# Full local repo: tarballs + all RPMs + createrepo metadata (run in Fedora container)
+local-repo: srctars
+	@echo -e "$(GREEN)[REPO]$(RESET) Building all RPMs + local yum repo..."
+	@bash build/scripts/local-repo.sh
+	@echo -e "$(GREEN)[OK]$(RESET)    Local repo in build/repo/ (see synthex-local.repo)"
 
 rpms: srctars
 	@echo -e "$(GREEN)[RPM]$(RESET) Building all RPM packages..."

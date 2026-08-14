@@ -922,6 +922,67 @@ check("synthex.target Wants agent service", "synthex-agent" in st)
 sc = open(os.path.join(ROOT, "installer/modules/services-systemd/services-systemd.conf")).read()
 check("installer enables agent service", "synthex-agent" in sc)
 
+# 65. Packaging integrity — every spec's first-party install path must exist
+print("\n📋 Spec integrity (install paths):")
+import glob as _glob, re as _re, os as _os
+TOPDIRS = ("desktop/","src/","systemd/","configs/","branding/","installer/","etc/","build/","kernel/","services/","safety/","tests/","docs/","udev/","dbus/","layouts/","modes/","profiles/","scripts/")
+_spec_broken = 0
+def _expand(p, macros):
+    return _re.sub(r'%\{(\w+)\}', lambda m: macros.get(m.group(1), m.group(0)), p)
+for _spec in sorted(_glob.glob(os.path.join(ROOT, "packages/spec-files/*.spec"))):
+    _s = open(_spec, encoding="utf-8", errors="replace").read()
+    _macros = dict(_re.findall(r'^%global\s+(\w+)\s+(\S+)', _s, _re.M))
+    for _m in _re.finditer(r'(?m)^\s*(?:install\s+(?:-\S+\s+)*|cp\s+(?:-\S+\s+)*)(\S+)', _s):
+        _p = _expand(_m.group(1).strip('"'), _macros)
+        if _p.startswith('%') or _p.startswith('/'): continue
+        if not _p.startswith(TOPDIRS): continue
+        _full = _os.path.join(ROOT, _p)
+        if '*' in _p:
+            _base = _os.path.dirname(_full)
+            if _base and not _os.path.isdir(_base): _spec_broken += 1
+        elif not _os.path.exists(_full):
+            _spec_broken += 1
+check("specs: all first-party install paths exist", _spec_broken == 0,
+      f"{_spec_broken} broken")
+
+# 66. Every spec has %files + a Name (buildable sanity)
+_bad = [f for f in _glob.glob(os.path.join(ROOT, "packages/spec-files/*.spec"))
+        if not _re.search(r'^Name:\s*\S+', open(f, encoding="utf-8", errors="replace").read(), _re.M)
+        or not _re.search(r'^%files', open(f, encoding="utf-8", errors="replace").read(), _re.M)]
+check("specs: all have Name + %files", len(_bad) == 0, f"{len(_bad)} bad")
+
+# 67. Core components have spec coverage (no unpackaged src dirs)
+_all_spec_text = ""
+for _f in _glob.glob(os.path.join(ROOT, "packages/spec-files/*.spec")):
+    _all_spec_text += open(_f, encoding="utf-8", errors="replace").read()
+for _crate in ["synthguard", "synthshield", "synthvault", "synthidentity", "synthnet",
+               "synthupdate", "synthbox", "synthex-blueprint", "synthex-boot",
+               "synthex-studio", "synthex-webapp-engine", "synthex-predictive-launch",
+               "synthex-widgets", "synthex-app-manager"]:
+    check(f"spec coverage: {_crate}", f"Name:           {_crate}" in _all_spec_text or _crate in _all_spec_text)
+
+# 68. sysusers for every service with a system User=
+for _svc, _user in [("synthex-brain.service", "synthex-brain"),
+                    ("synthex-agent-sandbox.service", "synthex-agent")]:
+    _unit = open(os.path.join(ROOT, "systemd", _svc)).read()
+    _sysu = _os.path.exists(os.path.join(ROOT, "systemd", _user + ".sysusers"))
+    check(f"sysusers: {_user}", ("User=" + _user) not in _unit or _sysu)
+
+# 69. No hardcoded personal users in shipped units
+_leak = []
+for _u in _glob.glob(os.path.join(ROOT, "systemd/*.service")):
+    _t = open(_u).read()
+    if _re.search(r'^User=(?!root$)\w+$', _t, _re.M) and "User=root" not in _t:
+        for _mm in _re.finditer(r'^User=(\w+)$', _t, _re.M):
+            _n = _mm.group(1)
+            if not _n.startswith("synthex") and _n not in ("_", "messagebus", "systemd-", "dnf"):
+                _leak.append((_os.path.basename(_u), _n))
+check("no personal User= in units", len(_leak) == 0, str(_leak[:3]))
+
+# 70. Build pipeline present
+for _f in ["build/scripts/make-srctars.sh", "build/scripts/local-repo.sh"]:
+    check(f"pipeline: {_f}", _os.access(_os.path.join(ROOT, _f), _os.X_OK))
+
 # Summary
 print(f"\n{'='*50}")
 print(f"  RESULTS: {passed} passed, {failed} failed")
