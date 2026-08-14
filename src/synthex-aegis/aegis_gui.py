@@ -215,8 +215,10 @@ class AegisMainWindow(Gtk.Window):
             for key, title, desc in engine_toggles:
                 r = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=12)
                 vb = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=2)
-                vb.pack_start(Gtk.Label(label=f"<b>{title}</b>", use_markup=True, xalign=0), False, False, 0)
-                vb.pack_start(Gtk.Label(label=f"<span size='small' color='#888888'>{desc}</span>", use_markup=True, xalign=0), False, False, 0)
+                safe_t = GLib.markup_escape_text(title)
+                safe_d = GLib.markup_escape_text(desc)
+                vb.pack_start(Gtk.Label(label=f"<b>{safe_t}</b>", use_markup=True, xalign=0), False, False, 0)
+                vb.pack_start(Gtk.Label(label=f"<span size='small' color='#888888'>{safe_d}</span>", use_markup=True, xalign=0), False, False, 0)
                 r.pack_start(vb, True, True, 0)
 
                 sw = Gtk.Switch()
@@ -307,7 +309,8 @@ class AegisMainWindow(Gtk.Window):
                 r = Gtk.ListBoxRow()
                 h = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=12)
                 h.set_border_width(6)
-                h.pack_start(Gtk.Label(label=f"📁 <code>{ex}</code>", use_markup=True, xalign=0), True, True, 0)
+                safe_ex = GLib.markup_escape_text(ex)
+                h.pack_start(Gtk.Label(label=f"📁 <tt>{safe_ex}</tt>", use_markup=True, xalign=0), True, True, 0)
                 r.add(h)
                 elist.add(r)
             vbox.pack_start(elist, False, False, 4)
@@ -329,7 +332,8 @@ class AegisMainWindow(Gtk.Window):
 
     def _update_progress(self, fraction, status_text, threat_count):
         self.prog_bar.set_fraction(fraction)
-        self.status_lbl.set_markup(f"<b>{status_text}</b> ({int(fraction * 100)}%)")
+        safe_st = GLib.markup_escape_text(status_text)
+        self.status_lbl.set_markup(f"<b>{safe_st}</b> ({int(fraction * 100)}%)")
         if fraction >= 1.0 or not self.engine.is_scanning:
             self.btn_quick.set_sensitive(True)
             self.btn_full.set_sensitive(True)

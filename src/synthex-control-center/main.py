@@ -1086,7 +1086,7 @@ class SettingsAppWindow(Gtk.Window):
 
                 for part in dev.get("children", []):
                     pr = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=12)
-                    pr.set_margin_left(28)
+                    pr.set_margin_start(28)
                     pr.pack_start(Gtk.Label(label=f"Partition: <b>{part.get('name')}</b> ({part.get('size')}, {part.get('fstype', 'raw')})", use_markup=True, xalign=0), True, True, 0)
                     mp = part.get("mountpoint") or "Not Mounted"
                     pr.pack_start(Gtk.Label(label=f"Mount: {mp}"), False, False, 0)
