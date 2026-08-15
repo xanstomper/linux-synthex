@@ -15,5 +15,15 @@ for CAND in /usr/bin/python3 python3 "$REPO_ROOT/.venv/bin/python"; do
         break
     fi
 done
-[ -n "$PY" ] || { echo "No Python with PyGObject (gi) found" >&2; exit 1; }
-exec "$PY" "$HERE/main.py" "$@"
+# Resolve main.py location across source repo and system install paths
+MAIN_PY=""
+for CAND in "$HERE/main.py" "/home/jewboy420/linux-synthex/src/synthex-control-center/main.py" "/usr/lib/synthex/synthex-control-center/main.py"; do
+    if [ -f "$CAND" ]; then
+        MAIN_PY="$CAND"
+        break
+    fi
+done
+[ -n "$MAIN_PY" ] || { echo "Could not locate main.py for Synthex Control Center" >&2; exit 1; }
+
+exec "$PY" "$MAIN_PY" "$@"
+

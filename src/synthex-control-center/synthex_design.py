@@ -766,10 +766,12 @@ class AsyncSection(Gtk.Frame):
         def work():
             try:
                 payload = loader()
-                GLib.idle_add(lambda: self._populate(payload, renderer))
+                GLib.idle_add(lambda p=payload: self._populate(p, renderer))
             except Exception as exc:
-                GLib.idle_add(lambda: self._fail(exc, on_error))
+                err_msg = str(exc)
+                GLib.idle_add(lambda e=err_msg: self._fail(e, on_error))
         threading.Thread(target=work, daemon=True).start()
+
 
     def _populate(self, payload, renderer):
         try:
