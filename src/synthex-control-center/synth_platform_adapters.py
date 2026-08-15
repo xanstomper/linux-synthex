@@ -43,6 +43,11 @@ def _gget(schema_id: str, key: str, default=None):
         return default
 
 
+def ensure_polkit_agent():
+    """Ensures a Polkit authentication agent is present or fallback active."""
+    return True
+
+
 HOME = Path.home()
 
 
@@ -52,6 +57,42 @@ def _which(*names):
         if p:
             return p
     return None
+
+
+def ensure_polkit_agent() -> bool:
+    """Make sure a polkit authentication agent is available so pkexec prompts
+    render a native GUI dialog instead of a broken/fallback one. Spawns a known
+    agent if none is registered for this session. Returns True if an agent is
+    (now) available."""
+    import subprocess as _sp
+    try:
+        ok, out, _ = run_cmd(["pgrep", "-af", "polkit"], timeout=4)
+        if ok and "agent" in (out or ""):
+            return True
+    except Exception:
+        pass
+    candidates = [
+        "/usr/libexec/polkit-gnome-authentication-agent-1",
+        "/usr/lib/polkit-gnome-authentication-agent-1",
+        "/usr/lib/x86_64-linux-gnu/libexec/polkit-gnome-authentication-agent-1",
+        "/usr/lib/x86_64-linux-gnu/polkit-mate/polkit-mate-authentication-agent-1",
+        "/usr/lib/polkit-mate/polkit-mate-authentication-agent-1",
+        "/usr/lib/libexec/polkit-kde-authentication-agent-1",
+        "/usr/lib/x86_64-linux-gnu/libexec/polkit-kde-authentication-agent-1",
+        "/usr/lib/x86_64-linux-gnu/libexec/lxqt-policykit-agent",
+        "/usr/libexec/polkit-pantheon-authentication-agent-1",
+    ]
+    env = dict(os.environ)
+    env.setdefault("DISPLAY", ":0")
+    for c in candidates:
+        if os.path.exists(c):
+            try:
+                _sp.Popen([c], start_new_session=True, env=env,
+                          stdout=_sp.DEVNULL, stderr=_sp.DEVNULL)
+                return True
+            except Exception:
+                continue
+    return False
 
 
 # ══════════════════════════════════════════════════════════════════════════════
@@ -200,15 +241,16 @@ class FirewallLayer:
 
     @staticmethod
     def set_enabled(enabled: bool) -> bool:
+        ensure_polkit_agent()
         if FirewallLayer.backend() == "firewalld":
-            cmd = ["pkexec", "firewall-cmd", "--add-service=ssh", "--permanent"] if enabled else \
-                  ["pkexec", "firewall-cmd", "--shutdown"]
             if enabled:
-                run_cmd(cmd, timeout=10)
-                ok, _, _ = run_cmd(["pkexec", "systemctl", "enable", "--now", "firewalld"], timeout=20)
-                run_cmd(["pkexec", "firewall-cmd", "--reload"], timeout=10)
-                return ok
-            ok, _, _ = run_cmd(cmd, timeout=10)
+                # Single prompt: enable service, allow ssh, reload — all in one
+                ok, _, _ = run_cmd(["pkexec", "bash", "-c",
+                                    "systemctl enable --now firewalld; "
+                                    "firewall-cmd --add-service=ssh --permanent; "
+                                    "firewall-cmd --reload"], timeout=30)
+            else:
+                ok, _, _ = run_cmd(["pkexec", "systemctl", "disable", "--now", "firewalld"], timeout=30)
             return ok
         ok, _, _ = run_cmd(["pkexec", "ufw", "enable" if enabled else "disable"], timeout=10)
         return ok

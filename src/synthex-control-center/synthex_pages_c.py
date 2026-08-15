@@ -19,7 +19,7 @@ from synth_system_adapters import (
     QuarantineManagerAdapter, SecurityAdapter, SystemAdapter, run_cmd,
     safe_set_gsetting, get_gsettings,
 )
-from synth_platform_adapters import FirewallLayer, _gget
+from synth_platform_adapters import FirewallLayer, _gget, ensure_polkit_agent
 from synthex_pages_a import _combo, _spin
 
 AEGIS_DIR = Path(__file__).resolve().parent.parent / "synthex-aegis"
@@ -50,10 +50,30 @@ def aegis_daemon_status() -> dict:
     return {"active": False, "via": None, "enabled": False}
 
 
-def _aegis_set_service(enable: bool):
-    verb = "enable --now" if enable else "disable --now"
-    run_cmd(["pkexec", "systemctl", *verb.split(), "synthex-aegis.service"], timeout=15)
-    run_cmd(["pkexec", "systemctl", "restart" if enable else "stop", "synthex-aegis.service"], timeout=15)
+def _aegis_set_service(enable: bool) -> bool:
+    """Single-prompt daemon control.
+    Installed OS: systemd unit via one pkexec call.
+    Source checkout: manage the daemon as a user process (no auth needed)."""
+    ensure_polkit_agent()
+    ok_units, units_out, _ = run_cmd(["systemctl", "list-unit-files", "synthex-aegis.service"], timeout=6)
+    if "synthex-aegis.service" in (units_out or ""):
+        verb = ["enable", "--now"] if enable else ["disable", "--now"]
+        ok, _, _ = run_cmd(["pkexec", "systemctl", *verb, "synthex-aegis.service"], timeout=30)
+        return ok
+    # Dev/source-tree fallback: run the real daemon as a user process
+    import sys as _sys
+    import subprocess as _sp
+    if enable:
+        try:
+            log = open("/tmp/synthex-aegis-daemon.log", "ab")
+            _sp.Popen([_sys.executable, str(AEGIS_DIR / "aegis_daemon.py")],
+                      start_new_session=True, stdout=log, stderr=_sp.STDOUT,
+                      stdin=_sp.DEVNULL)
+            return True
+        except Exception:
+            return False
+    run_cmd(["pkill", "-f", "aegis_daemon[.]py"], timeout=6)
+    return True
 
 
 def build_aegis(toast):
@@ -64,11 +84,20 @@ def build_aegis(toast):
 
     # ── Daemon ────────────────────────────────────────────────────────
     sec = Section("Real-time protection")
-    row, _ = toggle_row("Aegis daemon", "Behavioral engine monitoring processes, memory, sockets and SUID",
-                        icon="security-high",
-                        get=lambda: st["active"],
-                        set_=lambda v: _aegis_set_service(v))
-    sec.add_row(row)
+    daemon_sw = Gtk.Switch(valign=Gtk.Align.CENTER)
+    daemon_sw.set_active(st["active"])
+
+    def _on_daemon_toggle(sw, state):
+        ok = _aegis_set_service(state)
+        msg = ("Aegis protection " + ("started — behavioral engine live" if state else "stopped")) \
+            if ok else "Could not change protection state"
+        toast.show_message(msg, error=not ok, seconds=5)
+        return True
+
+    daemon_sw.connect("state-set", _on_daemon_toggle)
+    sec.add_row(entity_card("Aegis daemon",
+                            "Behavioral engine monitoring processes, memory, sockets and SUID",
+                            icon_name="security-high", trailing=daemon_sw))
     if st["active"]:
         sec.add_row(entity_card("Running via " + st["via"],
                                 "Audits every 2s · full SUID/baseline sweep every 60s",
