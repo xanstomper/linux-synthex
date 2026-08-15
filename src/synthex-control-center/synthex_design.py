@@ -26,189 +26,168 @@ CONTENT_WIDTH = 760  # max width of the settings column (centered)
 
 _CSS = """
 /* ══════════════════════════════════════════════════════════════════════════
-   SynthOS Settings — Premium macOS-grade Design System
-   Vibrancy surfaces, pill controls, crisp typography, buttery transitions.
+   Synthex Control Center — Native Desktop Design System (HIG Compliant)
+   Clean typography, grouped inset list rows, native switch proportions.
    ══════════════════════════════════════════════════════════════════════════ */
 
 .settings-window {
-  font-family: "Inter", "Cantarell", "SF Pro Text", "Noto Sans", "Ubuntu", sans-serif;
+  font-family: system-ui, -apple-system, "Inter", "Cantarell", "Ubuntu", "Segoe UI", sans-serif;
+  background-color: @theme_base_color;
+  color: @theme_fg_color;
 }
 
-/* ── Switches: macOS-style pills ─────────────────────────────────────── */
+/* ── Switches: Clean Native Proportions ───────────────────────────────── */
 switch {
-  border-radius: 999px;
-  min-width: 50px;
-  min-height: 28px;
-  background-color: alpha(@theme_fg_color, 0.15);
+  border-radius: 12px;
+  min-width: 44px;
+  min-height: 24px;
+  background-color: alpha(@theme_fg_color, 0.14);
   background-image: none;
+  border: 1px solid alpha(@theme_fg_color, 0.08);
   outline-style: none;
-  transition: background-color 200ms cubic-bezier(0.4, 0, 0.2, 1);
+  transition: background-color 150ms ease, border-color 150ms ease;
 }
-switch:checked { background-color: shade(@theme_selected_bg_color, 1.05); }
-switch:disabled { opacity: 0.4; }
+switch:checked {
+  background-color: #3584e4;
+  border-color: #3584e4;
+}
+switch:disabled { opacity: 0.35; }
 switch slider {
-  min-width: 22px;
-  min-height: 22px;
-  margin: 3px;
+  min-width: 18px;
+  min-height: 18px;
+  margin: 2px;
   border: none;
   border-radius: 50%;
-  background-color: white;
-  box-shadow: 0 2px 5px alpha(black, 0.35), 0 0 1px alpha(black, 0.25);
-  transition: all 200ms cubic-bezier(0.4, 0, 0.2, 1);
+  background-color: #ffffff;
+  box-shadow: 0 1px 2px alpha(black, 0.25);
+  transition: all 150ms ease;
 }
 
 /* ── Sliders ─────────────────────────────────────────────────────────── */
-.scale-ok trough {
-  min-height: 6px;
-  border-radius: 3px;
-  background-color: alpha(@theme_fg_color, 0.13);
+.scale-ok trough, scale trough {
+  min-height: 4px;
+  border-radius: 2px;
+  background-color: alpha(@theme_fg_color, 0.12);
   outline-style: none;
 }
-.scale-ok highlight {
-  border-radius: 3px;
-  min-height: 6px;
-  background-image: linear-gradient(to bottom,
-    shade(@theme_selected_bg_color, 1.25), shade(@theme_selected_bg_color, 0.95));
+.scale-ok highlight, scale highlight {
+  border-radius: 2px;
+  min-height: 4px;
+  background-color: #3584e4;
 }
 .scale-ok slider, scale slider {
-  min-width: 20px;
-  min-height: 20px;
-  margin: -8px;
+  min-width: 16px;
+  min-height: 16px;
+  margin: -6px;
   border-radius: 50%;
-  background-color: white;
-  border: 0.5px solid alpha(black, 0.12);
-  box-shadow: 0 2px 6px alpha(black, 0.30), 0 0 0 0.5px alpha(black, 0.06);
+  background-color: #ffffff;
+  border: 1px solid alpha(black, 0.15);
+  box-shadow: 0 1px 3px alpha(black, 0.20);
   background-image: none;
-  transition: box-shadow 150ms ease;
+  transition: transform 100ms ease;
 }
 .scale-ok slider:hover, scale slider:hover {
-  box-shadow: 0 3px 10px alpha(black, 0.40), 0 0 0 6px alpha(@theme_selected_bg_color, 0.12);
+  transform: scale(1.1);
 }
 
-/* ── Check / radio ───────────────────────────────────────────────────── */
+/* ── Check / Radio ───────────────────────────────────────────────────── */
 checkbutton check {
-  min-width: 20px;
-  min-height: 20px;
-  border-radius: 6px;
+  min-width: 18px;
+  min-height: 18px;
+  border-radius: 4px;
   border: 1.5px solid alpha(@theme_fg_color, 0.28);
   background-color: transparent;
-  transition: all 160ms ease;
+  transition: all 120ms ease;
 }
 checkbutton check:checked {
-  background-color: @theme_selected_bg_color;
-  border-color: @theme_selected_bg_color;
+  background-color: #3584e4;
+  border-color: #3584e4;
 }
 radiobutton radio {
-  min-width: 20px;
-  min-height: 20px;
+  min-width: 18px;
+  min-height: 18px;
   border-radius: 50%;
   border: 1.5px solid alpha(@theme_fg_color, 0.28);
-  transition: all 160ms ease;
+  transition: all 120ms ease;
 }
-radiobutton radio:checked { border-color: @theme_selected_bg_color; }
+radiobutton radio:checked { border-color: #3584e4; }
 
-/* ── Spinbuttons / comboboxes ────────────────────────────────────────── */
+/* ── Controls (Combo, Entry, Spin) ───────────────────────────────────── */
 spinbutton {
-  border-radius: 9px;
+  border-radius: 6px;
   border: 1px solid alpha(@theme_fg_color, 0.12);
   background-color: alpha(@theme_fg_color, 0.05);
-  padding: 0 4px;
+  padding: 2px 6px;
 }
 spinbutton entry { border: none; background: transparent; }
 
 .combo-compact button {
-  background-color: alpha(@theme_fg_color, 0.055);
-  border: 1px solid alpha(@theme_fg_color, 0.13);
-  border-radius: 9px;
-  padding: 6px 11px;
-  font-size: 9.5pt;
+  background-color: alpha(@theme_fg_color, 0.06);
+  border: 1px solid alpha(@theme_fg_color, 0.12);
+  border-radius: 6px;
+  padding: 5px 10px;
+  font-size: 9pt;
+  font-weight: 500;
   background-image: none;
-  transition: all 150ms ease;
+  transition: background-color 120ms ease;
   outline-style: none;
 }
 .combo-compact button:hover { background-color: alpha(@theme_fg_color, 0.10); }
-.combo-compact button:checked { background-color: alpha(@theme_fg_color, 0.13); }
-.combo-compact .cellview { padding-right: 4px; }
 
-/* ── Entries ─────────────────────────────────────────────────────────── */
 .entry-clean, entry {
   background-color: alpha(@theme_fg_color, 0.05);
-  border: 1px solid alpha(@theme_fg_color, 0.13);
-  border-radius: 9px;
-  padding: 6px 12px;
+  border: 1px solid alpha(@theme_fg_color, 0.12);
+  border-radius: 6px;
+  padding: 6px 10px;
   font-size: 9.5pt;
   box-shadow: none;
   outline-style: none;
-  transition: all 180ms cubic-bezier(0.4, 0, 0.2, 1);
+  transition: border-color 150ms ease;
 }
 .entry-clean:focus, entry:focus {
-  border-color: @theme_selected_bg_color;
-  box-shadow: 0 0 0 3.5px alpha(@theme_selected_bg_color, 0.20);
+  border-color: #3584e4;
 }
 
 /* ── Buttons ─────────────────────────────────────────────────────────── */
-button { outline-style: none; transition: all 150ms ease; }
+button { outline-style: none; }
 
 .btn-quiet {
-  background-color: alpha(@theme_fg_color, 0.055);
-  border: 1px solid alpha(@theme_fg_color, 0.13);
-  border-radius: 9px;
-  padding: 7px 16px;
-  font-size: 9.5pt;
-  font-weight: 600;
+  background-color: alpha(@theme_fg_color, 0.06);
+  border: 1px solid alpha(@theme_fg_color, 0.10);
+  border-radius: 6px;
+  padding: 6px 14px;
+  font-size: 9pt;
+  font-weight: 500;
 }
 .btn-quiet:hover { background-color: alpha(@theme_fg_color, 0.11); }
 .btn-quiet:active { background-color: alpha(@theme_fg_color, 0.16); }
 
 .btn-primary {
-  background-image: linear-gradient(to bottom,
-    shade(@theme_selected_bg_color, 1.16), shade(@theme_selected_bg_color, 0.94));
-  color: @theme_selected_fg_color;
+  background-color: #3584e4;
+  color: #ffffff;
   border: none;
-  border-radius: 9px;
-  padding: 8px 19px;
-  font-size: 9.5pt;
-  font-weight: 700;
-  box-shadow: 0 2px 10px alpha(@theme_selected_bg_color, 0.40), inset 0 1px 0 alpha(white, 0.22);
-  text-shadow: none;
-}
-.btn-primary:hover {
-  background-image: linear-gradient(to bottom,
-    shade(@theme_selected_bg_color, 1.24), shade(@theme_selected_bg_color, 1.02));
-  box-shadow: 0 4px 16px alpha(@theme_selected_bg_color, 0.50), inset 0 1px 0 alpha(white, 0.28);
-}
-.btn-primary:active {
-  background-image: none;
-  background-color: shade(@theme_selected_bg_color, 0.88);
-  box-shadow: inset 0 2px 6px alpha(black, 0.22);
-}
-.btn-primary:disabled { opacity: 0.5; }
-
-.btn-destructive {
-  color: @error_color;
-  background-color: alpha(@error_color, 0.07);
-  border: 1px solid alpha(@error_color, 0.40);
-  border-radius: 9px;
-  padding: 7px 16px;
-  font-size: 9.5pt;
+  border-radius: 6px;
+  padding: 6px 16px;
+  font-size: 9pt;
   font-weight: 600;
+  box-shadow: 0 1px 2px alpha(black, 0.15);
 }
-.btn-destructive:hover { background-color: alpha(@error_color, 0.15); }
+.btn-primary:hover { background-color: #2a76d2; }
+.btn-primary:active { background-color: #2163b3; }
+.btn-primary:disabled { opacity: 0.45; }
 
-/* ── Scrollbars: invisible until hover ───────────────────────────────── */
-scrollbar { background-color: transparent; opacity: 0.55; transition: opacity 300ms ease; }
-scrollbar:hover { opacity: 1; }
-scrollbar slider {
-  min-width: 10px;
-  min-height: 42px;
-  border-radius: 999px;
-  border: none;
-  margin: 3px 3px;
-  background-color: alpha(@theme_fg_color, 0.24);
+.btn-warn, .btn-destructive {
+  color: #ef4444;
+  background-color: alpha(#ef4444, 0.08);
+  border: 1px solid alpha(#ef4444, 0.28);
+  border-radius: 6px;
+  padding: 6px 14px;
+  font-size: 9pt;
+  font-weight: 500;
 }
-scrollbar slider:hover { background-color: alpha(@theme_fg_color, 0.45); }
+.btn-warn:hover, .btn-destructive:hover { background-color: alpha(#ef4444, 0.16); }
 
-/* ── Header ──────────────────────────────────────────────────────────── */
+/* ── Headerbar & Search ──────────────────────────────────────────────── */
 headerbar {
   background-image: none;
   background-color: @theme_base_color;
@@ -216,191 +195,167 @@ headerbar {
   box-shadow: none;
 }
 .app-title {
-  font-size: 14pt;
-  font-weight: 800;
-  letter-spacing: -0.02em;
+  font-size: 11.5pt;
+  font-weight: 700;
 }
 .settings-search {
-  border-radius: 999px;
-  padding: 7px 18px;
-  background-color: alpha(@theme_fg_color, 0.055);
-  border: 1px solid alpha(@theme_fg_color, 0.11);
-  font-size: 10pt;
+  border-radius: 6px;
+  padding: 6px 12px;
+  background-color: alpha(@theme_fg_color, 0.05);
+  border: 1px solid alpha(@theme_fg_color, 0.10);
+  font-size: 9.5pt;
   outline-style: none;
-  transition: all 180ms ease;
 }
 .settings-search:focus {
-  border-color: @theme_selected_bg_color;
-  box-shadow: 0 0 0 3.5px alpha(@theme_selected_bg_color, 0.18);
-  background-color: @theme_base_color;
+  border-color: #3584e4;
 }
 
-/* ── Sidebar: vibrancy panel ─────────────────────────────────────────── */
+/* ── Sidebar ─────────────────────────────────────────────────────────── */
 .sidebar, .sidebar-scroll { background-color: transparent; }
 .sidebar {
-  background-image: linear-gradient(to bottom,
-    alpha(@theme_fg_color, 0.045), alpha(@theme_fg_color, 0.025));
-  border-right: 1px solid alpha(@theme_fg_color, 0.07);
+  background-color: alpha(@theme_fg_color, 0.02);
+  border-right: 1px solid alpha(@theme_fg_color, 0.08);
 }
 .sidebar-item {
-  border-radius: 9px;
-  margin: 1px 12px;
-  padding: 7px 10px;
-  transition: all 150ms cubic-bezier(0.4, 0, 0.2, 1);
+  border-radius: 6px;
+  margin: 1px 8px;
+  padding: 6px 10px;
+  transition: background-color 100ms ease;
   outline-style: none;
 }
-.sidebar-item:hover { background-color: alpha(@theme_fg_color, 0.07); }
-.sidebar-item:active { background-color: alpha(@theme_fg_color, 0.12); }
+.sidebar-item:hover { background-color: alpha(@theme_fg_color, 0.06); }
 .sidebar-item:selected {
-  background-image: linear-gradient(to bottom,
-    shade(@theme_selected_bg_color, 1.14), shade(@theme_selected_bg_color, 0.96));
-  color: @theme_selected_fg_color;
-  box-shadow: 0 2px 8px alpha(@theme_selected_bg_color, 0.35);
+  background-color: #3584e4;
+  color: #ffffff;
 }
-.sidebar-item:selected .sidebar-title { color: @theme_selected_fg_color; font-weight: 700; }
-.sidebar-item:selected image { color: @theme_selected_fg_color; }
+.sidebar-item:selected .sidebar-title { color: #ffffff; font-weight: 600; }
+.sidebar-item:selected image { color: #ffffff; }
 
-.sidebar-title { font-size: 10pt; font-weight: 500; }
+.sidebar-title { font-size: 9.5pt; font-weight: 450; }
 .sidebar-group {
   font-size: 7.5pt;
-  font-weight: 800;
-  letter-spacing: 0.15em;
-  color: alpha(@theme_fg_color, 0.36);
-  padding: 18px 24px 6px 24px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  color: alpha(@theme_fg_color, 0.40);
+  padding: 14px 16px 4px 16px;
 }
 .sidebar-sep { background-color: transparent; }
 
-/* ── Content & cards ─────────────────────────────────────────────────── */
+/* ── Content & Grouped Inset Cards ───────────────────────────────────── */
 .content-scroll { background-color: @theme_base_color; }
-.content-column { margin: 0 6px; }
+.content-column { margin: 0 4px; }
 
-.page-header { padding: 2px 8px 8px 8px; }
-.page-title { font-size: 23pt; font-weight: 800; letter-spacing: -0.025em; }
-.page-icon-chip {
-  background-image: linear-gradient(135deg,
-    alpha(@theme_selected_bg_color, 0.28),
-    alpha(@theme_selected_bg_color, 0.10));
-  border-radius: 15px;
-  border: 1px solid alpha(@theme_selected_bg_color, 0.22);
-  padding: 4px;
-}
-.page-icon-chip image {
-  color: @theme_selected_bg_color;
-  -gtk-icon-transform: scale(0.85);
-}
-.page-subtitle { font-size: 10pt; color: alpha(@theme_fg_color, 0.55); padding-top: 5px; }
+.page-header { padding: 4px 6px 12px 6px; }
+.page-title { font-size: 17pt; font-weight: 700; }
+.page-subtitle { font-size: 9.5pt; color: alpha(@theme_fg_color, 0.55); padding-top: 3px; }
 
 .card {
-  background-color: alpha(@theme_fg_color, 0.038);
-  border-radius: 18px;
-  border: 1px solid alpha(@theme_fg_color, 0.075);
-  box-shadow: 0 1px 2px alpha(black, 0.04), 0 8px 28px alpha(black, 0.05);
+  background-color: alpha(@theme_fg_color, 0.035);
+  border-radius: 10px;
+  border: 1px solid alpha(@theme_fg_color, 0.08);
+  box-shadow: none;
 }
 .card-dark {
-  background-color: alpha(@theme_fg_color, 0.065);
-  border-radius: 18px;
-  border: 1px solid alpha(@theme_fg_color, 0.075);
+  background-color: alpha(@theme_fg_color, 0.055);
+  border-radius: 10px;
+  border: 1px solid alpha(@theme_fg_color, 0.08);
 }
-.card-padding { padding: 5px 5px; }
+.card-padding { padding: 2px; }
 
-.section-title-box { padding: 7px 12px 11px 12px; }
+.section-title-box { padding: 8px 6px 6px 6px; }
 .section-title {
   font-size: 9.5pt;
-  font-weight: 800;
-  letter-spacing: 0.09em;
-  color: alpha(@theme_fg_color, 0.55);
+  font-weight: 600;
+  color: alpha(@theme_fg_color, 0.65);
 }
-.section-sub { font-size: 9pt; color: alpha(@theme_fg_color, 0.46); padding-top: 2px; }
+.section-sub { font-size: 8.5pt; color: alpha(@theme_fg_color, 0.45); padding-top: 1px; }
 
 .row {
-  padding: 12px 12px;
-  border-radius: 11px;
-  transition: background-color 150ms ease;
+  padding: 10px 14px;
+  border-radius: 0;
+  transition: background-color 100ms ease;
   outline-style: none;
 }
-.row:hover { background-color: alpha(@theme_fg_color, 0.05); }
-.row-title { font-size: 10.5pt; font-weight: 500; }
-.row-sub { font-size: 9pt; color: alpha(@theme_fg_color, 0.52); padding-top: 2px; }
-.row-sep { background-color: transparent; }
+.row:hover { background-color: alpha(@theme_fg_color, 0.035); }
+.row-title { font-size: 9.5pt; font-weight: 500; }
+.row-sub { font-size: 8.5pt; color: alpha(@theme_fg_color, 0.50); padding-top: 2px; }
+.row-sep {
+  background-color: alpha(@theme_fg_color, 0.06);
+  min-height: 1px;
+}
 
-/* ── Badges / dots ───────────────────────────────────────────────────── */
+/* ── Badges ──────────────────────────────────────────────────────────── */
 .badge {
-  border-radius: 999px;
-  padding: 3.5px 12px;
-  font-size: 8.5pt;
-  font-weight: 700;
-  letter-spacing: 0.02em;
-}
-.badge-ok { background-color: alpha(#2ecc71, 0.16); color: shade(#2ecc71, 0.80); }
-.badge-warn { background-color: alpha(#e67e22, 0.16); color: shade(#e67e22, 0.80); }
-.badge-err { background-color: alpha(@error_color, 0.15); color: @error_color; }
-.badge-neutral { background-color: alpha(@theme_fg_color, 0.10); color: alpha(@theme_fg_color, 0.72); }
-.settings-window.dark .badge-ok { color: #5df0b4; }
-.settings-window.dark .badge-warn { color: #ffb969; }
-
-.dot { border-radius: 50%; min-width: 9px; min-height: 9px; padding: 0; }
-.dot-ok { background-color: #2ecc71; box-shadow: 0 0 6px alpha(#2ecc71, 0.6); }
-.dot-warn { background-color: #e67e22; box-shadow: 0 0 6px alpha(#e67e22, 0.6); }
-.dot-err { background-color: @error_color; box-shadow: 0 0 6px alpha(@error_color, 0.6); }
-.dot-off { background-color: alpha(@theme_fg_color, 0.28); }
-
-/* ── Info grid ───────────────────────────────────────────────────────── */
-.info-key { font-size: 9.5pt; color: alpha(@theme_fg_color, 0.56); }
-.info-val { font-size: 9.5pt; font-weight: 500; }
-
-/* ── Toast: frosted glass pill ───────────────────────────────────────── */
-.toast {
-  background-color: alpha(#0e1013, 0.92);
-  color: #f5f6f8;
-  border-radius: 13px;
-  padding: 12px 22px;
-  font-size: 10pt;
+  border-radius: 4px;
+  padding: 2px 8px;
+  font-size: 8pt;
   font-weight: 600;
-  box-shadow: 0 10px 34px alpha(black, 0.42), inset 0 1px 0 alpha(white, 0.10);
 }
-.toast-error { background-color: alpha(#8e2b2b, 0.95); color: white; }
+.badge-ok { background-color: alpha(#10b981, 0.13); color: #10b981; }
+.badge-warn { background-color: alpha(#f59e0b, 0.13); color: #f59e0b; }
+.badge-err { background-color: alpha(#ef4444, 0.13); color: #ef4444; }
+.badge-neutral { background-color: alpha(@theme_fg_color, 0.08); color: alpha(@theme_fg_color, 0.65); }
+
+.dot { border-radius: 50%; min-width: 8px; min-height: 8px; padding: 0; }
+.dot-ok { background-color: #10b981; }
+.dot-warn { background-color: #f59e0b; }
+.dot-err { background-color: #ef4444; }
+.dot-off { background-color: alpha(@theme_fg_color, 0.25); }
+
+/* ── Info Grid ───────────────────────────────────────────────────────── */
+.info-key { font-size: 9pt; color: alpha(@theme_fg_color, 0.50); }
+.info-val { font-size: 9pt; font-weight: 500; }
+
+/* ── Toast ───────────────────────────────────────────────────────────── */
+.toast {
+  background-color: #1e2129;
+  color: #f3f4f6;
+  border: 1px solid alpha(white, 0.12);
+  border-radius: 8px;
+  padding: 10px 18px;
+  font-size: 9pt;
+  font-weight: 500;
+  box-shadow: 0 4px 16px alpha(black, 0.35);
+}
+.toast-error { background-color: #7f1d1d; color: #ffffff; }
 
 /* ── Progress ────────────────────────────────────────────────────────── */
 .pbar-ok trough {
-  min-height: 6px;
-  border-radius: 3px;
-  background-color: alpha(@theme_fg_color, 0.10);
+  min-height: 4px;
+  border-radius: 2px;
+  background-color: alpha(@theme_fg_color, 0.08);
 }
 .pbar-ok progress {
-  border-radius: 3px;
-  min-height: 6px;
-  background-image: linear-gradient(to right,
-    shade(@theme_selected_bg_color, 0.95), shade(@theme_selected_bg_color, 1.2));
+  border-radius: 2px;
+  min-height: 4px;
+  background-color: #3584e4;
 }
 
-/* ── Entity cards ────────────────────────────────────────────────────── */
+/* ── Entity Cards ────────────────────────────────────────────────────── */
 .entity-card {
-  background-color: alpha(@theme_fg_color, 0.045);
+  background-color: alpha(@theme_fg_color, 0.03);
   border: 1px solid alpha(@theme_fg_color, 0.07);
-  border-radius: 13px;
-  padding: 13px 16px;
-  box-shadow: 0 1px 2px alpha(black, 0.03);
-  transition: all 170ms cubic-bezier(0.4, 0, 0.2, 1);
+  border-radius: 8px;
+  padding: 10px 14px;
+  transition: background-color 100ms ease;
 }
 .entity-card:hover {
-  border-color: alpha(@theme_selected_bg_color, 0.40);
-  box-shadow: 0 5px 18px alpha(black, 0.08);
+  background-color: alpha(@theme_fg_color, 0.05);
 }
-.entity-title { font-size: 10.5pt; font-weight: 600; }
-.entity-sub { font-size: 9pt; color: alpha(@theme_fg_color, 0.53); }
+.entity-title { font-size: 9.5pt; font-weight: 550; }
+.entity-sub { font-size: 8.5pt; color: alpha(@theme_fg_color, 0.50); }
 
 .empty-state {
   color: alpha(@theme_fg_color, 0.40);
-  font-size: 10pt;
-  padding: 28px;
-  font-style: italic;
+  font-size: 9pt;
+  padding: 20px;
 }
 
-/* ── Spinner / loading ───────────────────────────────────────────────── */
-spinner { color: @theme_selected_bg_color; }
-.async-loading { padding: 4px 4px; }
+/* ── Spinner / Loading ───────────────────────────────────────────────── */
+spinner { color: #3584e4; }
+.async-loading { padding: 4px; }
 
-/* ── Lists inside cards ──────────────────────────────────────────────── */
+/* ── Lists inside Cards ──────────────────────────────────────────────── */
 .card list, .card listbox {
   background-color: transparent;
   border: none;
@@ -415,17 +370,8 @@ def install_design(window):
     provider.load_from_data(_CSS.encode("utf-8"))
     style = window.get_style_context()
     style.add_provider(provider, Gtk.STYLE_PROVIDER_PRIORITY_APPLICATION)
-    # Dark detection for the few explicit dark rules
-    try:
-        theme = Gtk.Settings.get_default().get_property("gtk-application-prefer-dark-theme") or \
-            "dark" in (Gtk.Settings.get_default().get_property("gtk-theme-name") or "").lower()
-        ctx = window.get_style_context()
-        ctx.add_class("settings-window")
-        if theme:
-            ctx.add_class("dark")
-    except Exception:
-        pass
     window.get_style_context().add_class("settings-window")
+
 
 
 # ── Builder helpers ──────────────────────────────────────────────────────────
@@ -496,20 +442,18 @@ PAGE_ICONS = {
 
 
 class PageHeader(Gtk.Box):
-    """Icon chip + title + subtitle + trailing badges — the page hero row."""
+    """Clean native desktop page header: icon + title + subtitle + badges."""
     def __init__(self, title, subtitle="", badges=None, icon_name=None):
-        super().__init__(orientation=Gtk.Orientation.VERTICAL, spacing=0)
+        super().__init__(orientation=Gtk.Orientation.VERTICAL, spacing=2)
         self.get_style_context().add_class("page-header")
-        top = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=14)
+        top = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=10)
 
         icon_name = icon_name or PAGE_ICONS.get(title)
         if icon_name:
-            chip = Gtk.Box()
-            chip.get_style_context().add_class("page-icon-chip")
             img = Gtk.Image.new_from_icon_name(icon_name, Gtk.IconSize.DND)
-            chip.pack_start(img, True, True, 0)
-            chip.set_size_request(52, 52)
-            top.pack_start(chip, False, False, 0)
+            img.set_pixel_size(28)
+            img.set_valign(Gtk.Align.CENTER)
+            top.pack_start(img, False, False, 0)
 
         top.pack_start(label(title, "page-title", wrap=False), False, False, 0)
         for text, kind in (badges or []):
@@ -520,23 +464,24 @@ class PageHeader(Gtk.Box):
 
 
 class Section(Gtk.Frame):
-    """A settings card: one topic, many rows. GNOME-Settings style."""
+    """Grouped inset preferences section (Libadwaita style)."""
     def __init__(self, title=None, subtitle=None):
         super().__init__(shadow_type=Gtk.ShadowType.NONE)
         self.get_style_context().add_class("card")
-        outer = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=GAP_ROW)
-        outer.set_border_width(PAD_CARD)
+        outer = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=0)
+        outer.set_border_width(0)
         self.add(outer)
         if title:
             tb = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=1)
             tb.get_style_context().add_class("section-title-box")
-            tb.pack_start(label(title.upper(), "section-title"), False, False, 0)
+            tb.pack_start(label(title, "section-title"), False, False, 0)
             if subtitle:
                 tb.pack_start(label(subtitle, "section-sub"), False, False, 0)
             outer.pack_start(tb, False, False, 0)
         self.rows = Gtk.ListBox()
         self.rows.set_selection_mode(Gtk.SelectionMode.NONE)
         self.rows.get_style_context().add_class("card-padding")
+
         outer.pack_start(self.rows, False, False, 0)
         self._count = 0
 
