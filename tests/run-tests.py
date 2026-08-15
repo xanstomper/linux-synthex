@@ -1484,7 +1484,34 @@ except Exception as _e:
 
 
 
+# 84. Synthex Calamares Installer & Automated Partitioning Wizard
+print("\n📋 Synthex Calamares Installer & Automated Partitioning Wizard:")
+inst_dir = os.path.join(ROOT, "src", "synthex-installer")
+check("synthex partition wizard script exists", os.path.exists(os.path.join(inst_dir, "synthex_partition_wizard.py")))
+check("synthex-partition cli launcher exists", os.access(os.path.join(ROOT, "src", "synthex-partition"), os.X_OK))
+check("calamares settings.conf exists", os.path.exists(os.path.join(ROOT, "installer", "config", "settings.conf")))
+check("calamares synthexfde module exists", os.path.exists(os.path.join(ROOT, "installer", "modules", "synthexfde", "main.py")))
+check("calamares partition.conf exists", os.path.exists(os.path.join(ROOT, "installer", "modules", "partition", "partition.conf")))
+
+try:
+    if inst_dir not in sys.path:
+        sys.path.insert(0, inst_dir)
+    from synthex_partition_wizard import SynthexPartitionWizard
+    part_wiz = SynthexPartitionWizard(dry_run=True)
+    check("partition wizard initialized", part_wiz is not None)
+    pw_st = part_wiz.get_status()
+    check("partition wizard status query pass", "READY" in pw_st.get("status", ""))
+    disks = part_wiz.probe_disks()
+    check("partition wizard disk probe pass", len(disks) >= 1)
+    plan = part_wiz.create_partition_plan("/dev/sda", "btrfs", True)
+    check("partition plan generation pass", plan.encrypt is True and "btrfs" in plan.fs_type)
+    ok_p, _ = part_wiz.execute_partitioning(plan)
+    check("partition execution dry-run", ok_p is True)
+except Exception as _e:
+    check("partition wizard functional validation", False, str(_e))
+
 # Summary
+
 print(f"\n{'='*50}")
 print(f"  RESULTS: {passed} passed, {failed} failed")
 print(f"{'='*50}")

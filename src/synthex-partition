@@ -1,0 +1,21 @@
+#!/usr/bin/env python3
+# SPDX-License-Identifier: GPL-3.0-or-later
+import sys
+from pathlib import Path
+
+# Resolve installer engine directory
+candidates = [
+    Path(__file__).resolve().parent / "synthex-installer",
+    Path("/usr/lib/synthex-installer"),
+    Path("/home/jewboy420/linux-synthex/src/synthex-installer"),
+]
+
+for c in candidates:
+    if (c / "synthex_partition_wizard.py").exists():
+        if str(c) not in sys.path:
+            sys.path.insert(0, str(c))
+        break
+
+from synthex_partition_wizard import main
+if __name__ == "__main__":
+    main()
