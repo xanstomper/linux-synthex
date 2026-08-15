@@ -1034,6 +1034,26 @@ except Exception as _e:
 
 _mk = open(os.path.join(ROOT, "Makefile")).read()
 check("aegis make install target present", "install-aegis:" in _mk and "/usr/bin/synthex-aegis-daemon" in _mk)
+
+# 73b. SpoofGoof hard-evidence proof suite (user-mode portion)
+print("\n📋 SpoofGoof Proof Suite (wire-verified):")
+_proof = os.path.join(ROOT, "tests", "test_spoofgoof_proof.py")
+check("spoofgoof proof suite exists", os.path.exists(_proof))
+check("spoofgoof chaff uses NTP :123 (wire-safe vs DoT NAT)", "dst port 123" in open(_proof).read() if os.path.exists(_proof) else False)
+_sgf = open(os.path.join(ROOT, "src", "synthex-security", "synthex_spoofgoof.py")).read()
+check("spoofgoof no fabricated minimum counters", "18450" not in _sgf and "2450000" not in _sgf)
+check("spoofgoof status verifies subsystems live", "_verify_tcp_morphing" in _sgf and "_verify_daemon_alive" in _sgf)
+try:
+    _r = _sp.run([sys.executable, _proof], capture_output=True, text=True, timeout=240)
+    _out = _r.stdout + "\n" + _r.stderr  # unittest reports on stderr
+    _ran = "Ran 12 tests" in _out
+    _ok = "\nOK" in _out or "OK (skipped=" in _out
+    check("spoofgoof proof suite passes (12 proofs)", _r.returncode == 0 and _ran and _ok,
+          _out[-200:] if _r.returncode != 0 else None)
+    for _proof_name in ["PROOF 3", "PROOF 4", "PROOF 5", "PROOF 7", "PROOF 8", "PROOF 9", "PROOF 10", "PROOF 11"]:
+        check(f"spoofgoof {_proof_name} verified", f"{_proof_name} ·" in _out or f" {_proof_name}" in _out)
+except Exception as _e:
+    check("spoofgoof proof suite passes (12 proofs)", False, str(_e))
 check("aegis packaging unit registered", os.path.exists(os.path.join(ROOT, "packages", "services-systemd", "synthex-aegis.service")))
 
 # 74. Professional Settings Center — design system, full category coverage, Fedora platform layer

@@ -37,13 +37,16 @@ else:
 
 CONFIG_FILE = CONFIG_DIR / "config.json"
 
+# UDP chaff rides NTP (port 123): real cover traffic that leaves the wire.
+# Port 53 is unusable — the local DoT resolver NAT-redirects all outbound :53
+# (iptables OUTPUT REDIRECT), which would silently absorb the chaff.
 ANYCAST_TARGETS_UDP = [
-    ("1.1.1.1", 53),
-    ("9.9.9.9", 53),
-    ("8.8.8.8", 53),
-    ("149.112.112.112", 53),
-    ("208.67.222.222", 53),
-    ("194.242.2.4", 53)
+    ("162.159.200.1", 123),   # time.cloudflare.com (anycast NTP)
+    ("162.159.200.123", 123), # time.cloudflare.com
+    ("216.239.35.0", 123),    # time.google.com
+    ("216.239.35.4", 123),    # time.google.com
+    ("17.253.34.123", 123),   # time.apple.com
+    ("132.163.97.1", 123),    # time.nist.gov
 ]
 
 ANYCAST_TARGETS_TCP = [
@@ -153,42 +156,135 @@ class SpoofGoofEngine:
 
     # ── 1. Telemetry & Comprehensive Spoofing Audit ───────────────────────────
 
+    # ── Ground-truth subsystem verification (no fabricated status) ────────────
+
+    @staticmethod
+    def _verify_mac_cloaking() -> Tuple[bool, str]:
+        """True when the NetworkManager random-MAC policy is installed and at
+        least one active interface carries a locally-administered address."""
+        nm = Path("/etc/NetworkManager/conf.d/99-synthex-full-spoof.conf")
+        policy = False
+        try:
+            if nm.exists():
+                txt = nm.read_text()
+                policy = "cloned-mac-address=random" in txt and "dhcp-send-hostname=false" in txt
+        except Exception:
+            pass
+        locally_admin = False
+        try:
+            for iface in Path("/sys/class/net").iterdir():
+                if iface.name == "lo":
+                    continue
+                try:
+                    mac = (iface / "address").read_text().strip()
+                    first = int(mac.split(":")[0], 16)
+                    if (first & 0x02) and not (first & 0x01):  # locally administered, unicast
+                        locally_admin = True
+                        break
+                except Exception:
+                    continue
+        except Exception:
+            pass
+        if policy and locally_admin:
+            return True, "Policy installed · live interface locally-administered"
+        if policy:
+            return True, "Policy installed (applies on next connect)"
+        return False, "Run 'Enforce 100%' to install the MAC policy"
+
+    @staticmethod
+    def _verify_dhcp_hostname_strip() -> Tuple[bool, str]:
+        try:
+            nm = Path("/etc/NetworkManager/conf.d/99-synthex-full-spoof.conf")
+            txt = nm.read_text() if nm.exists() else ""
+            if "ipv4.dhcp-send-hostname=false" in txt and "ipv6.dhcp-send-hostname=false" in txt:
+                return True, "Option 12 hostname stripped (v4+v6)"
+        except Exception:
+            pass
+        return False, "Hostname still broadcast to DHCP servers"
+
+    @staticmethod
+    def _verify_tcp_morphing() -> Tuple[bool, str]:
+        """Reads the LIVE kernel values — not the config file."""
+        try:
+            ts = subprocess.run(["sysctl", "-n", "net.ipv4.tcp_timestamps"],
+                                capture_output=True, text=True, timeout=4).stdout.strip()
+            ttl = subprocess.run(["sysctl", "-n", "net.ipv4.ip_default_ttl"],
+                                 capture_output=True, text=True, timeout=4).stdout.strip()
+            if ts == "0" and ttl in ("64", "128"):
+                return True, f"Live kernel: timestamps={ts}, TTL={ttl}"
+            return False, f"Live kernel: timestamps={ts}, TTL={ttl} (not neutralized)"
+        except Exception:
+            return False, "sysctl unavailable"
+
+    @staticmethod
+    def _verify_daemon_alive() -> Tuple[bool, str]:
+        """True when a heartbeat stats file was written within the last 90s."""
+        for stats_file in [STATS_FILE, Path("/run/synthex/spoofgoof/stats.json"),
+                           Path.home() / ".config/synthex/spoofgoof/stats.json"]:
+            try:
+                if stats_file.exists():
+                    data = json.loads(stats_file.read_text())
+                    age = time.time() - float(data.get("last_heartbeat", 0))
+                    if age < 90:
+                        return True, f"Heartbeat {int(age)}s ago · {data.get('packets_injected', 0):,} packets"
+            except Exception:
+                continue
+        try:
+            svc = subprocess.run(["systemctl", "is-active", "synthex-spoofgoof"],
+                                 capture_output=True, text=True, timeout=4).stdout.strip()
+            if svc == "active":
+                return True, "Service active (stats pending)"
+        except Exception:
+            pass
+        return False, "Daemon not running"
+
     def get_status(self) -> Dict[str, Any]:
         cfg = self._load_config()
         prof = PROFILES.get(cfg.get("profile", "balanced"), PROFILES["balanced"])
 
-        # Check live stats file if available
+        # Real counters — never fabricated minimums. Read the user stats AND
+        # the system daemon's stats (root writes /run/synthex/spoofgoof/).
         live_packets = self._packets_injected
         live_bytes = self._bytes_morphed
-        if STATS_FILE.exists():
+        stats_candidates = [STATS_FILE, Path("/run/synthex/spoofgoof/stats.json"),
+                            Path.home() / ".config/synthex/spoofgoof/stats.json"]
+        for stats_file in stats_candidates:
             try:
-                with open(STATS_FILE, "r") as sf:
-                    st_data = json.load(sf)
-                    live_packets = max(live_packets, st_data.get("packets_injected", 0))
-                    live_bytes = max(live_bytes, st_data.get("bytes_morphed", 0))
+                if stats_file.exists():
+                    st_data = json.loads(stats_file.read_text())
+                    live_packets = max(live_packets, int(st_data.get("packets_injected", 0)))
+                    live_bytes = max(live_bytes, int(st_data.get("bytes_morphed", 0)))
             except Exception:
                 pass
 
+        daemon_ok, daemon_msg = self._verify_daemon_alive()
+        mac_ok, mac_msg = self._verify_mac_cloaking()
+        dhcp_ok, dhcp_msg = self._verify_dhcp_hostname_strip()
+        tcp_ok, tcp_msg = self._verify_tcp_morphing()
+        active = bool(cfg.get("enabled", True)) and daemon_ok
+
+        verified = sum([mac_ok, dhcp_ok, tcp_ok, daemon_ok])
         return {
-            "active": cfg.get("enabled", True),
+            "active": active,
             "profile": prof.name,
             "profile_key": cfg.get("profile", "balanced"),
             "noise_rate_pps": prof.noise_rate_pps,
             "packet_padding_bytes": prof.packet_padding_bytes,
             "network_latency_penalty": "+0.0 ms (Zero Added Latency)",
-            "correlation_resistance_score": "100.0% (100% Full-Spectrum Spoofed)",
-            "packets_injected_today": max(live_packets, 18450),
-            "bytes_obfuscated_mb": round((max(live_bytes, 2450000) / (1024 * 1024)), 2),
-            "mac_cloaking_active": True,
-            "dhcp_hostname_stripped": True,
-            "tcp_morphing_active": True,
+            "correlation_resistance_score": f"{25 * verified:.0f}% ({verified}/4 countermeasures verified live)",
+            "packets_injected_today": live_packets,
+            "bytes_obfuscated_mb": round(live_bytes / (1024 * 1024), 2),
+            "mac_cloaking_active": mac_ok,
+            "dhcp_hostname_stripped": dhcp_ok,
+            "tcp_morphing_active": tcp_ok,
+            "daemon_alive": daemon_ok,
             "features": [
-                {"name": "Zero-Latency Fast Path", "status": "Active (+0.0ms Penalty)", "icon": "emblem-default"},
-                {"name": "DPI Packet Length Morphing", "status": "Active (Dynamic Padding)", "icon": "channel-secure"},
-                {"name": "Multi-Protocol Decoy Chaff", "status": "Dispersing TLS/UDP Chaff", "icon": "network-transmit-receive"},
-                {"name": "Dynamic MAC Address Cloaking", "status": "Randomized Unicast", "icon": "security-high"},
-                {"name": "DHCP Hostname Identity Shield", "status": "Option 12 Stripped", "icon": "changes-prevent"},
-                {"name": "TCP/IP OS Stack Neutralizer", "status": "Timestamps=0, TTL=64", "icon": "dialog-password"}
+                {"name": "Chaff Daemon Heartbeat", "status": daemon_msg, "icon": "emblem-default"},
+                {"name": "DPI Packet Length Morphing", "status": f"Active (padding {prof.packet_padding_bytes}B ±24 jitter)" if daemon_ok else "Idle", "icon": "channel-secure"},
+                {"name": "Multi-Protocol Decoy Chaff", "status": f"UDP + TLS bursts @ {prof.noise_rate_pps} pps" if daemon_ok and prof.multi_protocol_chaff else ("UDP-only @ %d pps" % prof.noise_rate_pps) if daemon_ok else "Idle", "icon": "network-transmit-receive"},
+                {"name": "Dynamic MAC Address Cloaking", "status": mac_msg, "icon": "security-high"},
+                {"name": "DHCP Hostname Identity Shield", "status": dhcp_msg, "icon": "changes-prevent"},
+                {"name": "TCP/IP OS Stack Neutralizer", "status": tcp_msg, "icon": "dialog-password"}
             ]
         }
 
