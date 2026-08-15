@@ -222,12 +222,16 @@ class AegisEngine:
         comm_lower = comm.lower()
         cmdline_lower = cmdline.lower()
 
-        # 1. AI Agents, LLM gateways, developer tools, and system daemons
+        # 1. AI Agents, LLM gateways, developer tools, desktop environments, and system daemons
         trusted_apps = {
             "hermes", "antigravity", "agy", "opencode", "code", "cursor", "vscode",
             "pytest", "unittest", "node", "npm", "npx", "bun", "deno", "vite", "webpack",
             "cargo", "rustc", "gcc", "g++", "clang", "clang++", "gdb", "make", "ninja",
+            "python", "python3", "python3.12", "python3.11", "python3.10", "pypy", "pypy3",
             "tmux", "screen", "zsh", "bash", "sh", "dash", "cinnamon", "nemo", "muffin",
+            "hyprland", "waybar", "swww", "swaybg", "mako", "dunst", "rofi", "wofi",
+            "grim", "slurp", "wl-copy", "wl-paste", "gsettings", "dconf", "dconf-service",
+            "notify-send", "zenity", "kdialog", "gtk-launch", "xdg-open", "xdg-desktop-portal",
             "vesktop", "discord", "brave", "firefox", "chromium", "google-chrome",
             "gnome-screensho", "p11-kit-server", "gvfsd", "dbus-daemon", "systemd",
             "pulseaudio", "pipewire", "wireplumber", "ananicy-cpp", "gamemoded", "conky",
@@ -235,8 +239,16 @@ class AegisEngine:
             "nano", "vim", "vi", "tar", "zip", "unzip", "rsync", "sudo", "pkexec", "apt",
             "dpkg", "apt-get", "pacman", "rpm", "dnf", "flatpak", "snap", "systemctl",
             "journalctl", "dmesg", "lsblk", "blkid", "mount", "umount", "fdisk", "gdisk",
-            "curl", "wget", "ssh", "sshd", "ssh-agent", "ssh-add", "gpg", "gpg-agent"
+            "curl", "wget", "ssh", "sshd", "ssh-agent", "ssh-add", "gpg", "gpg-agent",
+            "synthex-control-center", "synthex-doctor", "synthex-aegis", "synthex-app-manager"
         }
+
+        # Whitelist all Synthex OS internal utilities and desktop control centers
+        if any(marker in cmdline_lower for marker in [
+            "synthex-control-center", "main.py", "synth_system_adapters", "synthex-doctor",
+            "synthex-aegis", "hermes", "antigravity", "opencode", "gtk.css", "accent_color"
+        ]):
+            return True
 
         if comm_lower in trusted_apps:
             # Only intercept if process contains an explicit attack payload (e.g. /dev/tcp or stratum)
