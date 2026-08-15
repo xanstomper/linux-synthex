@@ -1032,6 +1032,10 @@ try:
 except Exception as _e:
     check("aegis daemon --once full audit pass", False, str(_e))
 
+_mk = open(os.path.join(ROOT, "Makefile")).read()
+check("aegis make install target present", "install-aegis:" in _mk and "/usr/bin/synthex-aegis-daemon" in _mk)
+check("aegis packaging unit registered", os.path.exists(os.path.join(ROOT, "packages", "services-systemd", "synthex-aegis.service")))
+
 # 72. Synthex System Doctor, Auto-Repair & Anti-Bricking Suite
 print("\n📋 Synthex System Doctor & Anti-Bricking Auto-Repair:")
 doc_dir = os.path.join(ROOT, "src", "synthex-doctor")

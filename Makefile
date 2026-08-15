@@ -14,7 +14,7 @@ RESET  := \033[0m
 
 .PHONY: all help rust iso iso-all iso-plasma iso-hyprland iso-gnome iso-gaming iso-minimal \
         ks-validate rpms srctars local-repo clean clean-iso release docs \
-        aether sentinel
+        aether sentinel install-aegis aegis-start
 
 help:
 	@echo ""
@@ -28,6 +28,7 @@ help:
 	@echo "    make rpms           Build all RPM packages"
 	@echo "    make ks-validate    Validate all kickstart files"
 	@echo "    make release        Full release artifact set"
+	@echo "    make install-aegis   Install Aegis endpoint defense (system)"
 	@echo "    make clean          Remove build artefacts"
 	@echo ""
 
@@ -164,6 +165,31 @@ install-brain:
 	    /usr/lib/systemd/system/synthex-memory-palace.service
 	@systemctl daemon-reload 2>/dev/null || true
 	@echo -e "$(GREEN)[OK]$(RESET)    Brain OS daemons installed"
+
+# ── Aegis: install endpoint defense suite (engine, GUI, daemon, service) ────
+install-aegis:
+	@echo -e "$(GREEN)[AEGIS]$(RESET) Installing Synthex Aegis endpoint defense..."
+	@install -Dm755 src/synthex-aegis/aegis_engine.py \
+	    /usr/lib/synthex/aegis/aegis_engine.py
+	@install -Dm755 src/synthex-aegis/aegis_gui.py \
+	    /usr/lib/synthex/aegis/aegis_gui.py
+	@install -Dm755 src/synthex-aegis/aegis_daemon.py \
+	    /usr/lib/synthex/aegis/aegis_daemon.py
+	@install -Dm755 src/synthex-aegis/synthex-aegis \
+	    /usr/bin/synthex-aegis
+	@install -Dm755 src/synthex-aegis/synthex-aegis-daemon \
+	    /usr/bin/synthex-aegis-daemon
+	@install -Dm644 src/synthex-aegis/synthex-aegis.desktop \
+	    /usr/share/applications/synthex-aegis.desktop
+	@install -Dm644 systemd/synthex-aegis.service \
+	    /usr/lib/systemd/system/synthex-aegis.service
+	@systemctl daemon-reload 2>/dev/null || true
+	@echo -e "$(GREEN)[OK]$(RESET)    Aegis installed — enable with: systemctl enable --now synthex-aegis"
+
+aegis-start:
+	@echo -e "$(GREEN)[AEGIS]$(RESET) Starting Synthex Aegis real-time protection..."
+	@systemctl enable --now synthex-aegis.service
+	@echo -e "$(GREEN)[OK]$(RESET)    Aegis real-time protection active"
 
 # ── Brain OS: start all AI services ───────────────────────────────────────────
 brain-start:
