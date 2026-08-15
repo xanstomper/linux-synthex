@@ -1094,6 +1094,18 @@ try:
     check("encryption kernel memory encryption activation", ok_m is True)
     ok_t, _ = crypto_engine.enroll_tpm2("/dev/mapper/synthex-root")
     check("encryption tpm2 enrollment dry-run", ok_t is True)
+
+    # Anti-Forensics Engine Validation
+    from synthex_anti_forensics import SynthexAntiForensicsEngine
+    af_engine = SynthexAntiForensicsEngine(dry_run=True)
+    check("anti-forensics engine initialized", af_engine is not None)
+    af_audit = af_engine.audit_anti_forensics()
+    check("anti-forensics audit pass", len(af_audit.get("vectors", [])) == 7)
+    check("anti-forensics coldboot check", af_audit.get("coldboot_defense") is True)
+    check("anti-forensics core dump suppression check", af_audit.get("core_dump_prohibited") is True)
+    check("anti-forensics memory scrub check", af_audit.get("zero_residual_memory") is True)
+    ok_af, _ = af_engine.apply_maximum_anti_forensic_hardening()
+    check("anti-forensics maximum hardening application", ok_af is True)
 except Exception as _e:
     check("synthex encryption functional validation", False, str(_e))
 
