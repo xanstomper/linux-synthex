@@ -1210,6 +1210,56 @@ try:
 except Exception as _e:
     check("spoofgoof functional validation", False, str(_e))
 
+# 75. Synthex Hardware Defense, Airgap Killswitch, RAM Vault & Shredder Suite
+print("\n📋 Synthex Hardware Defense, Airgap Killswitch, RAM Vault & Shredder Suite:")
+check("synthex usb-armor script exists", os.path.exists(os.path.join(sec_dir, "synthex_usb_armor.py")))
+check("synthex killswitch script exists", os.path.exists(os.path.join(sec_dir, "synthex_airgap_killswitch.py")))
+check("synthex ramvault script exists", os.path.exists(os.path.join(sec_dir, "synthex_ramvault.py")))
+check("synthex shredder script exists", os.path.exists(os.path.join(sec_dir, "synthex_shredder.py")))
+
+check("usb-armor cli launcher exists", os.access(os.path.join(ROOT, "src", "synthex-usb-armor"), os.X_OK))
+check("killswitch cli launcher exists", os.access(os.path.join(ROOT, "src", "synthex-killswitch"), os.X_OK))
+check("ramvault cli launcher exists", os.access(os.path.join(ROOT, "src", "synthex-ramvault"), os.X_OK))
+check("shred cli launcher exists", os.access(os.path.join(ROOT, "src", "synthex-shred"), os.X_OK))
+
+try:
+    from pathlib import Path
+    from synthex_usb_armor import SynthexUSBArmor
+    usb_armor = SynthexUSBArmor(dry_run=True)
+    check("usb armor initialized", usb_armor is not None)
+    usb_st = usb_armor.get_status()
+    check("usb armor status query pass", "ACTIVE" in usb_st.get("armor_status", ""))
+    ok_u, _ = usb_armor.apply_usb_lockdown()
+    check("usb armor lockdown dry-run", ok_u is True)
+
+    from synthex_airgap_killswitch import SynthexAirgapKillswitch
+    killswitch = SynthexAirgapKillswitch(dry_run=True)
+    check("killswitch initialized", killswitch is not None)
+    ks_st = killswitch.get_status()
+    check("killswitch status query pass", ks_st.get("killswitch_armed") is True)
+    ok_ke, _ = killswitch.engage_killswitch()
+    check("killswitch engage dry-run", ok_ke is True)
+    ok_kd, _ = killswitch.disengage_killswitch()
+    check("killswitch disengage dry-run", ok_kd is True)
+
+    from synthex_ramvault import SynthexRAMVault
+    ramvault = SynthexRAMVault(dry_run=True)
+    check("ramvault initialized", ramvault is not None)
+    rv_st = ramvault.get_status()
+    check("ramvault status query pass", "zero_trace_guarantee" in rv_st)
+    ok_rm, _ = ramvault.mount_vault(256)
+    check("ramvault mount dry-run", ok_rm is True)
+    ok_ru, _ = ramvault.unmount_and_destroy()
+    check("ramvault unmount & shred dry-run", ok_ru is True)
+
+    from synthex_shredder import SynthexShredder
+    shredder = SynthexShredder(dry_run=True)
+    check("shredder initialized", shredder is not None)
+    ok_sf, _ = shredder.shred_file(Path("/tmp/test_shred_dummy.txt"), passes=3)
+    check("shredder file shred dry-run", ok_sf is True)
+except Exception as _e:
+    check("security ecosystem functional validation", False, str(_e))
+
 # Summary
 print(f"\n{'='*50}")
 print(f"  RESULTS: {passed} passed, {failed} failed")

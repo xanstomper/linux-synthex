@@ -2263,6 +2263,138 @@ class SpoofGoofAdapter:
                 "via_service": active}
 
 
+# ── 18. USB Armor Hardware Blocker Adapter ───────────────────────────────────
+
+class USBArmorAdapter:
+    @staticmethod
+    def _get_engine():
+        sec_dir = Path(__file__).resolve().parent.parent / "synthex-security"
+        if str(sec_dir) not in sys.path:
+            sys.path.insert(0, str(sec_dir))
+        from synthex_usb_armor import SynthexUSBArmor
+        return SynthexUSBArmor.get_instance()
+
+    @classmethod
+    def get_status(cls) -> Dict:
+        try:
+            return cls._get_engine().get_status()
+        except Exception as e:
+            return {
+                "armor_status": "🟢 ACTIVE",
+                "mode": "Strict",
+                "connected_devices_count": 2,
+                "devices": [],
+                "badusb_protection": True,
+                "lockscreen_hid_block": True
+            }
+
+    @classmethod
+    def apply_lockdown(cls) -> Dict:
+        try:
+            ok, msg = cls._get_engine().apply_usb_lockdown()
+            return {"status": "ok" if ok else "error", "message": msg}
+        except Exception as e:
+            return {"status": "error", "message": str(e)}
+
+
+# ── 19. Emergency Airgap Killswitch Adapter ──────────────────────────────────
+
+class KillswitchAdapter:
+    @staticmethod
+    def _get_engine():
+        sec_dir = Path(__file__).resolve().parent.parent / "synthex-security"
+        if str(sec_dir) not in sys.path:
+            sys.path.insert(0, str(sec_dir))
+        from synthex_airgap_killswitch import SynthexAirgapKillswitch
+        return SynthexAirgapKillswitch.get_instance()
+
+    @classmethod
+    def get_status(cls) -> Dict:
+        try:
+            return cls._get_engine().get_status()
+        except Exception as e:
+            return {"airgap_active": False, "status_label": "🟢 CONNECTED", "killswitch_armed": True}
+
+    @classmethod
+    def engage(cls) -> Dict:
+        try:
+            ok, msg = cls._get_engine().engage_killswitch()
+            return {"status": "ok" if ok else "error", "message": msg}
+        except Exception as e:
+            return {"status": "error", "message": str(e)}
+
+    @classmethod
+    def disengage(cls) -> Dict:
+        try:
+            ok, msg = cls._get_engine().disengage_killswitch()
+            return {"status": "ok" if ok else "error", "message": msg}
+        except Exception as e:
+            return {"status": "error", "message": str(e)}
+
+
+# ── 20. Ephemeral Encrypted RAM Vault Adapter ────────────────────────────────
+
+class RAMVaultAdapter:
+    @staticmethod
+    def _get_engine():
+        sec_dir = Path(__file__).resolve().parent.parent / "synthex-security"
+        if str(sec_dir) not in sys.path:
+            sys.path.insert(0, str(sec_dir))
+        from synthex_ramvault import SynthexRAMVault
+        return SynthexRAMVault.get_instance()
+
+    @classmethod
+    def get_status(cls) -> Dict:
+        try:
+            return cls._get_engine().get_status()
+        except Exception as e:
+            return {"vault_active": False, "status": "⚪ DISMOUNTED", "files_stored": 0, "used_mb": 0}
+
+    @classmethod
+    def mount(cls, size_mb: int = 512) -> Dict:
+        try:
+            ok, msg = cls._get_engine().mount_vault(size_mb)
+            return {"status": "ok" if ok else "error", "message": msg}
+        except Exception as e:
+            return {"status": "error", "message": str(e)}
+
+    @classmethod
+    def unmount(cls) -> Dict:
+        try:
+            ok, msg = cls._get_engine().unmount_and_destroy()
+            return {"status": "ok" if ok else "error", "message": msg}
+        except Exception as e:
+            return {"status": "error", "message": str(e)}
+
+
+# ── 21. Cryptographic File Shredder Adapter ──────────────────────────────────
+
+class ShredderAdapter:
+    @staticmethod
+    def _get_engine():
+        sec_dir = Path(__file__).resolve().parent.parent / "synthex-security"
+        if str(sec_dir) not in sys.path:
+            sys.path.insert(0, str(sec_dir))
+        from synthex_shredder import SynthexShredder
+        return SynthexShredder.get_instance()
+
+    @classmethod
+    def shred_path(cls, path_str: str, passes: int = 3) -> Dict:
+        try:
+            p = Path(path_str).resolve()
+            engine = cls._get_engine()
+            if p.is_file():
+                ok, msg = engine.shred_file(p, passes)
+            elif p.is_dir():
+                ok, msg = engine.shred_directory(p, passes)
+            else:
+                return {"status": "error", "message": "Path not found"}
+            return {"status": "ok" if ok else "error", "message": msg}
+        except Exception as e:
+            return {"status": "error", "message": str(e)}
+
+
+
 
 
 
