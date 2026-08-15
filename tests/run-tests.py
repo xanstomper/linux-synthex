@@ -1612,7 +1612,37 @@ try:
 except Exception as _e:
     check("oobe wizard functional validation", False, str(_e))
 
+# 89. Synthex Bootable Hybrid ISO Generation Pipeline
+print("\n📋 Synthex Bootable Hybrid ISO Generation Pipeline:")
+iso_dir = os.path.join(ROOT, "src", "synthex-installer")
+check("synthex iso builder script exists", os.path.exists(os.path.join(iso_dir, "synthex_iso_builder.py")))
+check("synthex-iso cli launcher exists", os.access(os.path.join(ROOT, "src", "synthex-iso"), os.X_OK))
+
+try:
+    if iso_dir not in sys.path:
+        sys.path.insert(0, iso_dir)
+    from synthex_iso_builder import SynthexISOBuilder, ISOBuildConfig
+    builder = SynthexISOBuilder(dry_run=True)
+    check("iso builder initialized", builder is not None)
+    prereqs = builder.check_prerequisites()
+    check("iso builder prereqs check pass", isinstance(prereqs, dict))
+    cfg = ISOBuildConfig(
+        edition="hyprland",
+        version="2026.10",
+        volume_id="SYNTHEX_2026_10",
+        kernel_version="6.14.0",
+        compression="zstd",
+        output_path="/tmp/synthex-test.iso"
+    )
+    b_res = builder.build_iso(cfg)
+    check("iso build dry-run pass", b_res.get("status") == "ISO_BUILT" and b_res.get("uefi_bootable") is True)
+    val_res = builder.validate_iso("/tmp/synthex-test.iso")
+    check("iso validation pass", val_res.get("is_valid") is True and len(val_res.get("checks_passed", [])) >= 3)
+except Exception as _e:
+    check("iso builder functional validation", False, str(_e))
+
 # Summary
+
 
 
 
