@@ -355,10 +355,9 @@ def build_region(toast):
         ok = InputMethodAdapter.set_current(v)
         toast.show_message(f"Input method: {v}" if ok else "Could not set input method", error=not ok)
     _combo(sec, "Keyboard input method system", opts, lambda: cur_im, _set_im, width_chars=26)
-    row, _ = buttons_row("Restart input method", "Applies the input method immediately",
+    sec.add_row(buttons_row("Restart input method", "Applies the input method immediately",
                          icon="input-keyboard",
-                         buttons=[("Restart", "btn-quiet", lambda b: (run_cmd(["ibus", "restart"]), toast.show_message("Input method restarted")))])
-    sec.add_row(row)
+                         buttons=[("Restart", "btn-quiet", lambda b: (run_cmd(["ibus", "restart"]), toast.show_message("Input method restarted")))]))
     col.add(sec)
 
     sec = Section("Regional formats")
@@ -552,10 +551,9 @@ def build_panels(toast):
     col.add(sec)
 
     sec = Section("Panel editing")
-    row, _ = buttons_row("Panel edit mode", "Unlock and rearrange panel applets",
+    sec.add_row(buttons_row("Panel edit mode", "Unlock and rearrange panel applets",
                          icon="list-add",
-                         buttons=[("Toggle edit mode", "btn-primary", lambda b: _toggle_panel_edit(toast))])
-    sec.add_row(row)
+                         buttons=[("Toggle edit mode", "btn-primary", lambda b: _toggle_panel_edit(toast))]))
     col.add(sec)
     return col
 
@@ -597,11 +595,15 @@ def build_xlets(kind, title, icon, toast):
 
     sec = Section("Manage")
     opener = (lambda b, k=kind: run_cmd([f"cinnamon-{k[:-1]}-settings"]))
-    sec.add_row(buttons_row(f"Browse & install more", f"Open the {kind} manager",
+    sec.add_row(buttons_row("Browse & install more", f"Open the {kind} manager",
                             icon="system-software-install",
                             buttons=[(f"Open {kind} manager", "btn-primary", opener)]))
     col.add(sec)
     return col
+
+
+def _unused_marker():
+    pass
 
 
 def build_applets(toast):
