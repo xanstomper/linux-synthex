@@ -1,10 +1,16 @@
-#!/bin/sh
-# SPDX-License-Identifier: GPL-3.0-or-later
-# synthex-aegis-daemon — Synthex Aegis real-time protection daemon launcher
-# Works both from an installed system (/usr/lib/synthex/aegis) and from a
-# source checkout (next to this script).
-if [ -f /usr/lib/synthex/aegis/aegis_daemon.py ]; then
-    exec python3 /usr/lib/synthex/aegis/aegis_daemon.py "$@"
-fi
-DIR="$(cd "$(dirname "$(readlink -f "$0")")" && pwd)"
-exec python3 "$DIR/aegis_daemon.py" "$@"
+#!/usr/bin/env python3
+import sys
+from pathlib import Path
+
+candidate_paths = [
+    Path("/home/jewboy420/linux-synthex/src/synthex-aegis"),
+    Path("/usr/lib/synthex/aegis"),
+    Path(__file__).resolve().parent / "synthex-aegis"
+]
+for p in candidate_paths:
+    if p.exists() and str(p) not in sys.path:
+        sys.path.insert(0, str(p))
+
+from aegis_daemon import main
+if __name__ == "__main__":
+    main()
