@@ -30,18 +30,17 @@ def build_appearance(toast):
     col = ContentColumn()
     col.add(PageHeader("Appearance",
                        "Themes, icons, cursors, accents and rice presets",
-                       badges=[(f"{len(ThemeAdapter.list_gtk_themes() or [])} themes", "neutral")]))
+                       badges=[(f"{len(ThemeAdapter.get_installed_themes())} themes", "neutral")]))
 
     sec = Section("Theme")
-    _combo(sec, "GTK theme", ThemeAdapter.list_gtk_themes(),
-           lambda: ThemeAdapter.get_current_gtk_theme(), ThemeAdapter.apply_gtk_theme)
-    _combo(sec, "Icon theme", ThemeAdapter.list_icon_themes(),
-           lambda: ThemeAdapter.get_current_icon_theme(), ThemeAdapter.apply_icon_theme)
-    _combo(sec, "Cursor theme", ThemeAdapter.list_cursor_themes() or ["default"],
+    _combo(sec, "GTK theme", [(t, t) for t in ThemeAdapter.get_installed_themes()],
+           lambda: ThemeAdapter.get_current_gtk_theme(), ThemeAdapter.set_gtk_theme, width_chars=24)
+    _combo(sec, "Icon theme", [(t, t) for t in ThemeAdapter.get_installed_icons()],
+           lambda: _gget("org.cinnamon.desktop.interface", "icon-theme", "Adwaita"),
+           ThemeAdapter.set_icon_theme, width_chars=24)
+    _combo(sec, "Cursor theme", [(t, t) for t in (ThemeAdapter.get_installed_icons() or ["default"])],
            lambda: _gget("org.cinnamon.desktop.interface", "cursor-theme", "default"),
-           lambda v: safe_set_gsetting("org.cinnamon.desktop.interface", "cursor-theme", v))
-    _combo(sec, "Desktop theme (metacity)", ThemeAdapter.list_gtk_themes(),
-           lambda: ThemeAdapter.get_current_gtk_theme(), lambda v: True)
+           ThemeAdapter.set_cursor_theme, width_chars=24)
     col.add(sec)
 
     sec = Section("Colors")
@@ -57,8 +56,8 @@ def build_appearance(toast):
     row, sw = toggle_row("Dark mode", "Enable the dark GTK & Cinnamon variant",
                          icon="weather-clear-night",
                          get=lambda: _gget("org.cinnamon.desktop.interface", "gtk-theme", "").lower().endswith(("-dark", "dark")),
-                         set_=lambda v: ThemeAdapter.apply_gtk_theme(
-                             ThemeAdapter.get_current_gtk_theme() + ("-dark" if v else "")))
+                         set_=lambda v: ThemeAdapter.set_gtk_theme(
+                             ("Mint-Y-Dark" if v else "Mint-Y")))
     sec.add_row(row)
     col.add(sec)
 
@@ -100,13 +99,13 @@ def build_appearance(toast):
 
     # Rice presets + import
     sec = Section("Rice Studio")
-    presets = ThemeAdapter.list_rice_presets() or []
+    presets = ThemeAdapter.get_rice_presets() or []
     for p in presets[:6]:
-        sec.add_row(entity_card(p.get("name", "Preset"), p.get("description", "")[:70],
-                                icon_name=p.get("icon", "preferences-desktop-theme"),
+        sec.add_row(entity_card(p.get("name", "Preset"), p.get("desc", "")[:70],
+                                icon_name="preferences-desktop-theme",
                                 trailing=button("Apply", "btn-primary",
                                                 lambda b, pid=p.get("id"): _apply_rice(pid, toast))))
-    sec.add_row(buttons_row("Import", "Install a rice preset bundle (.synthex-rice) or theme archive",
+    sec.add_row(buttons_row("Import", "Install a rice preset bundle or theme archive",
                             icon="document-import",
                             buttons=[("Choose file…", "btn-quiet", lambda b: _import_theme(toast))]))
     col.add(sec)
@@ -127,7 +126,7 @@ def _import_theme(toast):
     dlg.add_filter(filt)
     if dlg.run() == Gtk.ResponseType.ACCEPT:
         path = dlg.get_filename()
-        res = ThemeAdapter.install_theme_file(path)
+        res = ThemeAdapter.install_theme_or_icon_archive(path)
         toast.show_message(res.get("message", "Theme installed") if res.get("ok") else "Import failed",
                            error=not res.get("ok", True))
     dlg.destroy()
@@ -597,10 +596,10 @@ def build_xlets(kind, title, icon, toast):
     col.add(sec)
 
     sec = Section("Manage")
+    opener = (lambda b, k=kind: run_cmd([f"cinnamon-{k[:-1]}-settings"]))
     sec.add_row(buttons_row(f"Browse & install more", f"Open the {kind} manager",
                             icon="system-software-install",
-                            buttons=[(f"Open {kind} manager", "btn-primary",
-                                      lambda b, k=kind: run_cmd([f"cinnamon-{k[:-1]}-settings"])])))
+                            buttons=[(f"Open {kind} manager", "btn-primary", opener)]))
     col.add(sec)
     return col
 
