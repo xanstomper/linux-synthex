@@ -23,9 +23,17 @@ rootpw --lock
 firstboot --reconfig
 xconfig --startxonboot
 
-zerombr
-clearpart --all --initlabel
-autopart --type=btrfs
+xconfig --startxonboot
+
+# ── LIVE IMAGE ───────────────────────────────────────────────────────────────
+# Livecd-creator builds a squashfs live root (overlayfs) mounted read-write on
+# boot: the ISO is FULLY USABLE as a desktop before any installation. Contents
+# are ephemeral; "Install Synthex" on the desktop (Calamares) writes to disk.
+liveimg --name="Synthex-Gaming" --nombr
+
+# Live session non-root user (also created by live-setup.sh at first boot).
+# Auto-login + passwordless sudo wired in %post below.
+user --name=liveuser --groups=wheel,audio,video,input,storage --password=liveuser
 
 %packages
 @core
@@ -281,4 +289,8 @@ systemctl disable lvm2-monitor mdmonitor 2>/dev/null || true
 [ -f /usr/lib/systemd/system/synthex-firstboot.service ] && systemctl enable synthex-firstboot.service || true
 
 echo "SynthOS Gaming Edition post-install complete."
+
+# ── Enable live session setup (live-only via ConditionPathExists) ──
+mkdir -p /run/synthex-live
+systemctl enable synthex-live-setup.service 2>/dev/null || true
 %end

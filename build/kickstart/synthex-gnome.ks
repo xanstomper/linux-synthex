@@ -23,9 +23,17 @@ rootpw --lock
 firstboot --reconfig
 xconfig --startxonboot
 
-zerombr
-clearpart --all --initlabel
-autopart --type=btrfs
+xconfig --startxonboot
+
+# ── LIVE IMAGE ───────────────────────────────────────────────────────────────
+# Livecd-creator builds a squashfs live root (overlayfs) mounted read-write on
+# boot: the ISO is FULLY USABLE as a desktop before any installation. Contents
+# are ephemeral; "Install Synthex" on the desktop (Calamares) writes to disk.
+liveimg --name="Synthex-Gnome" --nombr
+
+# Live session non-root user (also created by live-setup.sh at first boot).
+# Auto-login + passwordless sudo wired in %post below.
+user --name=liveuser --groups=wheel,audio,video,input,storage --password=liveuser
 
 %packages
 @core
@@ -227,4 +235,8 @@ defaultyes=True
 DNFEOF
 
 echo "SynthOS GNOME Edition post-install complete."
+
+# ── Enable live session installation (live-only via ConditionPathExists) ──
+mkdir -p /run/synthex-live
+systemctl enable synthex-live-setup.service 2>/dev/null || true
 %end

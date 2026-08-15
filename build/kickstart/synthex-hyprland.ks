@@ -22,9 +22,12 @@ network --bootproto=dhcp --device=link --activate
 rootpw --lock
 firstboot --reconfig
 
-zerombr
-clearpart --all --initlabel
-autopart --type=btrfs
+# ── LIVE IMAGE ─────────────────────────────────────────
+# Live squashfs root: usable before installing.
+liveimg --name="Synthex-Hyprland" --nombr
+
+# Live session non-root user (created by live-setup.sh).
+user --name=liveuser --groups=wheel,audio,video,input,storage --password=liveuser
 
 %packages
 @core
@@ -349,4 +352,8 @@ systemctl disable lvm2-monitor mdmonitor 2>/dev/null || true
 useradd -r -d /var/lib/greeter -M greeter 2>/dev/null || true
 
 echo "SynthOS Hyprland Edition post-install complete."
+
+# ── Enable live session setup (live-only via ConditionPathExists) ──
+mkdir -p /run/synthex-live
+systemctl enable synthex-live-setup.service 2>/dev/null || true
 %end

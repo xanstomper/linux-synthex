@@ -22,9 +22,12 @@ rootpw --lock
 firstboot --reconfig
 skipx
 
-zerombr
-clearpart --all --initlabel
-autopart --type=btrfs
+# ── LIVE IMAGE ─────────────────────────────────────────
+# Live squashfs root: usable before installing.
+liveimg --name="Synthex-Minimal" --nombr
+
+# Live session non-root user (created by live-setup.sh).
+user --name=liveuser --groups=wheel,audio,video,input,storage --password=liveuser
 
 %packages --excludedocs --instLangs=en
 @core
@@ -150,4 +153,8 @@ systemctl disable lvm2-monitor mdmonitor 2>/dev/null || true
 [ -f /usr/lib/systemd/system/synthex-firstboot.service ] && systemctl enable synthex-firstboot.service || true
 
 echo "SynthOS Minimal Edition post-install complete."
+
+# ── Enable live session setup (live-only via ConditionPathExists) ──
+mkdir -p /run/synthex-live
+systemctl enable synthex-live-setup.service 2>/dev/null || true
 %end

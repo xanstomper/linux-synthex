@@ -310,6 +310,18 @@ check("kickstart has SDDM autologin.conf", "autologin.conf" in plasma_content an
 check("kickstart has polkit installer rule", "49-synthex-live-installer.rules" in plasma_content)
 check("kickstart places installer on desktop", "synthex-installer.desktop" in plasma_content and "Desktop" in plasma_content)
 
+# 27b. Live-usable-before-install: real live squashfs + liveuser creation
+print("\n📋 Live usable-before-installing:")
+check("kickstart builds LIVE image (liveimg)·httpfilter", "liveimg" in plasma_content or "liveimg" in open(os.path.join(ROOT, "build", "kickstart", "synthex-plasma.ks")).read())
+for _ed in ["plasma", "gnome", "hyprland", "gaming", "minimal"]:
+    _ks = os.path.join(ROOT, "build", "kickstart", f"synthex-{_ed}.ks")
+    if os.path.exists(_ks):
+        _c = open(_ks).read()
+        check(f"{_ed}.ks is a LIVE image (liveimg+liveuser+installer)",
+              "liveimg" in _c and "user --name=liveuser" in _c)
+_live_spec = open(os.path.join(ROOT, "packages", "spec-files", "synthex-system-config.spec")).read() if os.path.exists(os.path.join(ROOT, "packages", "spec-files", "synthex-system-config.spec")) else ""
+check("system-config installs live-setup.service + desktop", "synthex-live-setup.service" in _live_spec and "install-synthex.desktop" in _live_spec)
+
 # 28. Live ISO security — passwordless sudo + firewall enabled
 print("\n📋 Live ISO security:")
 check("kickstart has liveuser NOPASSWD sudo", "liveuser ALL=(ALL) NOPASSWD: ALL" in plasma_content)
