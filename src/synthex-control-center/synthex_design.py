@@ -276,6 +276,18 @@ headerbar {
 
 .page-header { padding: 2px 8px 8px 8px; }
 .page-title { font-size: 23pt; font-weight: 800; letter-spacing: -0.025em; }
+.page-icon-chip {
+  background-image: linear-gradient(135deg,
+    alpha(@theme_selected_bg_color, 0.28),
+    alpha(@theme_selected_bg_color, 0.10));
+  border-radius: 15px;
+  border: 1px solid alpha(@theme_selected_bg_color, 0.22);
+  padding: 4px;
+}
+.page-icon-chip image {
+  color: @theme_selected_bg_color;
+  -gtk-icon-transform: scale(0.85);
+}
 .page-subtitle { font-size: 10pt; color: alpha(@theme_fg_color, 0.55); padding-top: 5px; }
 
 .card {
@@ -423,6 +435,10 @@ def label(text, css_class=None, xalign=0, wrap=True, **kw):
     if css_class:
         l.get_style_context().add_class(css_class)
     l.set_line_wrap_mode(Pango.WrapMode.WORD_CHAR)
+    if wrap:
+        # Cap natural width so long subtitles cannot stretch the column
+        l.set_width_chars(30)
+        l.set_max_width_chars(48)
     return l
 
 
@@ -452,13 +468,50 @@ def dot(kind):
     return d
 
 
+PAGE_ICONS = {
+    "Appearance": "preferences-desktop-theme", "Backgrounds": "preferences-desktop-wallpaper",
+    "Night Light": "night-light", "Notifications": "preferences-desktop-notification",
+    "Privacy Center": "preferences-system-privacy", "SpoofGoof Shield": "network-vpn",
+    "Online Accounts": "applications-internet", "Language & Region": "cs-language",
+    "Account Details": "avatar-default", "Accessibility": "preferences-desktop-accessibility",
+    "Installed Apps": "preferences-desktop-applications", "Desktop": "cs-desktop",
+    "Windows": "preferences-system-windows", "Workspaces": "view-grid",
+    "Panels": "cs-panel", "Applets": "preferences-plugin",
+    "Desklets": "preferences-desktop-widgets", "Extensions": "application-x-extension",
+    "Gestures": "input-touchpad", "Preferred Applications": "preferences-desktop-default-applications",
+    "Startup Applications": "preferences-session", "Screen Lock & Saver": "system-lock-screen",
+    "Display": "preferences-desktop-display", "Sound": "multimedia-volume-control",
+    "Mouse & Touchpad": "input-mouse", "Keyboard": "preferences-desktop-keyboard",
+    "Graphics Tablet": "input-tablet", "Printers & Scanners": "cs-printer",
+    "Bluetooth": "bluetooth", "Thunderbolt": "thunderbolt", "Color": "preferences-color",
+    "Power Management": "preferences-system-power", "Storage & Disks": "drive-harddisk",
+    "Drivers": "applications-science", "Gaming": "applications-games",
+    "Cameras & Gamepads": "camera-video", "Network": "preferences-system-network",
+    "Aegis Security Center": "security-high", "Security": "security-high",
+    "System Doctor": "applications-engineering", "Software Sources": "package-x-generic",
+    "Update Manager": "system-software-update", "Timeshift": "timebench",
+    "Login Window": "cs-user", "Date & Time": "preferences-system-time",
+    "System Information": "dialog-information", "Users & Groups": "system-users",
+}
+
+
 class PageHeader(Gtk.Box):
-    """Title + subtitle + trailing badges row at the top of every page."""
-    def __init__(self, title, subtitle="", badges=None):
+    """Icon chip + title + subtitle + trailing badges — the page hero row."""
+    def __init__(self, title, subtitle="", badges=None, icon_name=None):
         super().__init__(orientation=Gtk.Orientation.VERTICAL, spacing=0)
         self.get_style_context().add_class("page-header")
-        top = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=10)
-        top.pack_start(label(title, "page-title"), False, False, 0)
+        top = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=14)
+
+        icon_name = icon_name or PAGE_ICONS.get(title)
+        if icon_name:
+            chip = Gtk.Box()
+            chip.get_style_context().add_class("page-icon-chip")
+            img = Gtk.Image.new_from_icon_name(icon_name, Gtk.IconSize.DND)
+            chip.pack_start(img, True, True, 0)
+            chip.set_size_request(52, 52)
+            top.pack_start(chip, False, False, 0)
+
+        top.pack_start(label(title, "page-title", wrap=False), False, False, 0)
         for text, kind in (badges or []):
             top.pack_end(badge(text, kind), False, False, 0)
         self.pack_start(top, False, False, 0)
@@ -644,19 +697,40 @@ def info_grid(pairs):
 
 
 class ContentColumn(Gtk.Box):
-    """Centered, width-constrained settings column used by every page."""
-    def __init__(self):
-        super().__init__(orientation=Gtk.Orientation.VERTICAL, spacing=GAP_CARD)
-        self.set_halign(Gtk.Align.CENTER)
-        self.set_valign(Gtk.Align.START)
-        self.set_size_request(CONTENT_WIDTH, -1)
-        self.set_border_width(PAD_PAGE)
+    """Centered, exactly-width-constrained settings column for every page.
+
+    Viewports force full-width allocation onto children, so halign, spacers
+    and Gtk.Alignment all fail to center reliably. This subclass settles it
+    deterministically in do_size_allocate: the inner column always receives
+    exactly min(max_width, available) pixels, centered."""
+    __gtype_name__ = "SynthexContentColumn"
+
+    def __init__(self, max_width=CONTENT_WIDTH):
+        super().__init__(orientation=Gtk.Orientation.HORIZONTAL, spacing=0)
+        self._max_width = max_width
+        self._column = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=GAP_CARD)
+        self._column.set_border_width(PAD_PAGE)
+        self.pack_start(self._column, True, True, 0)
+
+    def do_size_allocate(self, allocation):
+        Gtk.Box.do_size_allocate(self, allocation)
+        w = min(self._max_width, allocation.width)
+        rect = Gdk.Rectangle()
+        rect.x = max(0, (allocation.width - w) // 2)
+        rect.y = 0
+        rect.width = w
+        rect.height = allocation.height
+        self._column.size_allocate(rect)
+        import os as _os
+        if _os.environ.get("SYNTHEX_LAYOUT_DEBUG"):
+            with open("/tmp/layout_debug.log", "a") as _f:
+                _f.write(f"alloc w={allocation.width} → column {rect.x}+{rect.width}\n")
 
     def add(self, w):
-        self.pack_start(w, False, False, 0)
+        self._column.pack_start(w, False, False, 0)
 
     def add_expand(self, w):
-        self.pack_start(w, True, True, 0)
+        self._column.pack_start(w, True, True, 0)
 
 
 class AsyncSection(Gtk.Frame):
