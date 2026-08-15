@@ -1139,6 +1139,7 @@ try:
     check("spoofgoof profile switch gaming", sg_engine.set_profile("gaming") is True)
     payload = sg_engine.generate_chaff_payload(64)
     check("spoofgoof chaff payload generation", len(payload) == 64)
+    check("isp stealth suite script exists", os.path.exists(os.path.join(ROOT, "tests", "test_isp_stealth.py")))
 except Exception as _e:
     check("spoofgoof functional validation", False, str(_e))
 
