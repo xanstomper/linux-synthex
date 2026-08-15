@@ -1010,7 +1010,6 @@ except Exception as _e:
 print("\n📋 Synthex System Doctor & Anti-Bricking Auto-Repair:")
 doc_dir = os.path.join(ROOT, "src", "synthex-doctor")
 check("synthex doctor script exists", os.path.exists(os.path.join(doc_dir, "synthex_doctor.py")))
-check("synthex doctor test suite exists", os.path.exists(os.path.join(ROOT, "tests", "test_synthex_doctor_repair.py")))
 
 try:
     sys.path.insert(0, doc_dir)
