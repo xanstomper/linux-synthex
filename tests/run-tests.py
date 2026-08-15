@@ -1542,7 +1542,27 @@ try:
 except Exception as _e:
     check("cpu tuner functional validation", False, str(_e))
 
+# 86. Synthex Live QEMU/KVM Virtual Machine Boot Harness
+print("\n📋 Synthex Live QEMU/KVM Virtual Machine Boot Harness:")
+boot_dir = os.path.join(ROOT, "src", "synthex-boot")
+check("synthex vm runner script exists", os.path.exists(os.path.join(boot_dir, "synthex_vm_runner.py")))
+check("synthex-vm cli launcher exists", os.access(os.path.join(ROOT, "src", "synthex-vm"), os.X_OK))
+
+try:
+    if boot_dir not in sys.path:
+        sys.path.insert(0, boot_dir)
+    from synthex_vm_runner import SynthexVMRunner
+    vm_runner = SynthexVMRunner(dry_run=True)
+    check("vm runner initialized", vm_runner is not None)
+    caps = vm_runner.probe_capabilities()
+    check("vm capabilities probe pass", caps.host_cores >= 1 and caps.qemu_bin != "")
+    boot_res = vm_runner.run_live_test_boot()
+    check("live vm boot test pass", boot_res.get("ok") is True and boot_res.get("status") == "PASSED")
+except Exception as _e:
+    check("vm runner functional validation", False, str(_e))
+
 # Summary
+
 
 
 
