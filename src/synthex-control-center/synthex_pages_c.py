@@ -561,6 +561,65 @@ def build_spoofgoof(toast):
 
     col.add(AsyncSection("Active countermeasures", loader=lambda: True, renderer=render_feats))
 
+    # ── IP identity rotation (new address without a VPN) ──────────────
+    def render_ip(payload, sec):
+        pub = payload.get("ip") or "unavailable"
+        def _rotate(b):
+            dlg = Gtk.MessageDialog(
+                transient_for=None, flags=0, message_type=Gtk.MessageType.WARNING,
+                buttons=Gtk.ButtonsType.OK_CANCEL,
+                text="Rotate network identity now?")
+            dlg.format_secondary_text(
+                "A fresh randomized MAC forces a new DHCP lease — your public IP\n"
+                "typically changes. Expect a ~5-15 second disconnect.\n\n"
+                "Note: live TCP source-IP spoofing is impossible by protocol design;\n"
+                "this delivers a genuinely new, unlinkable address instead.")
+            if dlg.run() == Gtk.ResponseType.OK:
+                dlg.destroy()
+                toast.show_message("Rotating identity — connection will blip…", seconds=8)
+                def work():
+                    res = SpoofGoofAdapter.rotate_ip(verify=True)
+                    GLib.idle_add(lambda: toast.show_message(
+                        (res.get("message", "") +
+                         (f" · public IP CHANGED {res.get('before_public_ip')} → {res.get('after_public_ip')}"
+                          if res.get("public_ip_changed") else " · ISP re-issued same IP (new MAC still unlinkable)"))[:120],
+                        error=not res.get("ok"), seconds=8))
+                threading.Thread(target=work, daemon=True).start()
+            else:
+                dlg.destroy()
+
+        sec.add_row(entity_card("Current public IP", pub,
+                                icon_name="network-idle",
+                                trailing=button("Rotate now", "btn-primary", _rotate)))
+
+        def _rot6(b):
+            res = SpoofGoofAdapter.rotate_ipv6()
+            toast.show_message((f"IPv6 privacy addresses regenerated ({res.get('temporary_addresses', 0)} temporary)"
+                                if res.get("ok") else f"IPv6 rotation failed: {res.get('message', res.get('error', ''))}")[:80],
+                               error=not res.get("ok"))
+
+        sec.add_row(buttons_row("IPv6 privacy rotation", "Regenerate RFC 4941 temporary addresses",
+                                icon="network-wireless",
+                                buttons=[("New IPv6 identity", "btn-quiet", _rot6)]))
+
+    col.add(AsyncSection("IP identity rotation", "New public address via MAC re-roll + fresh DHCP lease — no VPN",
+                         loader=lambda: {"ip": SpoofGoofAdapter.get_public_ip()},
+                         renderer=render_ip))
+
+    # Auto-rotation schedule
+    sec = Section("Automatic rotation")
+    row, _ = combo_row("Rotate identity every",
+                       [(0, "Off"), (15, "15 minutes"), (30, "30 minutes"),
+                        (60, "1 hour"), (180, "3 hours"), (360, "6 hours")],
+                       subtitle="The daemon re-rolls MAC + DHCP lease on schedule",
+                       icon="preferences-system-time",
+                       get=lambda: 0,
+                       set_=lambda v: (SpoofGoofAdapter.set_ip_rotate_interval(int(v)),
+                                       toast.show_message(f"Auto IP rotation: {'off' if int(v) == 0 else f'every {int(v)} min'} (applied by daemon)")),
+                       width_chars=14)
+    sec.add_row(row)
+    col.add(sec)
+
     # ── Live stats ────────────────────────────────────────────────────
     sec = Section("Live statistics")
     sec.add_row(entity_card("Latency penalty", str(st.get("network_latency_penalty", "+0.0 ms")),

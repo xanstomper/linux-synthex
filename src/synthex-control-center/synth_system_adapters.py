@@ -2184,6 +2184,34 @@ class SpoofGoofAdapter:
                 ("gaming", "Low-Latency Pro (Zero-Ping)")]
 
     @classmethod
+    def get_public_ip(cls, timeout: int = 8):
+        try:
+            return cls._get_engine().get_public_ip(timeout)
+        except Exception:
+            return None
+
+    @classmethod
+    def rotate_ip(cls, interface: str = "", verify: bool = True) -> Dict:
+        try:
+            return cls._get_engine().rotate_ip(interface, verify)
+        except Exception as e:
+            return {"ok": False, "message": str(e)}
+
+    @classmethod
+    def rotate_ipv6(cls, interface: str = "") -> Dict:
+        try:
+            return cls._get_engine().rotate_ipv6_privacy(interface)
+        except Exception as e:
+            return {"ok": False, "message": str(e)}
+
+    @classmethod
+    def set_ip_rotate_interval(cls, minutes: int) -> bool:
+        try:
+            return cls._get_engine().set_ip_rotate_interval(minutes)
+        except Exception:
+            return False
+
+    @classmethod
     def daemon_status(cls) -> Dict:
         ok, out, _ = run_cmd(["systemctl", "is-active", "synthex-spoofgoof"], timeout=4)
         active = ok and "active" in (out or "")

@@ -319,6 +319,33 @@ class SpoofGoofProof(unittest.TestCase):
         finally:
             subprocess.run(["ip", "link", "del", name], capture_output=True)
 
+    # ── PROOF 13: real IP identity rotation (opt-in — drops the link) ─────
+
+    @unittest.skipUnless(os.environ.get("SPOOFGOOF_ROTATE") == "1",
+                         "opt-in: SPOOFGOOF_ROTATE=1 (briefly disconnects the network)")
+    def test_proof_13_ip_rotation(self):
+        """Full identity rotation: MAC re-rolled, DHCP lease renewed, connectivity
+        restored, and the public IP observed before/after via echo services."""
+        engine = SpoofGoofEngine.get_instance()
+        res = engine.rotate_ip(verify=True)
+
+        self.assertTrue(res["ok"], f"rotation failed: {res}")
+        self.assertTrue(res["mac_changed"],
+                        f"MAC unchanged: {res['before_mac']} == {res['after_mac']}")
+        self.assertTrue(res["connectivity_restored"],
+                        "no connectivity after rotation — network left broken!")
+        first = int(res["after_mac"].split(":")[0], 16)
+        self.assertEqual(first & 0x02, 2, "rotated MAC not locally administered")
+        self.assertIn(res["method"], ("networkmanager", "raw-ip-link"))
+
+        ip_note = ("PUBLIC IP CHANGED" if res["public_ip_changed"]
+                   else "ISP re-issued same public IP (dynamic-pool dependent)")
+        record("PROOF 13 · IP identity rotation (LIVE)",
+               f"method={res['method']} · MAC {res['before_mac']} → {res['after_mac']} · "
+               f"LAN {res['before_lan_ip']} → {res['after_lan_ip']} · "
+               f"public {res['before_public_ip']} → {res['after_public_ip']} [{ip_note}] · "
+               f"connectivity restored ✓")
+
     @unittest.skipUnless(HAVE_ROOT, "requires root (icmp timing)")
     def test_proof_12_zero_latency(self):
         """Ping RTT to 1.1.1.1 with chaff running vs paused differs within noise."""

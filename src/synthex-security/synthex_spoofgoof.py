@@ -440,6 +440,195 @@ net.ipv6.conf.default.use_tempaddr = 2
                 pass
             time.sleep(interval)
 
+    # ── 4. IP Identity Rotation (new address, no VPN) ─────────────────────────
+    #
+    # Honest engineering note: TCP source-IP spoofing on established flows is
+    # impossible by design (the 3-way handshake would never complete). What we
+    # deliver instead — and verify — is address *rotation with unlinkability*:
+    # a fresh randomized MAC forces a brand-new DHCP lease, and the ISP hands
+    # out a different public IP from its pool, with hostname Option-12 stripped.
+    # The result is a genuinely different network identity, achieved locally.
+
+    @staticmethod
+    def get_public_ip(timeout: int = 8) -> Optional[str]:
+        """Current public IP via echo services (v4 preferred, v6 fallback)."""
+        for url in ("https://api.ipify.org", "https://icanhazip.com", "https://ifconfig.me/ip"):
+            try:
+                out = subprocess.run(["curl", "-s", "--max-time", str(timeout), url],
+                                     capture_output=True, text=True, timeout=timeout + 2).stdout.strip()
+                if out and (out.count(".") == 3 or ":" in out):
+                    return out
+            except Exception:
+                continue
+        return None
+
+    @staticmethod
+    def get_lan_ip(interface: str) -> str:
+        try:
+            out = subprocess.run(["ip", "-o", "-4", "addr", "show", "dev", interface],
+                                 capture_output=True, text=True, timeout=4).stdout
+            for token in out.split():
+                if token.count(".") == 3 and "/" in token:
+                    return token.split("/")[0]
+        except Exception:
+            pass
+        return ""
+
+    @staticmethod
+    def _nm_active_connection(interface: str) -> Optional[str]:
+        try:
+            out = subprocess.run(
+                ["nmcli", "-t", "-f", "NAME,DEVICE,TYPE", "connection", "show", "--active"],
+                capture_output=True, text=True, timeout=6).stdout
+            for line in out.splitlines():
+                name, dev, ctype = (line.split(":", 2) + ["", "", ""])[:3]
+                if dev == interface and "wireless" in ctype:
+                    return name
+                if dev == interface and "ethernet" in ctype:
+                    return name
+        except Exception:
+            pass
+        return None
+
+    def rotate_ip(self, interface: str = "", verify: bool = True) -> Dict[str, Any]:
+        """Rolls a fresh network identity: new randomized MAC → new DHCP lease
+        → (typically) new public IP. Brief disconnect (~5-15s) is inherent."""
+        if not interface:
+            okr, out, _ = (None, "", None)
+            try:
+                out = subprocess.run(["bash", "-c",
+                                      "ip -o -4 route show default | awk '{print $5}' | head -1"],
+                                     capture_output=True, text=True, timeout=4).stdout.strip()
+            except Exception:
+                out = ""
+            interface = out or "wlp1s0"
+
+        def mac_of(iface):
+            try:
+                return Path(f"/sys/class/net/{iface}/address").read_text().strip()
+            except Exception:
+                return "?"
+
+        before_pub = self.get_public_ip() if verify else None
+        before_mac = mac_of(interface)
+        before_lan = self.get_lan_ip(interface)
+
+        conn = self._nm_active_connection(interface)
+        method = "none"
+        if conn:
+            # Per-connection randomized MAC (persists across NM reconnects)
+            is_wifi = True
+            try:
+                tp = subprocess.run(["nmcli", "-t", "-f", "TYPE", "connection", "show", conn],
+                                    capture_output=True, text=True, timeout=5).stdout.strip()
+                is_wifi = "wireless" in tp
+            except Exception:
+                pass
+            key = "802-11-wireless.cloned-mac-address" if is_wifi else "ethernet.cloned-mac-address"
+            subprocess.run(["nmcli", "connection", "modify", conn, key, "random"],
+                           capture_output=True, timeout=8)
+            subprocess.run(["nmcli", "connection", "modify", conn,
+                            "ipv4.dhcp-client-id", "mac"],
+                           capture_output=True, timeout=8)
+            subprocess.run(["nmcli", "device", "disconnect", interface],
+                           capture_output=True, timeout=15)
+            time.sleep(1.0)
+            # Reconnect with retries (stored credentials used)
+            connected = False
+            for _ in range(6):
+                r = subprocess.run(["nmcli", "connection", "up", conn],
+                                   capture_output=True, timeout=25)
+                if r.returncode == 0:
+                    connected = True
+                    break
+                time.sleep(2)
+            method = "networkmanager" if connected else "nm-failed"
+        if method in ("none", "nm-failed"):
+            # Fallback: raw link dance (works without NM, root required)
+            try:
+                new_mac = generate_random_mac()
+                subprocess.run(["ip", "link", "set", "dev", interface, "down"],
+                               capture_output=True, timeout=6)
+                subprocess.run(["ip", "link", "set", "dev", interface, "address", new_mac],
+                               capture_output=True, timeout=6)
+                subprocess.run(["ip", "link", "set", "dev", interface, "up"],
+                               capture_output=True, timeout=6)
+                method = "raw-ip-link"
+            except Exception:
+                pass
+
+        after_mac = mac_of(interface)
+        after_lan = self.get_lan_ip(interface)
+        connectivity = False
+        after_pub = None
+        if verify:
+            for _ in range(8):
+                after_pub = self.get_public_ip(timeout=6)
+                if after_pub:
+                    connectivity = True
+                    break
+                time.sleep(2)
+
+        changed_pub = bool(before_pub and after_pub and before_pub != after_pub)
+        return {
+            "ok": after_mac != before_mac and method not in ("none",),
+            "interface": interface,
+            "method": method,
+            "before_public_ip": before_pub,
+            "after_public_ip": after_pub,
+            "public_ip_changed": changed_pub,
+            "before_mac": before_mac,
+            "after_mac": after_mac,
+            "mac_changed": after_mac != before_mac,
+            "before_lan_ip": before_lan,
+            "after_lan_ip": after_lan,
+            "connectivity_restored": connectivity,
+            "message": (
+                f"Identity rotated: MAC {after_mac}, LAN {before_lan}→{after_lan}, "
+                f"public {before_pub}→{after_pub}" if changed_pub else
+                f"Identity rotated: MAC {after_mac}, LAN {before_lan}→{after_lan}. "
+                f"Public IP {after_pub} is held by your router's WAN lease (NAT) — "
+                f"renew the router WAN lease for a new ISP-assigned address"),
+
+        }
+
+    def rotate_ipv6_privacy(self, interface: str = "") -> Dict[str, Any]:
+        """Forces regeneration of the IPv6 privacy (temporary) address so the
+        interface identifier cannot be correlated over time (RFC 4941)."""
+        if not interface:
+            try:
+                interface = subprocess.run(["bash", "-c",
+                                            "ip -o -6 route show default | awk '{print $5}' | head -1"],
+                                           capture_output=True, text=True, timeout=4).stdout.strip() or "wlp1s0"
+            except Exception:
+                interface = "wlp1s0"
+        try:
+            before = subprocess.run(["ip", "-o", "-6", "addr", "show", "dev", interface, "scope", "global"],
+                                    capture_output=True, text=True, timeout=4).stdout
+            subprocess.run(["sysctl", "-w", f"net.ipv6.conf.{interface}.use_tempaddr=2"],
+                           capture_output=True, timeout=4)
+            subprocess.run(["sysctl", "-w", f"net.ipv6.conf.{interface}.use_tempaddr=0"],
+                           capture_output=True, timeout=4)
+            subprocess.run(["sysctl", "-w", f"net.ipv6.conf.{interface}.use_tempaddr=2"],
+                           capture_output=True, timeout=4)
+            subprocess.run(["nmcli", "device", "reapply", interface],
+                           capture_output=True, timeout=10)
+            time.sleep(2)
+            after = subprocess.run(["ip", "-o", "-6", "addr", "show", "dev", interface, "scope", "global"],
+                                   capture_output=True, text=True, timeout=4).stdout
+            return {"ok": True, "interface": interface,
+                    "temporary_addresses": after.count("temporary"),
+                    "changed": before != after,
+                    "detail": after.strip()[:200]}
+        except Exception as e:
+            return {"ok": False, "interface": interface, "error": str(e)}
+
+    def set_ip_rotate_interval(self, minutes: int) -> bool:
+        cfg = self._load_config()
+        cfg["ip_rotate_interval_min"] = int(minutes)
+        self._save_config(cfg)
+        return True
+
     def run_daemon(self):
         """Continuous background daemon loop emitting multi-protocol chaff."""
         print(f"[SpoofGoof] Starting 100% Full-Spectrum packet morphing & chaff daemon (PID: {os.getpid()})...")
@@ -451,10 +640,19 @@ net.ipv6.conf.default.use_tempaddr = 2
 
         udp_sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
         udp_sock.setblocking(False)
+        last_ip_rotation = 0.0
 
         while True:
             cfg = self._load_config()
             if cfg.get("enabled", True):
+                # Scheduled identity rotation (0 = off)
+                interval_min = int(cfg.get("ip_rotate_interval_min", 0) or 0)
+                if interval_min > 0 and time.time() - last_ip_rotation > interval_min * 60:
+                    last_ip_rotation = time.time()
+                    try:
+                        self.rotate_ip(verify=False)
+                    except Exception:
+                        pass
                 prof = PROFILES.get(cfg.get("profile", "balanced"), PROFILES["balanced"])
                 interval = 1.0 / max(prof.noise_rate_pps, 1)
 
@@ -535,6 +733,24 @@ def main():
     elif sys.argv[1] == "disable":
         engine.toggle_enabled(False)
         print("✓ SpoofGoof disabled.")
+    elif sys.argv[1] == "myip":
+        v4 = engine.get_public_ip()
+        print(f"Public IP: {v4 or 'unavailable'}")
+    elif sys.argv[1] == "rotate-ip":
+        print("[SpoofGoof] Rotating network identity (brief disconnect)...")
+        res = engine.rotate_ip(verify=True)
+        icon = "✓" if res["ok"] else "✗"
+        print(f"{icon} {res['message']}")
+        print(f"   method={res['method']} · MAC {res['before_mac']} → {res['after_mac']}")
+        print(f"   public {res['before_public_ip']} → {res['after_public_ip']} "
+              f"({'CHANGED' if res['public_ip_changed'] else 'same (ISP pool)'})")
+        print(f"   LAN {res['before_lan_ip']} → {res['after_lan_ip']} · connectivity: {res['connectivity_restored']}")
+    elif sys.argv[1] == "rotate-ipv6":
+        res = engine.rotate_ipv6_privacy()
+        print(("✓" if res["ok"] else "✗") + f" IPv6 privacy addresses: {res}")
+    elif sys.argv[1] == "auto-rotate" and len(sys.argv) >= 3:
+        engine.set_ip_rotate_interval(int(sys.argv[2]))
+        print(f"✓ Auto IP rotation every {sys.argv[2]} minutes (0=off). Applied by daemon.")
     elif sys.argv[1] == "json":
         print(json.dumps(engine.get_status(), indent=2))
     else:

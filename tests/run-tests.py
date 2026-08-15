@@ -1046,14 +1046,14 @@ check("spoofgoof status verifies subsystems live", "_verify_tcp_morphing" in _sg
 try:
     _r = _sp.run([sys.executable, _proof], capture_output=True, text=True, timeout=240)
     _out = _r.stdout + "\n" + _r.stderr  # unittest reports on stderr
-    _ran = "Ran 12 tests" in _out
+    _ran = "Ran 13 tests" in _out
     _ok = "\nOK" in _out or "OK (skipped=" in _out
-    check("spoofgoof proof suite passes (12 proofs)", _r.returncode == 0 and _ran and _ok,
+    check("spoofgoof proof suite passes (13 proofs)", _r.returncode == 0 and _ran and _ok,
           _out[-200:] if _r.returncode != 0 else None)
     for _proof_name in ["PROOF 3", "PROOF 4", "PROOF 5", "PROOF 7", "PROOF 8", "PROOF 9", "PROOF 10", "PROOF 11"]:
         check(f"spoofgoof {_proof_name} verified", f"{_proof_name} ·" in _out or f" {_proof_name}" in _out)
 except Exception as _e:
-    check("spoofgoof proof suite passes (12 proofs)", False, str(_e))
+    check("spoofgoof proof suite passes (13 proofs)", False, str(_e))
 check("aegis packaging unit registered", os.path.exists(os.path.join(ROOT, "packages", "services-systemd", "synthex-aegis.service")))
 
 # 74. Professional Settings Center — design system, full category coverage, Fedora platform layer
