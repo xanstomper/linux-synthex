@@ -742,10 +742,7 @@ class ScreensaverAdapter:
 
     @staticmethod
     def lock_enabled() -> bool:
-        s = get_gsettings("org.cinnamon.desktop.lockdown")
-        if s:
-            return not s.get_boolean("disable-lock-screen")
-        return True
+        return not _gget("org.cinnamon.desktop.lockdown", "disable-lock-screen", False)
 
     @staticmethod
     def idle_settings() -> Dict:
@@ -871,13 +868,7 @@ class PreferredAppsAdapter:
     @staticmethod
     def get_default(role: str, mime: Optional[str]) -> str:
         if role == "terminal":
-            s = get_gsettings("org.cinnamon.desktop.default-applications.terminal")
-            if s:
-                try:
-                    return s.get_string("exec") or ""
-                except Exception:
-                    pass
-            return ""
+            return _gget("org.cinnamon.desktop.default-applications.terminal", "exec", "") or ""
         if mime:
             ok, out, _ = run_cmd(["xdg-mime", "query", "default", mime], timeout=5)
             if ok and out:
@@ -945,13 +936,7 @@ class WindowsAdapter:
 
     @staticmethod
     def get(key, default=None):
-        s = get_gsettings(WindowsAdapter.SCHEMA)
-        if s:
-            try:
-                return s.get_value(key).unpack()
-            except Exception:
-                pass
-        return default
+        return _gget(WindowsAdapter.SCHEMA, key, default)
 
     @staticmethod
     def set(key, value) -> bool:
@@ -1096,13 +1081,7 @@ class ExtensionsAdapter:
 
     @staticmethod
     def enabled_keys(kind: str = "applets") -> List[str]:
-        s = get_gsettings("org.cinnamon")
-        if s:
-            try:
-                return list(s.get_strv(f"enabled-{kind}"))
-            except Exception:
-                pass
-        return []
+        return list(_gget("org.cinnamon", f"enabled-{kind}", []) or [])
 
     @staticmethod
     def is_enabled(kind: str, uuid: str) -> bool:
@@ -1111,10 +1090,7 @@ class ExtensionsAdapter:
 
     @staticmethod
     def set_enabled(kind: str, uuid: str, enabled: bool) -> bool:
-        s = get_gsettings("org.cinnamon")
-        if not s:
-            return False
-        cur = list(s.get_strv(f"enabled-{kind}"))
+        cur = list(_gget("org.cinnamon", f"enabled-{kind}", []) or [])
         if enabled:
             if uuid not in cur:
                 cur.append(uuid)
@@ -1178,14 +1154,9 @@ class InputMethodAdapter:
 
     @staticmethod
     def current() -> str:
-        s = get_gsettings("org.cinnamon.desktop.interface")
-        if s:
-            try:
-                v = s.get_string("gtk-im-module")
-                if v and v != "gtk-im-context-simple":
-                    return v
-            except Exception:
-                pass
+        v = _gget("org.cinnamon.desktop.interface", "gtk-im-module", None)
+        if v and v != "gtk-im-context-simple":
+            return v
         return os.environ.get("GTK_IM_MODULE", "simple")
 
     @staticmethod
@@ -1196,13 +1167,7 @@ class InputMethodAdapter:
 
     @staticmethod
     def sources() -> List[str]:
-        s = get_gsettings("org.cinnamon.desktop.input-sources")
-        if s:
-            try:
-                return list(s.get_strv("sources"))
-            except Exception:
-                pass
-        return []
+        return list(_gget("org.cinnamon.desktop.input-sources", "sources", []) or [])
 
     @staticmethod
     def set_sources(srcs: List[str]) -> bool:
@@ -1227,26 +1192,17 @@ class FontsAdapter:
 
     @staticmethod
     def current_fonts() -> Dict:
-        s = get_gsettings("org.cinnamon.desktop.interface")
         out = {}
-        if s:
-            for key, label in [("font-name", "interface"), ("document-font-name", "document")]:
-                try:
-                    out[label] = s.get_string(key)
-                except Exception:
-                    pass
-        wm = get_gsettings("org.cinnamon.desktop.wm.preferences")
-        if wm:
-            try:
-                out["window_title"] = wm.get_string("titlebar-font")
-            except Exception:
-                pass
-        mon = get_gsettings("org.cinnamon.desktop.interface")
-        if mon:
-            try:
-                out["monospace"] = mon.get_string("monospace-font-name")
-            except Exception:
-                pass
+        for key, label in [("font-name", "interface"), ("document-font-name", "document")]:
+            v = _gget("org.cinnamon.desktop.interface", key, None)
+            if v:
+                out[label] = v
+        v = _gget("org.cinnamon.desktop.wm.preferences", "titlebar-font", None)
+        if v:
+            out["window_title"] = v
+        v = _gget("org.cinnamon.desktop.interface", "monospace-font-name", None)
+        if v:
+            out["monospace"] = v
         return out
 
     @staticmethod
@@ -1277,13 +1233,10 @@ class FontsAdapter:
     def antialias_settings() -> Dict:
         keys = ["antialiasing", "hinting", "dpi"]
         out = {}
-        s = get_gsettings("org.cinnamon.settings-daemon.plugins.xsettings")
-        if s:
-            for k in keys:
-                try:
-                    out[k] = s.get_value(k).unpack()
-                except Exception:
-                    pass
+        for k in keys:
+            v = _gget("org.cinnamon.settings-daemon.plugins.xsettings", k, None)
+            if v is not None:
+                out[k] = v
         return out or {"antialiasing": "rgba", "hinting": "slight", "dpi": 0}
 
     @staticmethod
@@ -1300,20 +1253,10 @@ class BackgroundsAdapter:
 
     @staticmethod
     def current() -> Dict:
-        s = get_gsettings(BackgroundsAdapter.SCHEMA)
         out = {"picture_uri": "", "mode": "wallpaper"}
-        if s:
-            try:
-                out["picture_uri"] = s.get_string("picture-uri")
-            except Exception:
-                pass
-        slide = get_gsettings("org.cinnamon.desktop.background.slideshow")
-        if slide:
-            try:
-                out["slideshow_enabled"] = slide.get_boolean("slideshow-enabled")
-                out["delay"] = slide.get_int("delay")
-            except Exception:
-                pass
+        out["picture_uri"] = _gget(BackgroundsAdapter.SCHEMA, "picture-uri", "") or ""
+        out["slideshow_enabled"] = bool(_gget("org.cinnamon.desktop.background.slideshow", "slideshow-enabled", False))
+        out["delay"] = int(_gget("org.cinnamon.desktop.background.slideshow", "delay", 300) or 300)
         return out
 
     @staticmethod

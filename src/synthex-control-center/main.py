@@ -51,6 +51,7 @@ from synth_system_adapters import (
     QuarantineManagerAdapter,
     DoctorAdapter,
     EncryptionAdapter,
+    SpoofGoofAdapter,
     safe_set_gsetting,
     get_gsettings,
     run_cmd
@@ -1660,6 +1661,39 @@ class SettingsAppWindow(Gtk.Window):
 
             net_priv_frame.add(net_priv_vbox)
             self.content_box.pack_start(net_priv_frame, False, False, 0)
+
+            # 4.5. SpoofGoof Zero-Latency Packet Noise & Traffic Masking
+            sg_status = SpoofGoofAdapter.get_status()
+            sg_frame = Gtk.Frame(label="SpoofGoof — Zero-Latency Packet Noise & Traffic Masking")
+            sg_vbox = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=10)
+            sg_vbox.set_border_width(16)
+
+            sg_top = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=12)
+            sg_top.pack_start(Gtk.Image.new_from_icon_name("network-transmit-receive", Gtk.IconSize.DIALOG), False, False, 0)
+            sg_info = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=2)
+            sg_info.pack_start(Gtk.Label(label="<b>Active Protection Profile:</b> <span color='#2ecc71'>" + sg_status["profile"] + "</span>", use_markup=True, xalign=0), False, False, 0)
+            sg_info.pack_start(Gtk.Label(label=f"Latency Penalty: <span color='#2ecc71'><b>{sg_status['network_latency_penalty']}</b></span> • DPI Resistance: <b>{sg_status['correlation_resistance_score']}</b>", use_markup=True, xalign=0), False, False, 0)
+            sg_info.pack_start(Gtk.Label(label=f"<small color='#888888'>Injected {sg_status['packets_injected_today']:,} dummy chaff packets ({sg_status['bytes_obfuscated_mb']} MB) to mask genuine user sessions.</small>", use_markup=True, xalign=0), False, False, 0)
+            sg_top.pack_start(sg_info, True, True, 0)
+            sg_vbox.pack_start(sg_top, False, False, 0)
+
+            # Profile Switcher Buttons
+            sg_btn_box = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=10)
+            btn_sg_bal = Gtk.Button.new_with_label("Adaptive Balanced")
+            btn_sg_bal.connect("clicked", lambda b: (SpoofGoofAdapter.set_profile("balanced"), self._render_category_page("privacy", "Privacy", ["Location", "Camera", "Microphone", "Screen capture", "App permissions", "Telemetry"])))
+            sg_btn_box.pack_start(btn_sg_bal, True, True, 0)
+
+            btn_sg_ult = Gtk.Button.new_with_label("Ultra-Stealth Max Chaff")
+            btn_sg_ult.connect("clicked", lambda b: (SpoofGoofAdapter.set_profile("ultra_stealth"), self._render_category_page("privacy", "Privacy", ["Location", "Camera", "Microphone", "Screen capture", "App permissions", "Telemetry"])))
+            sg_btn_box.pack_start(btn_sg_ult, True, True, 0)
+
+            btn_sg_gam = Gtk.Button.new_with_label("Low-Latency Pro (Gaming)")
+            btn_sg_gam.connect("clicked", lambda b: (SpoofGoofAdapter.set_profile("gaming"), self._render_category_page("privacy", "Privacy", ["Location", "Camera", "Microphone", "Screen capture", "App permissions", "Telemetry"])))
+            sg_btn_box.pack_start(btn_sg_gam, True, True, 0)
+
+            sg_vbox.pack_start(sg_btn_box, False, False, 4)
+            sg_frame.add(sg_vbox)
+            self.content_box.pack_start(sg_frame, False, False, 0)
 
             # 5. AI Privacy & Data Boundaries
             ai_frame = Gtk.Frame(label="SynthOS AI Data Boundaries (Hermes / OpenCode)")

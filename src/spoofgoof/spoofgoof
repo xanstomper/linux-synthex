@@ -1,0 +1,23 @@
+#!/usr/bin/env python3
+# SPDX-License-Identifier: GPL-3.0-or-later
+"""
+Synthex SpoofGoof CLI Tool
+Usage:
+  spoofgoof status                   — Display real-time packet masking & noise statistics
+  spoofgoof enable                   — Turn on packet noise & traffic morphing
+  spoofgoof disable                  — Turn off packet noise
+  spoofgoof profile <profile_name>   — Switch profile (balanced, ultra_stealth, gaming)
+"""
+
+import sys
+from pathlib import Path
+
+_SEC_DIR = Path(__file__).resolve().parent.parent / "synthex-security"
+if str(_SEC_DIR) not in sys.path:
+    sys.path.insert(0, str(_SEC_DIR))
+
+try:
+    from synthex_spoofgoof import main
+    main()
+except ImportError as e:
+    print(f"Error loading SpoofGoof engine: {e}")

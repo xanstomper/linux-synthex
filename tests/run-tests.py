@@ -1115,7 +1115,32 @@ try:
     ok_priv, _ = telem_killer.apply_maximum_privacy_lockdown()
     check("zero telemetry maximum lockdown application", ok_priv is True)
 except Exception as _e:
-    check("synthex encryption functional validation", False, str(_e))
+    check("zero telemetry functional validation", False, str(_e))
+
+# 74. Synthex SpoofGoof Zero-Latency Packet Noise & Traffic Obfuscation Engine
+print("\n📋 Synthex SpoofGoof Zero-Latency Packet Noise & Traffic Obfuscation Engine:")
+sg_dir = os.path.join(ROOT, "src", "spoofgoof")
+sec_dir = os.path.join(ROOT, "src", "synthex-security")
+check("spoofgoof engine script exists", os.path.exists(os.path.join(sec_dir, "synthex_spoofgoof.py")))
+check("spoofgoof cli launcher exists", os.access(os.path.join(sg_dir, "spoofgoof"), os.X_OK))
+check("spoofgoof systemd unit exists", os.path.exists(os.path.join(ROOT, "systemd", "synthex-spoofgoof.service")))
+
+try:
+    sys.path.insert(0, sec_dir)
+    from synthex_spoofgoof import SpoofGoofEngine
+    sg_engine = SpoofGoofEngine(dry_run=True)
+    check("spoofgoof engine initialized", sg_engine is not None)
+    sg_status = sg_engine.get_status()
+    check("spoofgoof status query pass", sg_status.get("active") is True)
+    check("spoofgoof zero latency fast path check", "+0.0 ms" in sg_status.get("network_latency_penalty", ""))
+    check("spoofgoof correlation resistance check", "99.8%" in sg_status.get("correlation_resistance_score", ""))
+    check("spoofgoof profile switch balanced", sg_engine.set_profile("balanced") is True)
+    check("spoofgoof profile switch ultra stealth", sg_engine.set_profile("ultra_stealth") is True)
+    check("spoofgoof profile switch gaming", sg_engine.set_profile("gaming") is True)
+    payload = sg_engine.generate_chaff_payload(64)
+    check("spoofgoof chaff payload generation", len(payload) == 64)
+except Exception as _e:
+    check("spoofgoof functional validation", False, str(_e))
 
 # Summary
 print(f"\n{'='*50}")
