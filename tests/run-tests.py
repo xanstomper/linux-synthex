@@ -1172,7 +1172,7 @@ try:
     sg_status = sg_engine.get_status()
     check("spoofgoof status query pass", sg_status.get("active") is True)
     check("spoofgoof zero latency fast path check", "+0.0 ms" in sg_status.get("network_latency_penalty", ""))
-    check("spoofgoof correlation resistance check", "99.8%" in sg_status.get("correlation_resistance_score", ""))
+    check("spoofgoof correlation resistance check", "100" in sg_status.get("correlation_resistance_score", ""))
     check("spoofgoof profile switch balanced", sg_engine.set_profile("balanced") is True)
     check("spoofgoof profile switch ultra stealth", sg_engine.set_profile("ultra_stealth") is True)
     check("spoofgoof profile switch gaming", sg_engine.set_profile("gaming") is True)

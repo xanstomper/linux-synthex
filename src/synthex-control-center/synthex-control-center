@@ -5,9 +5,15 @@ set -euo pipefail
 HERE="$(cd "$(dirname "$0")" && pwd)"
 REPO_ROOT="$(cd "$HERE/../.." && pwd)"
 
-# Launch Native SynthOS Control Center
-if [ -f "$REPO_ROOT/.venv/bin/python" ]; then
-    exec "$REPO_ROOT/.venv/bin/python" "$HERE/main.py" "$@"
-else
-    exec python3 "$HERE/main.py" "$@"
-fi
+# Launch Native SynthOS Control Center.
+# GTK3/PyGObject lives in system site-packages — the repo venv does not ship
+# gi bindings, so prefer the system interpreter.
+PY=""
+for CAND in /usr/bin/python3 python3 "$REPO_ROOT/.venv/bin/python"; do
+    if command -v "$CAND" >/dev/null 2>&1 && "$CAND" -c "import gi" >/dev/null 2>&1; then
+        PY="$CAND"
+        break
+    fi
+done
+[ -n "$PY" ] || { echo "No Python with PyGObject (gi) found" >&2; exit 1; }
+exec "$PY" "$HERE/main.py" "$@"

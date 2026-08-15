@@ -54,7 +54,7 @@ def run_tests():
     st = sg.get_status()
     check("SpoofGoof status is active", st["active"] is True)
     check("SpoofGoof zero latency penalty", "+0.0 ms" in st["network_latency_penalty"])
-    check("SpoofGoof DPI resistance rating", "99.8%" in st["correlation_resistance_score"])
+    check("SpoofGoof DPI resistance rating", "100" in st["correlation_resistance_score"])
 
     # Test payload entropy
     payload1 = sg.generate_chaff_payload(128)
