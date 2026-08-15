@@ -213,26 +213,46 @@ class AegisEngine:
 
     # ── 2. Real Process, Memory & Socket Behavioral Engine ───────────────────
 
+    def _is_trusted_developer_or_ai_process(self, pid: int, comm: str, cmdline: str, proc_path: Path) -> bool:
+        """
+        Ensures AI agents (Hermes, Antigravity, OpenCode, AgY, IDEs, and their official services)
+        are 100% immune from false positive terminations.
+        """
+        comm_lower = comm.lower()
+        cmdline_lower = cmdline.lower()
+
+        # 1. Direct AI agent process or IDE name check
+        if comm_lower in {"hermes", "antigravity", "agy", "opencode", "code", "cursor", "vscode"}:
+            return True
+
+        # 2. Commandline signature check for AI agent runtimes (Hermes gateway, dashboard, CLI)
+        if any(marker in cmdline_lower for marker in [
+            "hermes gateway", "hermes-dashboard", "hermes -z", "start-hermes.sh", "hermes/main.py",
+            "opencode.ai/zen", "antigravity-cli", "hermes.service"
+        ]):
+            return True
+
+        return False
+
     def audit_active_processes(self) -> List[ThreatIncident]:
         """Deeply audits active processes for reverse shells, memory injection, and linker tampering with zero false positives for AI agents."""
         threats = []
         if not self.config.get("realtime_protection", True):
             return threats
 
-        # Trusted developer tools, AI frameworks, desktop sessions, and system daemons
-        TRUSTED_PROCESS_NAMES = {
-            "hermes", "antigravity", "agy", "opencode", "code", "cursor", "vscode",
-            "cargo", "rustc", "gcc", "g++", "clang", "clang++", "pytest", "unittest",
-            "python3", "python", "node", "npm", "npx", "bun", "deno", "vite", "webpack",
-            "tmux", "screen", "zsh", "bash", "sh", "git", "rg", "ag", "grep", "cat",
-            "find", "sed", "awk", "cinnamon", "nemo", "muffin", "vesktop", "discord",
-            "brave", "firefox", "chromium", "google-chrome", "gnome-screensho", "p11-kit-server",
-            "gvfsd-trash", "gvfsd", "dbus-daemon", "systemd", "pulseaudio", "pipewire",
-            "wireplumber", "conky", "plank", "ananicy-cpp", "gamemoded"
-        }
-
         # Exclusions list from config
         exclusions = self.config.get("exclusions", [])
+
+        # Cache local Unix domain sockets to distinguish local IPC from remote reverse shells
+        local_unix_inodes = set()
+        try:
+            with open("/proc/net/unix", "r") as f:
+                for line in f:
+                    parts = line.split()
+                    if len(parts) >= 7 and parts[6].isdigit():
+                        local_unix_inodes.add(f"socket:[{parts[6]}]")
+        except Exception:
+            pass
 
         try:
             for pid_dir in os.listdir("/proc"):
@@ -267,6 +287,10 @@ class AegisEngine:
                     if any(ex.replace("*", "") in cmdline for ex in exclusions if ex):
                         continue
 
+                    # Deep AI Agent & Developer Framework Immunity Check
+                    if self._is_trusted_developer_or_ai_process(pid, comm, cmdline, proc_path):
+                        continue
+
                     # 1. Reverse Shell Detection (Layer 2)
                     if self.config.get("reverse_shell_blocker", True):
                         # Explicit malicious reverse shell command lines
@@ -281,23 +305,23 @@ class AegisEngine:
                         ]
                         is_explicit_rev = any(re.search(pat, cmdline, re.IGNORECASE) for pat in explicit_rev_patterns)
 
-                        # Socket redirection check on raw unattached shells (not AI servers or interactive terms)
+                        # Socket redirection check on raw unattached shells (not local Unix IPC)
                         is_socket_shell = False
                         socket_inode = ""
-                        is_ai_server = any(srv in cmdline.lower() for srv in ["hermes", "antigravity", "opencode", "uvicorn", "gunicorn", "http.server", "pytest", "tests/"])
                         
-                        if not is_ai_server and fd_path.exists():
+                        if fd_path.exists():
                             try:
                                 fd0_link = fd_path / "0"
                                 fd1_link = fd_path / "1"
                                 if fd0_link.is_symlink() and fd1_link.is_symlink():
                                     t0 = os.readlink(str(fd0_link))
                                     t1 = os.readlink(str(fd1_link))
-                                    # Both stdin AND stdout redirected directly to network socket
+                                    # Both stdin AND stdout redirected directly to external network socket (not local Unix IPC)
                                     if t0.startswith("socket:[") and t1.startswith("socket:["):
-                                        if comm in ["sh", "bash", "dash", "zsh", "nc", "socat"]:
-                                            is_socket_shell = True
-                                            socket_inode = t0
+                                        if t0 not in local_unix_inodes and t1 not in local_unix_inodes:
+                                            if comm in ["sh", "bash", "dash", "zsh", "nc", "socat"]:
+                                                is_socket_shell = True
+                                                socket_inode = t0
                             except (PermissionError, FileNotFoundError):
                                 pass
 
@@ -322,8 +346,8 @@ class AegisEngine:
                     # 2. Memory Integrity & W^X Violation Detection (Layer 1)
                     if self.config.get("memory_integrity_shield", True) and maps_path.exists():
                         try:
-                            # Flag executable stack (stack buffer overflow exploitation) or tmp payload injection
-                            if comm not in TRUSTED_PROCESS_NAMES:
+                            trusted_jit_runtimes = {"python3", "python", "node", "vesktop", "discord", "brave", "firefox", "chromium", "code", "cursor", "hermes", "antigravity"}
+                            if comm not in trusted_jit_runtimes:
                                 with open(maps_path, "r", errors="ignore") as f:
                                     for line in f:
                                         parts = line.split()
