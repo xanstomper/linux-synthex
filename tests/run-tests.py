@@ -1463,6 +1463,22 @@ try:
 except Exception as _e:
     check("vault manager functional validation", False, str(_e))
 
+# 83. Synthex Aegis Dual-Encryption & Chunk Dispersal Engine
+print("\n📋 Synthex Aegis Dual-Encryption & Chunk Dispersal Engine:")
+check("synthex aegis-dual-encrypt script exists", os.path.exists(os.path.join(sec_dir, "synthex_aegis_dual_encrypt.py")))
+check("synthex-aegis-encrypt cli launcher exists", os.access(os.path.join(ROOT, "src", "synthex-aegis-encrypt"), os.X_OK))
+
+try:
+    from synthex_aegis_dual_encrypt import SynthexAegisDualEncrypt
+    aegis_dual = SynthexAegisDualEncrypt(dry_run=True)
+    check("aegis dual encrypt initialized", aegis_dual is not None)
+    ad_st = aegis_dual.get_status()
+    check("aegis dual status query pass", "ACTIVE" in ad_st.get("status", ""))
+    ok_adv, _ = aegis_dual.create_armored_dual_vault("test_adv", 100, "LUKS2", "Serpent-ChaCha20-Cascade")
+    check("aegis armored vault creation dry-run", ok_adv is True)
+except Exception as _e:
+    check("aegis dual encrypt functional validation", False, str(_e))
+
 # Summary
 print(f"\n{'='*50}")
 print(f"  RESULTS: {passed} passed, {failed} failed")

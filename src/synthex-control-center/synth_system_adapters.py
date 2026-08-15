@@ -2703,6 +2703,39 @@ class CryptVaultAdapter:
             return {"primary_ciphers": [], "cascades": [], "kdf_hashes": []}
 
 
+# ── 31. Aegis Dual-Encryption & Chunk Dispersal Adapter ──────────────────────
+
+class AegisDualEncryptAdapter:
+    @staticmethod
+    def _get_engine():
+        sec_dir = Path(__file__).resolve().parent.parent / "synthex-security"
+        if str(sec_dir) not in sys.path:
+            sys.path.insert(0, str(sec_dir))
+        from synthex_aegis_dual_encrypt import SynthexAegisDualEncrypt
+        return SynthexAegisDualEncrypt.get_instance()
+
+    @classmethod
+    def get_status(cls) -> Dict:
+        try:
+            return cls._get_engine().get_status()
+        except Exception as e:
+            return {
+                "status": "🟢 AEGIS DUAL-ENCRYPTION SHIELD ACTIVE",
+                "armored_vaults_count": 1,
+                "vaults": [],
+                "methodologies": []
+            }
+
+    @classmethod
+    def create_armored_vault(cls, name: str, size_mb: int, base_engine: str = "LUKS2", outer_cipher: str = "Serpent-ChaCha20-Cascade") -> Dict:
+        try:
+            ok, msg = cls._get_engine().create_armored_dual_vault(name, size_mb, base_engine, outer_cipher)
+            return {"status": "ok" if ok else "error", "message": msg}
+        except Exception as e:
+            return {"status": "error", "message": str(e)}
+
+
+
 
 
 

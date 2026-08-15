@@ -1004,6 +1004,9 @@ def build_security(toast):
     sec.add_row(entity_card("VeraCrypt / TrueCrypt Vaults", "Plausible Deniability Hidden Volumes & Standalone .vc Containers",
                             icon_name="drive-harddisk",
                             trailing=button("+ New Vault", "btn-primary", lambda b: _create_vault_dialog(toast))))
+    sec.add_row(entity_card("Aegis Dual-Encryption & Chunk Dispersal", "Outer Serpent-ChaCha20 Armor · Parity Duplication · 40% Decoy Chaff Chunks",
+                            icon_name="security-high",
+                            trailing=badge("Dual Armored", "ok")))
     col.add(sec)
 
     sec = Section("Secure Boot & Platform Integrity")
