@@ -1360,6 +1360,28 @@ try:
 except Exception as _e:
     check("code engine & dev platform functional validation", False, str(_e))
 
+# 79. Synthex AI Brain & Anti-Hallucination Long-Term Memory Pipeline
+print("\n📋 Synthex AI Brain & Anti-Hallucination Long-Term Memory Pipeline:")
+brain_dir = os.path.join(ROOT, "src", "synthex-brain")
+check("synthex brain-pipeline script exists", os.path.exists(os.path.join(brain_dir, "synthex_brain_pipeline.py")))
+check("synthex-brain cli launcher exists", os.access(os.path.join(ROOT, "src", "synthex-brain-cli"), os.X_OK))
+
+try:
+    sys.path.insert(0, brain_dir)
+    from synthex_brain_pipeline import SynthexBrainPipeline
+    brain_pl = SynthexBrainPipeline(dry_run=True)
+    check("brain pipeline initialized", brain_pl is not None)
+    b_st = brain_pl.get_status()
+    check("brain status query pass", "ACTIVE" in b_st.get("status", ""))
+    ok_l = brain_pl.learn_session("test-sess-01", "Build Kernel", ["make -j8"], success=True)
+    check("brain session learning dry-run", ok_l is True)
+    recs = brain_pl.recall_knowledge("Kernel")
+    check("brain recall query pass", len(recs) > 0)
+    g_res = brain_pl.ground_action("synthex-doctor --check")
+    check("brain grounding validation pass", g_res.get("grounded", False) is True)
+except Exception as _e:
+    check("brain pipeline functional validation", False, str(_e))
+
 # Summary
 print(f"\n{'='*50}")
 print(f"  RESULTS: {passed} passed, {failed} failed")
