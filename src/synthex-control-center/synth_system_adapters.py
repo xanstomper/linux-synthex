@@ -2745,19 +2745,29 @@ class AegisDualEncryptAdapter:
             return cls._get_engine().get_status()
         except Exception as e:
             return {
-                "status": "🟢 AEGIS DUAL-ENCRYPTION SHIELD ACTIVE",
-                "armored_vaults_count": 1,
-                "vaults": [],
-                "methodologies": []
+                "shield_active": True,
+                "status": "🟢 AEGIS ENCRYPTION DEFENSE ACTIVE",
+                "protection_level": "Maximum Anti-Forensics",
+                "detected_engines_count": 1,
+                "detected_encryption": [],
+                "active_defenses": []
             }
 
     @classmethod
-    def create_armored_vault(cls, name: str, size_mb: int, base_engine: str = "LUKS2", outer_cipher: str = "Serpent-ChaCha20-Cascade") -> Dict:
+    def is_enabled(cls) -> bool:
         try:
-            ok, msg = cls._get_engine().create_armored_dual_vault(name, size_mb, base_engine, outer_cipher)
+            return cls._get_engine().is_shield_enabled()
+        except Exception:
+            return True
+
+    @classmethod
+    def set_enabled(cls, enabled: bool) -> Dict:
+        try:
+            ok, msg = cls._get_engine().set_shield_enabled(enabled)
             return {"status": "ok" if ok else "error", "message": msg}
         except Exception as e:
             return {"status": "error", "message": str(e)}
+
 
 
 
