@@ -12,6 +12,9 @@ Wants=synthex-recovery.service synthex-oobe.service
 Wants=synthex-blueprint.service synthex-blueprint.timer
 Wants=synthex-ananicy.service
 
+# Security — real-time endpoint attack prevention
+Wants=synthex-aegis.service
+
 # AI — consciousness + agent runtime
 Wants=synthex-aether.service
 Wants=synthex-sentinel.service

@@ -172,7 +172,8 @@ def main(argv=None) -> int:
     logging.basicConfig(
         level=logging.DEBUG if args.verbose else logging.INFO,
         format=f"%(asctime)s {PROG}[%(process)d] %(levelname)s: %(message)s",
-        datefmt="%Y-%m-%d %H:%M:%S")
+        datefmt="%Y-%m-%d %H:%M:%S",
+        stream=sys.stdout)
 
     if args.data_dir:
         _apply_data_dir(args.data_dir)

@@ -471,21 +471,11 @@ class AegisEngine:
 
                     # 4. Infostealer Credential Harvester Detection
                     infostealer_targets = ["Login Data", "key4.db", "logins.json", "cookies.sqlite", "leveldb", "tdata", ".ssh/id_rsa", ".ssh/id_ed25519", "exodus.wallet", ".aws/credentials"]
-                    trusted_browser_binaries = {
-                        "brave", "brave-browser", "firefox", "google-chrome", "google-chrome-stable",
-                        "chromium", "chromium-browser", "discord", "vesktop", "vesktop.bin", "telegram-desktop",
-                        "ssh", "ssh-agent", "systemd"
-                    }
-                    trusted_dev_tools = {"code", "cursor", "cargo", "git", "rg", "ag", "grep", "screen-stream"}
-
                     if any(target.lower() in cmdline.lower() for target in infostealer_targets):
-                        # Verify process is NOT an official browser binary, SSH client, IDE, or AI framework
-                        is_trusted = (
-                            comm.lower() in trusted_browser_binaries or
-                            comm.lower() in trusted_dev_tools or
-                            any(ai in cmdline.lower() for ai in ["antigravity", "hermes", "opencode", "pytest", "tests/run-tests.py"])
-                        )
-                        if not is_trusted:
+                        # Flag ONLY untrusted droppers executing from temporary dirs (/tmp, /dev/shm) or with explicit exfiltration payloads
+                        is_in_tmp = any(t in cmdline for t in ["/tmp/", "/dev/shm/", "/var/tmp/"])
+                        is_exfil = any(ex in cmdline.lower() for ex in ["exfiltrat", "harvest", "webhook", "discord.com/api", "telegram.org/bot", "transfer.sh"])
+                        if is_in_tmp or is_exfil:
                             inc = ThreatIncident(
                                 id=f"INFOSTEAL-{int(time.time())}-{pid}",
                                 timestamp=time.strftime("%Y-%m-%d %H:%M:%S"),
