@@ -1260,17 +1260,48 @@ class SettingsAppWindow(Gtk.Window):
             aegis_h = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=16)
             aegis_h.pack_start(Gtk.Image.new_from_icon_name("security-high", Gtk.IconSize.DIALOG), False, False, 0)
 
+            # Real Aegis daemon state (systemd service or dev-tree daemon)
+            def _aegis_daemon_active():
+                try:
+                    r = subprocess.run(["systemctl", "is-active", "--quiet", "synthex-aegis"],
+                                       capture_output=True, timeout=5)
+                    if r.returncode == 0:
+                        return True
+                except Exception:
+                    pass
+                try:
+                    r = subprocess.run(["pgrep", "-f", "aegis_daemon.py"], capture_output=True, timeout=5)
+                    return r.returncode == 0
+                except Exception:
+                    return False
+
+            aegis_active = _aegis_daemon_active()
+            _aegis_dir = Path(__file__).resolve().parent.parent / "synthex-aegis"
+
             atxt_box = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=2)
             atxt_lbl = Gtk.Label(xalign=0)
-            atxt_lbl.set_markup("<span size='large' weight='bold' color='#2ecc71'>Aegis Real-Time Behavioral Attack Defense</span>")
+            if aegis_active:
+                atxt_lbl.set_markup("<span size='large' weight='bold' color='#2ecc71'>● Aegis Real-Time Behavioral Attack Defense — ACTIVE</span>")
+            else:
+                atxt_lbl.set_markup("<span size='large' weight='bold' color='#e67e22'>● Aegis Real-Time Behavioral Attack Defense — INACTIVE</span>")
             atxt_box.pack_start(atxt_lbl, False, False, 0)
-            atxt_sub = Gtk.Label(label="Active behavioral defense blocking reverse shells, privilege escalation, memory tampering, and supply-chain exploits.", xalign=0)
+            _aegis_sub = ("Protection daemon is monitoring processes, memory integrity, SUID binaries and system baselines."
+                          if aegis_active else
+                          "Protection daemon is not running. Start it with 'systemctl enable --now synthex-aegis' or 'make aegis-start'.")
+            atxt_sub = Gtk.Label(label=_aegis_sub, xalign=0)
             atxt_sub.set_line_wrap(True)
             atxt_box.pack_start(atxt_sub, False, False, 0)
             aegis_h.pack_start(atxt_box, True, True, 0)
 
+            def _launch_aegis_hub(b):
+                exe = shutil.which("synthex-aegis") or str(_aegis_dir / "synthex-aegis")
+                if os.access(exe, os.X_OK):
+                    subprocess.Popen([exe])
+                else:
+                    subprocess.Popen([sys.executable, str(_aegis_dir / "aegis_gui.py")])
+
             btn_open_aegis = Gtk.Button.new_with_label("Open Synthex Aegis Hub")
-            btn_open_aegis.connect("clicked", lambda b: subprocess.Popen(["python3", "/home/jewboy420/linux-synthex/src/synthex-aegis/aegis_gui.py"]))
+            btn_open_aegis.connect("clicked", _launch_aegis_hub)
             aegis_h.pack_end(btn_open_aegis, False, False, 0)
 
             aegis_vbox.pack_start(aegis_h, False, False, 0)

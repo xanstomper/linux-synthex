@@ -17,6 +17,17 @@ import time
 from pathlib import Path
 from PySide6.QtCore import QObject, Signal, Slot, Property
 
+# Wallpaper resolution: installed system path first, then source checkout —
+# never a hardcoded developer home directory.
+def _wallpaper_root() -> str:
+    for candidate in ("/usr/share/synthex/wallpapers",
+                      str(Path(__file__).resolve().parents[2] / "branding" / "wallpaper")):
+        if Path(candidate).is_dir():
+            return candidate
+    return str(Path(__file__).resolve().parents[2] / "branding" / "wallpaper")
+
+_WALLPAPERS = _wallpaper_root()
+
 CONFIG_DIR = Path.home() / ".config" / "synthex"
 CONFIG_FILE = CONFIG_DIR / "rice.json"
 
@@ -80,7 +91,7 @@ class SettingsBridge(QObject):
             "cardOpacity": 0.94,
             "dockSize": 40,
             "dockPosition": "bottom",
-            "wallpaperPath": "file:///home/jewboy420/linux-synthex/branding/wallpaper/synthex-dark-4k.svg",
+            "wallpaperPath": f"file://{_WALLPAPERS}/synthex-dark-4k.svg",
             "widgets": {"clock": True, "weather": True, "quickSettings": True, "mediaPlayer": True, "systemMonitor": True, "terminalRice": True, "dock": True, "topPill": True},
             "performanceMode": "balanced",
             "nightLight": False,
@@ -477,7 +488,7 @@ class SettingsBridge(QObject):
     def dockSize(self): return self._config.get("dockSize", 40)
 
     @Property(str, notify=configChanged)
-    def wallpaperPath(self): return self._config.get("wallpaperPath", "file:///home/jewboy420/linux-synthex/branding/wallpaper/synthex-dark-4k.svg")
+    def wallpaperPath(self): return self._config.get("wallpaperPath", f"file://{_WALLPAPERS}/synthex-dark-4k.svg")
 
     @Property("QVariantMap", notify=configChanged)
     def widgetsConfig(self): return self._config.get("widgets", {})
@@ -542,9 +553,9 @@ class SettingsBridge(QObject):
     @Property("QVariantList", constant=True)
     def wallpapersList(self):
         return [
-            {"name": "Synthex Dark 4K", "path": "file:///home/jewboy420/linux-synthex/branding/wallpaper/synthex-dark-4k.svg"},
-            {"name": "Synthex Light 4K", "path": "file:///home/jewboy420/linux-synthex/branding/wallpaper/synthex-light-4k.svg"},
-            {"name": "Minimal Dark 4K", "path": "file:///home/jewboy420/linux-synthex/branding/wallpaper/synthex-minimal-dark-4k.svg"},
-            {"name": "Cyber Wave 4K", "path": "file:///home/jewboy420/linux-synthex/branding/wallpaper/synthex-cyber-4k.svg"},
-            {"name": "Sunset Horizon 4K", "path": "file:///home/jewboy420/linux-synthex/branding/wallpaper/synthex-sunset-4k.svg"}
+            {"name": "Synthex Dark 4K", "path": f"file://{_WALLPAPERS}/synthex-dark-4k.svg"},
+            {"name": "Synthex Light 4K", "path": f"file://{_WALLPAPERS}/synthex-light-4k.svg"},
+            {"name": "Minimal Dark 4K", "path": f"file://{_WALLPAPERS}/synthex-minimal-dark-4k.svg"},
+            {"name": "Cyber Wave 4K", "path": f"file://{_WALLPAPERS}/synthex-cyber-4k.svg"},
+            {"name": "Sunset Horizon 4K", "path": f"file://{_WALLPAPERS}/synthex-sunset-4k.svg"}
         ]
