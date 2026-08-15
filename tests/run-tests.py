@@ -1509,35 +1509,8 @@ try:
     check("partition execution dry-run", ok_p is True)
 except Exception as _e:
     check("partition wizard functional validation", False, str(_e))
-
-# 85. Synthex 1-Click AI & Privacy Software Marketplace
-print("\n📋 Synthex 1-Click AI & Privacy Software Marketplace:")
-try:
-    cc_dir = os.path.join(ROOT, "src", "synthex-control-center")
-    if cc_dir not in sys.path:
-        sys.path.insert(0, cc_dir)
-    from synth_system_adapters import MarketplaceAdapter
-    import synthex_pages_c
-
-    catalog = MarketplaceAdapter.get_catalog()
-    check("marketplace catalog loaded", len(catalog) >= 10)
-    ai_apps = MarketplaceAdapter.get_catalog(category="ai")
-    check("marketplace ai category populated", len(ai_apps) >= 3)
-    privacy_apps = MarketplaceAdapter.get_catalog(category="privacy")
-    check("marketplace privacy category populated", len(privacy_apps) >= 4)
-    dev_apps = MarketplaceAdapter.get_catalog(category="developer")
-    check("marketplace developer category populated", len(dev_apps) >= 3)
-    gaming_apps = MarketplaceAdapter.get_catalog(category="gaming")
-    check("marketplace gaming category populated", len(gaming_apps) >= 3)
-    ok_inst, _ = MarketplaceAdapter.install_app("ollama")
-    check("marketplace app install handler pass", ok_inst is True)
-    from synthex_design import Toast
-    mp_page = synthex_pages_c.build_marketplace(Toast())
-    check("marketplace gtk page builder pass", mp_page is not None)
-except Exception as _e:
-    check("marketplace functional validation", False, str(_e))
-
 # Summary
+
 
 
 print(f"\n{'='*50}")

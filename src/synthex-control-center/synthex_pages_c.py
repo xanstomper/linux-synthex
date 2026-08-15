@@ -17,8 +17,9 @@ from synthex_design import (
 from synth_system_adapters import (
     GamingPerformanceAdapter, PrivacyAdapter, AppManagerAdapter,
     QuarantineManagerAdapter, SecurityAdapter, SystemAdapter, run_cmd,
-    safe_set_gsetting, get_gsettings, SpoofGoofAdapter, MarketplaceAdapter,
+    safe_set_gsetting, get_gsettings, SpoofGoofAdapter,
 )
+
 
 from synth_platform_adapters import FirewallLayer, _gget, ensure_polkit_agent
 from synthex_pages_a import _combo, _spin
@@ -1043,81 +1044,4 @@ def build_devices(toast):
     col.add(sec)
     return col
 
-
-# ─────────────────────────────────────────────────────────────────────────────
-# SOFTWARE MARKETPLACE (1-Click AI, Privacy, Dev & Gaming Software Center)
-# ─────────────────────────────────────────────────────────────────────────────
-
-def build_marketplace(toast):
-    col = ContentColumn()
-    col.add(PageHeader("Software Marketplace", "1-Click installation for AI models, zero-trace privacy tools, dev suites & games"))
-
-    def _do_install(app, btn, badge_box):
-        name = app.get("name", "App")
-        btn.set_sensitive(False)
-        btn.set_label("Installing…")
-        toast.show_message(f"Installing {name} in background…", seconds=6)
-
-        def work():
-            ok, msg = MarketplaceAdapter.install_app(app["id"])
-            def done():
-                btn.set_sensitive(True)
-                if ok:
-                    btn.set_label("Launch")
-                    btn.get_style_context().remove_class("btn-primary")
-                    btn.get_style_context().add_class("btn-quiet")
-                    btn.disconnect_by_func(_on_click)
-                    btn.connect("clicked", lambda b: MarketplaceAdapter.launch_app(app["id"]))
-                    toast.show_message(f"✓ {name} installed successfully!", error=False, seconds=5)
-                else:
-                    btn.set_label("Retry")
-                    toast.show_message(f"Installation failed: {msg}", error=True, seconds=7)
-            GLib.idle_add(done)
-
-        threading.Thread(target=work, daemon=True).start()
-
-    def _on_click(btn, app, badge_box):
-        _do_install(app, btn, badge_box)
-
-    def render_category(cat_key, title, subtitle, icon, sec_col):
-        items = MarketplaceAdapter.get_catalog(category=cat_key)
-        if not items:
-            return
-        sec = Section(title, subtitle)
-        for app in items:
-            is_inst = app.get("installed", False)
-            trailing = Gtk.Box(spacing=8, valign=Gtk.Align.CENTER)
-
-            if is_inst:
-                trailing.pack_start(badge("Installed", "ok"), False, False, 0)
-                trailing.pack_start(button("Launch", "btn-quiet",
-                                           lambda b, a=app: (MarketplaceAdapter.launch_app(a["id"]),
-                                                             toast.show_message(f"Launching {a['name']}…"))), False, False, 0)
-            else:
-                trailing.pack_start(badge(app.get("size", "Free"), "neutral"), False, False, 0)
-                inst_btn = button("Get", "btn-primary", None)
-                inst_btn.connect("clicked", _on_click, app, trailing)
-                trailing.pack_start(inst_btn, False, False, 0)
-
-            sec.add_row(entity_card(
-                f"{app['name']}  ·  {app.get('author', 'Official')}",
-                app.get("description", ""),
-                icon_name=app.get("icon", icon),
-                trailing=trailing
-            ))
-        sec_col.add(sec)
-
-    # 1. 🧠 AI & LLM Acceleration
-    render_category("ai", "AI Acceleration & Local LLMs", "Run state-of-the-art models locally on GPU/NPU with zero cloud telemetry", "applications-science", col)
-
-    # 2. 🛡️ Zero-Trace Privacy & Security
-    render_category("privacy", "Zero-Trace Privacy & Cryptography", "Tor anonymity, end-to-end messaging, sealed wallets and encrypted vaults", "network-vpn", col)
-
-    # 3. 💻 Developer Intelligence
-    render_category("developer", "Developer Environments & Container Engines", "Polyglot IDEs, Rust compiler toolchains, and OCI container virtualization", "applications-development", col)
-
-    # 4. 🎮 Gaming & Graphics
-    render_category("gaming", "Gaming Hub & Media Creation", "Steam with Proton-GE compatibility, game launchers, and OBS streaming suite", "applications-games", col)
-
-    return col
 

@@ -53,11 +53,10 @@ SIDEBAR = [
          "account profile user full name shell groups login"),
         ("accessibility","Accessibility",    "preferences-desktop-accessibility", pages_a.build_accessibility,
          "accessibility a11y screen reader orca magnifier large text high contrast sticky keys slow keys bounce mouse keys hover click on-screen keyboard"),
-        ("marketplace",  "App Marketplace",  "software-store",                pages_c.build_marketplace,
-         "marketplace app store software install 1-click ai ollama open-webui comfyui privacy tor signal brave keepass monero dev vscode docker rust gaming steam heroic lutris obs"),
         ("apps",         "Installed Apps",   "preferences-desktop-applications", pages_c.build_apps,
          "apps applications installed uninstall remove cache reset programs software"),
     ]),
+
 
     ("Desktop", [
         ("desktop",      "Desktop",          "cs-desktop",                    pages_a.build_desktop,
