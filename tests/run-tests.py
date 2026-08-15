@@ -1054,12 +1054,12 @@ check("live-boot proof suite exists", os.path.exists(_lb))
 try:
     _r = _sp.run([sys.executable, _lb], capture_output=True, text=True, timeout=120)
     _out = _r.stdout + "\n" + _r.stderr
-    check("live-boot proof suite passes (6 live proofs)", _r.returncode == 0 and "Ran 6 tests" in _out,
+    check("live-boot proof suite passes (8 live proofs)", _r.returncode == 0 and "Ran 8 tests" in _out,
           _out[-200:] if _r.returncode != 0 else None)
-    for _ln in ["LIVE-1", "LIVE-2", "LIVE-3", "LIVE-4", "LIVE-5", "LIVE-6"]:
+    for _ln in ["LIVE-1", "LIVE-2", "LIVE-3", "LIVE-4", "LIVE-5", "LIVE-6", "LIVE-7", "LIVE-8"]:
         check(f"live {_ln}", _ln in _out)
 except Exception as _e:
-    check("live-boot proof suite passes (6 tests)", False, str(_e))
+    check("live-boot proof suite passes (8 tests)", False, str(_e))
 
 # 73c. Fingerprinting & Data-Privacy Reduction Proof Suite
 print("\n📋 Privacy Reduction Proof Suite:")

@@ -20,7 +20,7 @@ mkdir -p /etc/sddm.conf.d
 cat > /etc/sddm.conf.d/autologin.conf << 'EOF'
 [Autologin]
 User=liveuser
-Session=plasma
+Session=plasma.desktop
 EOF
 
 # Enable Calamares desktop icon
@@ -49,6 +49,8 @@ cp /home/liveuser/Desktop/install-synthex.desktop /usr/share/applications/ 2>/de
 systemctl disable snapper-timeline.timer 2>/dev/null || true
 systemctl disable snapper-cleanup.timer 2>/dev/null || true
 systemctl disable dnf-automatic.timer 2>/dev/null || true
+systemctl disable synthex-firstboot 2>/dev/null || true
+systemctl disable synthex-oobe 2>/dev/null || true
 systemctl disable synthex-system-daemon 2>/dev/null || true
 systemctl disable synthex-hwdaemon 2>/dev/null || true
 systemctl disable synthex-desktopd 2>/dev/null || true

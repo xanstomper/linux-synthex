@@ -301,7 +301,7 @@ mkdir -p /etc/sddm.conf.d/
 cat > /etc/sddm.conf.d/autologin.conf << 'AUTOEOF'
 [Autologin]
 User=liveuser
-Session=plasma
+Session=plasma.desktop
 AUTOEOF
 
 # Installer launcher on the live user's desktop

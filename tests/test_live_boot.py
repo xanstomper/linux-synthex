@@ -121,6 +121,32 @@ class LiveBootProof(unittest.TestCase):
                "dolphin · pipewire · NetworkManager-wifi · partitionmanager · "
                "system-config-printer · gstreamer-good · ffmpeg · mesa-vulkan · flatpak(browser)")
 
+    def test_live_7_no_oobe_on_live(self):
+        """A Mint-style live session must NOT run the first-boot wizard / OOBE —
+        it auto-logs-in to a usable desktop. Firstboot/OOBE only run after a real
+        install (post-install re-enables them). live-setup disables them on live."""
+        live = read(ROOT / "configs/live/live-setup.sh")
+        for svc in ["synthex-firstboot", "synthex-oobe"]:
+            self.assertIn(f"systemctl disable {svc}", live,
+                          f"live session does not disable {svc} — it would pop up on live boot")
+        # post-install re-enables them for the installed system
+        post = read(ROOT / "build/scripts/post-install.sh")
+        self.assertIn("synthex-firstboot", post, "post-install should enable firstboot after install")
+        record("LIVE-7 · no OOBE on live", "live-setup disables synthex-firstboot + synthex-oobe; "
+                                            "post-install re-enables them for the installed system")
+
+    def test_live_8_sddm_session_consistent(self):
+        """SDDM Session must be a resolvable .desktop id (plasma.desktop), and all
+        live autologin sources must agree — a bare 'plasma' would fail auto-login."""
+        for src in [read(KS_DIR / "synthex-plasma.ks"),
+                    read(ROOT / "configs/live/live-setup.sh"),
+                    read(ROOT / "desktop/sddm/sddm-live.conf")]:
+            if "Session=" in src:
+                sess = [l for l in src.splitlines() if l.startswith("Session=")][0]
+                self.assertIn(".desktop", sess,
+                              f"SDDM session not resolvable: {sess}")
+        record("LIVE-8 · SDDM session consistent", "all autologin sources use <session>.desktop")
+
 
 if __name__ == "__main__":
     unittest.main(verbosity=2, exit=False)
