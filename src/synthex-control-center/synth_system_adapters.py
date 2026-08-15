@@ -1044,7 +1044,7 @@ class SecurityAdapter:
     @staticmethod
     def get_firewall_rules():
         rules = []
-        ok, out, _ = run_cmd("pkexec ufw status numbered 2>/dev/null || sudo ufw status numbered 2>/dev/null || ufw status numbered 2>/dev/null")
+        ok, out, _ = run_cmd("ufw status numbered 2>/dev/null || sudo -n ufw status numbered 2>/dev/null")
         if ok and out:
             for line in out.split("\n"):
                 m = re.match(r"^\[\s*(\d+)\]\s+(.+?)\s{2,}(ALLOW|DENY|LIMIT|REJECT)\s+(IN|OUT)?\s*(.*?)$", line)

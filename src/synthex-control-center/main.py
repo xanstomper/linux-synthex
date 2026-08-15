@@ -1880,7 +1880,7 @@ class SettingsAppWindow(Gtk.Window):
 
             t_box = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=2)
             t_lbl = Gtk.Label(xalign=0)
-            t_lbl.set_markup("<span size='large' weight='bold' color='#2ecc71'>Automated Self-Healing & Diagnostic Doctor</span>")
+            t_lbl.set_markup("<span size='large' weight='bold' color='#2ecc71'>Automated Self-Healing &amp; Diagnostic Doctor</span>")
             t_box.pack_start(t_lbl, False, False, 0)
             t_sub = Gtk.Label(label="Proactively immunizes the OS against bricking, broken kernels, deleted initramfs images, fstab mount hangs, and stale package manager locks.", xalign=0)
             t_sub.set_line_wrap(True)
