@@ -2,7 +2,8 @@
 Name=Synthex Aegis
 GenericName=Endpoint Attack Prevention & Security Center
 Comment=Next-generation Linux real-time behavioral attack defense and threat prevention
-Exec=python3 /home/jewboy420/linux-synthex/src/synthex-aegis/aegis_gui.py
+Exec=synthex-aegis
+TryExec=synthex-aegis
 Icon=security-high
 Terminal=false
 Type=Application

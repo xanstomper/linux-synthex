@@ -1,0 +1,39 @@
+[Unit]
+Description=Synthex Aegis Real-Time Attack Prevention
+Documentation=https://synthex-linux.org/docs/aegis
+After=systemd-sysctl.service auditd.service
+Wants=auditd.service
+
+[Service]
+Type=simple
+ExecStart=/usr/bin/synthex-aegis-daemon --data-dir=/var/lib/synthex-aegis
+Restart=on-failure
+RestartSec=5
+# Reload engine configuration without restarting the protection
+ExecReload=/bin/kill -HUP $MAINPID
+
+# The behavioral engine must inspect and terminate processes system-wide
+User=root
+KillMode=control-group
+TimeoutStopSec=10
+
+# Security hardening
+ProtectSystem=strict
+ProtectHome=read-only
+PrivateTmp=yes
+NoNewPrivileges=yes
+ReadWritePaths=/var/lib/synthex-aegis
+CapabilityBoundingSet=CAP_KILL CAP_SYS_PTRACE CAP_DAC_READ_SEARCH CAP_SYSLOG
+SystemCallArchitectures=native
+ProtectKernelTunables=yes
+ProtectKernelModules=yes
+ProtectControlGroups=yes
+RestrictSUIDSGID=yes
+LockPersonality=yes
+MemoryDenyWriteExecute=no
+
+# Storage root for incidents, baselines and quarantine vault
+StateDirectory=synthex-aegis
+
+[Install]
+WantedBy=multi-user.target

@@ -213,29 +213,96 @@ class AegisEngine:
 
     # ── 2. Real Process, Memory & Socket Behavioral Engine ───────────────────
 
-    def _is_trusted_developer_or_ai_process(self, pid: int, comm: str, cmdline: str, proc_path: Path) -> bool:
+    def _is_trusted_system_or_user_process(self, pid: int, comm: str, cmdline: str, proc_path: Path) -> bool:
         """
-        Ensures AI agents (Hermes, Antigravity, OpenCode, AgY, IDEs, and their official services)
-        are 100% immune from false positive terminations.
+        Determines if a process is a legitimate system tool, desktop application, AI agent,
+        terminal command, or developer workflow.
+        Returns True to prevent false positive terminations on normal Linux operations.
         """
         comm_lower = comm.lower()
         cmdline_lower = cmdline.lower()
 
-        # 1. Direct AI agent process or IDE name check
-        if comm_lower in {"hermes", "antigravity", "agy", "opencode", "code", "cursor", "vscode"}:
-            return True
+        # 1. AI Agents, LLM gateways, developer tools, and system daemons
+        trusted_apps = {
+            "hermes", "antigravity", "agy", "opencode", "code", "cursor", "vscode",
+            "pytest", "unittest", "node", "npm", "npx", "bun", "deno", "vite", "webpack",
+            "cargo", "rustc", "gcc", "g++", "clang", "clang++", "gdb", "make", "ninja",
+            "tmux", "screen", "zsh", "bash", "sh", "dash", "cinnamon", "nemo", "muffin",
+            "vesktop", "discord", "brave", "firefox", "chromium", "google-chrome",
+            "gnome-screensho", "p11-kit-server", "gvfsd", "dbus-daemon", "systemd",
+            "pulseaudio", "pipewire", "wireplumber", "ananicy-cpp", "gamemoded", "conky",
+            "plank", "git", "grep", "rg", "ag", "find", "sed", "awk", "cat", "less",
+            "nano", "vim", "vi", "tar", "zip", "unzip", "rsync", "sudo", "pkexec", "apt",
+            "dpkg", "apt-get", "pacman", "rpm", "dnf", "flatpak", "snap", "systemctl",
+            "journalctl", "dmesg", "lsblk", "blkid", "mount", "umount", "fdisk", "gdisk",
+            "curl", "wget", "ssh", "sshd", "ssh-agent", "ssh-add", "gpg", "gpg-agent"
+        }
 
-        # 2. Commandline signature check for AI agent runtimes (Hermes gateway, dashboard, CLI)
-        if any(marker in cmdline_lower for marker in [
-            "hermes gateway", "hermes-dashboard", "hermes -z", "start-hermes.sh", "hermes/main.py",
-            "opencode.ai/zen", "antigravity-cli", "hermes.service"
-        ]):
-            return True
+        if comm_lower in trusted_apps:
+            # Only intercept if process contains an explicit attack payload (e.g. /dev/tcp or stratum)
+            if not any(atk in cmdline for atk in ["/dev/tcp/", "/dev/udp/", "stratum+tcp://", "stratum+ssl://"]):
+                return True
+
+        # 2. Interactive Terminal Sessions: processes with a controlling TTY (/dev/pts/* or /dev/tty*)
+        fd_path = proc_path / "fd"
+        if fd_path.exists():
+            try:
+                for fd_entry in fd_path.iterdir():
+                    if fd_entry.is_symlink():
+                        target = os.readlink(str(fd_entry))
+                        if target.startswith("/dev/pts/") or target.startswith("/dev/tty"):
+                            if not any(atk in cmdline for atk in ["/dev/tcp/", "stratum+tcp://"]):
+                                return True
+            except Exception:
+                pass
+
+        # 3. Process Ancestor Lineage Tree: If spawned by an interactive shell, GUI terminal, systemd, or AI daemon
+        curr_pid = pid
+        try:
+            for _ in range(8):
+                stat_file = Path(f"/proc/{curr_pid}/stat")
+                if not stat_file.exists():
+                    break
+                with open(stat_file, "r", errors="ignore") as f:
+                    stat_content = f.read()
+                r_paren = stat_content.rfind(")")
+                if r_paren == -1:
+                    break
+                p_comm = stat_content[stat_content.find("(") + 1:r_paren].lower()
+                fields = stat_content[r_paren + 2:].split()
+                if not fields:
+                    break
+                ppid = int(fields[1])
+
+                if p_comm in {
+                    "gnome-terminal", "alacritty", "kitty", "konsole", "xterm", "tilix",
+                    "terminator", "tmux", "screen", "sshd", "systemd", "cinnamon",
+                    "hermes", "antigravity", "agy", "opencode", "code", "cursor"
+                }:
+                    if not any(atk in cmdline for atk in ["/dev/tcp/", "stratum+tcp://"]):
+                        return True
+
+                if ppid <= 1 or ppid == curr_pid:
+                    break
+                curr_pid = ppid
+        except Exception:
+            pass
+
+        # 4. Standard System Paths: Binaries installed in /usr/bin, /bin, /usr/sbin, /opt
+        exe_link = proc_path / "exe"
+        if exe_link.exists() and exe_link.is_symlink():
+            try:
+                exe_target = os.readlink(str(exe_link))
+                if any(exe_target.startswith(p) for p in ["/usr/bin/", "/bin/", "/usr/sbin/", "/sbin/", "/usr/lib/", "/opt/", "/snap/"]):
+                    if not any(atk in cmdline for atk in ["/dev/tcp/", "stratum+tcp://"]):
+                        return True
+            except Exception:
+                pass
 
         return False
 
     def audit_active_processes(self) -> List[ThreatIncident]:
-        """Deeply audits active processes for reverse shells, memory injection, and linker tampering with zero false positives for AI agents."""
+        """Deeply audits active processes for reverse shells, memory injection, and linker tampering with zero false positives."""
         threats = []
         if not self.config.get("realtime_protection", True):
             return threats
@@ -287,8 +354,8 @@ class AegisEngine:
                     if any(ex.replace("*", "") in cmdline for ex in exclusions if ex):
                         continue
 
-                    # Deep AI Agent & Developer Framework Immunity Check
-                    if self._is_trusted_developer_or_ai_process(pid, comm, cmdline, proc_path):
+                    # Deep System & User Process Immunity Check
+                    if self._is_trusted_system_or_user_process(pid, comm, cmdline, proc_path):
                         continue
 
                     # 1. Reverse Shell Detection (Layer 2)
