@@ -1445,6 +1445,24 @@ try:
 except Exception as _e:
     check("llm turbocharger functional validation", False, str(_e))
 
+# 82. Synthex Cryptographic Vault & LUKS/VeraCrypt Multi-Cipher Engine
+print("\n📋 Synthex Cryptographic Vault & LUKS/VeraCrypt Multi-Cipher Engine:")
+check("synthex vault-manager script exists", os.path.exists(os.path.join(sec_dir, "synthex_vault_manager.py")))
+check("synthex-vault cli launcher exists", os.access(os.path.join(ROOT, "src", "synthex-vault"), os.X_OK))
+
+try:
+    from synthex_vault_manager import SynthexVaultManager
+    vault_mgr = SynthexVaultManager(dry_run=True)
+    check("vault manager initialized", vault_mgr is not None)
+    v_st = vault_mgr.get_status()
+    check("vault status query pass", "ACTIVE" in v_st.get("status", ""))
+    ciphers = vault_mgr.get_supported_ciphers()
+    check("vault supported ciphers count check", len(ciphers.get("primary_ciphers", [])) >= 4)
+    ok_vc, _ = vault_mgr.create_encrypted_container("test_vc", 100, "twofish-xts", "sha512")
+    check("vault container creation dry-run", ok_vc is True)
+except Exception as _e:
+    check("vault manager functional validation", False, str(_e))
+
 # Summary
 print(f"\n{'='*50}")
 print(f"  RESULTS: {passed} passed, {failed} failed")
