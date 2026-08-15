@@ -128,16 +128,29 @@ menuentry "🛑 Power Off" {{
             with open(os.path.join(paths["kernel_dir"], "initrd.img"), "wb") as f:
                 f.write(b"SYNTHEX_INITRD_STUB")
 
+        # Copy GRUB EFI module library to /boot/grub/x86_64-efi
+        grub_mod_src = "/usr/lib/grub/x86_64-efi"
+        if os.path.exists(grub_mod_src) and not self.dry_run:
+            try:
+                shutil.copytree(grub_mod_src, os.path.join(paths["boot_grub"], "x86_64-efi"), dirs_exist_ok=True)
+            except Exception:
+                pass
+
         # 3. Create UEFI Bootloader Binary (BOOTX64.EFI)
         bootx64_path = os.path.join(paths["efi_boot"], "BOOTX64.EFI")
         if shutil.which("grub-mkstandalone") and not self.dry_run:
             try:
                 early_cfg = tempfile.NamedTemporaryFile(mode="w", delete=False)
-                early_cfg.write(f"search --file --set=root /boot/grub/grub.cfg\nset prefix=($root)/boot/grub\nconfigfile /boot/grub/grub.cfg\n")
+                early_cfg.write(
+                    "search.file /LiveOS/squashfs.img root\n"
+                    "set prefix=($root)/boot/grub\n"
+                    "source ($root)/boot/grub/grub.cfg\n"
+                )
                 early_cfg.close()
                 subprocess.run([
                     "grub-mkstandalone",
                     "-O", "x86_64-efi",
+                    "--modules=all_video configfile normal search iso9660 fat part_gpt part_msdos test echo font gfxterm reboot halt",
                     "-o", bootx64_path,
                     f"boot/grub/grub.cfg={early_cfg.name}"
                 ], capture_output=True, timeout=30)
@@ -148,6 +161,7 @@ menuentry "🛑 Power Off" {{
         else:
             with open(bootx64_path, "wb") as f:
                 f.write(b"SYNTHEX_EFI_STUB")
+
 
         # 4. Generate efiboot.img (FAT16 image for UEFI El Torito)
         efiboot_img = os.path.join(paths["efi_boot"], "efiboot.img")
@@ -166,10 +180,42 @@ menuentry "🛑 Power Off" {{
 
         # 5. Create LiveOS SquashFS Rootfs Payload
         squash_path = os.path.join(paths["liveos"], "squashfs.img")
-        with open(squash_path, "wb") as f:
-            f.write(b"SYNTHEX_SQUASHFS_LIVE_PAYLOAD" * 4096)
+        if shutil.which("mksquashfs") and not self.dry_run:
+            live_root = tempfile.mkdtemp(prefix="synthex-live-root-")
+            try:
+                # Populate live root with core essentials
+                os.makedirs(os.path.join(live_root, "usr", "local", "bin"), exist_ok=True)
+                os.makedirs(os.path.join(live_root, "etc", "synthex"), exist_ok=True)
+                os.makedirs(os.path.join(live_root, "etc", "calamares"), exist_ok=True)
+                os.makedirs(os.path.join(live_root, "var", "lib", "synthex"), exist_ok=True)
+
+                # Copy Synthex binaries
+                for b in glob.glob("/usr/local/bin/synthex*"):
+                    try:
+                        shutil.copy2(b, os.path.join(live_root, "usr", "local", "bin"))
+                    except Exception:
+                        pass
+
+                # Copy Calamares installer configurations
+                cal_dir = "/home/jewboy420/linux-synthex/installer"
+                if os.path.exists(cal_dir):
+                    try:
+                        shutil.copytree(cal_dir, os.path.join(live_root, "etc", "calamares"), dirs_exist_ok=True)
+                    except Exception:
+                        pass
+
+                # Build compressed squashfs image
+                cmd = ["mksquashfs", live_root, squash_path, "-comp", "zstd", "-noappend", "-quiet"]
+                subprocess.run(cmd, capture_output=True, timeout=60)
+            finally:
+                shutil.rmtree(live_root, ignore_errors=True)
+
+        if not os.path.exists(squash_path):
+            with open(squash_path, "wb") as f:
+                f.write(b"SYNTHEX_SQUASHFS_LIVE_PAYLOAD" * 8192)
 
         return {"ok": True, "staging_dir": staging_dir, "paths": paths}
+
 
     # ── 3. Hybrid ISO Creation ────────────────────────────────────────────────
 
