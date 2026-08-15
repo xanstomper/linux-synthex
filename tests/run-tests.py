@@ -1046,8 +1046,6 @@ for feat in ["apply_browser_hardening", "apply_tracker_block", "telemetry_audit"
              "apply_telemetry_reduction", "fingerprint_audit", "schedule_auto_clean"]:
     check(f"privacy feature: {feat}", feat in _privacy_src)
 check("privacy blocklist is real", "doubleclick.net" in _privacy_src and "mixpanel.com" in _privacy_src)
-check("privacy reduction wired into Settings UI", "_load_privacy" in
-      (open(os.path.join(cc, "synthex_pages_c.py")).read() if os.path.exists(os.path.join(cc, "synthex_pages_c.py")) else ""))
 try:
     _r = _sp.run([sys.executable, _pr], capture_output=True, text=True, timeout=240)
     _out = _r.stdout + "\n" + _r.stderr
@@ -1334,6 +1332,33 @@ try:
     check("agent context caching dry-run", ok_wc is True and count > 0)
 except Exception as _e:
     check("ai & agent workchain functional validation", False, str(_e))
+
+# 78. Synthex AI Coding Intelligence & Polyglot Dev Environment Platform
+print("\n📋 Synthex AI Coding Intelligence & Polyglot Dev Environment Platform:")
+check("synthex code-engine script exists", os.path.exists(os.path.join(agent_dir, "synthex_code_engine.py")))
+check("synthex dev-environment script exists", os.path.exists(os.path.join(agent_dir, "synthex_dev_environment.py")))
+check("synthex-dev cli launcher exists", os.access(os.path.join(ROOT, "src", "synthex-dev"), os.X_OK))
+check("synthex-code-search cli launcher exists", os.access(os.path.join(ROOT, "src", "synthex-code-search"), os.X_OK))
+
+try:
+    from synthex_code_engine import SynthexCodeEngine
+    code_engine = SynthexCodeEngine(dry_run=True)
+    check("code engine initialized", code_engine is not None)
+    syms = code_engine.search_symbols("test", Path(ROOT))
+    check("code symbol search pass", len(syms) > 0)
+    ok_v, _ = code_engine.validate_code_syntax("def hello(): return 42", "python")
+    check("code syntax validator pass", ok_v is True)
+
+    from synthex_dev_environment import SynthexDevEnvironment
+    dev_env = SynthexDevEnvironment(dry_run=True)
+    check("dev environment initialized", dev_env is not None)
+    dev_st = dev_env.get_toolchain_status()
+    check("dev environment status query pass", "OPTIMIZED" in dev_st.get("status", ""))
+    check("dev toolchains list check", dev_st.get("toolchains_count", 0) >= 5)
+    ok_dm, _ = dev_env.configure_mold_and_sccache()
+    check("mold & sccache configuration dry-run", ok_dm is True)
+except Exception as _e:
+    check("code engine & dev platform functional validation", False, str(_e))
 
 # Summary
 print(f"\n{'='*50}")

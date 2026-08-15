@@ -203,42 +203,6 @@ def build_chromium_manifest(root: Optional[Path] = None) -> Dict[str, Dict]:
         for d in dirs:
             d = (root or Path("/")) / str(d) if str(d).startswith("/") else (root or Path("/")) / d
             manifests[str(d / f"synthex-privacy-{name}.json")] = json.dumps(chrome, indent=2)
-    return manifests
-
-
-def apply_browser_hardening(root: Optional[Path] = None) -> Dict:
-    """Write policy manifests for every installed Chromium-family browser.
-    Returns a per-browser report. Uses pkexec when writing to live /etc."""
-    report = {"written": [], "errors": []}
-    manifests = _chromium_manifests()
-    for path_str, content in manifests.items():
-        path = Path(path_str) if not root else root / Path(path_str).relative_to("/") if str(path_str).startswith("/") else Path(root) / path_str
-        try:
-            path.parent.mkdir(parents=True, exist_ok=True)
-            if root:
-                path.write_text(content)
-            else:
-                _pkexec_write(path, content)
-            report["written"].append(str(path))
-        except Exception as e:
-            report["errors"].append(f"{path}: {e}")
-    return report
-
-
-def _chromium_manifests() -> Dict[str, str]:
-    """All browser-specific managed policy manifests for the live system."""
-    return {
-        "/etc/opt/chrome/policies/managed/synthex-privacy.json": _chrome_json(),
-        "/etc/chromium/policies/managed/synthex-privacy.json": _chrome_json(),
-        "/etc/brave/policies/managed/synthex-privacy.json": _chrome_json(),
-        "/etc/opt/microsoft/edge/policies/managed/synthex-privacy.json": _chrome_json(),
-    }
-
-
-def _chrome_json() -> str:
-    return json.dumps({"policies": CHROMIUM_RECOMMENDED}, indent=2)
-
-
 # ══════════════════════════════════════════════════════════════════════════
 # 2. TRACKER DNS BLOCK (/etc/hosts)
 # ══════════════════════════════════════════════════════════════════════════
@@ -303,131 +267,97 @@ def remove_tracker_block(root: Optional[Path] = None) -> bool:
 # 3. TELEMETRY REDUCTION SWEEP
 # ══════════════════════════════════════════════════════════════════════════
 
-def telemetry_audit(root: Optional[Path] = None) -> List[Dict]:
-    """Read-only audit of telemetry/collector surfaces across the OS."""
-    r = Path(root or Path("/"))
-    out = []
-    def probe(name, conf, mitigation=""):
-        p = (r / conf.lstrip("/")) if root else Path(conf)
-        exists = p.exists()
-        detail = ""
-        mitigated = False
-        if exists and conf.endswith("coredump.conf"):
-            try:
-                m = re.search(r"^Storage=(\w+)", p.read_text(), re.M)
-                detail = f"Storage={m.group(1) if m else 'unknown'}"
-                mitigated = bool(m and m.group(1) == "none")
-                # also honour a Synthex drop-in override
-                drop = (r / "etc/systemd/coredump.conf.d/10-synthex.conf") if root else Path("/etc/systemd/coredump.conf.d/10-synthex.conf")
-                if drop.exists() and "Storage=none" in drop.read_text():
-                    mitigated = True
-                    detail += " (+drop-in Storage=none)"
-            except Exception:
-                pass
-        out.append({"name": name, "present": exists, "detail": detail,
-                    "mitigation": mitigation, "mitigated": mitigated})
+def fingerprint_audit() -> Dict:
+    """Delegate to the Synthex fingerprint-shield engine (avoids reimplementation)."""
+    try:
+        import os, sys
+        sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+        from synthex_fingerprint_shield import SynthexFingerprintShield
+        data = SynthexFingerprintShield.get_instance().audit_fingerprint_resistance()
+        vectors = data.get("vectors", [])
+        return {
+            "signals": {
+                "score": data.get("overall_privacy_score", 0),
+                "state": data.get("state_label", "?"),
+                "evaluated": data.get("vectors_evaluated", len(vectors)),
+                "mitigated": data.get("vectors_mitigated", 0),
+                "vectors": [v.get("name", "?")[:34] for v in vectors[:8]],
+            },
+            "entropy_bits": 0,
+            "recommendation": [v.get("technical_defense", "")[:70] for v in vectors[:6] if v.get("is_active")],
+        }
+    except Exception:
+        return {"signals": {"score": 0, "state": "engine unavailable"}, "entropy_bits": 0, "recommendation": []}
 
-    probe("systemd-coredump", "/etc/systemd/coredump.conf", "coredump.conf.d/10-synthex.conf Storage=none")
-    probe("apport", "/etc/default/apport", "set enabled=0")
-    probe("cockpit", "/etc/systemd/system/sockets.target.wants/cockpit.socket", "systemctl disable cockpit")
-    probe("abrt", "/etc/abrt/workflows", "disable crash reporting")
-    probe("dnf-automatic", "/usr/lib/systemd/system/dnf-automatic.timer", "auto-update telemetry")
-    return out
+
+def telemetry_audit(root: Optional[Path] = None) -> List[Dict]:
+    """Delegate to SynthexTelemetryKiller (avoids a duplicate implementation)."""
+    try:
+        import os, sys
+        sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+        from synthex_telemetry_killer import SynthexTelemetryKiller
+        data = SynthexTelemetryKiller.get_instance().audit_privacy_shield()
+        out = []
+        for v in data.get("vectors", []):
+            out.append({"name": str(v.get("name", "?"))[:34],
+                        "present": bool(v.get("is_active", False)),
+                        "mitigated": bool(v.get("is_active", False)),
+                        "detail": str(v.get("technical_defense", ""))[:70],
+                        "mitigation": str(v.get("target", ""))[:70]})
+        return out
+    except Exception:
+        return [{"name": "telemetry engine unavailable", "present": False,
+                 "mitigated": False, "detail": "", "mitigation": ""}]
 
 
 def apply_telemetry_reduction(root: Optional[Path] = None) -> Dict:
-    """Lay down drop-in overrides disabling coredump/abrt knobs where possible."""
+    """Delegate the actual telemetry lockdown to SynthexTelemetryKiller."""
     report = {"written": [], "errors": [], "systemd": []}
-    drops = [
-        ("/etc/systemd/coredump.conf.d/10-synthex.conf",
-         "[Coredump]\nStorage=none\nExternal size=0\nProcessSizeMax=0\nCompress=no\n"),
-        ("/etc/default/apport", "enabled=0\n"),
-    ]
-    for rel, content in drops:
-        path_str = rel
+    try:
+        import os, sys
+        sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+        from synthex_telemetry_killer import SynthexTelemetryKiller
+        ok, msg = SynthexTelemetryKiller.get_instance().apply_maximum_privacy_lockdown()
+        report["systemd"] = [msg]
+        report["written"].append("telemetry-killer lockdown")
+    except Exception as e:
+        report["errors"].append(str(e))
+    return report
+
+
+def apply_browser_hardening(root: Optional[Path] = None) -> Dict:
+    """Emit Chromium/Brave/Edge privacy policy manifests.
+    (Firefox hardening is already covered by the SpoofGoof policies.json.)"""
+    report = {"written": [], "errors": []}
+    for path_str, content in _chromium_manifests().items():
+        path = Path(path_str)
         if root:
-            base = Path(root)
-            if rel.startswith("/"):
-                rel = rel[1:]
-            path = base / rel
-        else:
-            path = Path(rel) if str(rel).startswith("/") else Path("/etc") / rel
+            path = root / path_str.lstrip("/")
         try:
+            path.parent.mkdir(parents=True, exist_ok=True)
             if root:
-                path.parent.mkdir(parents=True, exist_ok=True)
                 path.write_text(content)
             else:
                 _pkexec_write(path, content)
             report["written"].append(str(path))
         except Exception as e:
             report["errors"].append(f"{path}: {e}")
-
-    res = _run(["systemctl", "is-enabled", "cockpit.socket"], timeout=5)
-    if res and "enabled" in (res.stdout or ""):
-        _run(["pkexec", "systemctl", "disable", "cockpit.socket"], timeout=15)
-        report["systemd"].append("cockpit disabled")
-    elif res:
-        report["systemd"].append("cockpit not enabled (ok)")
     return report
 
 
-# ══════════════════════════════════════════════════════════════════════════
-# 4. FINGERPRINT AUDIT (read-only — does not fix, only measures)
-# ══════════════════════════════════════════════════════════════════════════
-
-def fingerprint_audit() -> Dict:
-    """Collect the observable fingerprint surface and estimate entropy."""
-    signals: Dict[str, str] = {}
-
-    signals["user"] = os.environ.get("USER", "?")
-    signals["hostname"] = socket.gethostname()
-    r = _run(["localectl", "status"], timeout=5)
-    lang = "?"
-    if r and r.stdout:
-        m = re.search(r"LANG=(\S+)", r.stdout)
-        if m: lang = m.group(1)
-    signals["locale"] = lang
-    r = _run(["timedatectl", "status"], timeout=5)
-    tz = time.tzname or ""
-    if r and r.stdout:
-        m = re.search(r"Time ?zone: (.+)", r.stdout)
-        if m: tz = m.group(1).strip()
-    signals["timezone"] = tz
-    r = _run(["fc-list", ":", "family"], timeout=8)
-    n_fonts = len(r.stdout.splitlines()) if r and r.stdout else 0
-    signals["installed_fonts"] = str(n_fonts)
-    r = _run(["xrandr"], timeout=5)
-    res = ""
-    if r and r.stdout:
-        m = re.search(r"current (\d+) x (\d+)", r.stdout)
-        if m: res = f"{m.group(1)}x{m.group(2)}"
-    signals["screen"] = res or "unknown"
-    r = _run(["bash", "-c", "getconf MAC; ip -o -4 route show default 2>/dev/null | awk '{print $5}' | head -1"], timeout=5)
-    signals["dpi_mac"] = r.stdout.splitlines()[0] if r and r.stdout else "?"
-    signals["mac_policy"] = "check-hosts"
-    ok, out = True, ""
-    r = _run(["resolvectl", "status"], timeout=5)
-    signals["dns"] = "DoT" if r and "+DNSOverTLS" in (r.stdout or "") else "plaintext"
-
-    # Estimated bits of entropy from font/screen/locale/tz
-    entropy = 0
-    if n_fonts: entropy += min(n_fonts / 400, 1.0) * 8
-    if "x" in res: entropy += 3   # resolution
-    entropy += 1 if lang != "en_US" else 0
-    entropy += min(len(tz)/4, 1) * 2
-
-    return {"signals": signals, "entropy_bits": round(entropy), 
-            "recommendation": [
-                "fonts — install a generic set, keep counter-consistent",
-                "screen — a fixed window size resists WxH fingerprint",
-                "clock — keep NTP sync (already drifting)",
-                "DNS — run SpoofGoof 'audit' to confirm DoT",
-            ]}
+def _chromium_manifests() -> Dict[str, str]:
+    return {
+        "/etc/opt/chrome/policies/managed/synthex-privacy.json": _chrome_json(),
+        "/etc/chromium/policies/managed/synthex-privacy.json": _chrome_json(),
+        "/etc/brave/policies/managed/synthex-privacy.json": _chrome_json(),
+        "/etc/opt/microsoft/edge/policies/managed/synthex-privacy.json": _chrome_json(),
+    }
 
 
-# ══════════════════════════════════════════════════════════════════════════
-# 5. SCHEDULED AUTO-CLEAN (user systemd timer)
-# ══════════════════════════════════════════════════════════════════════════
+def _chrome_json() -> str:
+    import json as _json
+    return _json.dumps({"policies": CHROMIUM_RECOMMENDED}, indent=2)
+
 
 USER_SERVICE = """[Unit]
 Description=Synthex Privacy — periodic de-identification

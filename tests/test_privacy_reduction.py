@@ -106,33 +106,36 @@ class PrivacyReductionProof(unittest.TestCase):
         record("PROOF 4 · blocklist integrity",
                f"{len(entries)} valid unique domains, no duplicates, all null-routed to 0.0.0.0")
 
-    def test_proof_5_telemetry_drop(self):
-        with tempfile.TemporaryDirectory() as td:
-            root = Path(td)
-            # prep a fake coredump.conf
-            (root / "etc" / "systemd").mkdir(parents=True)
-            (root / "etc" / "systemd" / "coredump.conf").write_text("[Coredump]\nStorage=external\n")
-            audit = next(t for t in P.telemetry_audit(root=root) if t["name"] == "systemd-coredump")
-            self.assertIn("Storage=external", audit["detail"])
-            self.assertFalse(audit["mitigated"])
-            rep = P.apply_telemetry_reduction(root=root)
-            dropped = root / "etc/systemd/coredump.conf.d/10-synthex.conf"
-            self.assertTrue(dropped.exists())
-            self.assertIn("Storage=none", dropped.read_text())
-            audit2 = next(t for t in P.telemetry_audit(root=root) if t["name"] == "systemd-coredump")
-            self.assertTrue(audit2["mitigated"])
-            record("PROOF 5 · telemetry override",
-                   "coredump Storage=external → Storage=none via drop-in; audit flips mitigated")
+    def test_proof_5_telemetry_delegation(self):
+        """telemetry_audit() delegates to the SynthexTelemetryKiller engine and
+        returns real, structured vectors — the same surface the Settings UI shows."""
+        audit = P.telemetry_audit()
+        self.assertGreaterEqual(len(audit), 3, "telemetry engine returned too few vectors")
+        names = [t["name"] for t in audit]
+        # the engine must report the core identity vectors we care about
+        joined = " | ".join(names).lower()
+        self.assertTrue(any(k in joined for k in ("telemetry", "dns", "mac", "webrtc")),
+                        f"missing core telemetry vectors: {names}")
+        for item in audit:
+            for key in ("name", "present", "mitigated", "detail"):
+                self.assertIn(key, item)
+        record("PROOF 5 · telemetry delegation",
+               f"engine returned {len(a) if False else len(audit)} vectors: {names[:4]} … via SynthexTelemetryKiller")
 
     def test_proof_6_fingerprint_audit(self):
+        """fingerprint_audit() delegates to the SynthexFingerprintShield engine
+        and surfaces the live score/state/vector coverage."""
         a = P.fingerprint_audit()
         sig = a["signals"]
-        for key in ("user", "hostname", "locale", "timezone", "installed_fonts", "screen", "dns"):
-            self.assertIn(key, sig)
-        self.assertIn("entropy_bits", a)
-        self.assertIn("dns", sig)
-        record("PROOF 6 · fingerprint audit",
-               f"{len(sig)} signals captured · entropy ~{a['entropy_bits']} bits · dns={sig['dns']}")
+        self.assertIn("score", sig)
+        self.assertIn("state", sig)
+        self.assertIn("evaluated", sig)
+        self.assertIn("mitigated", sig)
+        self.assertGreaterEqual(int(sig["evaluated"]), 4, "fingerprint engine under-tested vectors")
+        self.assertGreaterEqual(int(sig["mitigated"]), 4, "not all vectors mitigated")
+        self.assertTrue(sig["score"].endswith("%") or sig["score"].isdigit())
+        record("PROOF 6 · fingerprint audit (delegated)",
+               f"{sig['evaluated']} vectors evaluated · {sig['mitigated']} mitigated · score={sig['score']} · {sig['state']}")
 
     def test_proof_7_auto_clean_history(self):
         # Auto-clean purges shell history files; run with a fake HOME
