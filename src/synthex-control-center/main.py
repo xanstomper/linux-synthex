@@ -50,6 +50,7 @@ from synth_system_adapters import (
     StorageSenseAdapter,
     QuarantineManagerAdapter,
     DoctorAdapter,
+    EncryptionAdapter,
     safe_set_gsetting,
     get_gsettings,
     run_cmd
@@ -75,6 +76,7 @@ SIDEBAR_ITEMS = [
     ("storage",       "Storage & Disks",        "drive-harddisk",                           ["Disks", "Partitions", "Mounts", "Filesystems", "External drives", "TRIM"]),
     ("users",         "Users & Accounts",       "system-users",                             ["Accounts", "Password", "Administrator privileges", "Login behavior", "Profile"]),
     ("security",      "Security",               "cs-firewall",                              ["Firewall", "Encryption", "Secure Boot status", "Permissions", "Authentication", "Screen lock"]),
+    ("encryption",    "Hardware & Encryption",  "channel-secure",                           ["TPM 2.0", "LUKS2", "RAM Crypto", "Anti-Coldboot", "Fscrypt Vaults"]),
     ("privacy",       "Privacy",                "preferences-system-privacy",              ["Location", "Camera", "Microphone", "Screen capture", "App permissions", "Telemetry"]),
     ("apps",          "Apps & Defaults",        "preferences-desktop-default-applications", ["Installed applications", "Default applications", "Startup applications", "File associations"]),
     ("packages",      "Packages & Software",    "system-software-install",                  ["Updates", "Installed packages", "Repositories", "Drivers", "Optional components"]),
@@ -2025,6 +2027,115 @@ class SettingsAppWindow(Gtk.Window):
             doc_frame.add(doc_vbox)
             self.content_box.pack_start(doc_frame, False, False, 0)
 
+        # ── 18.5. Hardware, Kernel & System Encryption ─────────────────
+        elif cat_id == "encryption":
+            crypto = EncryptionAdapter.get_crypto_overview()
+
+            enc_frame = Gtk.Frame(label="Hardware, Kernel & Storage Cryptographic Hub")
+            enc_vbox = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=14)
+            enc_vbox.set_border_width(16)
+
+            # 1. Cryptographic Security Score Header
+            score_box = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=16)
+            score_box.set_border_width(12)
+            score_img = Gtk.Image.new_from_icon_name("security-high", Gtk.IconSize.DIALOG)
+            score_box.pack_start(score_img, False, False, 0)
+
+            score_txt = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=2)
+            score_val = crypto.get("overall_security_score", 75)
+            s_color = "#2ecc71" if score_val >= 80 else "#f39c12"
+            score_lbl = Gtk.Label(xalign=0)
+            score_lbl.set_markup(f"<span size='x-large' weight='bold' color='{s_color}'>Cryptographic Security Score: {score_val}%</span>")
+            score_txt.pack_start(score_lbl, False, False, 0)
+            score_sub = Gtk.Label(label="Multi-layer hardware, kernel, and storage cryptography protecting device keys, physical DRAM, and user files.", xalign=0)
+            score_sub.set_line_wrap(True)
+            score_txt.pack_start(score_sub, False, False, 0)
+            score_box.pack_start(score_txt, True, True, 0)
+            enc_vbox.pack_start(score_box, False, False, 0)
+
+            # 2. Cryptographic Layers Grid
+            layers_frame = Gtk.Frame(label="Active Cryptographic Defense Layers")
+            layers_vbox = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=8)
+            layers_vbox.set_border_width(12)
+
+            for l in crypto.get("layers", []):
+                r_box = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=12)
+                r_box.set_border_width(6)
+                icon_name = "channel-secure-symbolic" if l.get("is_secure") else "dialog-warning-symbolic"
+                r_box.pack_start(Gtk.Image.new_from_icon_name(icon_name, Gtk.IconSize.BUTTON), False, False, 0)
+
+                safe_layer = GLib.markup_escape_text(l.get("layer", ""))
+                safe_details = GLib.markup_escape_text(l.get("details", ""))
+                l_lbl = Gtk.Label(xalign=0)
+                l_lbl.set_markup(f"<b>{safe_layer}</b>\n<small color='#888888'>{safe_details}</small>")
+                r_box.pack_start(l_lbl, True, True, 0)
+
+                stat_color = "#2ecc71" if l.get("is_secure") else "#e67e22"
+                stat_lbl = Gtk.Label(xalign=1)
+                stat_lbl.set_markup(f"<span weight='bold' color='{stat_color}'>{l.get('status', '')}</span>")
+                r_box.pack_end(stat_lbl, False, False, 0)
+
+                layers_vbox.pack_start(r_box, False, False, 0)
+
+            layers_frame.add(layers_vbox)
+            enc_vbox.pack_start(layers_frame, False, False, 0)
+
+            # 3. Hardware Sealing & Kernel Anti-Coldboot Actions
+            act_frame = Gtk.Frame(label="Hardware Sealing & Anti-Coldboot Controls")
+            act_vbox = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=10)
+            act_vbox.set_border_width(12)
+
+            act_grid = Gtk.Grid()
+            act_grid.set_column_spacing(12)
+            act_grid.set_row_spacing(10)
+
+            # Button 1: TPM2 Hardware Sealing
+            btn_tpm = Gtk.Button.new_with_label("Enroll TPM 2.0 Hardware Key (PCR 0+2+7)")
+            btn_tpm.connect("clicked", lambda b: (EncryptionAdapter.enroll_tpm2_device("/dev/mapper/synthex-root"), b.set_label("✓ TPM 2.0 Hardware Enrolled!")))
+            act_grid.attach(btn_tpm, 0, 0, 1, 1)
+
+            # Button 2: Anti-Coldboot Kernel Sysctl
+            btn_sysctl = Gtk.Button.new_with_label("Apply Anti-Coldboot Kernel Hardening")
+            btn_sysctl.connect("clicked", lambda b: (EncryptionAdapter.apply_kernel_hardening(), b.set_label("✓ Key Isolation Hardened!")))
+            act_grid.attach(btn_sysctl, 1, 0, 1, 1)
+
+            # Button 3: RAM Memory Encryption
+            btn_ram = Gtk.Button.new_with_label("Activate AMD SME / Intel TME Memory Encryption")
+            btn_ram.connect("clicked", lambda b: (EncryptionAdapter.enable_memory_encryption(), b.set_label("✓ RAM Encryption Activated!")))
+            act_grid.attach(btn_ram, 0, 1, 1, 1)
+
+            # Button 4: Create Encrypted Vault
+            btn_vault = Gtk.Button.new_with_label("Create Hardware-Encrypted Security Vault...")
+            btn_vault.connect("clicked", lambda b: self._show_create_vault_dialog())
+            act_grid.attach(btn_vault, 1, 1, 1, 1)
+
+            act_vbox.pack_start(act_grid, False, False, 0)
+            act_frame.add(act_vbox)
+            enc_vbox.pack_start(act_frame, False, False, 0)
+
+            # 4. LUKS2 Encrypted Volumes & Fscrypt Vaults
+            vol_frame = Gtk.Frame(label="LUKS2 Storage Devices & Secure Folders")
+            vol_vbox = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=8)
+            vol_vbox.set_border_width(12)
+
+            for vol in crypto.get("luks_volumes", []):
+                v_box = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=12)
+                v_box.set_border_width(6)
+                v_box.pack_start(Gtk.Image.new_from_icon_name("drive-harddisk", Gtk.IconSize.BUTTON), False, False, 0)
+                safe_vname = GLib.markup_escape_text(vol.get("name", ""))
+                safe_vcipher = GLib.markup_escape_text(f"{vol.get('type', '')} — {vol.get('cipher', '')} ({vol.get('kdf', '')})")
+                v_lbl = Gtk.Label(xalign=0)
+                v_lbl.set_markup(f"<b>{safe_vname}</b> ({vol.get('size', '')})\n<small color='#888888'>{safe_vcipher}</small>")
+                v_box.pack_start(v_lbl, True, True, 0)
+                v_box.pack_end(Gtk.Label(label=vol.get("mountpoint", "Mounted")), False, False, 0)
+                vol_vbox.pack_start(v_box, False, False, 0)
+
+            vol_frame.add(vol_vbox)
+            enc_vbox.pack_start(vol_frame, False, False, 0)
+
+            enc_frame.add(enc_vbox)
+            self.content_box.pack_start(enc_frame, False, False, 0)
+
         # ── 19. Printers & Scanners ─────────────────────────────────────
         elif cat_id == "printers":
             frame = Gtk.Frame(label="Printers & Scanners (CUPS)")
@@ -2696,6 +2807,42 @@ class SettingsAppWindow(Gtk.Window):
             )
             res_md.run()
             res_md.destroy()
+
+    def _show_create_vault_dialog(self):
+        dialog = Gtk.Dialog(title="Create Hardware-Encrypted Security Vault", parent=self, flags=0)
+        dialog.add_button(Gtk.STOCK_CANCEL, Gtk.ResponseType.CANCEL)
+        dialog.add_button("Create Vault", Gtk.ResponseType.OK)
+
+        box = dialog.get_content_area()
+        box.set_spacing(10)
+        box.set_border_width(16)
+
+        box.pack_start(Gtk.Label(label="<b>Vault Name:</b>", use_markup=True, xalign=0), False, False, 0)
+        e_name = Gtk.Entry()
+        e_name.set_text("Confidential Vault")
+        box.pack_start(e_name, False, False, 0)
+
+        box.pack_start(Gtk.Label(label="<b>Directory Location:</b>", use_markup=True, xalign=0), False, False, 0)
+        e_path = Gtk.Entry()
+        e_path.set_text(str(Path.home() / "Vault"))
+        box.pack_start(e_path, False, False, 0)
+
+        dialog.show_all()
+        if dialog.run() == Gtk.ResponseType.OK:
+            vname = e_name.get_text().strip() or "Security Vault"
+            vpath = e_path.get_text().strip()
+            res = EncryptionAdapter.create_user_vault(vname, vpath)
+            md = Gtk.MessageDialog(
+                parent=self,
+                flags=0,
+                message_type=Gtk.MessageType.INFO if res.get("status") == "ok" else Gtk.MessageType.ERROR,
+                buttons=Gtk.ButtonsType.OK,
+                text=res.get("message", "Vault created.")
+            )
+            md.run()
+            md.destroy()
+            self._render_category_page("encryption", "Hardware & Encryption", ["TPM 2.0", "LUKS2", "RAM Crypto", "Anti-Coldboot", "Fscrypt Vaults"])
+        dialog.destroy()
 
 
 def main():

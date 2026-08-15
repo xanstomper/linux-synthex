@@ -1,78 +1,95 @@
 #!/usr/bin/env python3
-"""Synthex Disk Encryption — LUKS or VeraCrypt setup helper.
-Usage:
-  synthex-encrypt setup <device>    — Encrypt a disk
-  synthex-encrypt open <device>     — Open encrypted volume
-  synthex-encrypt close <volume>    — Close encrypted volume
-  synthex-encrypt status            — Show encryption status
-  synthex-encrypt wizard            — Interactive setup wizard
+# SPDX-License-Identifier: GPL-3.0-or-later
 """
-import os, sys, subprocess, json
+Synthex Hardware, Kernel & System Cryptographic CLI Hub
+Usage:
+  synthex-encrypt status                  — Full hardware, kernel, and storage encryption report
+  synthex-encrypt harden                  — Apply anti-coldboot kernel RAM sysctls & memory encryption
+  synthex-encrypt tpm-enroll <device>     — Seal LUKS2 disk encryption key to TPM 2.0 (PCR 0+2+7)
+  synthex-encrypt fido-enroll <device>    — Bind LUKS2 volume to physical FIDO2/YubiKey hardware token
+  synthex-encrypt vault <name> <path>     — Create hardware-encrypted secure folder vault
+  synthex-encrypt setup <device>          — Format device with military-grade LUKS2 + Argon2id KDF
+  synthex-encrypt open <device> <name>    — Open encrypted volume to /dev/mapper/<name>
+  synthex-encrypt close <volume>          — Close encrypted volume
+"""
 
-def run(cmd):
-    return subprocess.run(cmd, capture_output=True, text=True)
+import os
+import sys
+import subprocess
+from pathlib import Path
 
-def cmd_setup(device):
-    print(f"Synthex Disk Encryption Setup")
-    print(f"Device: {device}")
-    print()
-    print("Choose encryption method:")
-    print("1) LUKS2 (Linux native, recommended)")
-    print("2) VeraCrypt (cross-platform)")
-    choice = input("Choice [1]: ").strip() or "1"
-    if choice == "1":
-        print(f"Running: cryptsetup luksFormat {device}")
-        print("WARNING: This will ERASE all data on the device!")
-        confirm = input("Type YES to continue: ")
-        if confirm == "YES":
-            run(["sudo", "cryptsetup", "luksFormat", "--type", "luks2", "--cipher", "aes-xts-plain64", "--key-size", "512", "--hash", "sha256", device])
-            print(f"Device {device} encrypted with LUKS2")
-            name = input("Volume name [synthex-secret]: ").strip() or "synthex-secret"
-            run(["sudo", "cryptsetup", "open", device, name])
-            run(["sudo", "mkfs.btrfs", f"/dev/mapper/{name}"])
-            print(f"Encrypted volume {name} ready at /dev/mapper/{name}")
-    elif choice == "2":
-        print("VeraCrypt requires veracrypt package")
-        run(["sudo", "dnf", "install", "-y", "veracrypt"])
-        print("Run: veracrypt --create")
+# Add synthex-security to sys.path
+_SEC_DIR = Path(__file__).resolve().parent / "synthex-security"
+if str(_SEC_DIR) not in sys.path:
+    sys.path.insert(0, str(_SEC_DIR))
 
-def cmd_status():
-    print("Encryption Status:")
-    # Check LUKS
-    r = run(["sudo", "cryptsetup", "status"])
-    if r.stdout:
-        for line in r.stdout.splitlines():
-            print(f"  LUKS: {line}")
-    # Check if dm-crypt active
-    r = run(["ls", "/dev/mapper/"])
-    if r.stdout:
-        for line in r.stdout.splitlines():
-            if line not in ["control"]:
-                print(f"  Active: {line}")
-    # Check kernel support
-    r = run(["lsmod"])
-    if "dm_crypt" in r.stdout:
-        print("  DM-Crypt: Loaded")
-    if "aesni" in r.stdout:
-        print("  AES-NI: Available (hardware acceleration)")
+try:
+    from synthex_encryption import SynthexEncryptionEngine
+except ImportError:
+    SynthexEncryptionEngine = None
+
 
 def main():
-    if len(sys.argv) < 2:
-        print(__doc__)
-        cmd_status()
+    if len(sys.argv) < 2 or sys.argv[1] in ["status", "--status", "-s"]:
+        if SynthexEncryptionEngine:
+            engine = SynthexEncryptionEngine.get_instance()
+            health = engine.get_full_cryptographic_health()
+            print("=================================================================")
+            print(" Synthex Hardware, Kernel & System Cryptographic Security Hub")
+            print("=================================================================")
+            print(f" Cryptographic Security Score: {health['overall_security_score']}%")
+            print("-----------------------------------------------------------------")
+            for layer in health["layers"]:
+                icon = "🔒" if layer["is_secure"] else "⚠️ "
+                print(f" {icon} {layer['layer']:<42} : {layer['status']}")
+                print(f"    └─ {layer['details']}")
+            print("=================================================================")
+        else:
+            print("Synthex Encryption Engine loading error.")
         return
+
     cmd = sys.argv[1]
-    if cmd == "setup" and len(sys.argv) >= 3:
-        cmd_setup(sys.argv[2])
-    elif cmd == "status":
-        cmd_status()
-    elif cmd == "wizard":
-        print("Interactive encryption wizard...")
-        print("Step 1: Select device")
-        r = run(["lsblk", "-o", "NAME,SIZE,TYPE,MOUNTPOINT"])
-        print(r.stdout)
+    engine = SynthexEncryptionEngine.get_instance() if SynthexEncryptionEngine else None
+
+    if cmd == "harden":
+        if engine:
+            ok, msg = engine.apply_kernel_anticoldboot_hardening()
+            print(f"[{'OK' if ok else 'ERR'}] {msg}")
+            ok2, msg2 = engine.enable_kernel_memory_encryption()
+            print(f"[{'OK' if ok2 else 'ERR'}] {msg2}")
+        else:
+            print("Engine not available.")
+
+    elif cmd == "tpm-enroll" and len(sys.argv) >= 3:
+        dev = sys.argv[2]
+        if engine:
+            ok, msg = engine.enroll_tpm2(dev)
+            print(f"[{'OK' if ok else 'ERR'}] {msg}")
+
+    elif cmd == "vault" and len(sys.argv) >= 4:
+        vname = sys.argv[2]
+        vpath = sys.argv[3]
+        if engine:
+            ok, msg = engine.create_encrypted_user_vault(vname, vpath)
+            print(f"[{'OK' if ok else 'ERR'}] {msg}")
+
+    elif cmd == "setup" and len(sys.argv) >= 3:
+        device = sys.argv[2]
+        print(f"Formatting {device} with LUKS2 + Argon2id...")
+        subprocess.run(["sudo", "cryptsetup", "luksFormat", "--type", "luks2", "--cipher", "aes-xts-plain64", "--key-size", "512", "--hash", "sha512", "--pbkdf", "argon2id", device])
+
+    elif cmd == "open" and len(sys.argv) >= 4:
+        dev = sys.argv[2]
+        name = sys.argv[3]
+        subprocess.run(["sudo", "cryptsetup", "open", dev, name])
+
+    elif cmd == "close" and len(sys.argv) >= 3:
+        vol = sys.argv[2]
+        subprocess.run(["sudo", "cryptsetup", "close", vol])
+
     else:
         print(__doc__)
+
 
 if __name__ == "__main__":
     main()

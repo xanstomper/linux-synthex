@@ -1067,6 +1067,36 @@ try:
 except Exception as _e:
     check("synthex doctor functional validation", False, str(_e))
 
+# 73. Synthex Hardware, Kernel & System Cryptographic Security Suite
+print("\n📋 Synthex Hardware, Kernel & System Cryptographic Security Suite:")
+sec_dir = os.path.join(ROOT, "src", "synthex-security")
+check("synthex encryption engine script exists", os.path.exists(os.path.join(sec_dir, "synthex_encryption.py")))
+check("synthex encrypt cli wrapper exists", os.access(os.path.join(ROOT, "src", "synthex-encrypt"), os.X_OK))
+
+try:
+    sys.path.insert(0, sec_dir)
+    from synthex_encryption import SynthexEncryptionEngine
+    crypto_engine = SynthexEncryptionEngine(dry_run=True)
+    check("encryption engine initialized", crypto_engine is not None)
+    health = crypto_engine.get_full_cryptographic_health()
+    check("encryption health diagnostics pass", health.get("overall_security_score", 0) > 0)
+    check("encryption tpm2 telemetry check", "present" in health.get("tpm2", {}))
+    check("encryption cpu acceleration check", "aes_ni" in health.get("cpu_crypto", {}))
+    check("encryption memory encryption check", "technology" in health.get("memory_encryption", {}))
+    check("encryption kernel security check", "hardened" in health.get("kernel_security", {}))
+    check("encryption luks storage check", len(health.get("luks_volumes", [])) > 0)
+    check("encryption swap check", "is_encrypted" in health.get("swap_encryption", {}))
+    
+    # Test hardening methods (dry_run mode)
+    ok_h, _ = crypto_engine.apply_kernel_anticoldboot_hardening()
+    check("encryption anti-coldboot sysctl hardening", ok_h is True)
+    ok_m, _ = crypto_engine.enable_kernel_memory_encryption()
+    check("encryption kernel memory encryption activation", ok_m is True)
+    ok_t, _ = crypto_engine.enroll_tpm2("/dev/mapper/synthex-root")
+    check("encryption tpm2 enrollment dry-run", ok_t is True)
+except Exception as _e:
+    check("synthex encryption functional validation", False, str(_e))
+
 # Summary
 print(f"\n{'='*50}")
 print(f"  RESULTS: {passed} passed, {failed} failed")
