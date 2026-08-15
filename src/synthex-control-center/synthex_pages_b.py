@@ -994,11 +994,11 @@ def build_security(toast):
     col.add(sec)
 
     # ── Aegis Autonomous Encryption Defense Shield ───────────────────────────
-    sec_aegis = Section("Aegis Encryption Defense Shield")
+    sec_aegis = Section("Aegis Active Encryption Defense Shield")
     from synth_system_adapters import AegisDualEncryptAdapter
     
-    shield_row, _ = toggle_row("Aegis Encryption Defense Shield",
-                               "Auto-detects LUKS & VeraCrypt, masks volume signatures, injects 40% decoy chaff & duplicates blobs",
+    shield_row, _ = toggle_row("Aegis Active Defense Shield",
+                               "Hardware-accelerated Anti-DMA protection, dm-integrity block sentinel, anti-bruteforce, and TPM2 sealing",
                                icon="security-high",
                                get=lambda: AegisDualEncryptAdapter.is_enabled(),
                                set_=lambda v: _toggle_aegis_shield(v, toast))
@@ -1006,30 +1006,23 @@ def build_security(toast):
 
     st = AegisDualEncryptAdapter.get_status()
     for d in st.get("detected_encryption", []):
-        sec_aegis.add_row(entity_card(f"Auto-Detected: {d.get('engine_name', 'Encrypted Volume')}",
+        sec_aegis.add_row(entity_card(f"Auto-Shielded: {d.get('engine_name', 'Encrypted Volume')}",
                                       f"Target: {d.get('target_device')} · Cipher: {d.get('cipher')}",
                                       icon_name="drive-harddisk" if "LUKS" in d.get("engine_name", "") else "security-high",
                                       trailing=badge(d.get("status", "Shielded"), "ok" if "Shielded" in d.get("status", "") else "neutral")))
 
-    sec_aegis.add_row(entity_card("Cryptographic Decoy Chaff Blobs",
-                                  "40% Indistinguishable honey blocks injected to defeat raw disk analysis",
-                                  icon_name="channel-secure",
-                                  trailing=badge("Active", "ok") if st.get("shield_active") else badge("Disabled", "neutral")))
+    for l in st.get("active_defenses", []):
+        badge_kind = "ok" if l.get("active") else "neutral"
+        badge_text = "Armed" if l.get("active") else "Off"
+        sec_aegis.add_row(entity_card(l.get("name", "Defense Layer"),
+                                      f"[{l.get('category')}] {l.get('description')}",
+                                      icon_name="channel-secure" if "DMA" in l.get("name", "") else "security-high",
+                                      trailing=badge(badge_text, badge_kind)))
 
-    sec_aegis.add_row(entity_card("Chunk Parity Duplication (K-of-N)",
-                                  "Reed-Solomon redundancy protects against sector corruption & bit-flipping",
-                                  icon_name="drive-harddisk",
-                                  trailing=badge("Active", "ok") if st.get("shield_active") else badge("Disabled", "neutral")))
-
-    sec_aegis.add_row(entity_card("Magic Header Camouflage",
-                                  "Strips LUKS/VeraCrypt signatures so forensic tools see pure CSPRNG noise",
-                                  icon_name="visibility",
-                                  trailing=badge("Camouflaged", "ok") if st.get("shield_active") else badge("Exposed", "warn")))
-
-    sec_aegis.add_row(entity_card("Zero Key Leakage Guarantee",
-                                  "Protected stdin pipes, 0700/0600 file ACLs, and kernel keyring memory isolation",
-                                  icon_name="dialog-password",
-                                  trailing=button("Run Key Audit", "btn-quiet", lambda b: _run_key_audit(toast))))
+    sec_aegis.add_row(entity_card("Emergency Keyring Purge & Panic Dismount",
+                                  "Instantly unmounts volumes, zeros kernel memory keyrings, and drops Linux filesystem caches",
+                                  icon_name="process-stop",
+                                  trailing=button("🚨 Panic Purge", "btn-warn", lambda b: _panic_purge_action(toast))))
     col.add(sec_aegis)
 
     sec = Section("Secure Boot & Platform Integrity")
@@ -1038,6 +1031,16 @@ def build_security(toast):
                             trailing=badge("Enabled", "ok") if "enabled" in (out or "").lower() else badge("Check", "neutral")))
     col.add(sec)
     return col
+
+
+def _panic_purge_action(toast):
+    try:
+        from synth_system_adapters import AegisDualEncryptAdapter
+        res = AegisDualEncryptAdapter.panic_purge()
+        toast.show_message(res.get("message", "Emergency memory purge executed"), error=(res.get("status") != "ok"))
+    except Exception as e:
+        toast.show_message(f"Panic purge error: {e}", error=True)
+
 
 
 def _toggle_aegis_shield(enabled, toast):

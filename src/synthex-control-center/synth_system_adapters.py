@@ -2768,6 +2768,15 @@ class AegisDualEncryptAdapter:
         except Exception as e:
             return {"status": "error", "message": str(e)}
 
+    @classmethod
+    def panic_purge(cls) -> Dict:
+        try:
+            ok, msg = cls._get_engine().emergency_panic_purge()
+            return {"status": "ok" if ok else "error", "message": msg}
+        except Exception as e:
+            return {"status": "error", "message": str(e)}
+
+
 
 
 
