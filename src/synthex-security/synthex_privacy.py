@@ -207,42 +207,65 @@ def build_chromium_manifest(root: Optional[Path] = None) -> Dict[str, Dict]:
 # 2. TRACKER DNS BLOCK (/etc/hosts)
 # ══════════════════════════════════════════════════════════════════════════
 
+_BLOCK_HEAD = "# ---- Synthex Privacy Tracker Block ----"
+_BLOCK_TAIL = "# ---- End Synthex Privacy Tracker Block ----"
+
+
+def _block_entries() -> List[str]:
+    """Just the 0.0.0.0 DOMAIN lines from the blocklist."""
+    return [d for d in TRACKER_DOMAINS.splitlines() if d.startswith("0.0.0.0")]
+
+
 def build_hosts(root: Optional[Path] = None) -> str:
-    """Current /etc/hosts content with tracker block merged (idempotent)."""
+    """/etc/hosts content with the complete, current tracker block.
+    Reconciles fully: any previously-applied Synthex block is replaced with the
+    current list, so domains added to TRACKER_DOMAINS appear on the next apply
+    and nothing is ever duplicated."""
     r = Path(root or Path("/"))
     hosts_path = r / "etc/hosts" if root else Path("/etc/hosts")
     existing = hosts_path.read_text() if hosts_path.exists() else ""
-    if "Synthex Privacy" in existing:
-        # Replace the previous block (everything between markers)
-        start = existing.find("# ----")
-        end = existing.find("# ====")
-        if start != -1 and end != -1:
-            existing = existing[:start] + existing[end + len("# ----"):]
-    return existing + "\n" + TRACKER_DOMAINS
+
+    # Strip any prior Synthex block (current marker style, or legacy single-header)
+    if _BLOCK_HEAD in existing and _BLOCK_TAIL in existing:
+        s = existing.index(_BLOCK_HEAD)
+        e = existing.index(_BLOCK_TAIL) + len(_BLOCK_TAIL)
+        existing = existing[:s] + existing[e:]
+    elif "Synthex Privacy" in existing:
+        start = existing.find("# Synthex Privacy")
+        end = existing.find("\n\n", start)
+        existing = existing[:start] + (existing[end:] if end != -1 else "")
+
+    block = "\n" + _BLOCK_HEAD + "\n" + TRACKER_DOMAINS.rstrip() + "\n" + _BLOCK_TAIL + "\n"
+    return existing.rstrip("\n") + "\n" + block
 
 
 def apply_tracker_block(root: Optional[Path] = None) -> Tuple[bool, str]:
-    """Write the blocklist to /etc/hosts. Verifies a sample resolves to 0.0.0.0."""
+    """Write the blocklist to /etc/hosts (idempotent, fully reconciles)."""
     try:
+        content = build_hosts(root)
         if root:
-            (Path(root) / "etc/hosts").write_text(build_hosts(root))
+            (Path(root) / "etc/hosts").write_text(content)
         else:
             tmp = Path(tempfile.gettempdir()) / "synthex-hosts"
-            tmp.write_text(build_hosts())
+            tmp.write_text(content)
             r = _run(["pkexec", "cp", str(tmp), "/etc/hosts"], timeout=15)
             if not r or r.returncode != 0:
                 return False, "pkexec denied or failed"
-        verified = _run(["getent", "hosts", "doubleclick.net"], timeout=8)
-        ok = verified and "0.0.0.0" in verified.stdout
-        return True, ("Tracker block active (%d domains). doubleclick.net → 0.0.0.0" % len(TRACKER_DOMAINS.splitlines())) if ok else ("Domains added; DNS cache may need flush")
+        n = len(_block_entries())
+        verified = _run(["getent", "ahostsv4", "doubleclick.net"], timeout=8)
+        ok = bool(verified and "0.0.0.0" in (verified.stdout or ""))
+        msg = f"Tracker block active ({n} domains)"
+        msg += ". doubleclick.net sinkholed to 0.0.0.0." if ok else ", DNS cache may need flush."
+        return True, msg
     except Exception as e:
         return False, str(e)
 
 
 def trackers_blocked() -> int:
+    """Count of blocklist entries currently present in /etc/hosts (0 if off)."""
     try:
         hosts = Path("/etc/hosts").read_text()
-        return sum(1 for d in TRACKER_DOMAINS.splitlines() if d.strip() and d in hosts)
+        return sum(1 for d in _block_entries() if d in hosts)
     except Exception:
         return 0
 
@@ -251,16 +274,23 @@ def remove_tracker_block(root: Optional[Path] = None) -> bool:
     try:
         r = Path(root or Path("/"))
         hosts_path = r / "etc/hosts" if root else Path("/etc/hosts")
-        lines = hosts_path.read_text().splitlines()
-        keep = [l for l in lines if "synthex.pri" not in l and "Synthex Privacy" not in l and not (l and not l.startswith("#") and "0.0.0.0" in l)]
+        txt = hosts_path.read_text() if hosts_path.exists() else ""
+        s = txt.find(_BLOCK_HEAD)
+        e = txt.find(_BLOCK_TAIL)
+        if s != -1 and e != -1:
+            txt = txt[:s] + txt[e + len(_BLOCK_TAIL):]
         if root:
-            hosts_path.write_text("\n".join(keep) + "\n")
+            hosts_path.write_text(txt)
         else:
-            tmp = Path(tempfile.gettempdir()) / "synthex-hosts-remove"; tmp.write_text("\n".join(keep) + "\n")
+            tmp = Path(tempfile.gettempdir()) / "synthex-hosts-remove"
+            tmp.write_text(txt)
             _run(["pkexec", "cp", str(tmp), str(hosts_path)], timeout=15)
         return True
     except Exception:
         return False
+
+
+# ══════════════════════════════════════════════════════════════════════════
 
 
 # ══════════════════════════════════════════════════════════════════════════

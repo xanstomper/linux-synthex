@@ -1382,6 +1382,25 @@ try:
 except Exception as _e:
     check("brain pipeline functional validation", False, str(_e))
 
+# 80. Synthex Universal SQL Brain & Autonomous Guidance Platform
+print("\n📋 Synthex Universal SQL Brain & Autonomous Guidance Platform:")
+check("synthex sql-brain script exists", os.path.exists(os.path.join(brain_dir, "synthex_sql_brain.py")))
+check("synthex-guide cli launcher exists", os.access(os.path.join(ROOT, "src", "synthex-guide"), os.X_OK))
+
+try:
+    from synthex_sql_brain import SynthexSQLBrain
+    sql_brain = SynthexSQLBrain(dry_run=True)
+    check("sql brain initialized", sql_brain is not None)
+    sql_st = sql_brain.get_status()
+    check("sql brain status query pass", "OPTIMAL" in sql_st.get("status", ""))
+    ok_act = sql_brain.record_agent_action("sess-01", "test-agent", "build", "shell", "make", "ok", True)
+    check("sql action recording dry-run", ok_act is True)
+    guide_res = sql_brain.generate_agent_guidance("diagnose system and fix boot")
+    check("sql guidance generation pass", guide_res.get("guidance_status", "") != "")
+    check("sql guidance steps check", len(guide_res.get("action_steps", [])) > 0)
+except Exception as _e:
+    check("sql brain & guidance platform functional validation", False, str(_e))
+
 # Summary
 print(f"\n{'='*50}")
 print(f"  RESULTS: {passed} passed, {failed} failed")
