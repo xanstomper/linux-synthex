@@ -6,7 +6,7 @@ PartOf=synthex.target
 
 [Service]
 Type=simple
-ExecStart=/usr/bin/python3 /home/jewboy420/linux-synthex/src/synthex-security/synthex_spoofgoof.py status
+ExecStart=/usr/bin/python3 /home/jewboy420/linux-synthex/src/synthex-security/synthex_spoofgoof.py daemon
 Restart=always
 RestartSec=5s
 

@@ -27,9 +27,14 @@ from pathlib import Path
 from dataclasses import dataclass, asdict
 from typing import Dict, List, Optional, Tuple, Any
 
-CONFIG_DIR = Path.home() / ".config" / "synthex" / "spoofgoof"
+if os.geteuid() == 0:
+    CONFIG_DIR = Path("/etc/synthex/spoofgoof")
+    STATS_FILE = Path("/run/synthex/spoofgoof/stats.json")
+else:
+    CONFIG_DIR = Path.home() / ".config" / "synthex" / "spoofgoof"
+    STATS_FILE = CONFIG_DIR / "stats.json"
+
 CONFIG_FILE = CONFIG_DIR / "config.json"
-STATS_FILE = CONFIG_DIR / "stats.json"
 
 ANYCAST_TARGETS = [
     ("1.1.1.1", 53),
@@ -206,6 +211,49 @@ class SpoofGoofEngine:
             time.sleep(interval)
 
 
+    def run_daemon(self):
+        """Runs the continuous daemon loop in foreground for systemd service."""
+        print(f"[SpoofGoof] Starting continuous traffic morphing & packet chaff daemon (PID: {os.getpid()})...")
+        CONFIG_DIR.mkdir(parents=True, exist_ok=True)
+        STATS_FILE.parent.mkdir(parents=True, exist_ok=True)
+        sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+        sock.setblocking(False)
+
+        while True:
+            cfg = self._load_config()
+            if cfg.get("enabled", True):
+                prof = PROFILES.get(cfg.get("profile", "balanced"), PROFILES["balanced"])
+                interval = 1.0 / max(prof.noise_rate_pps, 1)
+
+                try:
+                    target_ip, target_port = random.choice(ANYCAST_TARGETS)
+                    # Randomize padding size slightly (+/- 20%) to prevent fixed packet size fingerprinting
+                    jitter_size = max(16, prof.packet_padding_bytes + random.randint(-16, 16))
+                    payload = self.generate_chaff_payload(jitter_size)
+                    sock.sendto(payload, (target_ip, target_port))
+                    self._packets_injected += 1
+                    self._bytes_morphed += len(payload)
+
+                    # Update live stats file periodically
+                    if self._packets_injected % 20 == 0:
+                        try:
+                            with open(STATS_FILE, "w") as sf:
+                                json.dump({
+                                    "packets_injected": self._packets_injected,
+                                    "bytes_morphed": self._bytes_morphed,
+                                    "last_heartbeat": time.time(),
+                                    "profile": prof.name
+                                }, sf)
+                        except Exception:
+                            pass
+                except Exception:
+                    pass
+
+                time.sleep(interval)
+            else:
+                time.sleep(1.0)
+
+
 def main():
     engine = SpoofGoofEngine.get_instance()
     if len(sys.argv) < 2 or sys.argv[1] in ["status", "--status"]:
@@ -223,6 +271,8 @@ def main():
         for f in st["features"]:
             print(f" 🛡️  {f['name']:<30} : {f['status']}")
         print("=================================================================")
+    elif sys.argv[1] in ["daemon", "run", "--daemon"]:
+        engine.run_daemon()
     elif sys.argv[1] == "profile" and len(sys.argv) >= 3:
         p = sys.argv[2]
         if engine.set_profile(p):
@@ -238,7 +288,7 @@ def main():
     elif sys.argv[1] == "json":
         print(json.dumps(engine.get_status(), indent=2))
     else:
-        print(f"Usage: {sys.argv[0]} [status | profile <balanced|ultra_stealth|gaming> | enable | disable | json]")
+        print(f"Usage: {sys.argv[0]} [status | daemon | profile <balanced|ultra_stealth|gaming> | enable | disable | json]")
 
 
 if __name__ == "__main__":
