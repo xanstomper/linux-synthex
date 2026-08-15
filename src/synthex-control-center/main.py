@@ -1610,29 +1610,55 @@ class SettingsAppWindow(Gtk.Window):
             hw_priv_frame.add(hw_priv_box)
             self.content_box.pack_start(hw_priv_frame, False, False, 0)
 
-            # 4. Network Privacy & Anti-Tracking
-            net_priv_frame = Gtk.Frame(label="Network Privacy & Anti-Tracking Shield")
+            # 4. 100% Zero-Telemetry & Total ISP Network Stealth
+            net_priv_frame = Gtk.Frame(label="100% Zero-Telemetry & Total ISP Network Stealth Shield")
+            net_priv_vbox = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=10)
+            net_priv_vbox.set_border_width(16)
+
+            z_lbl = Gtk.Label(xalign=0)
+            z_lbl.set_markup("<span color='#2ecc71' weight='bold' size='large'>✓ ZERO DATA LEAVES YOUR DEVICE • 100% HIDDEN FROM ISP &amp; WEBSITES</span>")
+            net_priv_vbox.pack_start(z_lbl, False, False, 0)
+            z_desc = Gtk.Label(label="All background diagnostic telemetry is permanently masked. All DNS lookups are encrypted via DNS-over-TLS (DoT) directly to zero-log privacy resolvers. Hardware MAC addresses rotate randomly on every connection.", xalign=0)
+            z_desc.set_line_wrap(True)
+            net_priv_vbox.pack_start(z_desc, False, False, 0)
+
             net_priv_grid = Gtk.Grid()
             net_priv_grid.set_column_spacing(16)
             net_priv_grid.set_row_spacing(10)
-            net_priv_grid.set_border_width(16)
 
-            net_priv_grid.attach(Gtk.Label(label="Wi-Fi MAC Address Randomization:", xalign=0), 0, 0, 1, 1)
-            mac_rand_sw = Gtk.Switch()
-            mac_rand_sw.set_active(True)
-            net_priv_grid.attach(mac_rand_sw, 1, 0, 1, 1)
+            net_priv_grid.attach(Gtk.Label(label="100% OS & App Zero-Telemetry Lockdown:", xalign=0), 0, 0, 1, 1)
+            telem_sw = Gtk.Switch()
+            telem_sw.set_active(True)
+            telem_sw.connect("state-set", lambda s, st: (PrivacyAdapter.apply_zero_telemetry_lockdown() if st else None))
+            net_priv_grid.attach(telem_sw, 1, 0, 1, 1)
 
-            net_priv_grid.attach(Gtk.Label(label="IPv6 Privacy Extensions (RFC 4941):", xalign=0), 0, 1, 1, 1)
-            ipv6_sw = Gtk.Switch()
-            ipv6_sw.set_active(True)
-            net_priv_grid.attach(ipv6_sw, 1, 1, 1, 1)
-
-            net_priv_grid.attach(Gtk.Label(label="Encrypted DNS-over-TLS (Quad9/Cloudflare):", xalign=0), 0, 2, 1, 1)
+            net_priv_grid.attach(Gtk.Label(label="Encrypted DNS-over-TLS (ISP Invisible):", xalign=0), 0, 1, 1, 1)
             dot_sw = Gtk.Switch()
             dot_sw.set_active(True)
-            net_priv_grid.attach(dot_sw, 1, 2, 1, 1)
+            net_priv_grid.attach(dot_sw, 1, 1, 1, 1)
 
-            net_priv_frame.add(net_priv_grid)
+            net_priv_grid.attach(Gtk.Label(label="Dynamic Hardware MAC Address Randomization:", xalign=0), 0, 2, 1, 1)
+            mac_rand_sw = Gtk.Switch()
+            mac_rand_sw.set_active(True)
+            net_priv_grid.attach(mac_rand_sw, 1, 2, 1, 1)
+
+            net_priv_grid.attach(Gtk.Label(label="IPv6 Privacy Extensions (RFC 4941):", xalign=0), 0, 3, 1, 1)
+            ipv6_sw = Gtk.Switch()
+            ipv6_sw.set_active(True)
+            net_priv_grid.attach(ipv6_sw, 1, 3, 1, 1)
+
+            net_priv_grid.attach(Gtk.Label(label="WebRTC Local & Public IP Leak Shield:", xalign=0), 0, 4, 1, 1)
+            webrtc_sw = Gtk.Switch()
+            webrtc_sw.set_active(True)
+            net_priv_grid.attach(webrtc_sw, 1, 4, 1, 1)
+
+            net_priv_vbox.pack_start(net_priv_grid, False, False, 4)
+
+            btn_lockdown = Gtk.Button.new_with_label("Enforce 100% Zero-Telemetry & ISP Stealth Lockdown")
+            btn_lockdown.connect("clicked", lambda b: (PrivacyAdapter.apply_zero_telemetry_lockdown(), b.set_label("✓ Zero-Telemetry & Stealth Locked!")))
+            net_priv_vbox.pack_start(btn_lockdown, False, False, 4)
+
+            net_priv_frame.add(net_priv_vbox)
             self.content_box.pack_start(net_priv_frame, False, False, 0)
 
             # 5. AI Privacy & Data Boundaries

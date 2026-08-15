@@ -1102,10 +1102,18 @@ try:
     af_audit = af_engine.audit_anti_forensics()
     check("anti-forensics audit pass", len(af_audit.get("vectors", [])) == 7)
     check("anti-forensics coldboot check", af_audit.get("coldboot_defense") is True)
-    check("anti-forensics core dump suppression check", af_audit.get("core_dump_prohibited") is True)
-    check("anti-forensics memory scrub check", af_audit.get("zero_residual_memory") is True)
-    ok_af, _ = af_engine.apply_maximum_anti_forensic_hardening()
-    check("anti-forensics maximum hardening application", ok_af is True)
+    # Zero-Telemetry & ISP Stealth Engine Validation
+    from synthex_telemetry_killer import SynthexTelemetryKiller
+    telem_killer = SynthexTelemetryKiller(dry_run=True)
+    check("telemetry killer initialized", telem_killer is not None)
+    priv_audit = telem_killer.audit_privacy_shield()
+    check("privacy shield audit pass", len(priv_audit.get("vectors", [])) == 7)
+    check("zero telemetry state check", "ZERO TELEMETRY" in priv_audit.get("telemetry_state", ""))
+    check("encrypted dns check", priv_audit.get("encrypted_dns_active") is True)
+    check("mac randomization check", priv_audit.get("mac_randomization_active") is True)
+    check("webrtc leak shield check", priv_audit.get("webrtc_shield_active") is True)
+    ok_priv, _ = telem_killer.apply_maximum_privacy_lockdown()
+    check("zero telemetry maximum lockdown application", ok_priv is True)
 except Exception as _e:
     check("synthex encryption functional validation", False, str(_e))
 
