@@ -2122,9 +2122,74 @@ class SpoofGoofAdapter:
     def toggle(cls, enabled: bool) -> bool:
         try:
             engine = cls._get_engine()
-            return engine.toggle_enabled(enabled)
+            ok = engine.toggle_enabled(enabled)
+            # Keep the system service in sync (single prompt if needed)
+            try:
+                import subprocess as _sp
+                verb = "restart" if enabled else "stop"
+                _sp.run(["pkexec", "systemctl", verb, "synthex-spoofgoof.service"],
+                        capture_output=True, timeout=20)
+            except Exception:
+                pass
+            return ok
         except Exception:
             return False
+
+    @classmethod
+    def spoof_mac(cls, interface: str = "") -> Tuple[bool, str]:
+        """Randomizes the MAC on the primary (or given) interface."""
+        try:
+            engine = cls._get_engine()
+            if not interface:
+                iface = cls.primary_interface()
+                return engine.spoof_active_mac(iface)
+            return engine.spoof_active_mac(interface)
+        except Exception as e:
+            return False, str(e)
+
+    @classmethod
+    def primary_interface(cls) -> str:
+        ok, out, _ = run_cmd(["bash", "-c",
+                              "ip -o -4 route show default 2>/dev/null | awk '{print $5}' | head -1"], timeout=4)
+        return out.strip() if ok and out.strip() else "wlp1s0"
+
+    @classmethod
+    def list_interfaces(cls) -> List[Dict]:
+        ifaces = []
+        ok, out, _ = run_cmd(["bash", "-c",
+                              "ip -o link show 2>/dev/null | awk -F': ' '{print $2}'"], timeout=4)
+        for name in (out or "").splitlines():
+            name = name.strip()
+            if name and name != "lo":
+                mac = ""
+                okm, mout, _ = run_cmd(["bash", "-c",
+                                        f"cat /sys/class/net/{name}/address 2>/dev/null"], timeout=3)
+                if okm:
+                    mac = mout.strip()
+                ifaces.append({"name": name, "mac": mac})
+        return ifaces
+
+    @classmethod
+    def enforce_full_spectrum(cls) -> Tuple[bool, str]:
+        """One-shot 100% full-spectrum spoofing enforcement (MAC + hostname + TCP + chaff)."""
+        try:
+            engine = cls._get_engine()
+            return engine.enforce_100_percent_spoofing()
+        except Exception as e:
+            return False, str(e)
+
+    @classmethod
+    def profiles(cls) -> List[Tuple[str, str]]:
+        return [("balanced", "Adaptive Balanced"), ("ultra_stealth", "Ultra-Stealth Maximum Chaff"),
+                ("gaming", "Low-Latency Pro (Zero-Ping)")]
+
+    @classmethod
+    def daemon_status(cls) -> Dict:
+        ok, out, _ = run_cmd(["systemctl", "is-active", "synthex-spoofgoof"], timeout=4)
+        active = ok and "active" in (out or "")
+        okp, pout, _ = run_cmd(["pgrep", "-fc", "synthex_spoofgoof[.]py"], timeout=4)
+        return {"active": active or (okp and pout.strip() not in ("", "0")),
+                "via_service": active}
 
 
 

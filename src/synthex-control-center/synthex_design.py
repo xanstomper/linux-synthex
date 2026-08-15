@@ -26,326 +26,327 @@ CONTENT_WIDTH = 760  # max width of the settings column (centered)
 
 _CSS = """
 /* ══════════════════════════════════════════════════════════════════════════
-   SynthOS Settings — Modern Design System
-   Clean, sleek, libadwaita-inspired surfaces that adapt to any GTK theme.
+   SynthOS Settings — Premium macOS-grade Design System
+   Vibrancy surfaces, pill controls, crisp typography, buttery transitions.
    ══════════════════════════════════════════════════════════════════════════ */
 
 .settings-window {
-  font-family: Cantarell, "Noto Sans", "Inter", "Ubuntu", sans-serif;
+  font-family: "Inter", "Cantarell", "SF Pro Text", "Noto Sans", "Ubuntu", sans-serif;
 }
 
-/* ── Global controls restyle ─────────────────────────────────────────── */
-
-/* Switches: modern pill toggles */
+/* ── Switches: macOS-style pills ─────────────────────────────────────── */
 switch {
   border-radius: 999px;
-  min-width: 46px;
-  min-height: 24px;
-  background-color: alpha(@theme_fg_color, 0.16);
+  min-width: 50px;
+  min-height: 28px;
+  background-color: alpha(@theme_fg_color, 0.15);
   background-image: none;
-  transition: all 180ms ease;
+  outline-style: none;
+  transition: background-color 200ms cubic-bezier(0.4, 0, 0.2, 1);
 }
-switch:checked { background-color: @theme_selected_bg_color; }
+switch:checked { background-color: shade(@theme_selected_bg_color, 1.05); }
+switch:disabled { opacity: 0.4; }
 switch slider {
-  min-width: 19px;
-  min-height: 19px;
-  margin: 2px;
+  min-width: 22px;
+  min-height: 22px;
+  margin: 3px;
   border: none;
   border-radius: 50%;
-  background-color: @theme_base_color;
-  box-shadow: 0 1px 3px alpha(black, 0.30);
-  transition: all 180ms ease;
+  background-color: white;
+  box-shadow: 0 2px 5px alpha(black, 0.35), 0 0 1px alpha(black, 0.25);
+  transition: all 200ms cubic-bezier(0.4, 0, 0.2, 1);
 }
-switch:checked slider { background-color: @theme_selected_fg_color; }
-switch:disabled { opacity: 0.45; }
 
-/* Sliders */
+/* ── Sliders ─────────────────────────────────────────────────────────── */
 .scale-ok trough {
-  min-height: 5px;
+  min-height: 6px;
   border-radius: 3px;
-  background-color: alpha(@theme_fg_color, 0.12);
+  background-color: alpha(@theme_fg_color, 0.13);
+  outline-style: none;
 }
 .scale-ok highlight {
   border-radius: 3px;
-  min-height: 5px;
-  background-color: @theme_selected_bg_color;
+  min-height: 6px;
+  background-image: linear-gradient(to bottom,
+    shade(@theme_selected_bg_color, 1.25), shade(@theme_selected_bg_color, 0.95));
 }
-.scale-ok slider {
-  min-width: 18px;
-  min-height: 18px;
-  margin: -7px;
+.scale-ok slider, scale slider {
+  min-width: 20px;
+  min-height: 20px;
+  margin: -8px;
   border-radius: 50%;
-  background-color: @theme_base_color;
-  border: 2px solid @theme_selected_bg_color;
-  box-shadow: 0 1px 4px alpha(black, 0.22);
+  background-color: white;
+  border: 0.5px solid alpha(black, 0.12);
+  box-shadow: 0 2px 6px alpha(black, 0.30), 0 0 0 0.5px alpha(black, 0.06);
+  background-image: none;
+  transition: box-shadow 150ms ease;
+}
+.scale-ok slider:hover, scale slider:hover {
+  box-shadow: 0 3px 10px alpha(black, 0.40), 0 0 0 6px alpha(@theme_selected_bg_color, 0.12);
 }
 
-/* Check & radio */
+/* ── Check / radio ───────────────────────────────────────────────────── */
 checkbutton check {
-  min-width: 18px;
-  min-height: 18px;
+  min-width: 20px;
+  min-height: 20px;
   border-radius: 6px;
-  border: 2px solid alpha(@theme_fg_color, 0.30);
+  border: 1.5px solid alpha(@theme_fg_color, 0.28);
   background-color: transparent;
-  transition: all 150ms ease;
+  transition: all 160ms ease;
 }
 checkbutton check:checked {
   background-color: @theme_selected_bg_color;
   border-color: @theme_selected_bg_color;
 }
 radiobutton radio {
-  min-width: 18px;
-  min-height: 18px;
+  min-width: 20px;
+  min-height: 20px;
   border-radius: 50%;
-  border: 2px solid alpha(@theme_fg_color, 0.30);
-  transition: all 150ms ease;
+  border: 1.5px solid alpha(@theme_fg_color, 0.28);
+  transition: all 160ms ease;
 }
 radiobutton radio:checked { border-color: @theme_selected_bg_color; }
 
-/* Spin buttons */
+/* ── Spinbuttons / comboboxes ────────────────────────────────────────── */
 spinbutton {
   border-radius: 9px;
   border: 1px solid alpha(@theme_fg_color, 0.12);
-  background-color: alpha(@theme_fg_color, 0.04);
-  padding: 0 2px;
+  background-color: alpha(@theme_fg_color, 0.05);
+  padding: 0 4px;
 }
 spinbutton entry { border: none; background: transparent; }
 
-/* Scrollbars: thin overlay-style */
-scrollbar { background-color: transparent; }
-scrollbar slider {
-  min-width: 9px;
-  min-height: 36px;
-  border-radius: 999px;
-  border: none;
-  margin: 3px 2px;
-  background-color: alpha(@theme_fg_color, 0.22);
-  transition: background-color 150ms ease;
-}
-scrollbar slider:hover { background-color: alpha(@theme_fg_color, 0.40); }
-
-/* Spinner */
-spinner { color: @theme_selected_bg_color; }
-
-/* ── Sidebar ─────────────────────────────────────────────────────────── */
-.sidebar { background-color: alpha(@theme_fg_color, 0.028); }
-.sidebar-scroll { background: transparent; }
-
-.sidebar-item {
+.combo-compact button {
+  background-color: alpha(@theme_fg_color, 0.055);
+  border: 1px solid alpha(@theme_fg_color, 0.13);
   border-radius: 9px;
-  margin: 1px 10px;
-  padding: 7px 10px;
-  transition: all 150ms ease;
-}
-.sidebar-item:hover { background-color: alpha(@theme_fg_color, 0.06); }
-.sidebar-item:active { background-color: alpha(@theme_fg_color, 0.10); }
-.sidebar-item:selected {
-  background-color: @theme_selected_bg_color;
-  color: @theme_selected_fg_color;
-}
-.sidebar-item:selected .sidebar-title { color: @theme_selected_fg_color; }
-
-.sidebar-title { font-size: 10pt; font-weight: 500; }
-.sidebar-sub { font-size: 8.5pt; color: alpha(@theme_fg_color, 0.50); }
-
-.sidebar-group {
-  font-size: 7.5pt;
-  font-weight: 800;
-  letter-spacing: 0.14em;
-  color: alpha(@theme_fg_color, 0.38);
-  padding: 16px 22px 6px 22px;
-}
-
-.sidebar-sep { background-color: alpha(@theme_fg_color, 0.09); min-width: 1px; }
-
-/* ── Header bar ──────────────────────────────────────────────────────── */
-.app-title { font-size: 13pt; font-weight: 700; letter-spacing: -0.01em; }
-
-.settings-search {
-  border-radius: 999px;
-  padding: 6px 16px;
-  background-color: alpha(@theme_fg_color, 0.05);
-  border: 1px solid alpha(@theme_fg_color, 0.10);
-  transition: all 160ms ease;
-}
-.settings-search:focus {
-  border-color: @theme_selected_bg_color;
-  box-shadow: 0 0 0 3px alpha(@theme_selected_bg_color, 0.18);
-}
-
-/* ── Content column ──────────────────────────────────────────────────── */
-.content-scroll { background-color: @theme_base_color; }
-.content-column { margin: 0 8px; }
-
-/* ── Page header ─────────────────────────────────────────────────────── */
-.page-header { padding: 2px 6px 6px 6px; }
-.page-title {
-  font-size: 20pt;
-  font-weight: 700;
-  letter-spacing: -0.015em;
-}
-.page-subtitle {
-  font-size: 10pt;
-  color: alpha(@theme_fg_color, 0.58);
-  padding-top: 4px;
-}
-
-/* ── Cards / sections ────────────────────────────────────────────────── */
-.card {
-  background-color: alpha(@theme_fg_color, 0.035);
-  border-radius: 16px;
-  border: 1px solid alpha(@theme_fg_color, 0.08);
-  box-shadow: 0 1px 2px alpha(black, 0.03), 0 6px 18px alpha(black, 0.035);
-}
-.card-dark {
-  background-color: alpha(@theme_fg_color, 0.06);
-  border-radius: 16px;
-  border: 1px solid alpha(@theme_fg_color, 0.08);
-}
-.card-padding { padding: 6px 4px; }
-
-.section-title-box { padding: 6px 10px 10px 10px; }
-.section-title {
+  padding: 6px 11px;
   font-size: 9.5pt;
-  font-weight: 700;
-  letter-spacing: 0.06em;
-  color: alpha(@theme_fg_color, 0.62);
+  background-image: none;
+  transition: all 150ms ease;
+  outline-style: none;
 }
-.section-sub {
-  font-size: 9pt;
-  color: alpha(@theme_fg_color, 0.48);
-  padding-top: 2px;
-}
+.combo-compact button:hover { background-color: alpha(@theme_fg_color, 0.10); }
+.combo-compact button:checked { background-color: alpha(@theme_fg_color, 0.13); }
+.combo-compact .cellview { padding-right: 4px; }
 
-/* ── Rows ────────────────────────────────────────────────────────────── */
-.row {
-  padding: 12px 12px;
-  border-radius: 10px;
-  transition: background-color 150ms ease;
+/* ── Entries ─────────────────────────────────────────────────────────── */
+.entry-clean, entry {
+  background-color: alpha(@theme_fg_color, 0.05);
+  border: 1px solid alpha(@theme_fg_color, 0.13);
+  border-radius: 9px;
+  padding: 6px 12px;
+  font-size: 9.5pt;
+  box-shadow: none;
+  outline-style: none;
+  transition: all 180ms cubic-bezier(0.4, 0, 0.2, 1);
 }
-.row:hover { background-color: alpha(@theme_fg_color, 0.045); }
-
-.row-title { font-size: 10.5pt; font-weight: 500; }
-.row-sub {
-  font-size: 9pt;
-  color: alpha(@theme_fg_color, 0.55);
-  padding-top: 2px;
+.entry-clean:focus, entry:focus {
+  border-color: @theme_selected_bg_color;
+  box-shadow: 0 0 0 3.5px alpha(@theme_selected_bg_color, 0.20);
 }
-
-.row-sep { background-color: transparent; }
 
 /* ── Buttons ─────────────────────────────────────────────────────────── */
+button { outline-style: none; transition: all 150ms ease; }
+
 .btn-quiet {
-  background-color: alpha(@theme_fg_color, 0.05);
+  background-color: alpha(@theme_fg_color, 0.055);
   border: 1px solid alpha(@theme_fg_color, 0.13);
   border-radius: 9px;
   padding: 7px 16px;
   font-size: 9.5pt;
   font-weight: 600;
-  transition: all 150ms ease;
 }
-.btn-quiet:hover { background-color: alpha(@theme_fg_color, 0.10); }
-.btn-quiet:active { background-color: alpha(@theme_fg_color, 0.14); }
+.btn-quiet:hover { background-color: alpha(@theme_fg_color, 0.11); }
+.btn-quiet:active { background-color: alpha(@theme_fg_color, 0.16); }
 
 .btn-primary {
   background-image: linear-gradient(to bottom,
-    shade(@theme_selected_bg_color, 1.12),
-    shade(@theme_selected_bg_color, 0.96));
+    shade(@theme_selected_bg_color, 1.16), shade(@theme_selected_bg_color, 0.94));
   color: @theme_selected_fg_color;
   border: none;
   border-radius: 9px;
-  padding: 8px 18px;
+  padding: 8px 19px;
   font-size: 9.5pt;
   font-weight: 700;
-  box-shadow: 0 2px 8px alpha(@theme_selected_bg_color, 0.35);
-  transition: all 150ms ease;
+  box-shadow: 0 2px 10px alpha(@theme_selected_bg_color, 0.40), inset 0 1px 0 alpha(white, 0.22);
+  text-shadow: none;
 }
 .btn-primary:hover {
   background-image: linear-gradient(to bottom,
-    shade(@theme_selected_bg_color, 1.20),
-    shade(@theme_selected_bg_color, 1.02));
-  box-shadow: 0 3px 12px alpha(@theme_selected_bg_color, 0.45);
+    shade(@theme_selected_bg_color, 1.24), shade(@theme_selected_bg_color, 1.02));
+  box-shadow: 0 4px 16px alpha(@theme_selected_bg_color, 0.50), inset 0 1px 0 alpha(white, 0.28);
 }
 .btn-primary:active {
   background-image: none;
-  background-color: shade(@theme_selected_bg_color, 0.90);
+  background-color: shade(@theme_selected_bg_color, 0.88);
+  box-shadow: inset 0 2px 6px alpha(black, 0.22);
 }
 .btn-primary:disabled { opacity: 0.5; }
 
 .btn-destructive {
   color: @error_color;
-  background-color: alpha(@error_color, 0.06);
-  border: 1px solid alpha(@error_color, 0.38);
+  background-color: alpha(@error_color, 0.07);
+  border: 1px solid alpha(@error_color, 0.40);
   border-radius: 9px;
   padding: 7px 16px;
   font-size: 9.5pt;
   font-weight: 600;
-  transition: all 150ms ease;
 }
-.btn-destructive:hover { background-color: alpha(@error_color, 0.14); }
+.btn-destructive:hover { background-color: alpha(@error_color, 0.15); }
 
-/* ── Combo & entry ───────────────────────────────────────────────────── */
-.combo-compact button {
-  background-color: alpha(@theme_fg_color, 0.05);
-  border: 1px solid alpha(@theme_fg_color, 0.13);
-  border-radius: 9px;
-  padding: 6px 10px;
-  font-size: 9.5pt;
-  transition: all 150ms ease;
+/* ── Scrollbars: invisible until hover ───────────────────────────────── */
+scrollbar { background-color: transparent; opacity: 0.55; transition: opacity 300ms ease; }
+scrollbar:hover { opacity: 1; }
+scrollbar slider {
+  min-width: 10px;
+  min-height: 42px;
+  border-radius: 999px;
+  border: none;
+  margin: 3px 3px;
+  background-color: alpha(@theme_fg_color, 0.24);
 }
-.combo-compact button:hover { background-color: alpha(@theme_fg_color, 0.10); }
-.combo-compact button:checked { background-color: alpha(@theme_fg_color, 0.12); }
+scrollbar slider:hover { background-color: alpha(@theme_fg_color, 0.45); }
 
-.entry-clean {
-  background-color: alpha(@theme_fg_color, 0.04);
-  border: 1px solid alpha(@theme_fg_color, 0.13);
-  border-radius: 9px;
-  padding: 6px 11px;
-  font-size: 9.5pt;
+/* ── Header ──────────────────────────────────────────────────────────── */
+headerbar {
+  background-image: none;
+  background-color: @theme_base_color;
+  border-bottom: 1px solid alpha(@theme_fg_color, 0.08);
   box-shadow: none;
-  transition: all 160ms ease;
 }
-.entry-clean:focus {
+.app-title {
+  font-size: 14pt;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+}
+.settings-search {
+  border-radius: 999px;
+  padding: 7px 18px;
+  background-color: alpha(@theme_fg_color, 0.055);
+  border: 1px solid alpha(@theme_fg_color, 0.11);
+  font-size: 10pt;
+  outline-style: none;
+  transition: all 180ms ease;
+}
+.settings-search:focus {
   border-color: @theme_selected_bg_color;
-  box-shadow: 0 0 0 3px alpha(@theme_selected_bg_color, 0.18);
+  box-shadow: 0 0 0 3.5px alpha(@theme_selected_bg_color, 0.18);
+  background-color: @theme_base_color;
 }
 
-/* ── Badges & status ─────────────────────────────────────────────────── */
+/* ── Sidebar: vibrancy panel ─────────────────────────────────────────── */
+.sidebar, .sidebar-scroll { background-color: transparent; }
+.sidebar {
+  background-image: linear-gradient(to bottom,
+    alpha(@theme_fg_color, 0.045), alpha(@theme_fg_color, 0.025));
+  border-right: 1px solid alpha(@theme_fg_color, 0.07);
+}
+.sidebar-item {
+  border-radius: 9px;
+  margin: 1px 12px;
+  padding: 7px 10px;
+  transition: all 150ms cubic-bezier(0.4, 0, 0.2, 1);
+  outline-style: none;
+}
+.sidebar-item:hover { background-color: alpha(@theme_fg_color, 0.07); }
+.sidebar-item:active { background-color: alpha(@theme_fg_color, 0.12); }
+.sidebar-item:selected {
+  background-image: linear-gradient(to bottom,
+    shade(@theme_selected_bg_color, 1.14), shade(@theme_selected_bg_color, 0.96));
+  color: @theme_selected_fg_color;
+  box-shadow: 0 2px 8px alpha(@theme_selected_bg_color, 0.35);
+}
+.sidebar-item:selected .sidebar-title { color: @theme_selected_fg_color; font-weight: 700; }
+.sidebar-item:selected image { color: @theme_selected_fg_color; }
+
+.sidebar-title { font-size: 10pt; font-weight: 500; }
+.sidebar-group {
+  font-size: 7.5pt;
+  font-weight: 800;
+  letter-spacing: 0.15em;
+  color: alpha(@theme_fg_color, 0.36);
+  padding: 18px 24px 6px 24px;
+}
+.sidebar-sep { background-color: transparent; }
+
+/* ── Content & cards ─────────────────────────────────────────────────── */
+.content-scroll { background-color: @theme_base_color; }
+.content-column { margin: 0 6px; }
+
+.page-header { padding: 2px 8px 8px 8px; }
+.page-title { font-size: 23pt; font-weight: 800; letter-spacing: -0.025em; }
+.page-subtitle { font-size: 10pt; color: alpha(@theme_fg_color, 0.55); padding-top: 5px; }
+
+.card {
+  background-color: alpha(@theme_fg_color, 0.038);
+  border-radius: 18px;
+  border: 1px solid alpha(@theme_fg_color, 0.075);
+  box-shadow: 0 1px 2px alpha(black, 0.04), 0 8px 28px alpha(black, 0.05);
+}
+.card-dark {
+  background-color: alpha(@theme_fg_color, 0.065);
+  border-radius: 18px;
+  border: 1px solid alpha(@theme_fg_color, 0.075);
+}
+.card-padding { padding: 5px 5px; }
+
+.section-title-box { padding: 7px 12px 11px 12px; }
+.section-title {
+  font-size: 9.5pt;
+  font-weight: 800;
+  letter-spacing: 0.09em;
+  color: alpha(@theme_fg_color, 0.55);
+}
+.section-sub { font-size: 9pt; color: alpha(@theme_fg_color, 0.46); padding-top: 2px; }
+
+.row {
+  padding: 12px 12px;
+  border-radius: 11px;
+  transition: background-color 150ms ease;
+  outline-style: none;
+}
+.row:hover { background-color: alpha(@theme_fg_color, 0.05); }
+.row-title { font-size: 10.5pt; font-weight: 500; }
+.row-sub { font-size: 9pt; color: alpha(@theme_fg_color, 0.52); padding-top: 2px; }
+.row-sep { background-color: transparent; }
+
+/* ── Badges / dots ───────────────────────────────────────────────────── */
 .badge {
   border-radius: 999px;
-  padding: 3px 11px;
+  padding: 3.5px 12px;
   font-size: 8.5pt;
   font-weight: 700;
   letter-spacing: 0.02em;
 }
-.badge-ok { background-color: alpha(#2ecc71, 0.15); color: shade(#2ecc71, 0.82); }
-.badge-warn { background-color: alpha(#e67e22, 0.15); color: shade(#e67e22, 0.82); }
-.badge-err { background-color: alpha(@error_color, 0.14); color: @error_color; }
-.badge-neutral { background-color: alpha(@theme_fg_color, 0.09); color: alpha(@theme_fg_color, 0.75); }
-.settings-window.dark .badge-ok { color: #55efb8; }
-.settings-window.dark .badge-warn { color: #ffb569; }
+.badge-ok { background-color: alpha(#2ecc71, 0.16); color: shade(#2ecc71, 0.80); }
+.badge-warn { background-color: alpha(#e67e22, 0.16); color: shade(#e67e22, 0.80); }
+.badge-err { background-color: alpha(@error_color, 0.15); color: @error_color; }
+.badge-neutral { background-color: alpha(@theme_fg_color, 0.10); color: alpha(@theme_fg_color, 0.72); }
+.settings-window.dark .badge-ok { color: #5df0b4; }
+.settings-window.dark .badge-warn { color: #ffb969; }
 
 .dot { border-radius: 50%; min-width: 9px; min-height: 9px; padding: 0; }
-.dot-ok { background-color: #2ecc71; }
-.dot-warn { background-color: #e67e22; }
-.dot-err { background-color: @error_color; }
-.dot-off { background-color: alpha(@theme_fg_color, 0.3); }
+.dot-ok { background-color: #2ecc71; box-shadow: 0 0 6px alpha(#2ecc71, 0.6); }
+.dot-warn { background-color: #e67e22; box-shadow: 0 0 6px alpha(#e67e22, 0.6); }
+.dot-err { background-color: @error_color; box-shadow: 0 0 6px alpha(@error_color, 0.6); }
+.dot-off { background-color: alpha(@theme_fg_color, 0.28); }
 
 /* ── Info grid ───────────────────────────────────────────────────────── */
-.info-key { font-size: 9.5pt; color: alpha(@theme_fg_color, 0.58); }
+.info-key { font-size: 9.5pt; color: alpha(@theme_fg_color, 0.56); }
 .info-val { font-size: 9.5pt; font-weight: 500; }
 
-/* ── Toast: dark glass pill ──────────────────────────────────────────── */
+/* ── Toast: frosted glass pill ───────────────────────────────────────── */
 .toast {
-  background-color: alpha(#14161c, 0.94);
-  color: #f4f5f7;
-  border-radius: 12px;
-  padding: 11px 20px;
+  background-color: alpha(#0e1013, 0.92);
+  color: #f5f6f8;
+  border-radius: 13px;
+  padding: 12px 22px;
   font-size: 10pt;
-  font-weight: 500;
-  box-shadow: 0 6px 24px alpha(black, 0.35);
+  font-weight: 600;
+  box-shadow: 0 10px 34px alpha(black, 0.42), inset 0 1px 0 alpha(white, 0.10);
 }
-.toast-error { background-color: alpha(shade(@error_color, 0.55), 0.95); color: white; }
+.toast-error { background-color: alpha(#8e2b2b, 0.95); color: white; }
 
 /* ── Progress ────────────────────────────────────────────────────────── */
 .pbar-ok trough {
@@ -356,34 +357,43 @@ spinner { color: @theme_selected_bg_color; }
 .pbar-ok progress {
   border-radius: 3px;
   min-height: 6px;
-  background-color: @theme_selected_bg_color;
+  background-image: linear-gradient(to right,
+    shade(@theme_selected_bg_color, 0.95), shade(@theme_selected_bg_color, 1.2));
 }
 
 /* ── Entity cards ────────────────────────────────────────────────────── */
 .entity-card {
-  background-color: alpha(@theme_fg_color, 0.04);
-  border: 1px solid alpha(@theme_fg_color, 0.08);
-  border-radius: 12px;
+  background-color: alpha(@theme_fg_color, 0.045);
+  border: 1px solid alpha(@theme_fg_color, 0.07);
+  border-radius: 13px;
   padding: 13px 16px;
   box-shadow: 0 1px 2px alpha(black, 0.03);
-  transition: all 160ms ease;
+  transition: all 170ms cubic-bezier(0.4, 0, 0.2, 1);
 }
 .entity-card:hover {
-  border-color: alpha(@theme_selected_bg_color, 0.45);
-  box-shadow: 0 4px 14px alpha(black, 0.07);
+  border-color: alpha(@theme_selected_bg_color, 0.40);
+  box-shadow: 0 5px 18px alpha(black, 0.08);
 }
 .entity-title { font-size: 10.5pt; font-weight: 600; }
-.entity-sub { font-size: 9pt; color: alpha(@theme_fg_color, 0.55); }
+.entity-sub { font-size: 9pt; color: alpha(@theme_fg_color, 0.53); }
 
 .empty-state {
-  color: alpha(@theme_fg_color, 0.42);
+  color: alpha(@theme_fg_color, 0.40);
   font-size: 10pt;
-  padding: 26px;
+  padding: 28px;
   font-style: italic;
 }
 
-/* Loading spinner row */
-.async-loading { padding: 4px 2px; }
+/* ── Spinner / loading ───────────────────────────────────────────────── */
+spinner { color: @theme_selected_bg_color; }
+.async-loading { padding: 4px 4px; }
+
+/* ── Lists inside cards ──────────────────────────────────────────────── */
+.card list, .card listbox {
+  background-color: transparent;
+  border: none;
+}
+list row { outline-style: none; }
 """
 
 

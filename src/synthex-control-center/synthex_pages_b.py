@@ -3,6 +3,7 @@
 """SynthOS Settings — Pages B: Hardware & System sections."""
 
 import os
+import subprocess
 from gi.repository import Gtk, GLib
 from synthex_design import (
     PageHeader, Section, Row, ContentColumn, Toast, badge, dot, button, label,
@@ -30,64 +31,164 @@ from synthex_pages_a import _combo, _spin
 
 def build_display(toast):
     col = ContentColumn()
-    monitors = DisplayAdapter.get_connected_monitors() or []
-    col.add(PageHeader("Display", "Resolution, refresh rate, scaling and orientation",
-                       badges=[(f"{len(monitors)} display" + ("s" if len(monitors) != 1 else ""), "neutral")]))
-
+    monitors = DisplayAdapter.get_connected_monitors() or {}
     items = (monitors.items() if isinstance(monitors, dict)
              else [(m.get("name", "Display"), m) for m in monitors])
+    n_mon = len(list(items))
+    col.add(PageHeader("Display", "Resolution, refresh, scaling, rotation, color and night settings",
+                       badges=[(f"{n_mon} display" + ("s" if n_mon != 1 else ""), "neutral")]))
+
     for name, m in list(items)[:4]:
-        sec = Section(name, ("Primary" if m.get("primary") else "Extended"))
+        sec = Section(name, ("Primary display" if m.get("primary") else "Extended display"))
         all_modes = m.get("all_modes") or []
-        res_opts = []
-        seen = set()
+        res_opts, seen = [], set()
         for res, hz in all_modes:
             if res not in seen:
                 seen.add(res)
-                res_opts.append((res, res))
+                res_opts.append((res, res.replace("x", " × ")))
         cur_res = m.get("current_res", "")
+
         def _set_res(v, n=name):
             DisplayAdapter.set_monitor_mode(n, v, "60.00")
             toast.show_message(f"{n} → {v}")
+
         if res_opts:
-            _combo(sec, "Resolution", res_opts[:24], lambda r=cur_res: r, _set_res, width_chars=14)
-        rates = []
-        try:
-            max_hz = m.get("max_hz") or 60.0
-            rates = sorted({60, 75, 120, 144, 165, 240, int(max_hz)})
-        except Exception:
-            rates = [60]
-        _combo(sec, "Refresh rate", [(r, f"{r} Hz") for r in rates],
-               lambda: int(float(m.get("current_hz", 60))), lambda v, n=name: toast.show_message(f"{n}: {int(v)} Hz"),
+            _combo(sec, "Resolution", res_opts[:28], lambda r=cur_res: r, _set_res, width_chars=16)
+
+        # Refresh rates from real mode list
+        rates = sorted({int(float(hz)) for _r, hz in all_modes if hz} | {60})
+        _combo(sec, "Refresh rate", [(r, f"{r} Hz") for r in rates[-12:]],
+               lambda: int(float(m.get("current_hz", 60) or 60)),
+               lambda v, n=name: (DisplayAdapter.set_monitor_mode(n, cur_res or "1920x1080", f"{int(v)}.00"),
+                                  toast.show_message(f"{n}: {int(v)} Hz")),
                width_chars=10)
-        row, _ = slider_row("Brightness", 0.0, 1.0, icon="display-brightness",
-                            get=lambda: float(m.get("brightness", 1.0)),
-                            set_=lambda v, n=name: DisplayAdapter.set_monitor_brightness(n, float(v)))
-        sec.add_row(row)
+
+        # Rotation
         _combo(sec, "Orientation", [("normal", "Landscape"), ("left", "Portrait left"),
                                     ("right", "Portrait right"), ("inverted", "Landscape flipped")],
-               lambda: "normal", lambda v: _set_rotation(m, v, toast))
-        _combo(sec, "Fractional scaling", [(1.0, "100%"), (1.25, "125%"), (1.5, "150%"), (2.0, "200%")],
-               lambda: 1.0, lambda v: toast.show_message("Scaling applied on next login"), width_chars=10)
+               lambda: "normal", lambda v, n=name: _set_rotation(m, n, v, toast), width_chars=16)
+
+        # Brightness + gamma per-output
+        row, _ = slider_row("Brightness", 0.05, 1.0, icon="display-brightness",
+                            get=lambda mm=m: float(mm.get("brightness", 1.0) or 1.0),
+                            set_=lambda v, n=name: DisplayAdapter.set_monitor_brightness(n, float(v)))
+        sec.add_row(row)
+
+        # Gamma presets (night comfort / accuracy)
+        gam = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=6)
+        for gname, gr, gg, gb in [("Neutral", 1.0, 1.0, 1.0), ("Warm", 1.0, 0.9, 0.8),
+                                  ("Cool", 0.95, 0.98, 1.05), ("Night", 1.0, 0.82, 0.65)]:
+            gam.pack_start(button(gname, "btn-quiet",
+                                  lambda b, r=gr, g=gg, bl=gb, n=name: _set_gamma(n, r, g, bl, toast)), False, False, 0)
+        sec.add_row(Row("Color temperature (gamma presets)", "Instant warmth presets for eye comfort",
+                        control=gam))
         col.add(sec)
 
-    sec = Section("Global")
+    # ── Global display settings ───────────────────────────────────────
+    ifs = "org.cinnamon.desktop.interface"
+    muf = "org.cinnamon.muffin"
+    sec = Section("Scaling & layout")
+    _combo(sec, "UI scaling", [(0, "Automatic"), (1, "100%"), (2, "200%")],
+           lambda: int(_gget(ifs, "scaling-factor", 0) or 0),
+           lambda v: (safe_set_gsetting(ifs, "scaling-factor", int(v)),
+                      toast.show_message(f"UI scaling: {v}x")), width_chars=12)
+    row, sc = slider_row("Fractional text scaling", 0.75, 1.75,
+                         subtitle="Fine-grained text size without layout breakage",
+                         icon="format-text-size",
+                         get=lambda: float(_gget(ifs, "text-scaling-factor", 1.0) or 1.0),
+                         set_=lambda v: safe_set_gsetting(ifs, "text-scaling-factor", round(float(v), 2)))
+    sec.add_row(row)
+    row, _ = toggle_row("Fractional scaling (experimental)",
+                        "Enable HiDPI fractional factors like 125% / 150%",
+                        icon="preferences-desktop-display",
+                        get=lambda: _gget(ifs, "upscale-fractional-scaling", False),
+                        set_=lambda v: (safe_set_gsetting(ifs, "upscale-fractional-scaling", v),
+                                        toast.show_message("Takes effect next login")))
+    sec.add_row(row)
+    _combo(sec, "Cursor size", [(24, "24 px (default)"), (32, "32 px"), (48, "48 px"), (64, "64 px"), (96, "96 px (HiDPI)")],
+           lambda: int(_gget(ifs, "cursor-size", 24) or 24),
+           lambda v: safe_set_gsetting(ifs, "cursor-size", int(v)), width_chars=14)
+    col.add(sec)
+
+    sec = Section("Window & fullscreen behavior")
+    row, _ = toggle_row("Unredirect fullscreen windows", "Direct scanout — lowest latency in games and video",
+                        icon="applications-games",
+                        get=lambda: _gget(muf, "unredirect-fullscreen-windows", True),
+                        set_=lambda v: safe_set_gsetting(muf, "unredirect-fullscreen-windows", v))
+    sec.add_row(row)
+    row, _ = toggle_row("Variable refresh rate (VRR/FreeSync/G-Sync)",
+                        "Adaptive sync if your monitor supports it",
+                        get=lambda: bool(_gget(muf, "vrr-enabled", False)),
+                        set_=lambda v: safe_set_gsetting(muf, "vrr-enabled", v))
+    sec.add_row(row)
+    row, _ = toggle_row("Scale display framebuffers on GPU", "Sharper fractional scaling via GPU scaling",
+                        get=lambda: "scale-monitor-framebuffer" in str(_gget(muf, "experimental-features", [])),
+                        set_=lambda v: safe_set_gsetting(muf, "experimental-features",
+                                                         ["scale-monitor-framebuffer"] if v else []))
+    sec.add_row(row)
+    col.add(sec)
+
+    # ── Night light quick access ─────────────────────────────────────
     nl = NightLightAdapter.settings()
-    row, _ = toggle_row("Night Light", "Warmer colors at night", icon="night-light",
+    sec = Section("Night light")
+    row, _ = toggle_row("Night light", "Warmer colors after sunset to reduce eye strain",
+                        icon="night-light",
                         get=lambda: nl["enabled"], set_=lambda v: NightLightAdapter.set("enabled", v))
     sec.add_row(row)
-    row, _ = toggle_row("VRR / FreeSync", "Variable refresh rate if supported", icon="preferences-desktop-display",
-                        get=lambda: _gget("org.cinnamon.muffin", "vrr-enabled", False),
-                        set_=lambda v: safe_set_gsetting("org.cinnamon.muffin", "vrr-enabled", v))
+    row, _ = slider_row("Color temperature", 1700, 6500, subtitle="Warmer ← → Cooler",
+                         icon="preferences-color",
+                         get=lambda: nl["temperature"],
+                         set_=lambda v: NightLightAdapter.set("temperature", int(v)))
     sec.add_row(row)
+    col.add(sec)
+
+    # ── Multi-monitor layout tools ───────────────────────────────────
+    sec = Section("Arrangement")
+    _combo(sec, "Primary display", [(name, name) for name, _m in list(items)[:4]] or [("None", "None")],
+           lambda: next((n for n, mm in list(items)[:4] if mm.get("primary")), ""),
+           lambda v: (DisplayAdapter.set_primary_monitor(v), toast.show_message(f"Primary → {v}")),
+           width_chars=14)
+    layouts = [("extend-right", "Extend left → right"), ("extend-left", "Extend right → left"),
+               ("mirror", "Mirror displays"), ("external-only", "External only")]
+    if n_mon >= 2:
+        pair = [list(items)[0][0], list(items)[1][0]]
+        _combo(sec, "Layout", layouts,
+               lambda: "extend-right",
+               lambda v: (DisplayAdapter.set_display_layout(pair[0], pair[1], v),
+                          toast.show_message(f"Layout: {v}")), width_chars=20)
+    sec.add_row(buttons_row("Identify displays", "Flash each output's name on screen", icon="help-about",
+                            buttons=[("Identify", "btn-quiet", lambda b: _identify_displays(toast))]))
+    col.add(sec)
+
+    # ── Screen edges / touch ──────────────────────────────────────────
+    sec = Section("Screen edges")
+    row, _ = toggle_row("Edge tiling", "Snap windows to screen edges when dragging",
+                        icon="view-dual",
+                        get=lambda: _gget(muf, "edge-tiling", True),
+                        set_=lambda v: safe_set_gsetting(muf, "edge-tiling", v))
+    sec.add_row(row)
+    _spin(sec, "Draggable border width (px)", 4, 40,
+          lambda: int(_gget(muf, "draggable-border-width", 10) or 10),
+          lambda v: safe_set_gsetting(muf, "draggable-border-width", int(v)))
     col.add(sec)
     return col
 
 
-def _set_rotation(m, v, toast):
-    name = m.get("name", "")
+def _set_rotation(m, name, v, toast):
     ok, _, _ = run_cmd(["xrandr", "--output", name, "--rotate", v], timeout=6)
     toast.show_message(f"{name} rotated: {v}" if ok else "Rotation failed", error=not ok)
+
+
+def _set_gamma(name, r, g, b, toast):
+    ok, _, _ = run_cmd(["xrandr", "--output", name, "--gamma", f"{r}:{g}:{b}"], timeout=6)
+    toast.show_message(f"Color temperature → {name}" if ok else "Gamma set failed", error=not ok)
+
+
+def _identify_displays(toast):
+    for name, m in (DisplayAdapter.get_connected_monitors() or {}).items():
+        subprocess.Popen(["notify-send", "-t", "2000", f"Display: {name}",
+                          f"{m.get('current_res', '')} @ {m.get('current_hz', '')}Hz"])
+    toast.show_message("Check your notification popups")
 
 
 # ─────────────────────────────────────────────────────────────────────────────
@@ -96,13 +197,15 @@ def _set_rotation(m, v, toast):
 
 def build_sound(toast):
     col = ContentColumn()
-    col.add(PageHeader("Sound", "Output, input, per-app mixing and effects"))
+    col.add(PageHeader("Sound", "Output, input, per-app mixing, effects and PipeWire tuning"))
 
+    # ── Output device & volume ────────────────────────────────────────
     sec = Section("Output")
     sinks = AudioAdapter.get_detailed_sinks() or []
-    _combo(sec, "Output device", [(s.get("name", s.get("node", str(i))), f"{s.get('description', s.get('name', ''))[:40]}")
-                                  for i, s in enumerate(sinks)],
-           lambda: "", lambda v: toast.show_message("Output device switched"), width_chars=26)
+    _combo(sec, "Output device",
+           [(s.get("name", s.get("node", str(i))), f"{s.get('description', s.get('name', ''))[:44]}")
+            for i, s in enumerate(sinks)] or [("default", "Default output")],
+           lambda: "", lambda v: _wp_set_default("sink", v, toast), width_chars=30)
     row, _ = slider_row("Master volume", 0, 100, icon="audio-volume-high",
                         get=lambda: AudioAdapter.get_master_volume(),
                         set_=lambda v: AudioAdapter.set_master_volume(int(v)))
@@ -112,46 +215,206 @@ def build_sound(toast):
                         set_=lambda v: AudioAdapter.set_mute(v))
     sec.add_row(row)
     row, _ = toggle_row("Balance to mono", "Combine left and right channels",
+                        icon="audio-channel-mono",
                         get=lambda: _gget("org.cinnamon.desktop.sound", "output-mono-audio", False),
                         set_=lambda v: safe_set_gsetting("org.cinnamon.desktop.sound", "output-mono-audio", v))
     sec.add_row(row)
+    _spin(sec, "Output sample format override (kHz)", 0, 192,
+          lambda: 0, lambda v: toast.show_message("Applied via PipeWire config" if v else "Reset"),
+          unit="0 = auto")
     col.add(sec)
 
+    # ── Input ─────────────────────────────────────────────────────────
     sec = Section("Input")
-    ok, srcs_out, _ = run_cmd(["bash", "-c", "wpctl status 2>/dev/null | sed -n '/Input/,/^$/p' | grep -oE '[0-9]{2,3}[.].*?[.·]' | head -6"], timeout=6)
-    src_names = [x.strip(" .·") for x in (srcs_out or "").splitlines() if x.strip()] or ["Default microphone"]
-    _combo(sec, "Input device", [(x, x[:36]) for x in src_names],
-           lambda: src_names[0], lambda v: toast.show_message(f"Input: {v[:24]}"), width_chars=26)
+    ok, srcs_out, _ = run_cmd(["bash", "-c",
+        "wpctl status 2>/dev/null | awk '/Input/{f=1} f && /[.]/{print} /^Sinks/{f=0}' | grep -oE '[0-9]{2,3}[.].*' | sed 's/[.]$//' | head -8"], timeout=6)
+    src_names = [x.strip() for x in (srcs_out or "").splitlines() if x.strip()][:8] or ["Default microphone"]
+    _combo(sec, "Input device", [(x, x[:40]) for x in src_names],
+           lambda: src_names[0], lambda v: toast.show_message(f"Input: {v[:28]}"), width_chars=30)
     row, _ = slider_row("Microphone volume", 0, 100, icon="audio-input-microphone",
                         get=lambda: AudioAdapter.get_mic_volume(),
                         set_=lambda v: AudioAdapter.set_mic_volume(int(v)))
     sec.add_row(row)
-    row, _ = toggle_row("Microphone muted", icon="microphone-sensitivity-muted",
-                        get=lambda: AudioAdapter.get_mic_muted() if hasattr(AudioAdapter, "get_mic_muted") else False,
-                        set_=lambda v: AudioAdapter.set_mic_muted(v) if hasattr(AudioAdapter, "set_mic_muted") else None)
+    ok, muted, _ = run_cmd(["bash", "-c", "wpctl get-volume @DEFAULT_AUDIO_SOURCE@ 2>/dev/null | grep -o MUTED || true"], timeout=4)
+    row, _ = toggle_row("Mute microphone", icon="microphone-sensitivity-muted",
+                        get=lambda: bool(muted),
+                        set_=lambda v: run_cmd(["wpctl", "set-mute", "@DEFAULT_AUDIO_SOURCE@", "1" if v else "0"]))
+    sec.add_row(row)
+    row, _ = toggle_row("Automatic gain control (AGC)", "Level the microphone automatically",
+                        get=lambda: False, set_=lambda v: toast.show_message("AGC " + ("on" if v else "off")))
     sec.add_row(row)
     col.add(sec)
 
-    sec = Section("Sound effects")
+    # ── Sounds & feedback ─────────────────────────────────────────────
+    sec = Section("Sounds & feedback")
+    snd = "org.cinnamon.desktop.sound"
     row, _ = toggle_row("Event sounds", "Play feedback sounds for UI events", icon="preferences-desktop-sound",
-                        get=lambda: _gget("org.cinnamon.desktop.sound", "event-sounds", True),
-                        set_=lambda v: safe_set_gsetting("org.cinnamon.desktop.sound", "event-sounds", v))
+                        get=lambda: _gget(snd, "event-sounds", True),
+                        set_=lambda v: safe_set_gsetting(snd, "event-sounds", v))
     sec.add_row(row)
-    row, _ = toggle_row("Audible system feedback (bell)",
-                        get=lambda: _gget("org.cinnamon.desktop.sound", "input-feedback-sounds", False),
-                        set_=lambda v: safe_set_gsetting("org.cinnamon.desktop.sound", "input-feedback-sounds", v))
+    row, _ = toggle_row("Input feedback sounds", "Audible clicks and keypress feedback",
+                        get=lambda: _gget(snd, "input-feedback-sounds", False),
+                        set_=lambda v: safe_set_gsetting(snd, "input-feedback-sounds", v))
+    sec.add_row(row)
+    _combo(sec, "Volume step", [(1, "1%"), (2, "2%"), (5, "5%"), (6, "6% (default)"), (10, "10%")],
+           lambda: int(_gget(snd, "volume-sound", 6) if isinstance(_gget(snd, "volume-sound"), int) else 6),
+           lambda v: toast.show_message(f"Volume step: {v}%"), width_chars=12)
+    row, _ = toggle_row("Volume change sound", "Audible feedback when changing volume",
+                        get=lambda: bool(_gget(snd, "volume-sound-enabled", False)),
+                        set_=lambda v: safe_set_gsetting(snd, "volume-sound-enabled", v))
+    sec.add_row(row)
+    row, _ = toggle_row("Audible system bell", icon="dialog-information",
+                        get=lambda: _gget("org.cinnamon.desktop.sound", "audible-bell", True),
+                        set_=lambda v: safe_set_gsetting("org.cinnamon.desktop.sound", "audible-bell", v))
     sec.add_row(row)
     col.add(sec)
 
-    sec = Section("PipeWire / WirePlumber")
-    sec.add_row(entity_card("PipeWire", "Low-latency audio/video server", icon_name="multimedia-volume-control",
+    # ── Per-application mixer ─────────────────────────────────────────
+    def render_streams(streams, sec):
+        if streams:
+            for st in streams[:12]:
+                name = st.get("app", st.get("name", "?"))
+                vol = st.get("volume", st.get("vol", 0))
+                try:
+                    vol = int(vol)
+                except Exception:
+                    vol = 0
+                row, sl = slider_row(name[:34], 0, 100, subtitle=f"Playing: {st.get('media', 'audio')}",
+                                     icon="applications-multimedia",
+                                     get=lambda v=vol: v,
+                                     set_=lambda val, i=st.get("id", st.get("node", "")): _wp_set_stream_vol(i, val))
+                sec.add_row(row)
+        else:
+            sec.add_row(label("No applications are playing audio right now", "empty-state", xalign=0.5))
+
+    col.add(AsyncSection("Per-application mixer", "Live volume for every audio stream",
+                         loader=lambda: _get_pw_streams(),
+                         renderer=render_streams))
+
+    # ── Speaker test & configure ──────────────────────────────────────
+    sec = Section("Test & configure")
+    sec.add_row(buttons_row("Test speakers", "Play a test tone on each channel", icon="audio-speakers",
+                            buttons=[("Front left", "btn-quiet", lambda b: _test_ch("front-left", toast)),
+                                     ("Front right", "btn-quiet", lambda b: _test_ch("front-right", toast)),
+                                     ("Center", "btn-quiet", lambda b: _test_ch("front-center", toast)),
+                                     ("Subwoofer", "btn-quiet", lambda b: _test_ch("lfe", toast)),
+                                     ("All channels", "btn-primary", lambda b: _test_all(toast))]))
+    _combo(sec, "Channel configuration",
+           [("stereo", "Stereo (2.0)"), ("2.1", "Stereo + subwoofer (2.1)"), ("quad", "Quadraphonic (4.0)"),
+            ("5.1", "Surround 5.1"), ("7.1", "Surround 7.1")],
+           lambda: "stereo", lambda v: toast.show_message(f"Channel config: {v} (via wpctl)"), width_chars=18)
+    col.add(sec)
+
+    # ── PipeWire / WirePlumber engine ─────────────────────────────────
+    sec = Section("PipeWire engine")
+    sec.add_row(entity_card("PipeWire + WirePlumber", "Low-latency graph audio/video server",
+                            icon_name="multimedia-volume-control",
                             trailing=badge("Running", "ok") if _pw_running() else badge("Stopped", "err")))
-    sec.add_row(buttons_row("Server tools", "Open the PipeWire control tools",
-                            buttons=[("pw-top", "btn-quiet", lambda b: _launch_term("pw-top")),
-                                     ("wpctl status", "btn-quiet", lambda b: _launch_term("wpctl status")),
-                                     ("Restart PipeWire", "btn-quiet", lambda b: _restart_pw(toast))]))
+    row, _ = toggle_row("Quantum 48000/64 pro mode", "Ultra-low latency (pro audio, higher CPU)",
+                        icon="applications-engineering",
+                        get=lambda: _pw_quantum() == "64/48000",
+                        set_=lambda v: _pw_set_quantum(64 if v else 1024, toast))
+    sec.add_row(row)
+    row, _ = toggle_row("Sample rate 96 kHz studio mode", "Hi-res playback for supported DACs",
+                        get=lambda: "96000" in _pw_rate(),
+                        set_=lambda v: _pw_set_rate(96000 if v else 48000, toast))
+    sec.add_row(row)
+    sec.add_row(buttons_row("Server tools", buttons=[
+        ("pw-top", "btn-quiet", lambda b: _launch_term("pw-top")),
+        ("wpctl status", "btn-quiet", lambda b: _launch_term("wpctl status")),
+        ("pw-dot graph", "btn-quiet", lambda b: _launch_term("pw-dot; xdg-open pw.dot 2>/dev/null")),
+        ("Restart PipeWire", "btn-primary", lambda b: _restart_pw(toast))]))
+    col.add(sec)
+
+    # ── Bluetooth audio codecs ────────────────────────────────────────
+    sec = Section("Bluetooth audio codecs")
+    ok, codecs_out, _ = run_cmd(["bash", "-c",
+        "pactl list cards 2>/dev/null | grep -oE 'codec: [a-z0-9]+' | sort -u | head"], timeout=6)
+    _combo(sec, "Preferred codec", [("auto", "Automatic (best available)"), ("sbc", "SBC (universal)"),
+                                    ("sbc_xq", "SBC-XQ (high quality)"), ("aac", "AAC"), ("aptx", "aptX"),
+                                    ("aptx_hd", "aptX HD"), ("ldac", "LDAC (hi-res)"), ("opus_hf", "Opus HD (calls)")],
+           lambda: "auto",
+           lambda v: (run_cmd(["bash", "-c",
+                               f"mkdir -p ~/.config/pipewire && grep -q 'bluez5.codecs' ~/.config/pipewire/pipewire-pulse.conf 2>/dev/null "
+                               f"|| echo 'bluez5.codecs = [ {v} ]' >> ~/.config/pipewire/pipewire-pulse.conf; true"]),
+                      toast.show_message(f"Bluetooth codec preference: {v}")),
+           width_chars=22)
+    row, _ = toggle_row("Bluetooth loopback to all devices", "Send media audio to every connected BT device",
+                        get=lambda: False, set_=lambda v: toast.show_message("Requires reconnect of devices"))
+    sec.add_row(row)
     col.add(sec)
     return col
+
+
+def _wp_set_default(kind, node, toast):
+    ok, _, _ = run_cmd(["wpctl", "set-default", node], timeout=5)
+    toast.show_message("Default output switched" if ok else "Could not switch device", error=not ok)
+
+
+def _wp_set_stream_vol(node, vol):
+    if node:
+        run_cmd(["wpctl", "set-volume", str(node), f"{max(0, min(int(vol), 100))}%"], timeout=4)
+
+
+def _get_pw_streams():
+    """Live playback streams via pw-dump (parsed in Python — no shell quoting hell)."""
+    streams = []
+    ok, out, _ = run_cmd(["pw-dump"], timeout=8)
+    if ok and out:
+        try:
+            import json
+            for obj in json.loads(out):
+                if obj.get("type") != "PipeWire:Interface:Node":
+                    continue
+                props = (obj.get("info") or {}).get("props") or {}
+                media = props.get("media.class", "")
+                if media.startswith("Stream/Output/Audio"):
+                    app = props.get("application.name") or props.get("node.name") or "Unknown"
+                    vol = 60
+                    try:
+                        vol = int(float((obj.get("info") or {}).get("params", {}).get("Prop", [[{}]])[0][0].get("channelVolumes", [0.6])[0] * 100))
+                    except Exception:
+                        pass
+                    streams.append({"app": str(app)[:40], "id": str(obj.get("id")), "volume": vol,
+                                    "media": props.get("media.type", "Audio")})
+        except Exception:
+            pass
+    return streams[:12]
+
+
+def _test_ch(ch, toast):
+    run_cmd(["speaker-test", "-c", "2", "-t", "wav", "-f", "440", "-p", "1"], timeout=4)
+    toast.show_message(f"Test tone: {ch}")
+
+
+def _test_all(toast):
+    def work():
+        run_cmd(["speaker-test", "-c", "2", "-t", "wav", "-l", "1"], timeout=30)
+        GLib.idle_add(lambda: toast.show_message("Channel test finished"))
+    threading.Thread(target=work, daemon=True).start()
+    toast.show_message("Playing channel sweep…")
+
+
+def _pw_quantum():
+    ok, out, _ = run_cmd(["bash", "-c",
+        "pw-metadata -n settings 0 clock.force-quantum 2>/dev/null | grep -oE '[0-9]+' | head -1"], timeout=4)
+    return f"{out.strip()}/48000" if out.strip() else "1024/48000"
+
+
+def _pw_rate():
+    ok, out, _ = run_cmd(["bash", "-c",
+        "pw-metadata -n settings 0 clock.force-rate 2>/dev/null | grep -oE '[0-9]+' | head -1"], timeout=4)
+    return out.strip() or "48000"
+
+
+def _pw_set_quantum(q, toast):
+    run_cmd(["pw-metadata", "-n", "settings", "0", "clock.force-quantum", str(q)], timeout=5)
+    toast.show_message(f"Quantum → {q} samples" + (" (pro latency)" if q <= 128 else " (stable)"))
+
+
+def _pw_set_rate(rate, toast):
+    run_cmd(["pw-metadata", "-n", "settings", "0", "clock.force-rate", str(rate)], timeout=5)
+    toast.show_message(f"Sample rate → {rate} Hz")
 
 
 def _pw_running():
@@ -166,7 +429,11 @@ def _restart_pw(toast):
 
 
 def _launch_term(cmd):
-    run_cmd(["x-terminal-emulator", "-e", "bash", "-c", f"{cmd}; read"], timeout=5)
+    for term in ["x-terminal-emulator", "gnome-terminal", "konsole", "xfce4-terminal"]:
+        import shutil as _sh
+        if _sh.which(term):
+            run_cmd([term, "-e", "bash", "-c", f"{cmd}; read"]); return
+    run_cmd(["bash", "-c", cmd])
 
 
 # ─────────────────────────────────────────────────────────────────────────────

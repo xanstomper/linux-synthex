@@ -43,6 +43,8 @@ SIDEBAR = [
          "notifications do not disturb dnd popup banner sounds lock screen"),
         ("privacy",      "Privacy Center",   "preferences-system-privacy",    pages_c.build_privacy_center,
          "privacy location camera microphone permissions broker telemetry timeline kill switches zero telemetry AI audit clear recent files trash"),
+        ("spoofgoof",    "SpoofGoof Shield", "network-vpn",                   pages_c.build_spoofgoof,
+         "spoofgoof spoof privacy mac address randomize cloaking fingerprint traffic chaff decoy morphing dpi vpn identity network obfuscation stealth"),
         ("online",       "Online Accounts",  "applications-internet",         pages_a.build_online_accounts,
          "online accounts google nextcloud caldav mail calendar contacts files"),
         ("region",       "Language & Region","cs-language",                   pages_a.build_region,

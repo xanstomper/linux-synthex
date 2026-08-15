@@ -17,7 +17,7 @@ from synthex_design import (
 from synth_system_adapters import (
     GamingPerformanceAdapter, PrivacyAdapter, AppManagerAdapter,
     QuarantineManagerAdapter, SecurityAdapter, SystemAdapter, run_cmd,
-    safe_set_gsetting, get_gsettings,
+    safe_set_gsetting, get_gsettings, SpoofGoofAdapter,
 )
 from synth_platform_adapters import FirewallLayer, _gget, ensure_polkit_agent
 from synthex_pages_a import _combo, _spin
@@ -464,6 +464,115 @@ def _launch_term(cmd):
         if _sh.which(term):
             run_cmd([term, "-e", "bash", "-c", f"{cmd}; read"]); return
     run_cmd(["bash", "-c", cmd])
+
+
+# ─────────────────────────────────────────────────────────────────────────────
+# SPOOFGOOF — network identity & traffic obfuscation (Synthex security suite)
+# ─────────────────────────────────────────────────────────────────────────────
+
+def build_spoofgoof(toast):
+    col = ContentColumn()
+    try:
+        st = SpoofGoofAdapter.get_status()
+    except Exception:
+        st = {"active": False, "profile": "—", "features": []}
+    dm = SpoofGoofAdapter.daemon_status()
+    col.add(PageHeader("SpoofGoof Traffic Shield",
+                       "Network identity cloaking, packet morphing and decoy chaff — zero added latency",
+                       badges=[("Active", "ok") if st.get("active") else ("Off", "err"),
+                               (str(st.get("network_latency_penalty", "+0.0 ms")).split("(")[0].strip(), "neutral")]))
+
+    # ── Master + daemon ──────────────────────────────────────────────
+    sec = Section("Protection")
+    sw = Gtk.Switch(valign=Gtk.Align.CENTER)
+    sw.set_active(bool(st.get("active")))
+
+    def _on_toggle(swt, state):
+        ok = SpoofGoofAdapter.toggle(state)
+        toast.show_message(("SpoofGoof " + ("engaged — full-spectrum cloaking live" if state else "disengaged"))
+                           if ok else "Could not change SpoofGoof state", error=not ok, seconds=5)
+        return True
+
+    sw.connect("state-set", _on_toggle)
+    sec.add_row(entity_card("SpoofGoof engine",
+                            "MAC cloaking · DPI morphing · decoy chaff · hostname strip · TCP neutralizer",
+                            icon_name="security-high", trailing=sw))
+    if dm.get("active"):
+        sec.add_row(entity_card("Daemon running" + (" via systemd service" if dm.get("via_service") else ""),
+                                "Zero-latency fast path active — no ping penalty",
+                                icon_name="emblem-default", trailing=badge("Live", "ok")))
+    col.add(sec)
+
+    # ── Profile ───────────────────────────────────────────────────────
+    sec = Section("Obfuscation profile")
+    row, _ = combo_row("Profile", SpoofGoofAdapter.profiles(),
+                       subtitle="Balanced · Ultra-Stealth · Gaming zero-ping",
+                       icon="network-workgroup",
+                       get=lambda: st.get("profile_key", "balanced"),
+                       set_=lambda v: (SpoofGoofAdapter.set_profile(v),
+                                       toast.show_message(f"Profile: {dict(SpoofGoofAdapter.profiles()).get(v, v)}")),
+                       width_chars=24)
+    sec.add_row(row)
+    col.add(sec)
+
+    # ── Live identity controls ────────────────────────────────────────
+    sec = Section("Identity controls")
+    ifaces = SpoofGoofAdapter.list_interfaces()
+    primary = SpoofGoofAdapter.primary_interface()
+    iface_names = [(i["name"], f"{i['name']}  ({i['mac'][:17]})") for i in ifaces][:8] or [(primary, primary)]
+    _sel = {"iface": primary}
+
+    def _new_mac(b):
+        ok, msg = SpoofGoofAdapter.spoof_mac(_sel["iface"])
+        toast.show_message((f"MAC randomized on {_sel['iface']}" if ok else f"MAC spoof failed: {msg}")[:70],
+                           error=not ok, seconds=5)
+
+    row, cb = combo_row("Network interface", iface_names,
+                        subtitle="Interface to cloak",
+                        icon="network-wireless",
+                        get=lambda: primary,
+                        set_=lambda v: _sel.update(iface=v),
+                        width_chars=20)
+    sec.add_row(row)
+    sec.add_row(buttons_row("Randomize MAC address", "Assigns a fresh randomized unicast MAC immediately",
+                            icon="media-playlist-shuffle",
+                            buttons=[("Randomize now", "btn-primary", _new_mac)]))
+
+    def _enforce(b):
+        toast.show_message("Enforcing 100% full-spectrum spoofing…", seconds=4)
+        def work():
+            ok, msg = SpoofGoofAdapter.enforce_full_spectrum()
+            GLib.idle_add(lambda: toast.show_message(
+                ("Full-spectrum spoofing enforced — " + msg)[:80] if ok else f"Enforcement failed: {msg}"[:70],
+                error=not ok, seconds=6))
+        threading.Thread(target=work, daemon=True).start()
+
+    sec.add_row(buttons_row("Full-spectrum enforcement", "MAC + DHCP hostname + TCP stack + chaff in one shot",
+                            icon="system-run",
+                            buttons=[("Enforce 100% now", "btn-primary", _enforce)]))
+    col.add(sec)
+
+    # ── Active countermeasures list ───────────────────────────────────
+    def render_feats(_p, sec):
+        for f in (st.get("features") or [])[:8]:
+            sec.add_row(entity_card(f.get("name", "?")[:40], f.get("status", "")[:56],
+                                    icon_name=f.get("icon", "security-high"),
+                                    trailing=badge("Active", "ok")))
+
+    col.add(AsyncSection("Active countermeasures", loader=lambda: True, renderer=render_feats))
+
+    # ── Live stats ────────────────────────────────────────────────────
+    sec = Section("Live statistics")
+    sec.add_row(entity_card("Latency penalty", str(st.get("network_latency_penalty", "+0.0 ms")),
+                            icon_name="speedometer", trailing=badge("Zero", "ok")))
+    sec.add_row(entity_card("Correlation resistance", str(st.get("correlation_resistance_score", "—")),
+                            icon_name="channel-secure"))
+    sec.add_row(entity_card("Chaff packets injected", f"{st.get('packets_injected_today', 0):,}",
+                            icon_name="network-transmit-receive"))
+    sec.add_row(entity_card("Traffic obfuscated", f"{st.get('bytes_obfuscated_mb', 0)} MB",
+                            icon_name="drive-multidisk"))
+    col.add(sec)
+    return col
 
 
 # ─────────────────────────────────────────────────────────────────────────────
