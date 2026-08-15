@@ -740,3 +740,119 @@ def _spin(sec, title, lo, hi, get, set_, step=1, unit="", subtitle="", icon=None
     row, _ = spin_row(title, lo, hi, step=step, subtitle=subtitle, icon=icon,
                       get=get, set_=set_, unit=unit)
     sec.add_row(row)
+
+
+# ─────────────────────────────────────────────────────────────────────────────
+# ACCESSIBILITY (a11y — screen reader, magnifier, keyboard, mouse)
+# ─────────────────────────────────────────────────────────────────────────────
+
+def build_accessibility(toast):
+    col = ContentColumn()
+    col.add(PageHeader("Accessibility", "Seeing, hearing, typing and pointing assistance"))
+
+    sec = Section("Vision")
+    s = "org.cinnamon.desktop.a11y.applications"
+    row, _ = toggle_row("Screen reader (Orca)", "Speak interface elements aloud", icon="orca",
+                        get=lambda: _gget(s, "screen-reader-enabled", False),
+                        set_=lambda v: (safe_set_gsetting(s, "screen-reader-enabled", v),
+                                        run_cmd(["orca", "--replace" if v else "--quit"])))
+    sec.add_row(row)
+    m = "org.cinnamon.desktop.a11y.magnifier"
+    row, _ = toggle_row("Screen magnifier", "Zoom the entire desktop", icon="zoom-in",
+                        get=lambda: _gget(m, "mag-enabled", False),
+                        set_=lambda v: safe_set_gsetting(m, "mag-enabled", v))
+    sec.add_row(row)
+    row, _ = slider_row("Magnification factor", 1.0, 8.0, icon="zoom-best-fit",
+                        get=lambda: float(_gget(m, "screen-magnifier-zoom", 2.0)),
+                        set_=lambda v: safe_set_gsetting(m, "screen-magnifier-zoom", round(float(v), 1)))
+    sec.add_row(row)
+    row, _ = toggle_row("Large text", "Increase interface text size by 25%", icon="format-text-size",
+                        get=lambda: _gget("org.cinnamon.desktop.interface", "text-scaling-factor", 1.0) > 1.0,
+                        set_=lambda v: safe_set_gsetting("org.cinnamon.desktop.interface", "text-scaling-factor",
+                                                         1.25 if v else 1.0))
+    sec.add_row(row)
+    row, _ = toggle_row("High contrast theme", icon="preferences-desktop-accessibility",
+                        get=lambda: _gget("org.cinnamon.desktop.interface", "gtk-theme", "") == "HighContrast",
+                        set_=lambda v: safe_set_gsetting("org.cinnamon.desktop.interface", "gtk-theme",
+                                                         "HighContrast" if v else "Mint-Y"))
+    sec.add_row(row)
+    col.add(sec)
+
+    sec = Section("Hearing")
+    row, _ = toggle_row("Visual alerts", "Flash the screen when a sound plays",
+                        get=lambda: _gget("org.cinnamon.desktop.sound", "visual-bell", False),
+                        set_=lambda v: safe_set_gsetting("org.cinnamon.desktop.sound", "visual-bell", v))
+    sec.add_row(row)
+    col.add(sec)
+
+    sec = Section("Typing")
+    k = "org.cinnamon.desktop.a11y.keyboard"
+    row, _ = toggle_row("Sticky keys", "Press modifier keys one at a time", icon="input-keyboard",
+                        get=lambda: _gget(k, "stickykeys-enabled", False),
+                        set_=lambda v: safe_set_gsetting(k, "stickykeys-enabled", v))
+    sec.add_row(row)
+    row, _ = toggle_row("Slow keys", "Ignore brief keypresses",
+                        get=lambda: _gget(k, "slowkeys-enabled", False),
+                        set_=lambda v: safe_set_gsetting(k, "slowkeys-enabled", v))
+    sec.add_row(row)
+    row, _ = toggle_row("Bounce keys", "Ignore rapidly repeated keypresses",
+                        get=lambda: _gget(k, "bouncekeys-enabled", False),
+                        set_=lambda v: safe_set_gsetting(k, "bouncekeys-enabled", v))
+    sec.add_row(row)
+    row, _ = toggle_row("On-screen keyboard", icon="preferences-desktop-keyboard",
+                        get=lambda: _gget("org.cinnamon.desktop.a11y.applications", "keyboard-onboard-enabled", False),
+                        set_=lambda v: safe_set_gsetting("org.cinnamon.desktop.a11y.applications",
+                                                         "keyboard-onboard-enabled", v))
+    sec.add_row(row)
+    col.add(sec)
+
+    sec = Section("Pointing & clicking")
+    a = "org.cinnamon.desktop.a11y.mouse"
+    row, _ = toggle_row("Mouse keys", "Control the pointer with the numeric keypad", icon="input-mouse",
+                        get=lambda: _gget(a, "mouse-keys-enabled", False),
+                        set_=lambda v: safe_set_gsetting(a, "mouse-keys-enabled", v))
+    sec.add_row(row)
+    row, _ = toggle_row("Simulated secondary click", "Hold the primary button to right-click",
+                        get=lambda: _gget(a, "secondary-click-enabled", False),
+                        set_=lambda v: safe_set_gsetting(a, "secondary-click-enabled", v))
+    sec.add_row(row)
+    row, _ = toggle_row("Hover click", "Click by pausing the pointer",
+                        get=lambda: _gget(a, "dwell-click-enabled", False),
+                        set_=lambda v: safe_set_gsetting(a, "dwell-click-enabled", v))
+    sec.add_row(row)
+    col.add(sec)
+    return col
+
+
+# ─────────────────────────────────────────────────────────────────────────────
+# USERS & GROUPS
+# ─────────────────────────────────────────────────────────────────────────────
+
+def build_users(toast):
+    import pwd as _pwd
+    col = ContentColumn()
+    col.add(PageHeader("Users & Groups", "Accounts, administrators and groups"))
+
+    sec = Section("Users on this system")
+    users = [u for u in _pwd.getpwall() if u.pw_uid >= 1000 and u.pw_name != "nobody"]
+    for u in users[:8]:
+        groups = []
+        ok, out, _ = run_cmd(["id", "-nG", u.pw_name], timeout=4)
+        if ok and out:
+            groups = out.split()
+        admin = "wheel" in groups or "sudo" in groups
+        sec.add_row(entity_card(u.pw_gecos.split(",")[0] or u.pw_name,
+                                f"{u.pw_name} · UID {u.pw_uid}" + (" · Administrator" if admin else ""),
+                                icon_name="avatar-default",
+                                trailing=badge("Admin", "ok") if admin else badge("Standard", "neutral")))
+    col.add(sec)
+
+    sec = Section("Manage")
+    sec.add_row(buttons_row("User administration", "Create, modify and remove accounts",
+                            icon="system-users",
+                            buttons=[("Open users & groups", "btn-primary",
+                                      lambda b: run_cmd(["cinnamon-settings", "users"])),
+                                     ("Groups editor", "btn-quiet",
+                                      lambda b: _launch_term("groups; vigr 2>/dev/null || cat /etc/group | tail -20"))]))
+    col.add(sec)
+    return col

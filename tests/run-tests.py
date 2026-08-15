@@ -1042,7 +1042,7 @@ cc = os.path.join(ROOT, "src", "synthex-control-center")
 for f in ["synthex_design.py", "synth_platform_adapters.py", "synthex_pages_a.py", "synthex_pages_b.py", "main.py"]:
     check(f"settings module {f}", os.path.exists(os.path.join(cc, f)))
 _sm = open(os.path.join(cc, "main.py")).read()
-_expected_cats = ["appearance", "backgrounds", "nightlight", "notifications", "privacy", "online", "region",
+_expected_cats = ["appearance", "backgrounds", "nightlight", "notifications", "privacy", "online", "region", "accessibility",
                    "account", "desktop", "windows", "workspaces", "panels", "applets", "desklets", "extensions",
                    "gestures", "preferred", "startup", "screensaver", "display", "sound", "mouse", "keyboard",
                    "tablet", "printers", "bluetooth", "thunderbolt", "color", "power", "storage", "drivers",

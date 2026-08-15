@@ -48,6 +48,8 @@ SIDEBAR = [
          "language locale region input method ibus fcitx keyboard formats date time 24 hour"),
         ("account",      "Account Details",  "avatar-default",                pages_a.build_account,
          "account profile user full name shell groups login"),
+        ("accessibility","Accessibility",    "preferences-desktop-accessibility", pages_a.build_accessibility,
+         "accessibility a11y screen reader orca magnifier large text high contrast sticky keys slow keys bounce mouse keys hover click on-screen keyboard"),
     ]),
     ("Desktop", [
         ("desktop",      "Desktop",          "cs-desktop",                    pages_a.build_desktop,
@@ -116,6 +118,8 @@ SIDEBAR = [
          "date time timezone ntp clock 24 hour rtc sync"),
         ("sysinfo",      "System Info",      "dialog-information",            pages_b.build_system_info,
          "system info about hostname kernel cpu memory diagnostics journal specs hardware"),
+        ("users",        "Users & Groups",   "system-users",                  pages_a.build_users,
+         "users accounts groups administrator password wheel sudo create remove"),
     ]),
 ]
 
