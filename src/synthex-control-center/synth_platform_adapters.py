@@ -25,7 +25,23 @@ import subprocess
 from pathlib import Path
 from typing import Dict, List, Optional
 
+from gi.repository import Gio
 from synth_system_adapters import run_cmd, get_gsettings, safe_set_gsetting
+
+def _gget(schema_id: str, key: str, default=None):
+    """Abort-proof GSettings read: verifies schema AND key existence first."""
+    try:
+        source = Gio.SettingsSchemaSource.get_default()
+        if not source:
+            return default
+        schema_obj = source.lookup(schema_id, True)
+        if not schema_obj or not schema_obj.has_key(key):
+            return default
+        s = Gio.Settings.new(schema_id)
+        return s.get_value(key).unpack()
+    except Exception:
+        return default
+
 
 HOME = Path.home()
 
@@ -706,13 +722,7 @@ class GraphicsTabletAdapter:
 
 
 def get_tablet_gsetting(key: str):
-    s = get_gsettings("org.cinnamon.settings-daemon.plugins.csdwacom")
-    if s:
-        try:
-            return s.get_value(f"stylus-{key}").unpack()
-        except Exception:
-            pass
-    return None
+    return _gget("org.cinnamon.settings-daemon.plugins.csdwacom", f"stylus-{key}", None)
 
 
 # ══════════════════════════════════════════════════════════════════════════════
@@ -724,13 +734,7 @@ class ScreensaverAdapter:
 
     @staticmethod
     def get(key, default=None):
-        s = get_gsettings(ScreensaverAdapter.SCHEMA)
-        if s:
-            try:
-                return s.get_value(key).unpack()
-            except Exception:
-                pass
-        return default
+        return _gget(ScreensaverAdapter.SCHEMA, key, default)
 
     @staticmethod
     def set(key, value) -> bool:
@@ -757,13 +761,8 @@ class ScreensaverAdapter:
 
     @staticmethod
     def _session_idle() -> int:
-        s = get_gsettings("org.cinnamon.desktop.session")
-        if s:
-            try:
-                return s.get_uint("idle-delay")
-            except Exception:
-                pass
-        return 0
+        v = _gget("org.cinnamon.desktop.session", "idle-delay", None)
+        return int(v) if v is not None else 0
 
     @staticmethod
     def set_idle_delay(seconds: int) -> bool:
@@ -980,13 +979,7 @@ class WorkspacesAdapter:
 
     @staticmethod
     def get_osd() -> bool:
-        s = get_gsettings("org.cinnamon")
-        if s:
-            try:
-                return s.get_boolean("workspace-osd-visible")
-            except Exception:
-                pass
-        return True
+        return bool(_gget("org.cinnamon", "workspace-osd-visible", True))
 
     @staticmethod
     def set_osd(v: bool) -> bool:
@@ -998,23 +991,12 @@ class WorkspacesAdapter:
 
     @staticmethod
     def get_count() -> int:
-        s = get_gsettings(WorkspacesAdapter.WS_SCHEMA)
-        if s:
-            try:
-                return s.get_int("num-workspaces")
-            except Exception:
-                pass
-        return 4
+        v = _gget(WorkspacesAdapter.WS_SCHEMA, "num-workspaces", None)
+        return int(v) if v is not None else 4
 
     @staticmethod
     def dynamic() -> bool:
-        s = get_gsettings("org.cinnamon.muffin")
-        if s:
-            try:
-                return s.get_boolean("dynamic-workspaces")
-            except Exception:
-                pass
-        return False
+        return bool(_gget("org.cinnamon.muffin", "dynamic-workspaces", False))
 
     @staticmethod
     def set_dynamic(v: bool) -> bool:
@@ -1025,14 +1007,11 @@ class HotCornersAdapter:
     SCHEMA = "org.cinnamon"
 
     @staticmethod
-    def _get(key, default):
-        s = get_gsettings(HotCornersAdapter.SCHEMA)
-        if s:
-            try:
-                return s.get_strv(key) if key.endswith("list") else s.get_value(key).unpack()
-            except Exception:
-                pass
-        return default
+    def _get(key, default=None):
+        if key.endswith("list"):
+            v = _gget(HotCornersAdapter.SCHEMA, key, None)
+            return v if v is not None else default
+        return _gget(HotCornersAdapter.SCHEMA, key, default)
 
     @staticmethod
     def settings() -> Dict:
@@ -1057,13 +1036,7 @@ class EffectsAdapter:
 
     @staticmethod
     def _get(key, default):
-        s = get_gsettings(EffectsAdapter.SCHEMA)
-        if s:
-            try:
-                return s.get_value(key).unpack()
-            except Exception:
-                pass
-        return default
+        return _gget(EffectsAdapter.SCHEMA, key, default)
 
     @staticmethod
     def all() -> Dict:
@@ -1164,13 +1137,7 @@ class GesturesAdapter:
 
     @staticmethod
     def _get(key, default):
-        s = get_gsettings(GesturesAdapter.SCHEMA)
-        if s:
-            try:
-                return s.get_value(key).unpack()
-            except Exception:
-                pass
-        return default
+        return _gget(GesturesAdapter.SCHEMA, key, default)
 
     @staticmethod
     def settings() -> Dict:
@@ -1393,19 +1360,15 @@ class PanelAdapter:
     SCHEMA = "org.cinnamon"
 
     @staticmethod
-    def _get(key, default, type_=None):
-        s = get_gsettings(PanelAdapter.SCHEMA)
-        if s:
-            try:
-                if type_ == "b":
-                    return s.get_boolean(key)
-                if type_ == "i":
-                    return s.get_int(key)
-                v = s.get_value(key).unpack()
-                return v if v is not None else default
-            except Exception:
-                pass
-        return default
+    def _get(key, default=None, type_=None):
+        v = _gget(PanelAdapter.SCHEMA, key, None)
+        if v is None:
+            return default
+        if type_ == "b":
+            return bool(v)
+        if type_ == "i":
+            return int(v)
+        return v
 
     @staticmethod
     def settings() -> Dict:
@@ -1533,20 +1496,14 @@ class NightLightAdapter:
 
     @staticmethod
     def _get(key, default):
-        s = get_gsettings(NightLightAdapter.SCHEMA)
-        if s:
-            try:
-                return s.get_value(key).unpack()
-            except Exception:
-                pass
-        return default
+        return _gget(NightLightAdapter.SCHEMA, key, default)
 
     @staticmethod
     def settings() -> Dict:
         return {
             "enabled": NightLightAdapter._get("night-light-enabled", False),
             "temperature": NightLightAdapter._get("night-light-temperature", 4500),
-            "from_hour": NightLightAdapter._get("night-light-schedule-automatic", True),
+            "auto_schedule": NightLightAdapter._get("night-light-schedule-automatic", True),
             "schedule_from": NightLightAdapter._get("night-light-schedule-from", 20.0),
             "schedule_to": NightLightAdapter._get("night-light-schedule-to", 6.0),
         }

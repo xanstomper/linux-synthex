@@ -135,12 +135,20 @@ class CodecInstallerWindow(Adw.ApplicationWindow):
 
     def _install_worker(self, pkgs, btn):
         # Enable RPM Fusion if needed for codecs
+        fedora_ver = "40"
+        try:
+            r_ver = subprocess.run(["rpm", "-E", "%fedora"], capture_output=True, text=True, timeout=5)
+            if r_ver.returncode == 0 and r_ver.stdout.strip().isdigit():
+                fedora_ver = r_ver.stdout.strip()
+        except Exception:
+            pass
+
         rpmfusion_cmd = [
-            "pkexec","dnf","install","-y","--nogpgcheck",
-            "https://mirrors.rpmfusion.org/free/fedora/rpmfusion-free-release-$(rpm -E %fedora).noarch.rpm",
-            "https://mirrors.rpmfusion.org/nonfree/fedora/rpmfusion-nonfree-release-$(rpm -E %fedora).noarch.rpm",
+            "pkexec", "dnf", "install", "-y", "--nogpgcheck",
+            f"https://mirrors.rpmfusion.org/free/fedora/rpmfusion-free-release-{fedora_ver}.noarch.rpm",
+            f"https://mirrors.rpmfusion.org/nonfree/fedora/rpmfusion-nonfree-release-{fedora_ver}.noarch.rpm",
         ]
-        subprocess.run(" ".join(rpmfusion_cmd), shell=True, capture_output=True, timeout=120)
+        subprocess.run(rpmfusion_cmd, capture_output=True, timeout=120)
 
         r = subprocess.run(
             ["pkexec","dnf","install","-y","--"] + pkgs,

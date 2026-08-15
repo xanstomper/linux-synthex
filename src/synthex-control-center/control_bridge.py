@@ -129,7 +129,8 @@ class SettingsBridge(QObject):
 
             wall = self._config.get("wallpaperPath", "").replace("file://", "")
             if wall and os.path.exists(wall):
-                subprocess.Popen(f"swww img '{wall}' --transition-type wipe || feh --bg-fill '{wall}'", shell=True, stderr=subprocess.DEVNULL, stdout=subprocess.DEVNULL)
+                q_wall = shlex.quote(wall)
+                subprocess.Popen(["swww", "img", wall, "--transition-type", "wipe"], stderr=subprocess.DEVNULL, stdout=subprocess.DEVNULL)
         except Exception:
             pass
 
@@ -157,9 +158,11 @@ class SettingsBridge(QObject):
 
     def _get_gpu_model(self):
         try:
-            out = subprocess.check_output("lspci | grep -E -i 'vga|3d|display'", shell=True, text=True)
-            if out:
-                return out.split(":")[-1].strip()
+            res = subprocess.run(["lspci"], capture_output=True, text=True, timeout=5)
+            if res.returncode == 0:
+                for line in res.stdout.splitlines():
+                    if any(k in line.lower() for k in ["vga", "3d", "display"]):
+                        return line.split(":")[-1].strip()
         except Exception:
             pass
         return "Integrated / Discrete GPU"

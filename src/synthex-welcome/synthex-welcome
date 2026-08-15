@@ -84,7 +84,9 @@ class WelcomeWindow(Adw.Application):
 
     def run_cmd(self, cmd):
         try:
-            subprocess.Popen(cmd, shell=True)
+            import shlex
+            args = shlex.split(cmd) if isinstance(cmd, str) else cmd
+            subprocess.Popen(args)
         except Exception:
             pass
 

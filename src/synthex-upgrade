@@ -51,8 +51,8 @@ def cmd_check():
         print("⚠  No dnf available for update check")
 
     # Check for release packages
-    r = subprocess.run(["dnf", "list", f"fedora-release@{next_rel}" if next_rel == current + 1 else f"fedora-release"], 
-                       capture_output=True, text=True, timeout=30, shell=True)
+    target_pkg = f"fedora-release@{next_rel}" if next_rel == current + 1 else "fedora-release"
+    r = subprocess.run(["dnf", "list", target_pkg], capture_output=True, text=True, timeout=30)
     if r.returncode == 0:
         print(f"✅ Fedora {next_rel} packages available")
     else:

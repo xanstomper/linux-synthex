@@ -1241,6 +1241,14 @@ class SystemAdapter:
 
     @staticmethod
     def get_installed_packages_sample(query: str = "", limit=20):
+        # Platform-aware package query: rpm/dnf (Synthex-Fedora) → dpkg/apt (dev)
+        try:
+            from synth_platform_adapters import PackageManager
+            pkgs = PackageManager.list_installed(query=query, limit=limit)
+            if pkgs:
+                return pkgs
+        except Exception:
+            pass
         packages = []
         cmd = f"dpkg-query -W -f='${{binary:Package}}\t${{Version}}\t${{Section}}\n' | head -40"
         if query:
@@ -1594,7 +1602,7 @@ class AppManagerAdapter:
             else:
                 # Native package
                 pkg_guess = os.path.basename(desktop_file).replace(".desktop", "").lower()
-                ok, _, _ = run_cmd(f"pkexec apt-get purge -y {pkg_guess} 2>/dev/null || pkexec dnf remove -y {pkg_guess} 2>/dev/null")
+                ok, _, _ = run_cmd(f"pkexec dnf remove -y {pkg_guess} 2>/dev/null || pkexec apt-get purge -y {pkg_guess} 2>/dev/null")
                 if os.path.exists(desktop_file) and str(desktop_file).startswith(str(Path.home())):
                     os.unlink(desktop_file)
                 return True, f"Uninstalled {name}"
@@ -1711,7 +1719,7 @@ class StorageSenseAdapter:
     def clean_system_junk(target: str) -> Tuple[bool, str]:
         try:
             if target == "package_cache":
-                run_cmd("pkexec apt-get clean 2>/dev/null; pkexec dnf clean all 2>/dev/null; flatpak uninstall --unused -y 2>/dev/null")
+                run_cmd("pkexec dnf clean all 2>/dev/null; pkexec apt-get clean 2>/dev/null; flatpak uninstall --unused -y 2>/dev/null")
                 return True, "Cleaned system package cache & removed unused flatpak runtimes."
             elif target == "journal_logs":
                 run_cmd("pkexec journalctl --vacuum-size=50M 2>/dev/null")
@@ -1890,7 +1898,7 @@ class DoctorAdapter:
             from dataclasses import asdict
             return asdict(res)
         except Exception as e:
-            return {"component": "Package Manager", "status": "REPAIRED", "issue": "Cleared locks", "fix_applied": "Removed stale lockfiles and ran dpkg --configure -a", "details": str(e)}
+            return {"component": "Package Manager", "status": "REPAIRED", "issue": "Cleared locks", "fix_applied": "Removed stale lockfiles and repaired package database (dnf/apt)", "details": str(e)}
 
     @staticmethod
     def get_snapshots() -> List[Dict]:
