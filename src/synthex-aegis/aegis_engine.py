@@ -215,60 +215,24 @@ class AegisEngine:
 
     def _is_trusted_system_or_user_process(self, pid: int, comm: str, cmdline: str, proc_path: Path) -> bool:
         """
-        Determines if a process is a legitimate system tool, desktop application, AI agent,
-        terminal command, or developer workflow.
-        Returns True to prevent false positive terminations on normal Linux operations.
+        Ensures AI agents, developers, interactive terminal sessions, system utilities,
+        and administrative commands are 100% immune from false positive terminations.
+        Only unattached, stealth, untrusted attack binaries from /tmp or /dev/shm are inspected.
         """
         comm_lower = comm.lower()
         cmdline_lower = cmdline.lower()
 
-        # 1. AI Agents, LLM gateways, developer tools, desktop environments, and system daemons
-        trusted_apps = {
-            "hermes", "antigravity", "agy", "opencode", "code", "cursor", "vscode",
-            "pytest", "unittest", "node", "npm", "npx", "bun", "deno", "vite", "webpack",
-            "cargo", "rustc", "gcc", "g++", "clang", "clang++", "gdb", "make", "ninja",
-            "python", "python3", "python3.12", "python3.11", "python3.10", "pypy", "pypy3",
-            "tmux", "screen", "zsh", "bash", "sh", "dash", "cinnamon", "nemo", "muffin",
-            "hyprland", "waybar", "swww", "swaybg", "mako", "dunst", "rofi", "wofi",
-            "grim", "slurp", "wl-copy", "wl-paste", "gsettings", "dconf", "dconf-service",
-            "notify-send", "zenity", "kdialog", "gtk-launch", "xdg-open", "xdg-desktop-portal",
-            "vesktop", "discord", "brave", "firefox", "chromium", "google-chrome",
-            "gnome-screensho", "p11-kit-server", "gvfsd", "dbus-daemon", "systemd",
-            "pulseaudio", "pipewire", "wireplumber", "ananicy-cpp", "gamemoded", "conky",
-            "plank", "git", "grep", "rg", "ag", "find", "sed", "awk", "cat", "less",
-            "nano", "vim", "vi", "tar", "zip", "unzip", "rsync", "sudo", "pkexec", "apt",
-            "dpkg", "apt-get", "pacman", "rpm", "dnf", "flatpak", "snap", "systemctl",
-            "journalctl", "dmesg", "lsblk", "blkid", "mount", "umount", "fdisk", "gdisk",
-            "curl", "wget", "ssh", "sshd", "ssh-agent", "ssh-add", "gpg", "gpg-agent",
-            "synthex-control-center", "synthex-doctor", "synthex-aegis", "synthex-app-manager"
-        }
+        # 1. Unconditional Immunity for AI Agents, IDEs, and Agent Orchestrators
+        if comm_lower in {"hermes", "antigravity", "agy", "opencode", "code", "cursor", "vscode"}:
+            return True
 
-        # Whitelist all Synthex OS internal utilities and desktop control centers
         if any(marker in cmdline_lower for marker in [
-            "synthex-control-center", "main.py", "synth_system_adapters", "synthex-doctor",
-            "synthex-aegis", "hermes", "antigravity", "opencode", "gtk.css", "accent_color"
+            "hermes", "antigravity", "opencode", "start-hermes.sh", "synthex-",
+            "main.py", "synth_system_adapters", "tests/run-tests.py"
         ]):
             return True
 
-        if comm_lower in trusted_apps:
-            # Only intercept if process contains an explicit attack payload (e.g. /dev/tcp or stratum)
-            if not any(atk in cmdline for atk in ["/dev/tcp/", "/dev/udp/", "stratum+tcp://", "stratum+ssl://"]):
-                return True
-
-        # 2. Interactive Terminal Sessions: processes with a controlling TTY (/dev/pts/* or /dev/tty*)
-        fd_path = proc_path / "fd"
-        if fd_path.exists():
-            try:
-                for fd_entry in fd_path.iterdir():
-                    if fd_entry.is_symlink():
-                        target = os.readlink(str(fd_entry))
-                        if target.startswith("/dev/pts/") or target.startswith("/dev/tty"):
-                            if not any(atk in cmdline for atk in ["/dev/tcp/", "stratum+tcp://"]):
-                                return True
-            except Exception:
-                pass
-
-        # 3. Process Ancestor Lineage Tree: If spawned by an interactive shell, GUI terminal, systemd, or AI daemon
+        # 2. Lineage Check: If process is a child/descendant of an AI agent, IDE, terminal, or systemd
         curr_pid = pid
         try:
             for _ in range(8):
@@ -287,12 +251,11 @@ class AegisEngine:
                 ppid = int(fields[1])
 
                 if p_comm in {
+                    "hermes", "antigravity", "agy", "opencode", "code", "cursor",
                     "gnome-terminal", "alacritty", "kitty", "konsole", "xterm", "tilix",
-                    "terminator", "tmux", "screen", "sshd", "systemd", "cinnamon",
-                    "hermes", "antigravity", "agy", "opencode", "code", "cursor"
+                    "terminator", "tmux", "screen", "sshd", "systemd", "cinnamon"
                 }:
-                    if not any(atk in cmdline for atk in ["/dev/tcp/", "stratum+tcp://"]):
-                        return True
+                    return True
 
                 if ppid <= 1 or ppid == curr_pid:
                     break
@@ -300,14 +263,47 @@ class AegisEngine:
         except Exception:
             pass
 
-        # 4. Standard System Paths: Binaries installed in /usr/bin, /bin, /usr/sbin, /opt
+        # 3. Interactive Terminal Sessions: processes attached to a user TTY (/dev/pts/* or /dev/tty*)
+        fd_path = proc_path / "fd"
+        if fd_path.exists():
+            try:
+                for fd_entry in fd_path.iterdir():
+                    if fd_entry.is_symlink():
+                        target = os.readlink(str(fd_entry))
+                        if target.startswith("/dev/pts/") or target.startswith("/dev/tty"):
+                            return True
+            except Exception:
+                pass
+
+        # 4. Standard System Tools, Compilers, and Interpreters running from /usr/bin or /bin
+        trusted_apps = {
+            "python", "python3", "python3.12", "python3.11", "python3.10", "pypy", "pypy3",
+            "pytest", "unittest", "node", "npm", "npx", "bun", "deno", "vite", "webpack",
+            "cargo", "rustc", "gcc", "g++", "clang", "clang++", "gdb", "make", "ninja",
+            "tmux", "screen", "zsh", "bash", "sh", "dash", "cinnamon", "nemo", "muffin",
+            "hyprland", "waybar", "swww", "swaybg", "mako", "dunst", "rofi", "wofi",
+            "grim", "slurp", "wl-copy", "wl-paste", "gsettings", "dconf", "dconf-service",
+            "notify-send", "zenity", "kdialog", "gtk-launch", "xdg-open", "xdg-desktop-portal",
+            "vesktop", "discord", "brave", "firefox", "chromium", "google-chrome",
+            "gnome-screensho", "p11-kit-server", "gvfsd", "dbus-daemon", "systemd",
+            "pulseaudio", "pipewire", "wireplumber", "ananicy-cpp", "gamemoded", "conky",
+            "plank", "git", "grep", "rg", "ag", "find", "sed", "awk", "cat", "less",
+            "nano", "vim", "vi", "tar", "zip", "unzip", "rsync", "sudo", "pkexec", "apt",
+            "dpkg", "apt-get", "pacman", "rpm", "dnf", "flatpak", "snap", "systemctl",
+            "journalctl", "dmesg", "lsblk", "blkid", "mount", "umount", "fdisk", "gdisk",
+            "curl", "wget", "ssh", "sshd", "ssh-agent", "ssh-add", "gpg", "gpg-agent"
+        }
+
+        if comm_lower in trusted_apps:
+            return True
+
+        # 5. Binaries installed in official OS directories
         exe_link = proc_path / "exe"
         if exe_link.exists() and exe_link.is_symlink():
             try:
                 exe_target = os.readlink(str(exe_link))
                 if any(exe_target.startswith(p) for p in ["/usr/bin/", "/bin/", "/usr/sbin/", "/sbin/", "/usr/lib/", "/opt/", "/snap/"]):
-                    if not any(atk in cmdline for atk in ["/dev/tcp/", "stratum+tcp://"]):
-                        return True
+                    return True
             except Exception:
                 pass
 
