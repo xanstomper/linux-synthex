@@ -1005,11 +1005,19 @@ def build_security(toast):
     sec_aegis.add_row(shield_row)
 
     st = AegisDualEncryptAdapter.get_status()
-    for d in st.get("detected_encryption", []):
-        sec_aegis.add_row(entity_card(f"Auto-Shielded: {d.get('engine_name', 'Encrypted Volume')}",
-                                      f"Target: {d.get('target_device')} · Cipher: {d.get('cipher')}",
-                                      icon_name="drive-harddisk" if "LUKS" in d.get("engine_name", "") else "security-high",
-                                      trailing=badge(d.get("status", "Shielded"), "ok" if "Shielded" in d.get("status", "") else "neutral")))
+    detected_list = st.get("detected_encryption", [])
+    if detected_list:
+        for d in detected_list:
+            sec_aegis.add_row(entity_card(f"Auto-Shielded: {d.get('engine_name', 'Encrypted Volume')}",
+                                          f"Target: {d.get('target_device')} · Cipher: {d.get('cipher')}",
+                                          icon_name="drive-harddisk" if "LUKS" in d.get("engine_name", "") else "security-high",
+                                          trailing=badge(d.get("status", "Shielded"), "ok" if "Shielded" in d.get("status", "") else "neutral")))
+    else:
+        sec_aegis.add_row(entity_card("No Encrypted Volumes Detected",
+                                      "System running on standard ext4/btrfs. Aegis active shield is armed and ready—it will automatically detect and protect LUKS or VeraCrypt volumes the moment they are mounted.",
+                                      icon_name="dialog-information",
+                                      trailing=badge("Standing By", "neutral")))
+
 
     for l in st.get("active_defenses", []):
         badge_kind = "ok" if l.get("active") else "neutral"

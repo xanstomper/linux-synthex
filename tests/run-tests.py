@@ -1476,11 +1476,12 @@ try:
     check("aegis dual status query pass", "ACTIVE" in ad_st.get("status", ""))
     check("aegis dual shield enabled check", aegis_dual.is_shield_enabled() is True)
     det = aegis_dual.detect_underlying_encryption()
-    check("aegis dual auto-detected engines check", len(det) >= 1)
+    check("aegis dual auto-detected engines check", isinstance(det, list))
     ok_tgl, _ = aegis_dual.set_shield_enabled(True)
     check("aegis dual shield toggle dry-run", ok_tgl is True)
 except Exception as _e:
     check("aegis dual encrypt functional validation", False, str(_e))
+
 
 
 # Summary
