@@ -155,7 +155,7 @@ class SidebarRow(Gtk.ListBoxRow):
 class SettingsWindow(Gtk.ApplicationWindow):
     def __init__(self, app, initial_page="appearance"):
         super().__init__(application=app, title="System Settings")
-        self.set_default_size(1180, 820)
+        self.set_default_size(1220, 860)
         self.set_position(Gtk.WindowPosition.CENTER)
         self.current_pid = None
 
@@ -164,13 +164,16 @@ class SettingsWindow(Gtk.ApplicationWindow):
 
         # ── Header ─────────────────────────────────────────────────────
         hb = Gtk.HeaderBar(show_close_button=True)
-        hb.set_title("System Settings")
-        hb.set_subtitle("SynthOS Linux")
+        hb.set_show_close_button(True)
+        title_box = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, halign=Gtk.Align.START)
+        title_box.pack_start(label("System Settings", "app-title"), False, False, 0)
+        hb.set_custom_title(title_box)
         self.set_titlebar(hb)
 
         self.search_entry = Gtk.SearchEntry()
         self.search_entry.set_placeholder_text("Search settings…")
-        self.search_entry.set_width_chars(30)
+        self.search_entry.set_width_chars(32)
+        self.search_entry.get_style_context().add_class("settings-search")
         self.search_entry.connect("search-changed", self._on_search)
         hb.pack_end(self.search_entry)
 
@@ -186,7 +189,7 @@ class SettingsWindow(Gtk.ApplicationWindow):
         # Sidebar
         sidebar_box = Gtk.Box(orientation=Gtk.Orientation.VERTICAL)
         sidebar_box.get_style_context().add_class("sidebar")
-        sidebar_box.set_size_request(232, -1)
+        sidebar_box.set_size_request(246, -1)
         self.sidebar_scroll = Gtk.ScrolledWindow()
         self.sidebar_scroll.set_policy(Gtk.PolicyType.NEVER, Gtk.PolicyType.AUTOMATIC)
         self.sidebar_scroll.get_style_context().add_class("sidebar-scroll")
@@ -205,6 +208,7 @@ class SettingsWindow(Gtk.ApplicationWindow):
         self.main.pack_start(sidebar_box, False, False, 0)
 
         sep = Gtk.Separator(orientation=Gtk.Orientation.VERTICAL)
+        sep.get_style_context().add_class("sidebar-sep")
         self.main.pack_start(sep, False, False, 0)
 
         # Content — Overlay hosts the scrolled content + toast
@@ -286,16 +290,9 @@ def _pick_initial_page():
 
 
 def main():
-    app = Gtk.Application(application_id="org.synthex.Settings")
-    win_holder = {}
-
-    def activate(a):
-        if not win_holder.get("win"):
-            win_holder["win"] = SettingsWindow(a, _pick_initial_page())
-        win_holder["win"].present()
-
-    app.connect("activate", activate)
-    app.run([])
+    win = SettingsWindow(None, _pick_initial_page())
+    win.connect("destroy", Gtk.main_quit)
+    Gtk.main()
 
 
 if __name__ == "__main__":

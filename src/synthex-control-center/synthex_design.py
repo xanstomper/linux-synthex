@@ -25,183 +25,303 @@ GAP_ROW = 2         # gap between rows inside a card
 CONTENT_WIDTH = 760  # max width of the settings column (centered)
 
 _CSS = """
-/* ═══════════ SynthOS Settings — Professional Design System ═══════════ */
+/* ══════════════════════════════════════════════════════════════════════════
+   SynthOS Settings — Modern Design System
+   Clean, sleek, libadwaita-inspired surfaces that adapt to any GTK theme.
+   ══════════════════════════════════════════════════════════════════════════ */
 
-.settings-window { background-color: @theme_base_color; }
-
-.settings-window.dark { background-color: shade(@theme_base_color, 0.97); }
-
-/* ── Sidebar ───────────────────────────────────────────────────────── */
-.sidebar { background-color: alpha(@theme_fg_color, 0.03); }
-.sidebar-scroll { background: transparent; }
-.sidebar-item {
-  border-radius: 8px;
-  padding: 7px 10px;
-  transition: all 160ms ease;
+.settings-window {
+  font-family: Cantarell, "Noto Sans", "Inter", "Ubuntu", sans-serif;
 }
-.sidebar-item:hover { background-color: alpha(@theme_fg_color, 0.07); }
+
+/* ── Global controls restyle ─────────────────────────────────────────── */
+
+/* Switches: modern pill toggles */
+switch {
+  border-radius: 999px;
+  min-width: 46px;
+  min-height: 24px;
+  background-color: alpha(@theme_fg_color, 0.16);
+  background-image: none;
+  transition: all 180ms ease;
+}
+switch:checked { background-color: @theme_selected_bg_color; }
+switch slider {
+  min-width: 19px;
+  min-height: 19px;
+  margin: 2px;
+  border: none;
+  border-radius: 50%;
+  background-color: @theme_base_color;
+  box-shadow: 0 1px 3px alpha(black, 0.30);
+  transition: all 180ms ease;
+}
+switch:checked slider { background-color: @theme_selected_fg_color; }
+switch:disabled { opacity: 0.45; }
+
+/* Sliders */
+.scale-ok trough {
+  min-height: 5px;
+  border-radius: 3px;
+  background-color: alpha(@theme_fg_color, 0.12);
+}
+.scale-ok highlight {
+  border-radius: 3px;
+  min-height: 5px;
+  background-color: @theme_selected_bg_color;
+}
+.scale-ok slider {
+  min-width: 18px;
+  min-height: 18px;
+  margin: -7px;
+  border-radius: 50%;
+  background-color: @theme_base_color;
+  border: 2px solid @theme_selected_bg_color;
+  box-shadow: 0 1px 4px alpha(black, 0.22);
+}
+
+/* Check & radio */
+checkbutton check {
+  min-width: 18px;
+  min-height: 18px;
+  border-radius: 6px;
+  border: 2px solid alpha(@theme_fg_color, 0.30);
+  background-color: transparent;
+  transition: all 150ms ease;
+}
+checkbutton check:checked {
+  background-color: @theme_selected_bg_color;
+  border-color: @theme_selected_bg_color;
+}
+radiobutton radio {
+  min-width: 18px;
+  min-height: 18px;
+  border-radius: 50%;
+  border: 2px solid alpha(@theme_fg_color, 0.30);
+  transition: all 150ms ease;
+}
+radiobutton radio:checked { border-color: @theme_selected_bg_color; }
+
+/* Spin buttons */
+spinbutton {
+  border-radius: 9px;
+  border: 1px solid alpha(@theme_fg_color, 0.12);
+  background-color: alpha(@theme_fg_color, 0.04);
+  padding: 0 2px;
+}
+spinbutton entry { border: none; background: transparent; }
+
+/* Scrollbars: thin overlay-style */
+scrollbar { background-color: transparent; }
+scrollbar slider {
+  min-width: 9px;
+  min-height: 36px;
+  border-radius: 999px;
+  border: none;
+  margin: 3px 2px;
+  background-color: alpha(@theme_fg_color, 0.22);
+  transition: background-color 150ms ease;
+}
+scrollbar slider:hover { background-color: alpha(@theme_fg_color, 0.40); }
+
+/* Spinner */
+spinner { color: @theme_selected_bg_color; }
+
+/* ── Sidebar ─────────────────────────────────────────────────────────── */
+.sidebar { background-color: alpha(@theme_fg_color, 0.028); }
+.sidebar-scroll { background: transparent; }
+
+.sidebar-item {
+  border-radius: 9px;
+  margin: 1px 10px;
+  padding: 7px 10px;
+  transition: all 150ms ease;
+}
+.sidebar-item:hover { background-color: alpha(@theme_fg_color, 0.06); }
+.sidebar-item:active { background-color: alpha(@theme_fg_color, 0.10); }
 .sidebar-item:selected {
-  background-color: alpha(@theme_selected_bg_color, 0.9);
+  background-color: @theme_selected_bg_color;
   color: @theme_selected_fg_color;
 }
-.sidebar-item:selected .sidebar-sub { color: alpha(@theme_selected_fg_color, 0.72); }
-.sidebar-title { font-weight: 600; font-size: 10.5pt; }
-.sidebar-sub {
-  font-size: 8.5pt;
-  color: alpha(@theme_fg_color, 0.55);
-}
+.sidebar-item:selected .sidebar-title { color: @theme_selected_fg_color; }
+
+.sidebar-title { font-size: 10pt; font-weight: 500; }
+.sidebar-sub { font-size: 8.5pt; color: alpha(@theme_fg_color, 0.50); }
+
 .sidebar-group {
-  font-size: 8pt;
-  font-weight: 700;
-  color: alpha(@theme_fg_color, 0.42);
-  padding: 14px 10px 6px 10px;
+  font-size: 7.5pt;
+  font-weight: 800;
+  letter-spacing: 0.14em;
+  color: alpha(@theme_fg_color, 0.38);
+  padding: 16px 22px 6px 22px;
 }
 
-/* ── Content column ─────────────────────────────────────────────────── */
+.sidebar-sep { background-color: alpha(@theme_fg_color, 0.09); min-width: 1px; }
+
+/* ── Header bar ──────────────────────────────────────────────────────── */
+.app-title { font-size: 13pt; font-weight: 700; letter-spacing: -0.01em; }
+
+.settings-search {
+  border-radius: 999px;
+  padding: 6px 16px;
+  background-color: alpha(@theme_fg_color, 0.05);
+  border: 1px solid alpha(@theme_fg_color, 0.10);
+  transition: all 160ms ease;
+}
+.settings-search:focus {
+  border-color: @theme_selected_bg_color;
+  box-shadow: 0 0 0 3px alpha(@theme_selected_bg_color, 0.18);
+}
+
+/* ── Content column ──────────────────────────────────────────────────── */
 .content-scroll { background-color: @theme_base_color; }
 .content-column { margin: 0 8px; }
 
-/* ── Page header ────────────────────────────────────────────────────── */
-.page-header { padding: 2px 4px 4px 4px; }
-.page-title { font-size: 19pt; font-weight: 700; }
+/* ── Page header ─────────────────────────────────────────────────────── */
+.page-header { padding: 2px 6px 6px 6px; }
+.page-title {
+  font-size: 20pt;
+  font-weight: 700;
+  letter-spacing: -0.015em;
+}
 .page-subtitle {
   font-size: 10pt;
-  color: alpha(@theme_fg_color, 0.6);
-  padding-top: 3px;
+  color: alpha(@theme_fg_color, 0.58);
+  padding-top: 4px;
 }
 
-/* ── Cards / sections ───────────────────────────────────────────────── */
+/* ── Cards / sections ────────────────────────────────────────────────── */
 .card {
   background-color: alpha(@theme_fg_color, 0.035);
-  border-radius: 12px;
-  border: 1px solid alpha(@theme_fg_color, 0.09);
-  box-shadow: 0 1px 3px alpha(black, 0.04);
+  border-radius: 16px;
+  border: 1px solid alpha(@theme_fg_color, 0.08);
+  box-shadow: 0 1px 2px alpha(black, 0.03), 0 6px 18px alpha(black, 0.035);
 }
 .card-dark {
   background-color: alpha(@theme_fg_color, 0.06);
-  border-radius: 12px;
-  border: 1px solid alpha(@theme_fg_color, 0.09);
+  border-radius: 16px;
+  border: 1px solid alpha(@theme_fg_color, 0.08);
 }
-.card-padding { padding: 6px 2px; }
+.card-padding { padding: 6px 4px; }
 
-.section-title-box { padding: 4px 6px 10px 6px; }
+.section-title-box { padding: 6px 10px 10px 10px; }
 .section-title {
   font-size: 9.5pt;
   font-weight: 700;
-  color: alpha(@theme_fg_color, 0.88);
+  letter-spacing: 0.06em;
+  color: alpha(@theme_fg_color, 0.62);
 }
 .section-sub {
   font-size: 9pt;
-  color: alpha(@theme_fg_color, 0.52);
-  padding-top: 1px;
+  color: alpha(@theme_fg_color, 0.48);
+  padding-top: 2px;
 }
 
-/* ── Rows ───────────────────────────────────────────────────────────── */
+/* ── Rows ────────────────────────────────────────────────────────────── */
 .row {
-  padding: 11px 16px;
-  border-radius: 9px;
-  transition: background-color 140ms ease;
+  padding: 12px 12px;
+  border-radius: 10px;
+  transition: background-color 150ms ease;
 }
 .row:hover { background-color: alpha(@theme_fg_color, 0.045); }
-.row-suffix { opacity: 1; }
 
 .row-title { font-size: 10.5pt; font-weight: 500; }
 .row-sub {
   font-size: 9pt;
   color: alpha(@theme_fg_color, 0.55);
-  padding-top: 1px;
+  padding-top: 2px;
 }
+
 .row-sep { background-color: transparent; }
-.row-sep line {
-  background-color: alpha(@theme_fg_color, 0.09);
-}
 
-/* ══════════════════════════════════════════════════════════════════════ */
-/* Control styles */
-.scale-ok trough { min-height: 4px; border-radius: 2px; }
-.scale-ok highlight { border-radius: 2px; min-height: 4px; }
-.scale-ok slider {
-  min-width: 16px; min-height: 16px;
-  border-radius: 50%;
-  margin: -7px;
-}
-
-.combo-compact {
-  background-image: none;
-  border: 1px solid alpha(@theme_fg_color, 0.18);
-  border-radius: 7px;
-  padding: 5px 8px;
-  font-size: 9.5pt;
-}
-
-.entry-clean {
-  border: 1px solid alpha(@theme_fg_color, 0.18);
-  border-radius: 7px;
-  padding: 5px 9px;
-  font-size: 9.5pt;
-}
-.entry-clean:focus {
-  border-color: @theme_selected_bg_color;
-}
-
+/* ── Buttons ─────────────────────────────────────────────────────────── */
 .btn-quiet {
-  background: none;
-  border: 1px solid alpha(@theme_fg_color, 0.16);
-  border-radius: 8px;
-  padding: 6px 14px;
-  font-size: 9.5pt;
-  font-weight: 500;
-  transition: all 140ms ease;
-}
-.btn-quiet:hover { background-color: alpha(@theme_fg_color, 0.06); }
-
-.btn-primary {
-  background-color: @theme_selected_bg_color;
-  color: @theme_selected_fg_color;
-  border: none;
-  border-radius: 8px;
-  padding: 7px 18px;
+  background-color: alpha(@theme_fg_color, 0.05);
+  border: 1px solid alpha(@theme_fg_color, 0.13);
+  border-radius: 9px;
+  padding: 7px 16px;
   font-size: 9.5pt;
   font-weight: 600;
-  transition: all 140ms ease;
+  transition: all 150ms ease;
 }
-.btn-primary:hover { background-color: shade(@theme_selected_bg_color, 1.08); }
-.btn-primary:disabled { opacity: 0.45; }
+.btn-quiet:hover { background-color: alpha(@theme_fg_color, 0.10); }
+.btn-quiet:active { background-color: alpha(@theme_fg_color, 0.14); }
+
+.btn-primary {
+  background-image: linear-gradient(to bottom,
+    shade(@theme_selected_bg_color, 1.12),
+    shade(@theme_selected_bg_color, 0.96));
+  color: @theme_selected_fg_color;
+  border: none;
+  border-radius: 9px;
+  padding: 8px 18px;
+  font-size: 9.5pt;
+  font-weight: 700;
+  box-shadow: 0 2px 8px alpha(@theme_selected_bg_color, 0.35);
+  transition: all 150ms ease;
+}
+.btn-primary:hover {
+  background-image: linear-gradient(to bottom,
+    shade(@theme_selected_bg_color, 1.20),
+    shade(@theme_selected_bg_color, 1.02));
+  box-shadow: 0 3px 12px alpha(@theme_selected_bg_color, 0.45);
+}
+.btn-primary:active {
+  background-image: none;
+  background-color: shade(@theme_selected_bg_color, 0.90);
+}
+.btn-primary:disabled { opacity: 0.5; }
 
 .btn-destructive {
   color: @error_color;
-  background: none;
-  border: 1px solid alpha(@error_color, 0.4);
-  border-radius: 8px;
-  padding: 6px 14px;
+  background-color: alpha(@error_color, 0.06);
+  border: 1px solid alpha(@error_color, 0.38);
+  border-radius: 9px;
+  padding: 7px 16px;
   font-size: 9.5pt;
-  font-weight: 500;
+  font-weight: 600;
+  transition: all 150ms ease;
 }
-.btn-destructive:hover { background-color: alpha(@error_color, 0.1); }
+.btn-destructive:hover { background-color: alpha(@error_color, 0.14); }
 
-/* ── Badges & status ────────────────────────────────────────────────── */
+/* ── Combo & entry ───────────────────────────────────────────────────── */
+.combo-compact button {
+  background-color: alpha(@theme_fg_color, 0.05);
+  border: 1px solid alpha(@theme_fg_color, 0.13);
+  border-radius: 9px;
+  padding: 6px 10px;
+  font-size: 9.5pt;
+  transition: all 150ms ease;
+}
+.combo-compact button:hover { background-color: alpha(@theme_fg_color, 0.10); }
+.combo-compact button:checked { background-color: alpha(@theme_fg_color, 0.12); }
+
+.entry-clean {
+  background-color: alpha(@theme_fg_color, 0.04);
+  border: 1px solid alpha(@theme_fg_color, 0.13);
+  border-radius: 9px;
+  padding: 6px 11px;
+  font-size: 9.5pt;
+  box-shadow: none;
+  transition: all 160ms ease;
+}
+.entry-clean:focus {
+  border-color: @theme_selected_bg_color;
+  box-shadow: 0 0 0 3px alpha(@theme_selected_bg_color, 0.18);
+}
+
+/* ── Badges & status ─────────────────────────────────────────────────── */
 .badge {
   border-radius: 999px;
-  padding: 2px 10px;
+  padding: 3px 11px;
   font-size: 8.5pt;
   font-weight: 700;
+  letter-spacing: 0.02em;
 }
-.badge-ok {
-  background-color: alpha(#2ecc71, 0.16);
-  color: shade(#2ecc71, 0.85);
-}
-.badge-warn {
-  background-color: alpha(#e67e22, 0.16);
-  color: shade(#e67e22, 0.85);
-}
-.badge-err {
-  background-color: alpha(@error_color, 0.15);
-  color: @error_color;
-}
-.badge-neutral {
-  background-color: alpha(@theme_fg_color, 0.1);
-  color: alpha(@theme_fg_color, 0.75);
-}
+.badge-ok { background-color: alpha(#2ecc71, 0.15); color: shade(#2ecc71, 0.82); }
+.badge-warn { background-color: alpha(#e67e22, 0.15); color: shade(#e67e22, 0.82); }
+.badge-err { background-color: alpha(@error_color, 0.14); color: @error_color; }
+.badge-neutral { background-color: alpha(@theme_fg_color, 0.09); color: alpha(@theme_fg_color, 0.75); }
 .settings-window.dark .badge-ok { color: #55efb8; }
 .settings-window.dark .badge-warn { color: #ffb569; }
 
@@ -211,57 +331,59 @@ _CSS = """
 .dot-err { background-color: @error_color; }
 .dot-off { background-color: alpha(@theme_fg_color, 0.3); }
 
-/* ── Info grid (system info / key-value) ────────────────────────────── */
-.info-grid row { border-bottom: 1px solid alpha(@theme_fg_color, 0.06); }
-.info-grid cell { padding: 7px 14px; }
-.info-key {
-  font-size: 9.5pt;
-  color: alpha(@theme_fg_color, 0.6);
-}
-.info-val {
-  font-size: 9.5pt;
-  font-weight: 500;
-}
+/* ── Info grid ───────────────────────────────────────────────────────── */
+.info-key { font-size: 9.5pt; color: alpha(@theme_fg_color, 0.58); }
+.info-val { font-size: 9.5pt; font-weight: 500; }
 
-/* ── In-app toast ───────────────────────────────────────────────────── */
+/* ── Toast: dark glass pill ──────────────────────────────────────────── */
 .toast {
-  background-color: shade(@theme_selected_bg_color, 0.75);
-  color: @theme_selected_fg_color;
-  border-radius: 10px;
-  padding: 10px 18px;
+  background-color: alpha(#14161c, 0.94);
+  color: #f4f5f7;
+  border-radius: 12px;
+  padding: 11px 20px;
   font-size: 10pt;
+  font-weight: 500;
+  box-shadow: 0 6px 24px alpha(black, 0.35);
 }
-.toast-error { background-color: shade(@error_color, 0.9); }
+.toast-error { background-color: alpha(shade(@error_color, 0.55), 0.95); color: white; }
 
-/* ── Progress ──────────────────────────────────────────────────────── */
-.pbar-ok trough { min-height: 6px; border-radius: 3px; }
-.pbar-ok progress { border-radius: 3px; min-height: 6px; }
+/* ── Progress ────────────────────────────────────────────────────────── */
+.pbar-ok trough {
+  min-height: 6px;
+  border-radius: 3px;
+  background-color: alpha(@theme_fg_color, 0.10);
+}
+.pbar-ok progress {
+  border-radius: 3px;
+  min-height: 6px;
+  background-color: @theme_selected_bg_color;
+}
 
-/* ── List cards (devices, printers, snapshots...) ───────────────────── */
+/* ── Entity cards ────────────────────────────────────────────────────── */
 .entity-card {
-  background-color: alpha(@theme_fg_color, 0.045);
-  border: 1px solid alpha(@theme_fg_color, 0.09);
-  border-radius: 11px;
+  background-color: alpha(@theme_fg_color, 0.04);
+  border: 1px solid alpha(@theme_fg_color, 0.08);
+  border-radius: 12px;
   padding: 13px 16px;
-  transition: all 150ms ease;
+  box-shadow: 0 1px 2px alpha(black, 0.03);
+  transition: all 160ms ease;
 }
-.entity-card:hover { border-color: alpha(@theme_selected_bg_color, 0.45); }
+.entity-card:hover {
+  border-color: alpha(@theme_selected_bg_color, 0.45);
+  box-shadow: 0 4px 14px alpha(black, 0.07);
+}
 .entity-title { font-size: 10.5pt; font-weight: 600; }
-.entity-sub {
-  font-size: 9pt;
-  color: alpha(@theme_fg_color, 0.55);
-}
+.entity-sub { font-size: 9pt; color: alpha(@theme_fg_color, 0.55); }
 
 .empty-state {
-  color: alpha(@theme_fg_color, 0.45);
+  color: alpha(@theme_fg_color, 0.42);
   font-size: 10pt;
   padding: 26px;
+  font-style: italic;
 }
 
-.search-pill entry {
-  border-radius: 999px;
-  padding: 5px 14px;
-}
+/* Loading spinner row */
+.async-loading { padding: 4px 2px; }
 """
 
 
