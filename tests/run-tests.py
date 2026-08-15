@@ -105,7 +105,7 @@ for path, name in svc_wrappers:
 print("\n📋 synthex.py CLI command coverage:")
 synthex_py = open(os.path.join(ROOT, "src", "synthex.py")).read()
 expected_cmds = ["update","rollback","snapshot","mode","status","layout","theme",
-    "install","remove","search","drivers","hw-info","ai","firewall","proton","gpu",
+    "install","remove","search","drivers", "gaming", "devices", "aegis", "doctor","hw-info","ai","firewall","proton","gpu",
     "blueprint","backup","tray","welcome","recovery","gaming","codecs","nvidia",
     "kernel","service","logs","locale","ananicy","aur","usb","input",
     "power-profiles","upgrade","disk","report","timeshift","handheld","tour","appimage","hermes","agent","codex","kb"]
@@ -1042,13 +1042,13 @@ cc = os.path.join(ROOT, "src", "synthex-control-center")
 for f in ["synthex_design.py", "synth_platform_adapters.py", "synthex_pages_a.py", "synthex_pages_b.py", "main.py"]:
     check(f"settings module {f}", os.path.exists(os.path.join(cc, f)))
 _sm = open(os.path.join(cc, "main.py")).read()
-_expected_cats = ["appearance", "backgrounds", "nightlight", "notifications", "privacy", "online", "region", "accessibility",
+_expected_cats = ["appearance", "backgrounds", "nightlight", "notifications", "privacy", "online", "region", "accessibility", "apps",
                    "account", "desktop", "windows", "workspaces", "panels", "applets", "desklets", "extensions",
                    "gestures", "preferred", "startup", "screensaver", "display", "sound", "mouse", "keyboard",
-                   "tablet", "printers", "bluetooth", "thunderbolt", "color", "power", "storage", "drivers",
+                   "tablet", "printers", "bluetooth", "thunderbolt", "color", "power", "storage", "drivers", "gaming", "devices", "aegis", "doctor",
                    "network", "security", "sources", "updates", "timeshift", "login", "datetime", "sysinfo"]
 _missing = [c for c in _expected_cats if f'"{c}"' not in _sm]
-check(f"all 39 settings categories present", not _missing, str(_missing[:5]))
+check(f"all {len(_expected_cats)} settings categories present", not _missing, str(_missing[:5]))
 check("sidebar grouped professionally", "Personal" in _sm and "Desktop" in _sm and "Hardware" in _sm and "System" in _sm)
 check("URI deep-linking support", "synthex-settings://" in _sm)
 _pa = open(os.path.join(cc, "synthex_pages_a.py")).read()
@@ -1056,6 +1056,13 @@ _pb = open(os.path.join(cc, "synthex_pages_b.py")).read()
 check("no hardcoded home paths in pages", "/home/jewboy" not in _pa and "/home/jewboy" not in _pb)
 check("async loading for slow panels", "AsyncSection" in _pa and "AsyncSection" in _pb)
 _spa = open(os.path.join(cc, "synth_platform_adapters.py")).read() + _pa + _pb
+_pc = open(os.path.join(cc, "synthex_pages_c.py")).read() if os.path.exists(os.path.join(cc, "synthex_pages_c.py")) else ""
+if _pc:
+    for suite in ["build_aegis", "QuarantineManagerAdapter", "AegisEngine", "synthex-aegis", "build_doctor",
+                  "run_full_diagnosis", "build_gaming", "get_cpu_governors", "build_privacy_center",
+                  "get_ai_privacy_config", "apply_zero_telemetry_lockdown", "get_privacy_timeline",
+                  "build_apps", "uninstall_application", "build_devices"]:
+        check(f"synthex suite wired: {suite}", suite in _pc)
 for feat in ["rpm", "firewalld", "firewall-cmd", "dnf", "timeshift", "colormgr", "boltctl", "sddm",
              "localectl", "timedatectl", "xinput", "fc-list", "xdg-mime", "rpmfusion", "dnf-automatic",
              "akmod-nvidia", "fwupdmgr", "SELinux", "getenforce"]:

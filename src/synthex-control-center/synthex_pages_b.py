@@ -760,6 +760,7 @@ def _set_selinux(mode, toast):
 def build_sources(toast):
     col = ContentColumn()
     col.add(PageHeader("Software Sources", "Repositories, Copr and third-party software"))
+    rf = ReposAdapter.get_rpmfusion_status()
 
     sec = Section("RPM Fusion")
     sec.add_row(entity_card("RPM Fusion", "Free + Nonfree multimedia and driver repositories",

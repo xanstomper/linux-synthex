@@ -69,7 +69,37 @@ CMDS = {
     "agent":     lambda a: run(tool("synthex-agent"), *(a.args or [])),
     "codex":     lambda _: run(tool("synthex-agent"), "--codex"),
     "kb":        lambda a: run(tool("synthex-agent"), "--kb", *(a.args or [])),
+
+    # Synthex suites (Aegis endpoint defense, System Doctor, device inspection)
+    "aegis":     lambda a: _aegis(a if isinstance(a, list) else (a.args or [])),
+    "doctor":    lambda a: run("python3", os.path.join(
+                    os.path.dirname(os.path.abspath(__file__)),
+                    "synthex-doctor", "synthex_doctor.py"),
+                    *(a if isinstance(a, list) and a else (["--fix"] if "--fix" in (a or []) else []))),
+    "devices":   lambda a: run("bash", "-c",
+                    "echo '── USB devices ──'; lsusb; "
+                    "echo; echo '── Cameras ──'; ls /dev/video* 2>/dev/null || echo none; "
+                    "echo; echo '── Game controllers ──'; ls /dev/input/js* 2>/dev/null || echo none"),
 }
+
+
+def _aegis(args):
+    """synthex aegis [status|gui|scan|start|stop|enable|disable]"""
+    cmd = args[0] if args else "status"
+    aegis_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), "synthex-aegis")
+    if cmd == "gui":
+        return run("python3", os.path.join(aegis_dir, "aegis_gui.py"))
+    if cmd == "scan":
+        return run("python3", os.path.join(aegis_dir, "aegis_daemon.py"), "--once")
+    if cmd in ("start", "stop", "enable", "disable"):
+        verb = {"start": "start", "stop": "stop", "enable": "enable", "disable": "disable"}[cmd]
+        extra = " --now" if cmd in ("enable", "disable") else ""
+        return run("pkexec", "systemctl", verb + extra, "synthex-aegis.service")
+    res = run("systemctl", "is-active", "synthex-aegis", capture_output=True, text=True)
+    active = res and "active" in (res.stdout or "")
+    print("● Aegis protection: " + ("ACTIVE" if active else "INACTIVE"))
+    print("  synthex aegis gui|scan|start|stop|enable|disable")
+    return None
 
 def _search(query):
     print(f"🔍 {query}\n── Flatpak ──"); run("flatpak", "search", query)

@@ -25,6 +25,7 @@ import synthex_design as design
 from synthex_design import install_design, label, Toast, entity_card, badge, button, dot
 import synthex_pages_a as pages_a
 import synthex_pages_b as pages_b
+import synthex_pages_c as pages_c
 from synth_system_adapters import SystemAdapter
 
 # ── Sidebar registry: (id, title, icon, page-builder, searchable keywords) ──
@@ -40,8 +41,8 @@ SIDEBAR = [
          "redshift night light blue filter color temperature f.lux"),
         ("notifications","Notifications",    "preferences-desktop-notification", pages_a.build_notifications,
          "notifications do not disturb dnd popup banner sounds lock screen"),
-        ("privacy",      "Privacy",          "preferences-system-privacy",    pages_a.build_privacy,
-         "privacy location camera microphone permissions telemetry recent files trash"),
+        ("privacy",      "Privacy Center",   "preferences-system-privacy",    pages_c.build_privacy_center,
+         "privacy location camera microphone permissions broker telemetry timeline kill switches zero telemetry AI audit clear recent files trash"),
         ("online",       "Online Accounts",  "applications-internet",         pages_a.build_online_accounts,
          "online accounts google nextcloud caldav mail calendar contacts files"),
         ("region",       "Language & Region","cs-language",                   pages_a.build_region,
@@ -50,6 +51,8 @@ SIDEBAR = [
          "account profile user full name shell groups login"),
         ("accessibility","Accessibility",    "preferences-desktop-accessibility", pages_a.build_accessibility,
          "accessibility a11y screen reader orca magnifier large text high contrast sticky keys slow keys bounce mouse keys hover click on-screen keyboard"),
+        ("apps",         "Installed Apps",   "preferences-desktop-applications", pages_c.build_apps,
+         "apps applications installed uninstall remove cache reset programs software"),
     ]),
     ("Desktop", [
         ("desktop",      "Desktop",          "cs-desktop",                    pages_a.build_desktop,
@@ -100,12 +103,20 @@ SIDEBAR = [
          "storage disks partitions btrfs trim ssd lsblk mounts filesystems"),
         ("drivers",      "Drivers",          "applications-science",          pages_b.build_drivers,
          "drivers gpu nvidia amd intel mesa vulkan akmod firmware fwupd rpmfusion"),
+        ("gaming",       "Gaming",           "applications-games",            pages_c.build_gaming,
+         "gaming gamemode cpu governor zram ananicy mangohud gamescope performance fps latency"),
+        ("devices",      "Cameras & Gamepads","camera-video",                 pages_c.build_devices,
+         "devices cameras video v4l2 webcam gamepad joystick controller game controller calibration"),
     ]),
     ("System", [
         ("network",      "Network",          "preferences-system-network",    pages_b.build_network,
          "network wifi ethernet vpn proxy dns nmcli wireless"),
-        ("security",     "Security",         "security-high",                 pages_b.build_security,
-         "security firewall firewalld ufw selinux encryption luks secure boot ssh"),
+        ("aegis",        "Aegis Security",   "security-high",                 pages_c.build_aegis,
+         "aegis antivirus malware endpoint protection behavioral reverse shell quarantine incidents scan shields eicar threat"),
+        ("security",     "Security & Firewall","security-high",               pages_b.build_security,
+         "security firewall firewalld ufw selinux encryption luks secure boot ssh tpm mitigations"),
+        ("doctor",       "System Doctor",    "applications-engineering",      pages_c.build_doctor,
+         "doctor repair diagnosis self-healing anti-brick bootloader fstab packages rollback snapshots auto-repair"),
         ("sources",      "Software Sources", "package-x-generic",             pages_b.build_sources,
          "sources repositories repos dnf copr rpmfusion flatpak flathub mirrors"),
         ("updates",      "Update Manager",   "system-software-update",        pages_b.build_updates,
@@ -210,19 +221,22 @@ class SettingsWindow(Gtk.ApplicationWindow):
         self.show_all()
         self.show_page(initial_page)
 
-    # ── Sidebar group headers ─────────────────────────────────────────
+    # ── Sidebar group headers (once per group, above its first row) ───
+    @staticmethod
+    def _group_of(pid):
+        for gname, items in SIDEBAR:
+            if any(i[0] == pid for i in items):
+                return gname
+        return None
+
     def _sidebar_headers(self, row, before, data=None):
-        if row.get_header() is None:
-            pid = row.pid
-            group = None
-            for gname, items in SIDEBAR:
-                if any(i[0] == pid for i in items):
-                    group = gname
-                    break
-            if group:
-                h = Gtk.Label(label=group.upper(), xalign=0)
+        if before is None or self._group_of(before.pid) != self._group_of(row.pid):
+            if not isinstance(row.get_header(), Gtk.Label):
+                h = Gtk.Label(label=(self._group_of(row.pid) or "").upper(), xalign=0)
                 h.get_style_context().add_class("sidebar-group")
                 row.set_header(h)
+        else:
+            row.set_header(None)
 
     # ── Page switching ────────────────────────────────────────────────
     def show_page(self, pid):
