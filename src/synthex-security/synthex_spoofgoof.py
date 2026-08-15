@@ -22,6 +22,7 @@ import json
 import random
 import socket
 import select
+import shutil
 import subprocess
 import threading
 from pathlib import Path
@@ -629,6 +630,330 @@ net.ipv6.conf.default.use_tempaddr = 2
         self._save_config(cfg)
         return True
 
+    # ── 5. Trace-Link Audit & History Purge ──────────────────────────────────
+    #
+    # IP rotation defeats the LOCAL observer. It does NOT cut the threads that
+    # actually re-attach your history: persistent browser state, logged-in
+    # account sessions, ISP DHCP/RADIUS logs (who had which IP, when), DNS
+    # egress patterns, a stable IPv6 prefix, and an identifying hostname.
+    # These methods audit and (where possible) mitigate those link vectors.
+
+    FIREFOX_GLOBS = [".mozilla/firefox/*default*", ".mozilla/firefox/*.default-release*",
+                     ".librewolf", ".waterfox"]
+    CHROMIUM_DIRS = [".config/google-chrome", ".config/chromium",
+                     ".config/BraveSoftware/Brave-Browser", ".config/thorium-browser",
+                     ".config/vivaldi", ".config/BraveSoftware/Brave-Browser-Beta"]
+
+    @classmethod
+    def _browser_state(cls, root: Path) -> Dict:
+        """Counts linkable artifacts across installed browsers (read-only)."""
+        out = {"profiles": [], "cookie_dbs": 0, "history_dbs": 0,
+               "cache_bytes": 0, "storage_dirs": 0}
+        for pat in cls.FIREFOX_GLOBS:
+            for prof in root.glob(pat):
+                if not prof.is_dir():
+                    continue
+                cookies = prof / "cookies.sqlite"
+                places = prof / "places.sqlite"
+                n_cookies = 0
+                if cookies.exists():
+                    try:
+                        import sqlite3 as _sq
+                        with _sq.connect(f"file:{cookies}?mode=ro", uri=True, timeout=2) as cx:
+                            n_cookies = cx.execute("SELECT COUNT(*) FROM moz_cookies").fetchone()[0]
+                    except Exception:
+                        n_cookies = -1
+                    out["cookie_dbs"] += 1
+                n_hist = 0
+                if places.exists():
+                    try:
+                        import sqlite3 as _sq
+                        with _sq.connect(f"file:{places}?mode=ro", uri=True, timeout=2) as cx:
+                            n_hist = cx.execute("SELECT COUNT(*) FROM moz_places").fetchone()[0]
+                    except Exception:
+                        n_hist = -1
+                    out["history_dbs"] += 1
+                cache = prof / "cache2"
+                cbytes = sum(f.stat().st_size for f in cache.rglob("*") if f.is_file()) if cache.exists() else 0
+                storage = prof / "storage" / "default"
+                nstor = len(list(storage.iterdir())) if storage.exists() else 0
+                out["cache_bytes"] += cbytes
+                out["storage_dirs"] += nstor
+                out["profiles"].append({"engine": "firefox", "path": str(prof),
+                                        "cookies": n_cookies, "history": n_hist,
+                                        "storage_origins": nstor, "cache_bytes": cbytes})
+        for cdir in cls.CHROMIUM_DIRS:
+            base = root / cdir
+            if not base.is_dir():
+                continue
+            for prof_dir in list(base.glob("*")):
+                if not prof_dir.is_dir():
+                    continue
+                cookies = prof_dir / "Cookies"
+                history = prof_dir / "History"
+                cache = prof_dir / "Cache" / "Cache_Data"
+                cbytes = sum(f.stat().st_size for f in cache.rglob("*") if f.is_file()) if cache.exists() else 0
+                storage = prof_dir / "Local Storage" / "leveldb"
+                nstor = len(list(storage.glob("*.ldb"))) if storage.exists() else 0
+                if cookies.exists() or history.exists():
+                    out["profiles"].append({"engine": "chromium", "path": str(prof_dir),
+                                            "cookies": -1 if cookies.exists() else 0,
+                                            "history": -1 if history.exists() else 0,
+                                            "storage_origins": nstor, "cache_bytes": cbytes})
+                    out["cookie_dbs"] += 1 if cookies.exists() else 0
+                    out["history_dbs"] += 1 if history.exists() else 0
+                    out["cache_bytes"] += cbytes
+                    out["storage_dirs"] += nstor
+        return out
+
+    @classmethod
+    def audit_traceability(cls) -> List[Dict[str, Any]]:
+        """Live audit of every vector that can re-link a rotated identity."""
+        findings: List[Dict[str, Any]] = []
+        home = Path.home()
+
+        def add(vector, severity, risk, detail, mitigated=False, mitigation=""):
+            findings.append({"vector": vector, "severity": severity, "risk": risk,
+                             "detail": detail, "mitigated": mitigated, "mitigation": mitigation})
+
+        # 1. Persistent browser state
+        try:
+            bs = cls._browser_state(home)
+            if bs["profiles"]:
+                cookies = sum(max(p["cookies"], 0) for p in bs["profiles"])
+                storage = sum(p["storage_origins"] for p in bs["profiles"])
+                sessions = any(p["cookies"] > 20 for p in bs["profiles"])
+                add("Browser cookies & site storage", 3 if sessions else 2,
+                    "Cookies/localStorage re-attach your identity the moment you reconnect — "
+                    "a new IP does not clear them" +
+                    (" (likely logged-in sessions detected)" if sessions else ""),
+                    f"{len(bs['profiles'])} profile(s) · {cookies} cookies · {storage} site-storage origins · "
+                    f"{bs['cache_bytes'] // 1024} KB cache",
+                    mitigated=False, mitigation="Purge browser linkage (below), or use a throwaway profile")
+            else:
+                add("Browser cookies & site storage", 0, "No browser profiles found",
+                    "none detected", mitigated=True)
+        except Exception as e:
+            add("Browser cookies & site storage", 1, "audit error", str(e)[:80])
+
+        # 2. DNS egress path
+        try:
+            r = subprocess.run(["resolvectl", "status"], capture_output=True, text=True, timeout=5)
+            dot = "DNSOverTLS" in r.stdout and ("+DNSOverTLS" in r.stdout or "DNSOverTLS=yes" in r.stdout)
+            stub = "stub" in r.stdout
+            add("DNS egress path", 0 if dot else 2,
+                "Plaintext DNS lets the ISP build your full browsing history even with a new IP",
+                "DoT active + DNSSEC + stub resolver" if dot and stub else
+                ("encrypted DNS not confirmed: " + r.stdout.splitlines()[0][:60] if r.stdout else "resolvectl unavailable"),
+                mitigated=dot, mitigation="Already enforced by Synthex encrypted-DNS policy" if dot
+                else "Enable DNS-over-TLS in resolved config")
+        except Exception:
+            add("DNS egress path", 1, "could not determine", "resolvectl unavailable")
+
+        # 3. Hostname identity
+        try:
+            hn = socket.gethostname()
+            user = os.environ.get("USER", "")
+            identifying = (user and user.lower() in hn.lower()) or                           any(w in hn.lower() for w in ("name", "laptop", "pc-", "desk"))
+            mdns = subprocess.run(["pgrep", "-x", "avahi-daemon"], capture_output=True).returncode == 0
+            leaked = identifying or (mdns and identifying)
+            add("Hostname identity", 2 if identifying else (1 if mdns else 0),
+                "An identifying hostname is broadcast on the LAN (mDNS/SSDP) even when "
+                "DHCP option-12 is stripped for the ISP path",
+                f"hostname='{hn}' · mDNS daemon {'running' if mdns else 'off'}",
+                mitigated=not identifying,
+                mitigation="Set a generic hostname (System Info → Hostname) and/or disable avahi")
+        except Exception:
+            pass
+
+        # 4. Clock synchronization (skew is a passive fingerprint)
+        try:
+            r = subprocess.run(["timedatectl", "show", "-p", "NTPSynchronized", "--value"],
+                               capture_output=True, text=True, timeout=5).stdout.strip()
+            synced = r == "yes"
+            add("Clock skew fingerprint", 0 if synced else 1,
+                "An unsynchronized clock is a stable passive fingerprint across IP changes",
+                f"NTP synchronized: {synced}",
+                mitigated=synced, mitigation="Enable automatic date & time (Date & Time settings)")
+        except Exception:
+            pass
+
+        # 5. IPv6 temporary addresses
+        try:
+            r = subprocess.run(["bash", "-c",
+                                "ip -o -6 addr show scope global 2>/dev/null | grep -c temporary"],
+                               capture_output=True, text=True, timeout=5).stdout.strip()
+            n_temp = int(r or 0)
+            has_v6 = subprocess.run(["bash", "-c", "ip -o -6 addr show scope global | head -1"],
+                                    capture_output=True, text=True, timeout=5).stdout.strip()
+            if has_v6:
+                add("IPv6 address stability", 0 if n_temp > 0 else 2,
+                    "The IPv6 prefix is ISP-delegated (stable per household); without "
+                    "temporary addresses the interface ID is a permanent tracker",
+                    f"{n_temp} temporary (privacy) address(es) in use",
+                    mitigated=n_temp > 0,
+                    mitigation="RFC 4941 privacy extensions already enforced" if n_temp > 0
+                    else "Run 'Enforce 100%' to enable ipv6 use_tempaddr=2")
+        except Exception:
+            pass
+
+        # 6. ISP-side logs (honest, cannot be mitigated locally)
+        add("ISP connection logs", 3,
+            "NOT mitigable by any local tool: your ISP logs DHCP leases, RADIUS sessions "
+            "and flow records tying every IP you ever held to your account. Only routing "
+            "through Tor (or a chain you trust) removes your IP from the site's view of "
+            "the request origin.",
+            "Rotation gives you a new address — it does not delete the ISP's records",
+            mitigated=False,
+            mitigation="Use Tor for activities where the origin IP must not be linkable to you")
+
+        # 7. Tor availability
+        ts = cls.tor_status()
+        add("Tor circuit availability", 0 if ts.get("socks_listening") else 2,
+            "Tor is the only listed tool that actually removes your IP from the "
+            "destination's view (three-hop onion routing)",
+            f"installed={ts.get('installed')} · service={ts.get('service')} · "
+            f"SOCKS 9050={'listening' if ts.get('socks_listening') else 'closed'}",
+            mitigated=bool(ts.get("socks_listening")),
+            mitigation="Enable Tor below, then route traffic via SOCKS5 127.0.0.1:9050")
+
+        # 8. MAC state
+        mac_ok, mac_msg = cls._verify_mac_cloaking()
+        add("MAC address stability", 0 if mac_ok else 2,
+            "A stable vendor MAC tracks you across every network you join",
+            mac_msg, mitigated=mac_ok, mitigation="Enforce 100% / rotate identity")
+        return findings
+
+    @classmethod
+    def purge_browser_linkage(cls, root: Optional[Path] = None, full: bool = True) -> Dict:
+        """Destroys linkable browser state: cookies, history, cache, site storage.
+        Bookmarks/passwords are PRESERVED. Browsers should be closed (reported)."""
+        root = root or Path.home()
+        report = {"purged": [], "errors": [], "running": []}
+
+        for name, pats in (("firefox", cls.FIREFOX_GLOBS),):
+            for pat in pats:
+                for prof in root.glob(pat):
+                    if not prof.is_dir():
+                        continue
+                    if subprocess.run(["pgrep", "-f", prof.name], capture_output=True).returncode == 0:
+                        report["running"].append(prof.name)
+                    try:
+                        import sqlite3 as _sq
+                        cookies = prof / "cookies.sqlite"
+                        if cookies.exists():
+                            with _sq.connect(cookies, timeout=4) as cx:
+                                cx.execute("DELETE FROM moz_cookies")
+                                cx.commit()
+                            for suffix in ("-wal", "-shm"):
+                                wal = Path(str(cookies) + suffix)
+                                if wal.exists():
+                                    wal.unlink()
+                            report["purged"].append(f"{prof.name}: cookies")
+                        if full:
+                            places = prof / "places.sqlite"
+                            if places.exists():
+                                with _sq.connect(places, timeout=4) as cx:
+                                    cx.execute("DELETE FROM moz_places")
+                                    cx.execute("DELETE FROM moz_historyvisits")
+                                    cx.commit()
+                                report["purged"].append(f"{prof.name}: history")
+                            for sub in ("cache2", "startupCache", "shader-cache",
+                                        "storage/default", "storage/temporary",
+                                        "sessionstore-backups", "sessions"):
+                                d = prof / sub
+                                if d.exists():
+                                    shutil.rmtree(d, ignore_errors=True)
+                                    report["purged"].append(f"{prof.name}: {sub}")
+                    except Exception as e:
+                        report["errors"].append(f"{prof.name}: {e}")
+
+        for cdir in cls.CHROMIUM_DIRS:
+            base = root / cdir
+            if not base.is_dir():
+                continue
+            for prof_dir in list(base.glob("*")):
+                if not prof_dir.is_dir() or prof_dir.name in ("GrShaderCache", "GraphiteDawnCache", "Crashpad"):
+                    continue
+                if subprocess.run(["pgrep", "-f", prof_dir.parent.name], capture_output=True).returncode == 0:
+                    report["running"].append(prof_dir.parent.name)
+                try:
+                    for sub in ("Cookies", "Cookies-journal", "History", "History-journal",
+                                "Cache", "Code Cache", "GPUCache", "Service Worker",
+                                "Local Storage", "Session Storage", "IndexedDB", "Media Cache"):
+                        target = prof_dir / sub
+                        if target.exists():
+                            if target.is_dir():
+                                shutil.rmtree(target, ignore_errors=True)
+                            else:
+                                target.unlink()
+                            report["purged"].append(f"{prof_dir.parent.name}/{prof_dir.name}: {sub}")
+                except Exception as e:
+                    report["errors"].append(f"{prof_dir}: {e}")
+        return report
+
+    # ── 6. Tor circuit integration ────────────────────────────────────────────
+
+    @staticmethod
+    def tor_status() -> Dict:
+        installed = shutil.which("tor") is not None
+        service = "unknown"
+        if installed:
+            r = subprocess.run(["systemctl", "is-active", "tor"], capture_output=True, text=True, timeout=4)
+            service = r.stdout.strip() or "unknown"
+        socks = False
+        try:
+            with socket.create_connection(("127.0.0.1", 9050), timeout=1.5):
+                socks = True
+        except Exception:
+            pass
+        return {"installed": installed, "service": service, "socks_listening": socks}
+
+    @staticmethod
+    def tor_enable() -> Tuple[bool, str]:
+        ensure = ["systemctl", "enable", "--now", "tor"]
+        if not shutil.which("tor"):
+            r = subprocess.run(["pkexec", "dnf", "install", "-y", "tor"],
+                               capture_output=True, text=True, timeout=600)
+            if r.returncode != 0:
+                return False, f"tor install failed: {r.stderr[-120:]}"
+        r = subprocess.run(["pkexec", *ensure], capture_output=True, text=True, timeout=30)
+        if r.returncode != 0:
+            return False, f"systemctl failed: {r.stderr[-120:]}"
+        for _ in range(20):
+            try:
+                with socket.create_connection(("127.0.0.1", 9050), timeout=1):
+                    return True, "Tor circuit up — SOCKS5 127.0.0.1:9050 listening"
+            except Exception:
+                time.sleep(1)
+        return False, "tor service started but SOCKS 9050 not listening yet"
+
+    @staticmethod
+    def tor_disable() -> bool:
+        subprocess.run(["pkexec", "systemctl", "disable", "--now", "tor"],
+                       capture_output=True, timeout=30)
+        return True
+
+    @staticmethod
+    def set_system_proxy_via_tor(enable: bool) -> bool:
+        """Points the desktop proxy stack at the local Tor SOCKS port."""
+        mode = "manual" if enable else "none"
+        try:
+            subprocess.run(["gsettings", "set", "org.gnome.system.proxy", "mode", mode],
+                           capture_output=True, timeout=5)
+            if enable:
+                subprocess.run(["gsettings", "set", "org.gnome.system.proxy.socks",
+                                "host", "127.0.0.1"], capture_output=True, timeout=5)
+                subprocess.run(["gsettings", "set", "org.gnome.system.proxy.socks",
+                                "port", "9050"], capture_output=True, timeout=5)
+                subprocess.run(["gsettings", "set", "org.gnome.system.proxy",
+                                "ignore-hosts",
+                                "['localhost', '127.0.0.0/8', '::1', '10.0.0.0/8', '192.168.0.0/16']"],
+                               capture_output=True, timeout=5)
+            return True
+        except Exception:
+            return False
+
     def run_daemon(self):
         """Continuous background daemon loop emitting multi-protocol chaff."""
         print(f"[SpoofGoof] Starting 100% Full-Spectrum packet morphing & chaff daemon (PID: {os.getpid()})...")
@@ -751,6 +1076,38 @@ def main():
     elif sys.argv[1] == "auto-rotate" and len(sys.argv) >= 3:
         engine.set_ip_rotate_interval(int(sys.argv[2]))
         print(f"✓ Auto IP rotation every {sys.argv[2]} minutes (0=off). Applied by daemon.")
+    elif sys.argv[1] == "audit-trace":
+        findings = SpoofGoofEngine.audit_traceability()
+        sev_name = {0: "MITIGATED", 1: "LOW", 2: "HIGH", 3: "CRITICAL"}
+        for f in findings:
+            icon = {0: "🟢", 1: "🟡", 2: "🟠", 3: "🔴"}[f["severity"]]
+            print(f"{icon} [{sev_name[f['severity']]:9s}] {f['vector']}")
+            print(f"   risk: {f['risk']}")
+            print(f"   state: {f['detail']}")
+            if not f["mitigated"] and f["mitigation"]:
+                print(f"   fix:  {f['mitigation']}")
+    elif sys.argv[1] == "purge-history":
+        rep = SpoofGoofEngine.purge_browser_linkage()
+        if rep["running"]:
+            print(f"⚠ close these browsers first: {', '.join(set(rep['running']))}")
+        for item in rep["purged"]:
+            print(f"  purged {item}")
+        for err in rep["errors"]:
+            print(f"  error  {err}")
+        print(f"✓ purge complete: {len(rep['purged'])} items removed, bookmarks/passwords preserved")
+    elif sys.argv[1] == "tor":
+        ts = SpoofGoofEngine.tor_status()
+        print(f"tor: installed={ts['installed']} service={ts['service']} socks9050={ts['socks_listening']}")
+    elif sys.argv[1] == "tor-on":
+        ok, msg = SpoofGoofEngine.tor_enable()
+        print(("[OK] " if ok else "[ERR] ") + msg)
+    elif sys.argv[1] == "tor-off":
+        SpoofGoofEngine.tor_disable()
+        print("[OK] tor disabled")
+    elif sys.argv[1] == "tor-proxy":
+        which = sys.argv[2] if len(sys.argv) > 2 else "on"
+        SpoofGoofEngine.set_system_proxy_via_tor(which == "on")
+        print(f"[OK] system proxy {'→ Tor SOCKS 127.0.0.1:9050' if which == 'on' else 'cleared'}")
     elif sys.argv[1] == "json":
         print(json.dumps(engine.get_status(), indent=2))
     else:

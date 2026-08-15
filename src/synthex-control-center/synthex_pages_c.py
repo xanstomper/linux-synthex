@@ -620,6 +620,102 @@ def build_spoofgoof(toast):
     sec.add_row(row)
     col.add(sec)
 
+    # ── Trace-link audit: what re-attaches your history ───────────────
+    def render_audit(findings, sec):
+        icons = {0: ("dot-ok", "ok"), 1: ("dot-warn", "neutral"), 2: ("dot-warn", "warn"), 3: ("dot-err", "err")}
+        for f in findings[:10]:
+            dot_css, badge_kind = icons.get(f.get("severity", 1), ("dot-off", "neutral"))
+            sev_label = {0: "Mitigated", 1: "Low", 2: "High", 3: "Critical"}[f.get("severity", 1)]
+            sec.add_row(entity_card(f.get("vector", "?")[:42], f.get("detail", "")[:72],
+                                    icon_name="preferences-system-privacy",
+                                    trailing=badge(sev_label, badge_kind)))
+
+    col.add(AsyncSection("Trace-link audit", "What can still re-attach your history after an IP change",
+                         loader=lambda: SpoofGoofAdapter.audit_traceability(),
+                         renderer=render_audit))
+
+    def _purge(b):
+        dlg = Gtk.MessageDialog(transient_for=None, flags=0,
+                                message_type=Gtk.MessageType.WARNING,
+                                buttons=Gtk.ButtonsType.OK_CANCEL,
+                                text="Purge browser linkage state?")
+        dlg.format_secondary_text(
+            "Destroys cookies, history, cache and site storage in ALL browsers.\n"
+            "Bookmarks and passwords are preserved. Close your browsers first.\n"
+            "You will be logged out of every site.")
+        if dlg.run() == Gtk.ResponseType.OK:
+            dlg.destroy()
+            def work():
+                rep = SpoofGoofAdapter.purge_browser_linkage()
+                n = len(rep.get("purged", []))
+                warn = (" · CLOSE: " + ", ".join(set(rep["running"]))) if rep.get("running") else ""
+                GLib.idle_add(lambda: toast.show_message(
+                    f"Purged {n} linkage items (bookmarks kept){warn}"[:110],
+                    error=bool(rep.get("errors")), seconds=7))
+            threading.Thread(target=work, daemon=True).start()
+        else:
+            dlg.destroy()
+
+    sec = Section("History purge")
+    sec.add_row(buttons_row("Browser linkage purge", "Cookies · history · cache · site storage — bookmarks & passwords kept",
+                            icon="edit-clear-all",
+                            buttons=[("Purge all browsers", "btn-destructive", _purge)]))
+    col.add(sec)
+
+    # ── Tor: the only real answer to ISP-log tracing ──────────────────
+    tor = SpoofGoofAdapter.tor_status()
+    sec = Section("Tor circuit")
+    tsw = Gtk.Switch(valign=Gtk.Align.CENTER)
+    tsw.set_active(bool(tor.get("socks_listening")))
+
+    def _on_tor(sw, state):
+        toast.show_message("Bringing up Tor circuit…" if state else "Stopping Tor…", seconds=4)
+        def work():
+            if state:
+                ok, msg = SpoofGoofAdapter.tor_enable()
+            else:
+                ok, msg = SpoofGoofAdapter.tor_disable(), "Tor disabled"
+            GLib.idle_add(lambda: (sw.set_active(bool(SpoofGoofAdapter.tor_status().get("socks_listening"))),
+                                   toast.show_message(msg[:90], error=not ok, seconds=6)))
+        threading.Thread(target=work, daemon=True).start()
+        return True
+
+    tsw.connect("state-set", _on_tor)
+    sec.add_row(entity_card("Tor daemon",
+                            "Three-hop onion routing — removes your IP from the destination's view",
+                            icon_name="network-vpn", trailing=tsw))
+
+    prox = Gtk.Switch(valign=Gtk.Align.CENTER)
+    ok_px, px_mode, _ = run_cmd(["gsettings", "get", "org.gnome.system.proxy", "mode"], timeout=4)
+
+    def _proxy_state():
+        okm, m, _ = run_cmd(["gsettings", "get", "org.gnome.system.proxy", "mode"], timeout=4)
+        return "manual" in (m or "")
+    prox.set_active(_proxy_state())
+
+    def _on_proxy(sw, state):
+        SpoofGoofAdapter.set_system_proxy_via_tor(state)
+        toast.show_message("System proxy → Tor SOCKS 127.0.0.1:9050" if state else "System proxy cleared")
+        return True
+    prox.connect("state-set", _on_proxy)
+    sec.add_row(entity_card("Route desktop via Tor", "SOCKS5 127.0.0.1:9050 for proxy-aware apps",
+                            icon_name="preferences-system-network", trailing=prox))
+    col.add(sec)
+
+    # ── Honest threat model ────────────────────────────────────────────
+    sec = Section("What rotation can — and cannot — do")
+    for line, kind in [
+        ("✓  Local network & access point: you appear as a brand-new device", "ok"),
+        ("✓  Websites see a new address; hostname stripped; DNS encrypted end-to-end", "ok"),
+        ("✗  Cookies, storage and LOGINS re-link you instantly — purge or use a clean profile", "err"),
+        ("✗  ISP logs tie every IP you ever held to your account — rotation deletes nothing", "err"),
+        ("✗  IPv6 prefix is household-stable (ISP-delegated) regardless of rotation", "err"),
+        ("→  For traffic that must not be traceable to your IP: use the Tor circuit above", "neutral"),
+    ]:
+        sec.add_row(entity_card("", line, trailing=badge("", kind) if False else None)
+                    if False else Gtk.Label(label=line, xalign=0.02))
+    col.add(sec)
+
     # ── Live stats ────────────────────────────────────────────────────
     sec = Section("Live statistics")
     sec.add_row(entity_card("Latency penalty", str(st.get("network_latency_penalty", "+0.0 ms")),

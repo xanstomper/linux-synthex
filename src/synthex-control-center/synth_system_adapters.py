@@ -2212,6 +2212,49 @@ class SpoofGoofAdapter:
             return False
 
     @classmethod
+    def audit_traceability(cls):
+        try:
+            return cls._get_engine().audit_traceability()
+        except Exception as e:
+            return [{"vector": "audit error", "severity": 1, "risk": str(e)[:80],
+                     "detail": "", "mitigated": False, "mitigation": ""}]
+
+    @classmethod
+    def purge_browser_linkage(cls, root=None):
+        try:
+            return cls._get_engine().purge_browser_linkage(root=root)
+        except Exception as e:
+            return {"purged": [], "errors": [str(e)], "running": []}
+
+    @classmethod
+    def tor_status(cls) -> Dict:
+        try:
+            return cls._get_engine().tor_status()
+        except Exception:
+            return {"installed": False, "service": "unknown", "socks_listening": False}
+
+    @classmethod
+    def tor_enable(cls):
+        try:
+            return cls._get_engine().tor_enable()
+        except Exception as e:
+            return False, str(e)
+
+    @classmethod
+    def tor_disable(cls) -> bool:
+        try:
+            return cls._get_engine().tor_disable()
+        except Exception:
+            return False
+
+    @classmethod
+    def set_system_proxy_via_tor(cls, enable: bool) -> bool:
+        try:
+            return cls._get_engine().set_system_proxy_via_tor(enable)
+        except Exception:
+            return False
+
+    @classmethod
     def daemon_status(cls) -> Dict:
         ok, out, _ = run_cmd(["systemctl", "is-active", "synthex-spoofgoof"], timeout=4)
         active = ok and "active" in (out or "")
