@@ -1588,7 +1588,32 @@ try:
 except Exception as _e:
     check("snapshot manager functional validation", False, str(_e))
 
+# 88. Synthex Firstboot OOBE & Hardware Driver Auto-Detection Engine
+print("\n📋 Synthex Firstboot OOBE & Hardware Driver Auto-Detection Engine:")
+oobe_dir = os.path.join(ROOT, "src", "synthex-oobe")
+check("synthex oobe wizard script exists", os.path.exists(os.path.join(oobe_dir, "synthex_oobe_wizard.py")))
+check("synthex-oobe cli launcher exists", os.access(os.path.join(ROOT, "src", "synthex-oobe-cli"), os.X_OK))
+check("synthex driver manager cli exists", os.access(os.path.join(ROOT, "src", "synthex-driver-manager"), os.X_OK))
+
+try:
+    if oobe_dir not in sys.path:
+        sys.path.insert(0, oobe_dir)
+    from synthex_oobe_wizard import SynthexOOBEWizard
+    oobe_wiz = SynthexOOBEWizard(dry_run=True)
+    check("oobe wizard initialized", oobe_wiz is not None)
+    ob_st = oobe_wiz.get_status()
+    check("oobe status query pass", "READY" in ob_st.get("status", ""))
+    inv = oobe_wiz.probe_hardware()
+    check("hardware inventory probe pass", inv.cpu_cores >= 1 and len(inv.devices) >= 1)
+    d_res = oobe_wiz.auto_install_drivers()
+    check("driver auto-detection pass", d_res.get("ok") is True)
+    init_res = oobe_wiz.run_firstboot_initialization("Privacy & Enterprise Hardened")
+    check("firstboot initialization dry-run pass", init_res.get("status") == "FIRSTBOOT_INITIALIZED")
+except Exception as _e:
+    check("oobe wizard functional validation", False, str(_e))
+
 # Summary
+
 
 
 
