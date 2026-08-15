@@ -56,6 +56,11 @@ public slots:
         return out;
     }
 
+    Q_INVOKABLE void exec(const QString &command) {
+        if (command.isEmpty()) return;
+        QProcess::startDetached("/bin/sh", {"-c", command});
+    }
+
     void captureSystemInfo() {
         QJsonObject info;
         QFile cpu("/proc/cpuinfo");
