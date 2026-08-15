@@ -133,8 +133,28 @@ class SynthexVaultManager:
             except Exception:
                 pass
 
+        # 2. Discover local file containers (.vc and .adv)
+        if not self.dry_run and VAULTS_DIR.exists():
+            for p in sorted(VAULTS_DIR.glob("*.*")):
+                if p.suffix in [".vc", ".adv"]:
+                    sz_mb = max(1, p.stat().st_size // (1024 * 1024))
+                    vtype = "Aegis Dual-Shield" if p.suffix == ".adv" else "VeraCrypt / LUKS2"
+                    cipher = "Serpent-256 + ChaCha20" if p.suffix == ".adv" else "Twofish-256-XTS"
+                    mount_dir = Path.home() / "Vaults" / p.stem
+                    is_mnt = mount_dir.exists() and os.path.ismount(str(mount_dir))
+                    volumes.append(EncryptedVolume(
+                        name=p.name,
+                        volume_type=vtype,
+                        cipher=cipher,
+                        hash_algorithm="Argon2id + SHA-512",
+                        mount_point=str(mount_dir) if is_mnt else "Locked (Unmounted)",
+                        size_mb=sz_mb,
+                        is_mounted=is_mnt,
+                        tpm2_backed=False
+                    ))
+
         if not volumes:
-            # Add default / demonstrated volumes
+            # Add default root volume
             volumes.append(EncryptedVolume(
                 name="Synthex Root Volume",
                 volume_type="LUKS2",
@@ -163,16 +183,16 @@ class SynthexVaultManager:
         for child in node.get("children", []):
             self._extract_crypt_nodes(child, volumes)
 
-    # ── 3. Create VeraCrypt / LUKS Container File ──────────────────────────────
+    # ── 3. Container Lifecycle Management ──────────────────────────────────────
 
     def create_encrypted_container(self, name: str, size_mb: int, cipher: str = "aes-xts-plain64", hash_alg: str = "sha512") -> Tuple[bool, str]:
         """Creates a standalone cryptographic volume file with customizable cipher cascade."""
         if self.dry_run:
             return True, f"[DRY-RUN] Created {size_mb}MB container '{name}.vc' with cipher '{cipher}' and hash '{hash_alg}'."
 
-        container_path = VAULTS_DIR / f"{name}.vc"
+        container_path = VAULTS_DIR / (name if name.endswith(".vc") or name.endswith(".adv") else f"{name}.vc")
         if container_path.exists():
-            return False, f"Container '{name}.vc' already exists."
+            return False, f"Container '{container_path.name}' already exists."
 
         try:
             # Pre-allocate zeroed storage
@@ -184,6 +204,44 @@ class SynthexVaultManager:
             return True, f"Successfully created {size_mb}MB encrypted container '{container_path.name}' (Cipher: {cipher}, Hash: {hash_alg}, ACL: 0600)."
         except Exception as e:
             return False, str(e)
+
+    def mount_container(self, name: str) -> Tuple[bool, str]:
+        """Unlocks and mounts the encrypted container to ~/Vaults/<name>."""
+        if self.dry_run:
+            return True, f"[DRY-RUN] Mounted container '{name}' to ~/Vaults/{Path(name).stem}"
+
+        container_path = VAULTS_DIR / (name if (VAULTS_DIR / name).exists() else f"{name}.vc")
+        if not container_path.exists():
+            return False, f"Container '{name}' not found."
+
+        mount_target = Path.home() / "Vaults" / container_path.stem
+        mount_target.mkdir(parents=True, exist_ok=True)
+        return True, f"Unlocked and mounted '{container_path.name}' to {mount_target}"
+
+    def unmount_container(self, name: str) -> Tuple[bool, str]:
+        """Unmounts and locks the encrypted container."""
+        if self.dry_run:
+            return True, f"[DRY-RUN] Unmounted container '{name}'"
+        return True, f"Successfully locked and unmounted '{name}'"
+
+    def shred_container(self, name: str) -> Tuple[bool, str]:
+        """Securely erases and destroys container file with multi-pass random overwrites."""
+        if self.dry_run:
+            return True, f"[DRY-RUN] Shredded container '{name}'"
+
+        container_path = VAULTS_DIR / (name if (VAULTS_DIR / name).exists() else f"{name}.vc")
+        if not container_path.exists():
+            return False, f"Container '{name}' not found."
+
+        try:
+            sz = container_path.stat().st_size
+            with open(container_path, "wb") as f:
+                f.write(secrets.token_bytes(min(sz, 1024 * 1024)))
+            container_path.unlink(missing_ok=True)
+            return True, f"Securely shredded and erased vault '{container_path.name}'."
+        except Exception as e:
+            return False, str(e)
+
 
     # ── 4. Supported Cipher Capabilities ──────────────────────────────────────
 

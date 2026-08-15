@@ -2702,6 +2702,31 @@ class CryptVaultAdapter:
         except Exception:
             return {"primary_ciphers": [], "cascades": [], "kdf_hashes": []}
 
+    @classmethod
+    def mount_vault(cls, name: str) -> Dict:
+        try:
+            ok, msg = cls._get_engine().mount_container(name)
+            return {"status": "ok" if ok else "error", "message": msg}
+        except Exception as e:
+            return {"status": "error", "message": str(e)}
+
+    @classmethod
+    def unmount_vault(cls, name: str) -> Dict:
+        try:
+            ok, msg = cls._get_engine().unmount_container(name)
+            return {"status": "ok" if ok else "error", "message": msg}
+        except Exception as e:
+            return {"status": "error", "message": str(e)}
+
+    @classmethod
+    def shred_vault(cls, name: str) -> Dict:
+        try:
+            ok, msg = cls._get_engine().shred_container(name)
+            return {"status": "ok" if ok else "error", "message": msg}
+        except Exception as e:
+            return {"status": "error", "message": str(e)}
+
+
 
 # ── 31. Aegis Dual-Encryption & Chunk Dispersal Adapter ──────────────────────
 
