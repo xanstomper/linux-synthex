@@ -1277,6 +1277,41 @@ try:
 except Exception as _e:
     check("fingerprint shield functional validation", False, str(_e))
 
+# 77. Synthex AI Accelerator & Secure Agent Workchain Engine
+print("\n📋 Synthex AI Accelerator & Secure Agent Workchain Engine:")
+ai_dir = os.path.join(ROOT, "src", "synthex-ai-hub")
+agent_dir = os.path.join(ROOT, "src", "synthex-agent")
+check("synthex ai-accelerator script exists", os.path.exists(os.path.join(ai_dir, "synthex_ai_accelerator.py")))
+check("synthex agent-workchain script exists", os.path.exists(os.path.join(agent_dir, "synthex_agent_workchain.py")))
+check("synthex-ai cli launcher exists", os.access(os.path.join(ROOT, "src", "synthex-ai"), os.X_OK))
+check("synthex-workchain cli launcher exists", os.access(os.path.join(ROOT, "src", "synthex-workchain"), os.X_OK))
+
+try:
+    sys.path.insert(0, ai_dir)
+    sys.path.insert(0, agent_dir)
+    from synthex_ai_accelerator import SynthexAIAccelerator
+    ai_accel = SynthexAIAccelerator(dry_run=True)
+    check("ai accelerator initialized", ai_accel is not None)
+    ai_st = ai_accel.get_status()
+    check("ai accelerator status query pass", "ACTIVE" in ai_st.get("status", ""))
+    ok_ao, _ = ai_accel.apply_ai_optimizations("llm_boost")
+    check("ai accelerator optimize dry-run", ok_ao is True)
+    ok_ap, _ = ai_accel.purge_vram_and_compact_memory()
+    check("ai accelerator purge dry-run", ok_ap is True)
+
+    from synthex_agent_workchain import SynthexAgentWorkchain
+    workchain = SynthexAgentWorkchain(dry_run=True)
+    check("agent workchain initialized", workchain is not None)
+    wc_st = workchain.get_status()
+    check("agent workchain status query pass", "OPTIMAL" in wc_st.get("status", ""))
+    ok_ws, _ = workchain.spawn_sandboxed_workplace("task-test-01", Path("/tmp"))
+    check("agent workplace spawn dry-run", ok_ws is True)
+    check("agent workplace cleanup dry-run", workchain.cleanup_workplace("task-test-01") is True)
+    ok_wc, count = workchain.cache_repo_context(Path(ROOT))
+    check("agent context caching dry-run", ok_wc is True and count > 0)
+except Exception as _e:
+    check("ai & agent workchain functional validation", False, str(_e))
+
 # Summary
 print(f"\n{'='*50}")
 print(f"  RESULTS: {passed} passed, {failed} failed")

@@ -1,0 +1,9 @@
+#!/usr/bin/env python3
+import sys
+from pathlib import Path
+_AGENT_DIR = Path(__file__).resolve().parent / "synthex-agent"
+if str(_AGENT_DIR) not in sys.path:
+    sys.path.insert(0, str(_AGENT_DIR))
+from synthex_agent_workchain import main
+if __name__ == "__main__":
+    main()
