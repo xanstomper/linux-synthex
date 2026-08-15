@@ -1401,6 +1401,24 @@ try:
 except Exception as _e:
     check("sql brain & guidance platform functional validation", False, str(_e))
 
+# 81. Synthex Dual-Engine LLM Turbocharger (Local & Cloud Acceleration)
+print("\n📋 Synthex Dual-Engine LLM Turbocharger (Local & Cloud Acceleration):")
+check("synthex llm-turbo script exists", os.path.exists(os.path.join(ai_dir, "synthex_llm_turbo.py")))
+check("synthex-turbo cli launcher exists", os.access(os.path.join(ROOT, "src", "synthex-turbo"), os.X_OK))
+
+try:
+    from synthex_llm_turbo import SynthexLLMTurbo
+    llm_turbo = SynthexLLMTurbo(dry_run=True)
+    check("llm turbo initialized", llm_turbo is not None)
+    turbo_st = llm_turbo.audit_llm_performance()
+    check("llm turbo audit pass", turbo_st.get("total_metrics", 0) == 5)
+    ok_tb, _ = llm_turbo.enable_all_turbo_optimizations()
+    check("llm turbo enable dry-run", ok_tb is True)
+    env_vars = llm_turbo.get_agent_env_vars()
+    check("llm agent env vars generated", "OMP_NUM_THREADS" in env_vars and "TCP_FASTOPEN" in env_vars)
+except Exception as _e:
+    check("llm turbocharger functional validation", False, str(_e))
+
 # Summary
 print(f"\n{'='*50}")
 print(f"  RESULTS: {passed} passed, {failed} failed")
