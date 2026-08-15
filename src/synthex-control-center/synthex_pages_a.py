@@ -8,6 +8,7 @@ from gi.repository import Gtk, GLib, Gio
 from synthex_design import (
     PageHeader, Section, Row, ContentColumn, Toast, badge, dot, button, label,
     toggle_row, combo_row, spin_row, slider_row, entry_row, buttons_row, entity_card,
+    AsyncSection,
 )
 from synth_system_adapters import (
     ThemeAdapter, PrivacyAdapter, SystemAdapter, run_cmd, safe_set_gsetting, get_gsettings,
@@ -143,33 +144,44 @@ def build_backgrounds(toast):
     col.add(PageHeader("Backgrounds", "Desktop wallpaper and slideshow",
                        badges=[(f"{len(walls)} images", "neutral")]))
 
-    sec = Section("Wallpaper")
-    flow = Gtk.FlowBox(max_children_per_line=5, selection_mode=Gtk.SelectionMode.SINGLE,
-                       homogeneous=True, column_spacing=8, row_spacing=8)
-    for w in walls[:25]:
-        try:
-            pix = Gtk.Image.new_from_file(w["path"])
-            pix.set_pixel_size(96)
-        except Exception:
-            pix = Gtk.Image.new_from_icon_name("image-x-generic", Gtk.IconSize.DIALOG)
-        box = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=2, border_width=2)
-        box.pack_start(pix, False, False, 0)
-        box.pack_start(label(w["name"], "entity-sub", xalign=0.5), False, False, 0)
-        flow.add(box)
-    flow.set_min_children_per_line(3)
-    wrap = Gtk.Box(border_width=10)
-    wrap.pack_start(flow, True, True, 0)
-    sec.add_widget(wrap)
+    def _thumbs(payload, sec):
+        flow = Gtk.FlowBox(max_children_per_line=5, selection_mode=Gtk.SelectionMode.SINGLE,
+                           homogeneous=True, column_spacing=8, row_spacing=8)
+        for pixbuf, name, path in payload:
+            img = Gtk.Image.new_from_pixbuf(pixbuf)
+            box = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=2, border_width=2)
+            box.pack_start(img, False, False, 0)
+            box.pack_start(label(name, "entity-sub", xalign=0.5), False, False, 0)
+            flow.add(box)
+        flow.set_min_children_per_line(3)
+        wrap = Gtk.Box(border_width=10)
+        wrap.pack_start(flow, True, True, 0)
+        sec.add_row(wrap)
 
-    def _apply(fbox, child, toast=toast):
-        idx = [i for i, c in enumerate(fbox.get_children()) if c == child]
-        if idx and walls[:25]:
-            w = walls[min(idx[0], len(walls) - 1)]
-            ok = BackgroundsAdapter.set_wallpaper(w["path"])
-            toast.show_message(f"Wallpaper set: {w['name']}" if ok else "Could not set wallpaper",
-                               error=not ok)
-    flow.connect("child-activated", _apply)
-    col.add(sec)
+        def _apply(fbox, child, toast=toast):
+            kids = fbox.get_children()
+            if kids:
+                w = list_of_walls[min(kids.index(child), len(list_of_walls) - 1)]
+                ok = BackgroundsAdapter.set_wallpaper(w["path"])
+                toast.show_message(f"Wallpaper set: {w['name']}" if ok else "Could not set wallpaper",
+                                   error=not ok)
+        flow.connect("child-activated", _apply)
+
+    list_of_walls = walls
+
+    def make_thumbs():
+        from gi.repository import GdkPixbuf
+        out = []
+        for w in walls[:20]:
+            try:
+                pb = GdkPixbuf.Pixbuf.new_from_file_at_scale(w["path"], 168, 100, True)
+            except Exception:
+                pb = None
+            out.append((pb, w["name"], w["path"]))
+        return out
+
+    col.add(AsyncSection("Wallpaper", "Click an image to apply it",
+                         loader=make_thumbs, renderer=_thumbs))
 
     sec = Section("Slideshow")
     row, _ = toggle_row("Rotate wallpaper automatically", "Cycle images from the picture folder",

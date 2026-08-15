@@ -1036,6 +1036,45 @@ _mk = open(os.path.join(ROOT, "Makefile")).read()
 check("aegis make install target present", "install-aegis:" in _mk and "/usr/bin/synthex-aegis-daemon" in _mk)
 check("aegis packaging unit registered", os.path.exists(os.path.join(ROOT, "packages", "services-systemd", "synthex-aegis.service")))
 
+# 74. Professional Settings Center — design system, full category coverage, Fedora platform layer
+print("\n📋 Settings Center v2 — professional design & complete categories:")
+cc = os.path.join(ROOT, "src", "synthex-control-center")
+for f in ["synthex_design.py", "synth_platform_adapters.py", "synthex_pages_a.py", "synthex_pages_b.py", "main.py"]:
+    check(f"settings module {f}", os.path.exists(os.path.join(cc, f)))
+_sm = open(os.path.join(cc, "main.py")).read()
+_expected_cats = ["appearance", "backgrounds", "nightlight", "notifications", "privacy", "online", "region",
+                   "account", "desktop", "windows", "workspaces", "panels", "applets", "desklets", "extensions",
+                   "gestures", "preferred", "startup", "screensaver", "display", "sound", "mouse", "keyboard",
+                   "tablet", "printers", "bluetooth", "thunderbolt", "color", "power", "storage", "drivers",
+                   "network", "security", "sources", "updates", "timeshift", "login", "datetime", "sysinfo"]
+_missing = [c for c in _expected_cats if f'"{c}"' not in _sm]
+check(f"all 39 settings categories present", not _missing, str(_missing[:5]))
+check("sidebar grouped professionally", "Personal" in _sm and "Desktop" in _sm and "Hardware" in _sm and "System" in _sm)
+check("URI deep-linking support", "synthex-settings://" in _sm)
+_pa = open(os.path.join(cc, "synthex_pages_a.py")).read()
+_pb = open(os.path.join(cc, "synthex_pages_b.py")).read()
+check("no hardcoded home paths in pages", "/home/jewboy" not in _pa and "/home/jewboy" not in _pb)
+check("async loading for slow panels", "AsyncSection" in _pa and "AsyncSection" in _pb)
+_spa = open(os.path.join(cc, "synth_platform_adapters.py")).read() + _pa + _pb
+for feat in ["rpm", "firewalld", "firewall-cmd", "dnf", "timeshift", "colormgr", "boltctl", "sddm",
+             "localectl", "timedatectl", "xinput", "fc-list", "xdg-mime", "rpmfusion", "dnf-automatic",
+             "akmod-nvidia", "fwupdmgr", "SELinux", "getenforce"]:
+    check(f"platform adapter: {feat}", feat in _spa)
+try:
+    _r = _sp.run([sys.executable, "-c",
+                  "import sys; sys.path.insert(0, " + repr(cc) + ");\n"
+                  "import gi; gi.require_version('Gtk','3.0')\n"
+                  "from gi.repository import Gtk\n"
+                  "import importlib.util as _u\n"
+                  "spec = _u.spec_from_file_location('settings_main', " + repr(os.path.join(cc, 'main.py')) + ")\n"
+                  "m = _u.module_from_spec(spec)\n"
+                  "spec.loader.exec_module(m)\n"
+                  "assert len(m.ALL_PAGES) >= 39\n"],
+                 capture_output=True, text=True, timeout=60)
+    check("settings window imports & registry complete", _r.returncode == 0, _r.stderr.strip()[-160:] or None)
+except Exception as _e:
+    check("settings window imports & registry complete", False, str(_e))
+
 # 72. Synthex System Doctor, Auto-Repair & Anti-Bricking Suite
 print("\n📋 Synthex System Doctor & Anti-Bricking Auto-Repair:")
 doc_dir = os.path.join(ROOT, "src", "synthex-doctor")

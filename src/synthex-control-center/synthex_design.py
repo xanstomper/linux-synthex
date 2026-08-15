@@ -72,13 +72,13 @@ _CSS = """
 
 /* ── Cards / sections ───────────────────────────────────────────────── */
 .card {
-  background-color: @theme_bg_color;
+  background-color: alpha(@theme_fg_color, 0.035);
   border-radius: 12px;
   border: 1px solid alpha(@theme_fg_color, 0.09);
   box-shadow: 0 1px 3px alpha(black, 0.04);
 }
 .card-dark {
-  background-color: shade(@theme_bg_color, 0.97);
+  background-color: alpha(@theme_fg_color, 0.06);
   border-radius: 12px;
   border: 1px solid alpha(@theme_fg_color, 0.09);
 }
@@ -239,7 +239,7 @@ _CSS = """
 
 /* ── List cards (devices, printers, snapshots...) ───────────────────── */
 .entity-card {
-  background-color: @theme_bg_color;
+  background-color: alpha(@theme_fg_color, 0.045);
   border: 1px solid alpha(@theme_fg_color, 0.09);
   border-radius: 11px;
   padding: 13px 16px;
@@ -506,8 +506,8 @@ def info_grid(pairs):
         grid.attach(label(k, "info-key"), 0, i, 1, 1)
         val = label(str(v), "info-val")
         val.set_selectable(True)
+        val.set_hexpand(True)
         grid.attach(val, 1, i, 1, 1)
-        grid.child_set_property(val, "hexpand", True)
     return grid
 
 
@@ -525,6 +525,74 @@ class ContentColumn(Gtk.Box):
 
     def add_expand(self, w):
         self.pack_start(w, True, True, 0)
+
+
+class AsyncSection(Gtk.Frame):
+    """A Section card whose data loads in a background thread.
+    Shows a subtle progress row immediately, then swaps in real content.
+    loader() -> payload; renderer(payload, section) -> None (adds rows)."""
+    def __init__(self, title=None, subtitle=None, loader=None, renderer=None, on_error=None):
+        super().__init__(shadow_type=Gtk.ShadowType.NONE)
+        self.get_style_context().add_class("card")
+        outer = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=GAP_ROW)
+        outer.set_border_width(PAD_CARD)
+        self.add(outer)
+        if title:
+            tb = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=1)
+            tb.get_style_context().add_class("section-title-box")
+            tb.pack_start(label(title.upper(), "section-title"), False, False, 0)
+            if subtitle:
+                tb.pack_start(label(subtitle, "section-sub"), False, False, 0)
+            outer.pack_start(tb, False, False, 0)
+        self.outer = outer
+        self.spinner_row = Gtk.Box(spacing=10, border_width=12)
+        sp = Gtk.Spinner()
+        sp.start()
+        self.spinner_row.pack_start(sp, False, False, 0)
+        self.spinner_row.pack_start(label("Loading…", "row-sub"), False, False, 0)
+        outer.pack_start(self.spinner_row, True, True, 0)
+        self.show_all()
+        if loader:
+            self.load(loader, renderer, on_error)
+
+    def load(self, loader, renderer, on_error=None):
+        import threading
+        def work():
+            try:
+                payload = loader()
+                GLib.idle_add(lambda: self._populate(payload, renderer))
+            except Exception as exc:
+                GLib.idle_add(lambda: self._fail(exc, on_error))
+        threading.Thread(target=work, daemon=True).start()
+
+    def _populate(self, payload, renderer):
+        try:
+            self.outer.remove(self.spinner_row)
+            renderer(payload, self)
+        except Exception:
+            self.outer.remove(self.spinner_row)
+            self.outer.pack_start(label("Could not display this section", "row-sub"), False, False, 0)
+        self.show_all()
+        return False
+
+    def _fail(self, exc, on_error):
+        self.outer.remove(self.spinner_row)
+        if on_error:
+            on_error(exc, self)
+        else:
+            self.outer.pack_start(label(f"Unavailable: {str(exc)[:80]}", "row-sub"), False, False, 0)
+        self.show_all()
+        return False
+
+    def add_row(self, child):
+        row = Gtk.ListBoxRow(selectable=False, activatable=False)
+        row.get_style_context().add_class("row")
+        row.add(child)
+        w = Gtk.ListBox(selection_mode=Gtk.SelectionMode.NONE)
+        w.get_style_context().add_class("card-padding")
+        w.add(row)
+        self.outer.pack_start(w, False, False, 0)
+        return row
 
 
 class Toast(Gtk.Revealer):
