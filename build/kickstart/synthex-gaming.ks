@@ -291,6 +291,6 @@ systemctl disable lvm2-monitor mdmonitor 2>/dev/null || true
 echo "SynthOS Gaming Edition post-install complete."
 
 # ── Enable live session setup (live-only via ConditionPathExists) ──
-mkdir -p /run/synthex-live
+mkdir -p /etc/synthex && touch /etc/synthex/live-mode
 systemctl enable synthex-live-setup.service 2>/dev/null || true
 %end

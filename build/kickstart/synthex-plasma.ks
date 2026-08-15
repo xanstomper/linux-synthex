@@ -396,6 +396,6 @@ echo "SynthOS Plasma Edition post-install complete."
 # ── Enable live session setup (runs live-only via ConditionPathExists) ─────
 # The squashfs live root mounts /run/synthex-live so autologin + installer
 # launcher fire on the live USB/ISO. Skipped automatically on installed systems.
-mkdir -p /run/synthex-live
+mkdir -p /etc/synthex && touch /etc/synthex/live-mode
 systemctl enable synthex-live-setup.service 2>/dev/null || true
 %end

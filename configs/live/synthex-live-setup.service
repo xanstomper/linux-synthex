@@ -5,7 +5,7 @@
 Description=Synthex Live Image Setup
 Wants=network-online.target
 After=network-online.target
-ConditionPathExists=/run/synthex-live
+ConditionPathExists=/etc/synthex/live-mode
 
 [Service]
 Type=oneshot

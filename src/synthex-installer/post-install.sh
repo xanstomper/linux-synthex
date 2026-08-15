@@ -50,10 +50,12 @@ echo "  Removing live-session packages..."
 dnf remove -y liveuser-config synthex-live-installer calamares-live 2>/dev/null || true
 
 # Clean up live user
-echo "  Removing live user..."
 userdel -r liveuser 2>/dev/null || true
 rm -f /etc/sudoers.d/10-liveuser 2>/dev/null || true
 rm -f /etc/sddm.conf.d/autologin.conf 2>/dev/null || true
+
+# Remove the live-mode marker so live-setup never runs on an installed system
+rm -f /etc/synthex/live-mode 2>/dev/null || true
 
 # Rebuild initramfs
 echo "  Rebuilding initramfs..."
