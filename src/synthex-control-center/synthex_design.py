@@ -84,11 +84,11 @@ switch slider {
   border: 1px solid alpha(black, 0.15);
   box-shadow: 0 1px 3px alpha(black, 0.20);
   background-image: none;
-  transition: transform 100ms ease;
 }
 .scale-ok slider:hover, scale slider:hover {
-  transform: scale(1.1);
+  box-shadow: 0 2px 6px alpha(black, 0.35);
 }
+
 
 /* ── Check / Radio ───────────────────────────────────────────────────── */
 checkbutton check {
@@ -231,7 +231,7 @@ headerbar {
 .sidebar-item:selected .sidebar-title { color: #ffffff; font-weight: 600; }
 .sidebar-item:selected image { color: #ffffff; }
 
-.sidebar-title { font-size: 9.5pt; font-weight: 450; }
+.sidebar-title { font-size: 9.5pt; font-weight: 500; }
 .sidebar-group {
   font-size: 7.5pt;
   font-weight: 700;
@@ -342,7 +342,8 @@ headerbar {
 .entity-card:hover {
   background-color: alpha(@theme_fg_color, 0.05);
 }
-.entity-title { font-size: 9.5pt; font-weight: 550; }
+.entity-title { font-size: 9.5pt; font-weight: 600; }
+
 .entity-sub { font-size: 8.5pt; color: alpha(@theme_fg_color, 0.50); }
 
 .empty-state {
