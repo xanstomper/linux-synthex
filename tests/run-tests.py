@@ -1006,6 +1006,32 @@ try:
 except Exception as _e:
     check("aegis engine functional validation", False, str(_e))
 
+# Aegis production daemon + service integration
+import subprocess as _sp
+import tempfile as _tf
+import json as _json
+check("aegis systemd service unit exists", os.path.exists(os.path.join(ROOT, "systemd", "synthex-aegis.service")))
+_unit = open(os.path.join(ROOT, "systemd", "synthex-aegis.service")).read() if os.path.exists(os.path.join(ROOT, "systemd", "synthex-aegis.service")) else ""
+check("aegis unit hardened + installable", all(k in _unit for k in ["ExecStart=/usr/bin/synthex-aegis-daemon", "ProtectSystem=strict", "WantedBy=multi-user.target"]))
+_target = open(os.path.join(ROOT, "systemd", "synthex.target")).read()
+check("aegis wired into synthex.target", "synthex-aegis.service" in _target)
+_desktop = open(os.path.join(aegis_dir, "synthex-aegis.desktop")).read()
+check("aegis desktop file portable (no home paths)", "/home/" not in _desktop and "Exec=synthex-aegis" in _desktop)
+check("aegis daemon launcher exists", os.access(os.path.join(aegis_dir, "synthex-aegis-daemon"), os.X_OK))
+try:
+    _tmp = _tf.mkdtemp(prefix="aegis-rt-")
+    with open(os.path.join(_tmp, "config.json"), "w") as _f:
+        _json.dump({"realtime_protection": True, "auto_terminate_malicious_pids": False,
+                    "desktop_notifications": False, "privilege_escalation_guard": False}, _f)
+    _r = _sp.run([sys.executable, os.path.join(aegis_dir, "aegis_daemon.py"),
+                  "--once", "--data-dir", _tmp], capture_output=True, text=True, timeout=120)
+    check("aegis daemon --once full audit pass", _r.returncode == 0 and "Single audit pass complete" in _r.stdout,
+          _r.stderr[-200:] if _r.returncode != 0 else None)
+    import shutil as _sh
+    _sh.rmtree(_tmp, ignore_errors=True)
+except Exception as _e:
+    check("aegis daemon --once full audit pass", False, str(_e))
+
 # 72. Synthex System Doctor, Auto-Repair & Anti-Bricking Suite
 print("\n📋 Synthex System Doctor & Anti-Bricking Auto-Repair:")
 doc_dir = os.path.join(ROOT, "src", "synthex-doctor")
