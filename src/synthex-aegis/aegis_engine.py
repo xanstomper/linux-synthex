@@ -750,9 +750,16 @@ class AegisEngine:
         with open(INCIDENTS_FILE, "w") as f:
             json.dump(incidents, f, indent=2)
 
+    def record_incident(self, incident: ThreatIncident):
+        incidents = self.get_incidents()
+        incidents.insert(0, asdict(incident))
+        self._save_incidents(incidents[:500])
+        return True
+
     def clear_incidents(self):
         self._save_incidents([])
         return True
+
 
     # ── 5. Scanning Engine (Multi-Layer Execution) ───────────────────────────
 

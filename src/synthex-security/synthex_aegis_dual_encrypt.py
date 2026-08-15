@@ -235,7 +235,7 @@ vm.unprivileged_userfaultfd = 0
         for child in node.get("children", []):
             self._scan_crypt_devs(child, detected, is_shielded)
 
-    # ── 3. Active Anti-Brute-Force Rate Limiting ───────────────────────────────
+    # ── 3. Active Anti-Brute-Force Rate Limiting & Incident Reporting ───────────
 
     def check_and_record_auth_attempt(self, success: bool) -> Tuple[bool, int, str]:
         """Enforces real exponential backoff rate-limiting against password brute-forcing."""
@@ -269,9 +269,44 @@ vm.unprivileged_userfaultfd = 0
 
             state["lockout_until"] = now + delay
             AUTH_LOCKOUT_FILE.write_text(json.dumps(state))
+
+            # Report threat to Aegis Engine if repeated failures
+            if fails >= 3:
+                self._report_aegis_threat(
+                    category="Brute-Force Cryptographic Attack",
+                    severity="High" if fails < 5 else "Critical",
+                    tactic="Credential Access (T1110)",
+                    details=f"Detected {fails} consecutive failed volume decryption attempts. Exponential lockout of {delay}s applied."
+                )
+
             if delay > 0:
                 return False, delay, f"ATTACK DEFENSE TRIGGERED: {fails} consecutive failed attempts. Locked for {delay}s."
             return False, 0, f"Invalid passphrase ({fails} failed attempts)."
+
+    def _report_aegis_threat(self, category: str, severity: str, tactic: str, details: str):
+        """Dispatches threat incident directly to Aegis Real-Time Incident Journal."""
+        try:
+            aegis_dir = Path(__file__).resolve().parent.parent / "synthex-aegis"
+            if str(aegis_dir) not in sys.path:
+                sys.path.insert(0, str(aegis_dir))
+            from aegis_engine import AegisEngine, ThreatIncident
+            engine = AegisEngine.get_instance()
+            inc = ThreatIncident(
+                id=f"CRYPT-{int(time.time())}",
+                timestamp=time.strftime("%Y-%m-%d %H:%M:%S"),
+                category=category,
+                severity=severity,
+                tactic=tactic,
+                process_name="aegis-encrypt",
+                pid=os.getpid(),
+                cmdline=" ".join(sys.argv),
+                target="/dev/mapper/crypt",
+                action_taken="Hardware Rate-Limited & Key Scrubbed",
+                details=details
+            )
+            engine.record_incident(inc)
+        except Exception:
+            pass
 
     # ── 4. Active Emergency Panic Dismount & Memory Purge ─────────────────────
 
@@ -282,11 +317,19 @@ vm.unprivileged_userfaultfd = 0
 
         actions = []
         try:
-            # 1. Flush and sync filesystem buffers
+            # 1. Report emergency lockdown incident to Aegis
+            self._report_aegis_threat(
+                category="Physical Tamper / Panic Lockdown",
+                severity="Critical",
+                tactic="Defense Evasion / Data Destruction (T1485)",
+                details="Emergency panic purge triggered: unmounting all volumes and zeroing memory keyrings."
+            )
+
+            # 2. Flush and sync filesystem buffers
             subprocess.run(["sync"], timeout=3)
             actions.append("Flushed disk write queues")
 
-            # 2. Drop kernel memory caches
+            # 3. Drop kernel memory caches
             try:
                 if os.geteuid() == 0:
                     with open("/proc/sys/vm/drop_caches", "w") as f:
@@ -297,13 +340,14 @@ vm.unprivileged_userfaultfd = 0
             except Exception:
                 pass
 
-            # 3. Clear user keyring keys
+            # 4. Clear user keyring keys
             subprocess.run(["keyctl", "clear", "@u"], capture_output=True, timeout=2)
             actions.append("Purged user session cryptographic keyrings")
 
             return True, f"EMERGENCY PURGE COMPLETE: {'; '.join(actions)}"
         except Exception as e:
             return False, f"Purge error: {e}"
+
 
     # ── 5. Comprehensive Defense Telemetry ────────────────────────────────────
 
