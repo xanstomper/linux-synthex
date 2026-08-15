@@ -30,6 +30,8 @@ class ISOBuildConfig:
     kernel_version: str
     compression: str  # "zstd", "xz", "gzip"
     output_path: str
+    full_system: bool = False
+
 
 
 class SynthexISOBuilder:
@@ -181,38 +183,56 @@ menuentry "🛑 Power Off" {{
         # 5. Create LiveOS SquashFS Rootfs Payload
         squash_path = os.path.join(paths["liveos"], "squashfs.img")
         if shutil.which("mksquashfs") and not self.dry_run:
-            live_root = tempfile.mkdtemp(prefix="synthex-live-root-")
-            try:
-                # Populate live root with core essentials
-                os.makedirs(os.path.join(live_root, "usr", "local", "bin"), exist_ok=True)
-                os.makedirs(os.path.join(live_root, "etc", "synthex"), exist_ok=True)
-                os.makedirs(os.path.join(live_root, "etc", "calamares"), exist_ok=True)
-                os.makedirs(os.path.join(live_root, "var", "lib", "synthex"), exist_ok=True)
+            if config.full_system:
+                # Full system compression excluding user data, virtual filesystems, and temporary caches
+                cmd = [
+                    "mksquashfs",
+                    "/",
+                    squash_path,
+                    "-comp", "zstd",
+                    "-Xcompression-level", "6",
+                    "-processors", str(os.cpu_count() or 4),
+                    "-e",
+                    "/home", "/proc", "/sys", "/dev", "/run", "/tmp",
+                    "/mnt", "/media", "/var/cache", "/var/tmp", "/var/log",
+                    "/var/lib/flatpak", "/build", "/.snapshots", "/swapfile", "/swap.img",
+                    "-noappend"
+                ]
+                subprocess.run(cmd, capture_output=True, timeout=900)
+            else:
+                live_root = tempfile.mkdtemp(prefix="synthex-live-root-")
+                try:
+                    # Populate live root with core essentials
+                    os.makedirs(os.path.join(live_root, "usr", "local", "bin"), exist_ok=True)
+                    os.makedirs(os.path.join(live_root, "etc", "synthex"), exist_ok=True)
+                    os.makedirs(os.path.join(live_root, "etc", "calamares"), exist_ok=True)
+                    os.makedirs(os.path.join(live_root, "var", "lib", "synthex"), exist_ok=True)
 
-                # Copy Synthex binaries
-                for b in glob.glob("/usr/local/bin/synthex*"):
-                    try:
-                        shutil.copy2(b, os.path.join(live_root, "usr", "local", "bin"))
-                    except Exception:
-                        pass
+                    # Copy Synthex binaries
+                    for b in glob.glob("/usr/local/bin/synthex*"):
+                        try:
+                            shutil.copy2(b, os.path.join(live_root, "usr", "local", "bin"))
+                        except Exception:
+                            pass
 
-                # Copy Calamares installer configurations
-                cal_dir = "/home/jewboy420/linux-synthex/installer"
-                if os.path.exists(cal_dir):
-                    try:
-                        shutil.copytree(cal_dir, os.path.join(live_root, "etc", "calamares"), dirs_exist_ok=True)
-                    except Exception:
-                        pass
+                    # Copy Calamares installer configurations
+                    cal_dir = "/home/jewboy420/linux-synthex/installer"
+                    if os.path.exists(cal_dir):
+                        try:
+                            shutil.copytree(cal_dir, os.path.join(live_root, "etc", "calamares"), dirs_exist_ok=True)
+                        except Exception:
+                            pass
 
-                # Build compressed squashfs image
-                cmd = ["mksquashfs", live_root, squash_path, "-comp", "zstd", "-noappend", "-quiet"]
-                subprocess.run(cmd, capture_output=True, timeout=60)
-            finally:
-                shutil.rmtree(live_root, ignore_errors=True)
+                    # Build compressed squashfs image
+                    cmd = ["mksquashfs", live_root, squash_path, "-comp", "zstd", "-noappend", "-quiet"]
+                    subprocess.run(cmd, capture_output=True, timeout=60)
+                finally:
+                    shutil.rmtree(live_root, ignore_errors=True)
 
         if not os.path.exists(squash_path):
             with open(squash_path, "wb") as f:
                 f.write(b"SYNTHEX_SQUASHFS_LIVE_PAYLOAD" * 8192)
+
 
         return {"ok": True, "staging_dir": staging_dir, "paths": paths}
 
@@ -262,7 +282,8 @@ menuentry "🛑 Power Off" {{
                 staging
             ]
 
-            proc = subprocess.run(cmd, capture_output=True, text=True, timeout=120)
+            proc = subprocess.run(cmd, capture_output=True, text=True, timeout=600)
+
             if proc.returncode != 0 and not os.path.exists(config.output_path):
                 return {"ok": False, "error": f"xorriso failed: {proc.stderr}"}
 
@@ -327,19 +348,22 @@ def main():
         print("=================================================================")
     elif sys.argv[1] == "build":
         edition = sys.argv[2] if len(sys.argv) > 2 else "hyprland"
-        out_path = sys.argv[3] if len(sys.argv) > 3 else "/home/jewboy420/linux-synthex/build/iso-out/synthex-2026.10-x86_64.iso"
+        out_path = sys.argv[3] if len(sys.argv) > 3 else "/home/jewboy420/linux-synthex/build/iso-out/synthex-2026.10-hyprland-x86_64.iso"
+        is_full = "--full" in sys.argv or "--full-system" in sys.argv
         cfg = ISOBuildConfig(
             edition=edition,
             version="2026.10",
             volume_id="SYNTHEX_2026_10",
             kernel_version="6.14.0",
             compression="zstd",
-            output_path=out_path
+            output_path=out_path,
+            full_system=is_full
         )
         print("=================================================================")
-        print(f" Building Synthex {edition.capitalize()} Hybrid Bootable ISO...")
+        print(f" Building Synthex {edition.capitalize()} Hybrid Bootable ISO {'(Full Desktop)' if is_full else '(Core NetInstall)'}...")
         print("=================================================================")
         res = builder.build_iso(cfg)
+
         if res.get("ok"):
             print(f" 🟢 ISO BUILD SUCCESSFUL")
             print(f" Output Image : {res['output_path']} ({res.get('size_mb', 0)} MB)")
