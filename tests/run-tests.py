@@ -1509,7 +1509,41 @@ try:
     check("partition execution dry-run", ok_p is True)
 except Exception as _e:
     check("partition wizard functional validation", False, str(_e))
+
+# 85. Synthex Hyprland Wayland Desktop Rice & Hardware-Aware CPU/Kernel Tuner
+print("\n📋 Synthex Hyprland Wayland Desktop Rice & Hardware-Aware CPU/Kernel Tuner:")
+
+hl_dir = os.path.join(ROOT, "desktop", "hyprland")
+check("hyprland config exists", os.path.exists(os.path.join(hl_dir, "hyprland.conf")))
+check("waybar config exists", os.path.exists(os.path.join(hl_dir, "waybar-config.jsonc")))
+check("waybar stylesheet exists", os.path.exists(os.path.join(hl_dir, "waybar-style.css")))
+check("hyprlock config exists", os.path.exists(os.path.join(hl_dir, "hyprlock.conf")))
+check("waybar aegis module script exists", os.access(os.path.join(hl_dir, "scripts", "waybar-aegis.sh"), os.X_OK))
+check("waybar spoofgoof module script exists", os.access(os.path.join(hl_dir, "scripts", "waybar-spoofgoof.sh"), os.X_OK))
+check("waybar power module script exists", os.access(os.path.join(hl_dir, "scripts", "waybar-power.sh"), os.X_OK))
+check("waybar gpu module script exists", os.access(os.path.join(hl_dir, "scripts", "waybar-gpu.sh"), os.X_OK))
+
+tune_dir = os.path.join(ROOT, "src", "synthex-cachy-tuning")
+check("synthex cpu tuner script exists", os.path.exists(os.path.join(tune_dir, "synthex_cpu_tuner.py")))
+check("synthex-tune cli launcher exists", os.access(os.path.join(ROOT, "src", "synthex-tune"), os.X_OK))
+
+try:
+    if tune_dir not in sys.path:
+        sys.path.insert(0, tune_dir)
+    from synthex_cpu_tuner import SynthexCPUTuner
+    tuner = SynthexCPUTuner(dry_run=True)
+    check("cpu tuner initialized", tuner is not None)
+    t_st = tuner.get_status()
+    check("cpu tuner status query pass", "READY" in t_st.get("status", ""))
+    cpu_arch = tuner.probe_cpu()
+    check("cpu architecture probe pass", cpu_arch.cores >= 1 and cpu_arch.vendor in ["intel", "amd", "unknown"])
+    tune_res = tuner.apply_tuning("performance")
+    check("cpu performance tuning dry-run", len(tune_res.get("applied_steps", [])) >= 3)
+except Exception as _e:
+    check("cpu tuner functional validation", False, str(_e))
+
 # Summary
+
 
 
 

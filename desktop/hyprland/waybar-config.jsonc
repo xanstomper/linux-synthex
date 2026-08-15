@@ -50,8 +50,11 @@
             "wlr/taskbar"
         ],
         "modules-right": [
+            "custom/aegis",
+            "custom/spoofgoof",
+            "custom/power",
+            "custom/gpu",
             "network",
-            "bluetooth",
             "pulseaudio",
             "battery",
             "clock#dock"
@@ -83,6 +86,37 @@
             "interval": "once"
         },
 
+        // ── Security & Hardware Performance Modules ─────────────────────────
+        "custom/aegis": {
+            "exec": "/home/jewboy420/linux-synthex/desktop/hyprland/scripts/waybar-aegis.sh",
+            "return-type": "json",
+            "interval": 5,
+            "on-click": "synthex-control-center aegis",
+            "format": "{}"
+        },
+        "custom/spoofgoof": {
+            "exec": "/home/jewboy420/linux-synthex/desktop/hyprland/scripts/waybar-spoofgoof.sh",
+            "return-type": "json",
+            "interval": 5,
+            "on-click": "synthex-control-center spoofgoof",
+            "format": "{}"
+        },
+        "custom/power": {
+            "exec": "/home/jewboy420/linux-synthex/desktop/hyprland/scripts/waybar-power.sh",
+            "return-type": "json",
+            "interval": 5,
+            "on-click": "synthex-power-profiles set performance || powerprofilesctl set performance",
+            "on-click-right": "synthex-power-profiles set power-saver || powerprofilesctl set power-saver",
+            "format": "{}"
+        },
+        "custom/gpu": {
+            "exec": "/home/jewboy420/linux-synthex/desktop/hyprland/scripts/waybar-gpu.sh",
+            "return-type": "json",
+            "interval": 10,
+            "on-click": "synthex-control-center drivers",
+            "format": "{}"
+        },
+
         // ── Center Pinned & Running Apps ────────────────────────────────────
         "wlr/taskbar": {
             "format": "{icon}",
@@ -109,7 +143,7 @@
             "format-disconnected": "󰤭",
             "tooltip-format-wifi": "{essid} ({signalStrength}%)\nIP: {ipaddr}\nSpeed: ↓{bandwidthDownBytes} ↑{bandwidthUpBytes}",
             "tooltip-format-ethernet": "{ifname}\nIP: {ipaddr}",
-            "on-click": "nm-connection-editor || synthex-control-center --page network"
+            "on-click": "nm-connection-editor || synthex-control-center network"
         },
 
         "bluetooth": {
@@ -118,7 +152,7 @@
             "format-connected": "󰂱",
             "tooltip-format": "Bluetooth: {status}",
             "tooltip-format-connected": "{controller_alias}\nConnected to: {device_alias}",
-            "on-click": "blueman-manager || synthex-control-center --page bluetooth"
+            "on-click": "blueman-manager || synthex-control-center bluetooth"
         },
 
         "pulseaudio": {
@@ -128,7 +162,7 @@
                 "default": ["󰕿", "󰖀", "󰕾"]
             },
             "tooltip-format": "Volume: {volume}% {desc}",
-            "on-click": "pavucontrol || synthex-control-center --page audio",
+            "on-click": "pavucontrol || synthex-control-center sound",
             "on-scroll-up": "wpctl set-volume @DEFAULT_AUDIO_SINK@ 5%+",
             "on-scroll-down": "wpctl set-volume @DEFAULT_AUDIO_SINK@ 5%-"
         },
@@ -153,3 +187,4 @@
         }
     }
 ]
+
