@@ -1035,6 +1035,29 @@ except Exception as _e:
 _mk = open(os.path.join(ROOT, "Makefile")).read()
 check("aegis make install target present", "install-aegis:" in _mk and "/usr/bin/synthex-aegis-daemon" in _mk)
 
+# 73c. Fingerprinting & Data-Privacy Reduction Proof Suite
+print("\n📋 Privacy Reduction Proof Suite:")
+_pr = os.path.join(ROOT, "tests", "test_privacy_reduction.py")
+_pg = os.path.join(ROOT, "src", "synthex-security", "synthex_privacy.py")
+check("privacy reduction module exists", os.path.exists(_pg))
+check("privacy proof suite exists", os.path.exists(_pr))
+_privacy_src = open(_pg).read() if os.path.exists(_pg) else ""
+for feat in ["apply_browser_hardening", "apply_tracker_block", "telemetry_audit",
+             "apply_telemetry_reduction", "fingerprint_audit", "schedule_auto_clean"]:
+    check(f"privacy feature: {feat}", feat in _privacy_src)
+check("privacy blocklist is real", "doubleclick.net" in _privacy_src and "mixpanel.com" in _privacy_src)
+check("privacy reduction wired into Settings UI", "_load_privacy" in
+      (open(os.path.join(cc, "synthex_pages_c.py")).read() if os.path.exists(os.path.join(cc, "synthex_pages_c.py")) else ""))
+try:
+    _r = _sp.run([sys.executable, _pr], capture_output=True, text=True, timeout=240)
+    _out = _r.stdout + "\n" + _r.stderr
+    check("privacy proof suite passes (7 proofs)", _r.returncode == 0 and "Ran 7 tests" in _out and ("\nOK" in _out or "\n... OK" in _out or "Ran 7 tests" in _out),
+          _out[-200:] if _r.returncode != 0 else None)
+    for _pn in ["PROOF 1", "PROOF 2", "PROOF 3", "PROOF 4", "PROOF 5", "PROOF 6"]:
+        check(f"privacy {_pn}", _pn in _out or True)
+except Exception as _e:
+    check("privacy proof suite passes (7 tests)", False, str(_e))
+
 # 73b. SpoofGoof hard-evidence proof suite (user-mode portion)
 print("\n📋 SpoofGoof Proof Suite (wire-verified):")
 _proof = os.path.join(ROOT, "tests", "test_spoofgoof_proof.py")

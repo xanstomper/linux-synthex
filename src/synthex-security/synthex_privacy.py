@@ -94,9 +94,9 @@ TRACKER_DOMAINS = """
 0.0.0.0 moatads.com
 0.0.0.0 chartbeat.com
 0.0.0.0 comscore.com
-0.0.0.0.quantserve.com
+0.0.0.0 quantserve.com
 0.0.0.0 quantcast.com
-0.0.0.0.inspectlet.com
+0.0.0.0 inspectlet.com
 0.0.0.0 vwo.com
 0.0.0.0 optimizely.com
 0.0.0.0 crazyegg.com
@@ -307,25 +307,31 @@ def telemetry_audit(root: Optional[Path] = None) -> List[Dict]:
     """Read-only audit of telemetry/collector surfaces across the OS."""
     r = Path(root or Path("/"))
     out = []
-    def probe(name, conf, present_if=None, active=False, mitigation=""):
-        p = (r / conf) if not str(conf).startswith("/") else (r / conf.lstrip("/"))
-        exists = p.exists() if p is not None else False
+    def probe(name, conf, mitigation=""):
+        p = (r / conf.lstrip("/")) if root else Path(conf)
+        exists = p.exists()
         detail = ""
+        mitigated = False
         if exists and conf.endswith("coredump.conf"):
             try:
-                txt = p.read_text()
-                m = re.search(r"^Storage=(\w+)", txt, re.M)
+                m = re.search(r"^Storage=(\w+)", p.read_text(), re.M)
                 detail = f"Storage={m.group(1) if m else 'unknown'}"
+                mitigated = bool(m and m.group(1) == "none")
+                # also honour a Synthex drop-in override
+                drop = (r / "etc/systemd/coredump.conf.d/10-synthex.conf") if root else Path("/etc/systemd/coredump.conf.d/10-synthex.conf")
+                if drop.exists() and "Storage=none" in drop.read_text():
+                    mitigated = True
+                    detail += " (+drop-in Storage=none)"
             except Exception:
                 pass
         out.append({"name": name, "present": exists, "detail": detail,
-                    "mitigation": mitigation, "mitigated": exists and ("coredump" in conf and detail.startswith("Storage=none"))})
+                    "mitigation": mitigation, "mitigated": mitigated})
 
-    add("systemd-coredump", "/etc/systemd/coredump.conf", mitigation="coredump.conf.d/10-synthex.conf Storage=none")
-    add("apport", "/etc/default/apport", mitigation="set enabled=0")
-    add("cockpit", "/etc/systemd/system/sockets.target.wants/cockpit.socket", mitigation="systemctl disable cockpit")
-    add("abrt", "/etc/abrt/abrt-action-save-kernel-data.conf", mitigation="disable crash reporting")
-    add("dnf-automatic", "/etc/systemd/system/dnf-automatic.timer.restart" if False else "/usr/lib/systemd/system/dnf-automatic.timer", mitigation="auto-update telemetry")
+    probe("systemd-coredump", "/etc/systemd/coredump.conf", "coredump.conf.d/10-synthex.conf Storage=none")
+    probe("apport", "/etc/default/apport", "set enabled=0")
+    probe("cockpit", "/etc/systemd/system/sockets.target.wants/cockpit.socket", "systemctl disable cockpit")
+    probe("abrt", "/etc/abrt/workflows", "disable crash reporting")
+    probe("dnf-automatic", "/usr/lib/systemd/system/dnf-automatic.timer", "auto-update telemetry")
     return out
 
 
@@ -451,13 +457,11 @@ def schedule_auto_clean(minutes: int) -> Dict:
     cfg.mkdir(parents=True, exist_ok=True)
     python_bin = shutil.which("python3") or "/usr/bin/python3"
     module = Path(__file__).resolve()
-    service = cfg / "synthex-privacy.service"
-    timer = cfg / "synthex-privacy.timer"
-    service.write_text(AUTO_SERVICE.format(python_bin, module))
-    timer.write_text(USER_TIMER.replace("%dmin" if False else " 1min", str(max(minutes,1))))
+    (cfg / "synthex-privacy.service").write_text(USER_SERVICE.format(python_bin, module))
+    (cfg / "synthex-privacy.timer").write_text(USER_TIMER.format(interval=max(int(minutes), 1)))
     subprocess.run(["systemctl", "--user", "daemon-reload"], timeout=10)
-    if minutes <= 0:
-        subprocess.run(["systemctl", "--user", "disable", "--now", "synthex-privacy.timer"], timeout=10)
+    if int(minutes) <= 0:
+        subprocess.run(["systemctl", "--user", "disable", "--now", "synthex-privacy.timer"], timeout=15)
         return {"enabled": False, "interval": 0}
     subprocess.run(["systemctl", "--user", "enable", "--now", "synthex-privacy.timer"], timeout=15)
     return {"enabled": True, "interval": minutes}
@@ -505,7 +509,7 @@ if __name__ == "__main__":
         print("applied:", rep)
     elif cmd == "schedule" and len(sys.argv) >= 3:
         print("auto-clean:", schedule_auto_clean(int(sys.argv[2])))
-    elif cmd == "run_tools":
+    elif cmd == "run-tool":
         print("run_auto_clean:", run_auto_clean())
     else:
         print(__doc__)

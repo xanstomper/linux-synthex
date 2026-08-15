@@ -23,6 +23,88 @@ from synth_platform_adapters import FirewallLayer, _gget, ensure_polkit_agent
 from synthex_pages_a import _combo, _spin
 
 AEGIS_DIR = Path(__file__).resolve().parent.parent / "synthex-aegis"
+SECURITY_DIR = Path(__file__).resolve().parent.parent / "synthex-security"
+
+
+def _load_privacy():
+    import sys
+    if str(SECURITY_DIR) not in sys.path:
+        sys.path.insert(0, str(SECURITY_DIR))
+    import synthex_privacy
+    return synthex_privacy
+
+
+def _privacy_harden(toast):
+    def work():
+        rep = _load_privacy().apply_browser_hardening()
+        n = len(rep.get("written", []))
+        GLib.idle_add(lambda: toast.show_message(
+            f"Hardened {n} browser policy configs" + (f" · {len(rep['errors'])} errors" if rep.get("errors") else ""),
+            error=bool(rep.get("errors")), seconds=5))
+    threading.Thread(target=work, daemon=True).start()
+
+
+def _privacy_audit(toast):
+    def work():
+        a = _load_privacy().fingerprint_audit()
+        sig = a["signals"]
+        lines = " · ".join(f"{k}:{v}" for k, v in list(sig.items())[:8] if k != "user")
+        GLib.idle_add(lambda: toast.show_message(
+            f"fingerprint ~{a['entropy_bits']} bits — {lines}"[:120], error=False, seconds=8))
+    threading.Thread(target=work, daemon=True).start()
+
+
+def _privacy_trackers_blocked():
+    try:
+        return _load_privacy().trackers_blocked() > 0
+    except Exception:
+        return False
+
+
+def _privacy_set_block(v, toast):
+    pg = _load_privacy()
+    ok, msg = (pg.apply_tracker_block() if v else (pg.remove_tracker_block(), "Tracker block removed"))
+    toast.show_message((msg if ok else "Block needs privileges (pkexec)")[:90], error=not ok, seconds=5)
+
+
+def _privacy_telemetry(toast):
+    def work():
+        rep = _load_privacy().apply_telemetry_reduction()
+        n = len(rep.get("written", []))
+        err = rep.get("errors", [])
+        GLib.idle_add(lambda: toast.show_message(
+            f"Telemetry reduction applied ({n} config files)" + ("" if not err else " · partial, needs sudo"),
+            error=bool(err), seconds=5))
+    threading.Thread(target=work, daemon=True).start()
+
+
+def _privacy_tel_audit(toast):
+    def work():
+        items = _load_privacy().telemetry_audit()
+        active = [t for t in items if t["present"] and not t["mitigated"]]
+        msgs = ", ".join(t["name"] for t in active) or "all collectors clean"
+        GLib.idle_add(lambda: toast.show_message(
+            f"Telemetry audit: {len(active)} active → {msgs}"[:110], error=bool(active), seconds=7))
+    threading.Thread(target=work, daemon=True).start()
+
+
+def _privacy_purge(toast):
+    try:
+        from synth_system_adapters import SpoofGoofAdapter
+        rep = SpoofGoofAdapter.purge_browser_linkage()
+        n = len(rep.get("purged", []))
+        toast.show_message(f"Purged {n} linkage items (bookmarks kept)", error=bool(rep.get("errors")), seconds=5)
+    except Exception as e:
+        toast.show_message(f"Purge failed: {e}"[:80], error=True)
+
+
+def _privacy_schedule(minutes, toast):
+    def work():
+        rep = _load_privacy().schedule_auto_clean(int(minutes))
+        GLib.idle_add(lambda: toast.show_message(
+            f"Auto de-identification {'every ' + str(rep['interval']) + ' min' if rep.get('enabled') else 'off'}",
+            seconds=5))
+    threading.Thread(target=work, daemon=True).start()
 
 
 def _load_aegis():
@@ -815,6 +897,52 @@ def build_privacy_center(toast):
 
     col.add(AsyncSection("Active microphone users", loader=lambda: PrivacyAdapter.get_active_mic_users() or [],
                          renderer=render_mic))
+
+    # ── Fingerprint & data privacy reduction ──────────────────────
+    pg = _load_privacy()
+    sec = Section("Fingerprint hardening")
+    sec.add_row(buttons_row("Browser fingerprint reduction",
+                            "Chromium/Brave policy: WebRTC off · no metrics · no sync · cookies/geolocation/sensors disabled (Firefox RFP already active)",
+                            icon="preferences-system-privacy",
+                            buttons=[("Apply to browsers", "btn-primary", lambda b: _privacy_harden(toast)),
+                                     ("Fingerprint audit", "btn-quiet", lambda b: _privacy_audit(toast))]))
+    sec.add_row(entity_card("Firefox resist-fingerprinting",
+                            "letterboxing · tracking/crypto/social protection · sensors/referer/beacon off · ECH+DoH",
+                            icon_name="firefox", trailing=badge("Active", "ok")))
+    col.add(sec)
+
+    sec = Section("DNS tracker block")
+    blocked = _privacy_trackers_blocked()
+    row, _ = combo_row("Tracker / ad blocklist",
+                       [(True, "On — block 70+ tracker domains system-wide"), (False, "Off")],
+                       subtitle="Applies to EVERY app via /etc/hosts, not just a browser",
+                       icon="network-offline",
+                       get=lambda: blocked,
+                       set_=lambda v: _privacy_set_block(bool(v), toast), width_chars=34)
+    sec.add_row(row)
+    sec.add_row(entity_card("Status",
+                            f"{pg.trackers_blocked() if hasattr(pg, 'trackers_blocked') else 0} tracker domains blocked" if hasattr(pg, 'trackers_blocked') else "",
+                            icon_name="system-shield", trailing=badge("Blocked", "ok") if blocked else badge("Off", "neutral")))
+    col.add(sec)
+
+    sec = Section("Telemetry reduction")
+    sec.add_row(buttons_row("System telemetry sweep", "coredump storage · apport · cockpit — reversible drop-in overrides",
+                            icon="dialog-information",
+                            buttons=[("Apply reduction", "btn-primary", lambda b: _privacy_telemetry(toast)),
+                                     ("Audit", "btn-quiet", lambda b: _privacy_tel_audit(toast))]))
+    sec.add_row(buttons_row("Browser linkage purge", "Cookies · history · cache · site storage (bookmarks kept)",
+                            icon="edit-clear-all",
+                            buttons=[("Purge all browsers", "btn-destructive",
+                                      lambda b: _privacy_purge(toast))]))
+    col.add(sec)
+
+    sec = Section("Scheduled de-identification")
+    _combo(sec, "Auto-clean frequency",
+           [(0, "Off"), (15, "Every 15 minutes"), (60, "Every hour"), (180, "Every 3 hours")],
+           lambda: 15,
+           lambda v: _privacy_schedule(int(v), toast),
+           subtitle="A user timer periodically purges browser + shell linkage", width_chars=18)
+    col.add(sec)
     return col
 
 
