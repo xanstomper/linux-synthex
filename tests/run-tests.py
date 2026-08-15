@@ -1561,7 +1561,35 @@ try:
 except Exception as _e:
     check("vm runner functional validation", False, str(_e))
 
+# 87. Synthex Btrfs Automated Snapshot & 1-Click GRUB Rollback Engine
+print("\n📋 Synthex Btrfs Automated Snapshot & 1-Click GRUB Rollback Engine:")
+snap_dir = os.path.join(ROOT, "src", "synthex-snapshots")
+check("synthex snapshot manager script exists", os.path.exists(os.path.join(snap_dir, "synthex_snapshot_manager.py")))
+check("synthex-snapshot cli launcher exists", os.access(os.path.join(ROOT, "src", "synthex-snapshot"), os.X_OK))
+
+try:
+    if snap_dir not in sys.path:
+        sys.path.insert(0, snap_dir)
+    from synthex_snapshot_manager import SynthexSnapshotManager
+    snap_mgr = SynthexSnapshotManager(dry_run=True)
+    check("snapshot manager initialized", snap_mgr is not None)
+    sn_st = snap_mgr.get_status()
+    check("snapshot status query pass", "READY" in sn_st.get("status", ""))
+    layout = snap_mgr.probe_btrfs_layout()
+    check("btrfs subvolume layout probe pass", len(layout.get("subvolumes", [])) >= 1)
+    new_snap = snap_mgr.create_snapshot("Test Automated Snapshot", "manual")
+    check("btrfs atomic snapshot creation dry-run", new_snap.id >= 1 and new_snap.name != "")
+    rb_res = snap_mgr.rollback_snapshot(new_snap.id)
+    check("btrfs 1-click rollback execution dry-run", rb_res.get("ok") is True)
+    grub_out = snap_mgr.generate_grub_snapshot_menu()
+    check("grub snapshot submenu generator pass", "Synthex System Snapshots" in grub_out)
+    hooks_ok = snap_mgr.install_package_manager_hooks()
+    check("package manager pre-upgrade hooks install pass", hooks_ok is True)
+except Exception as _e:
+    check("snapshot manager functional validation", False, str(_e))
+
 # Summary
+
 
 
 

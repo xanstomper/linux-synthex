@@ -1,0 +1,20 @@
+#!/usr/bin/env python3
+# SPDX-License-Identifier: GPL-3.0-or-later
+import sys
+from pathlib import Path
+
+candidates = [
+    Path(__file__).resolve().parent / "synthex-snapshots",
+    Path("/usr/lib/synthex-snapshots"),
+    Path("/home/jewboy420/linux-synthex/src/synthex-snapshots"),
+]
+
+for c in candidates:
+    if (c / "synthex_snapshot_manager.py").exists():
+        if str(c) not in sys.path:
+            sys.path.insert(0, str(c))
+        break
+
+from synthex_snapshot_manager import main
+if __name__ == "__main__":
+    main()
