@@ -26,7 +26,7 @@
 
 #if __has_include(<drm/drm.h>)
 #include <drm/drm.h>
-#define SOLUS_HAVE_DRM 1
+#define SYNTHEX_HAVE_DRM 1
 #endif
 
 #include "hw-profile.h"

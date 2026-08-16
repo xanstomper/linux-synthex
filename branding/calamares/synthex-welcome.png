@@ -61,7 +61,7 @@
   <!-- Wordmark "Synthex" -->
   <g transform="translate(64, 20)">
     <text x="0" y="0" font-family="'Inter','Segoe UI',Arial,sans-serif" font-size="32" font-weight="700" fill="#FFFFFF" letter-spacing="3">
-      Solus
+      Synthex
     </text>
     <!-- Subtle underline accent -->
     <line x1="0" y1="6" x2="140" y2="6" stroke="#FFB300" stroke-width="2" opacity="0.6" />

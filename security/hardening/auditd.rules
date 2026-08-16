@@ -254,7 +254,7 @@
 -a always,exit -S unshare -k solus_namespace
 
 #==============================================================================
-# 11. SOLUS-SPECIFIC APPLICATION MONITORING
+# 11. SYNTHEX-SPECIFIC APPLICATION MONITORING
 #==============================================================================
 
 # Monitor Synthex package manager (eopkg)

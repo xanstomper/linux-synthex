@@ -19,7 +19,7 @@ diff --git a/kernel/time/Kconfig b/kernel/time/Kconfig
 --- a/kernel/time/Kconfig
 +++ b/kernel/time/Kconfig
 @@ -0,0 +0,0 @@
-+config SOLUS_TICKLESS_GAMING
++config SYNTHEX_TICKLESS_GAMING
 +	bool "Synthex tickless gaming optimization"
 +	depends on NO_HZ_FULL
 +	default y

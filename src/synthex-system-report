@@ -45,17 +45,17 @@ def collect():
     report["zram"] = run("zramctl --noheadings | head -1 | awk '{print $2, $3, $4}'")
     report["services_failed"] = run("systemctl --failed --no-legend | wc -l")
     # Check Synthex services
-    solus_services = {}
+    synthex_services = {}
     for svc in ["synthex-desktopd", "synthex-stored", "synthex-hwdaemon", "synthex-workspace", "synthex-ananicy"]:
         s = run(f"systemctl is-active {svc}")
-        solus_services[svc] = s
-    report["solus_services"] = solus_services
+        synthex_services[svc] = s
+    report["synthex_services"] = synthex_services
     return report
 
 def format_report(report):
     lines = []
     lines.append("=" * 60)
-    lines.append(f"  SOLUS SYSTEM REPORT — {report['timestamp']}")
+    lines.append(f"  SYNTHEX SYSTEM REPORT — {report['timestamp']}")
     lines.append("=" * 60)
     lines.append(f"  Host:    {report.get('hostname', '?')}")
     lines.append(f"  Kernel:  {report.get('kernel', '?')}")
@@ -74,9 +74,9 @@ def format_report(report):
     lines.append(f"  Packages: {report.get('packages', '?')} rpm / {report.get('flatpaks', '?')} flatpak")
     lines.append(f"  Failed services: {report.get('services_failed', '?')}")
     lines.append("")
-    if report.get("solus_services"):
+    if report.get("synthex_services"):
         lines.append("  Synthex Services:")
-        for svc, status in report["solus_services"].items():
+        for svc, status in report["synthex_services"].items():
             mark = "🟢" if status == "active" else "🔴" if status == "inactive" else "⚪"
             lines.append(f"    {mark} {svc}: {status}")
     lines.append("=" * 60)
