@@ -1,0 +1,164 @@
+├── ./
+│   ├── ai/
+│   │   ├── ai-architecture.md  (36K)
+│   │   ├── models/
+│   │   │   ├── model-sources.sh  (26K)
+│   │   ├── ollama/
+│   │   │   ├── modellibrary.json  (27K)
+│   │   │   ├── ollama-config  (785)
+│   │   │   ├── ollama.service  (1.5K)
+│   │   ├── synthex-ai-hub/
+│   │   │   ├── ai-hub.service  (891)
+│   │   │   ├── hub-architecture.md  (47K)
+│   ├── architecture/
+│   │   ├── overview.md  (59K)
+│   ├── branding/
+│   │   ├── boot-splash/
+│   │   ├── boot-splash.md  (9.8K)
+│   │   ├── branding-guide.md  (12K)
+│   │   ├── grub/
+│   │   │   ├── grub-synthex.cfg  (1.3K)
+│   │   │   ├── synthex-grub-theme.md  (7.6K)
+│   │   ├── logo/
+│   │   │   ├── logo-specs.md  (8.4K)
+│   │   │   ├── synthex-icon.svg  (2.7K)
+│   │   │   ├── synthex-logo.svg  (3.0K)
+│   │   ├── theme/
+│   │   │   ├── synthex-cursor/
+│   │   │   │   ├── design.md  (8.7K)
+│   │   │   ├── synthex-plasma-theme/
+│   │   │   │   ├── colors  (3.3K)
+│   │   │   │   ├── metadata.desktop  (1.5K)
+│   │   │   │   ├── README.md  (3.9K)
+│   │   │   ├── synthex-sddm-theme/
+│   │   │   │   ├── design.md  (8.4K)
+│   │   ├── wallpaper/
+│   │   │   ├── default-dark-config.txt  (2.7K)
+│   │   │   ├── generate-wallpapers.sh  (4.0K)
+│   ├── build/
+│   │   ├── ci/
+│   │   ├── kickstart/
+│   │   │   ├── synthex-gaming-packages.ksinc  (3.6K)
+│   │   │   ├── synthex-gnome.ks  (12K)
+│   │   │   ├── synthex-hyprland.ks  (20K)
+│   │   │   ├── synthex-plasma.ks  (24K)
+│   │   ├── livecd/
+│   │   │   ├── build-iso.sh  (16K)
+│   │   │   ├── Dockerfile  (8.5K)
+│   │   ├── scripts/
+│   │   │   ├── hardware-detect.sh  (24K)
+│   │   │   ├── post-install.sh  (20K)
+│   ├── ci/
+│   │   ├── ci-cd-architecture.md  (4.2K)
+│   │   ├── copr/
+│   │   │   ├── synthex-copr-setup.sh  (8.1K)
+│   │   │   ├── synthex.repo  (2.0K)
+│   │   ├── github-actions/
+│   │   │   ├── build-iso.yml  (7.7K)
+│   │   │   ├── build-packages.yml  (11K)
+│   │   │   ├── performance-benchmark.yml  (18K)
+│   │   │   ├── release-iso.yml  (13K)
+│   │   │   ├── security-scan.yml  (14K)
+│   │   │   ├── test-iso.yml  (11K)
+│   │   ├── iso-builder/
+│   │   │   ├── builder-config.sh  (7.0K)
+│   │   │   ├── test-iso.sh  (12K)
+│   │   │   ├── upload-iso.sh  (12K)
+│   ├── desktop/
+│   │   ├── common/
+│   │   │   ├── synthex-cursor/
+│   │   │   │   ├── target/
+│   │   │   │   │   ├── cursor.theme  (6.4K)
+│   │   ├── gnome/
+│   │   │   ├── synthex-gnome-overview.md  (16K)
+│   │   │   ├── synthex-shell.css  (18K)
+│   │   ├── hyprland/
+│   │   │   ├── hyprland.conf  (16K)
+│   │   │   ├── hyprpaper.conf  (2.6K)
+│   │   │   ├── synthex-hyprland-overview.md  (12K)
+│   │   │   ├── waybar-config.jsonc  (8.1K)
+│   │   │   ├── wofi-config  (2.9K)
+│   │   ├── plasma/
+│   │   │   ├── default-settings.knsrc  (3.1K)
+│   │   │   ├── kwin-synthex.kwinrules  (6.4K)
+│   │   │   ├── synthex-desktop-config.sh  (11K)
+│   │   │   ├── synthex-plasma-overview.md  (23K)
+│   ├── docs/
+│   │   ├── architecture/
+│   │   │   ├── synthex-architecture.md  (28K)
+│   │   ├── build/
+│   │   │   ├── build-guide.md  (6.0K)
+│   │   ├── developer/
+│   │   │   ├── building-packages.md  (5.1K)
+│   │   │   ├── contributing.md  (5.4K)
+│   │   ├── security/
+│   │   │   ├── security-guide.md  (12K)
+│   │   ├── user/
+│   │   │   ├── getting-started.md  (18K)
+│   │   │   ├── installation-guide.md  (16K)
+│   ├── gaming/
+│   │   ├── drivers/
+│   │   │   ├── amdgpu-config  (4.8K)
+│   │   │   ├── gpu-driver-manager.sh  (18K)
+│   │   │   ├── intel-config  (5.1K)
+│   │   │   ├── nvidia-config  (6.6K)
+│   │   ├── gaming-architecture.md  (21K)
+│   │   ├── gaming-control-center-spec.md  (31K)
+│   │   ├── proton/
+│   │   │   ├── proton-ge-build.sh  (15K)
+│   │   ├── README.md  (6.2K)
+│   │   ├── steam/
+│   │   │   ├── steam-optimizations.sh  (13K)
+│   │   │   ├── steam-wrapper.sh  (12K)
+│   ├── installer/
+│   │   ├── config/
+│   │   │   ├── calamares-settings.conf  (18K)
+│   │   ├── design/
+│   │   │   ├── installer-design.md  (19K)
+│   ├── kernel/
+│   │   ├── build.sh  (14K)
+│   │   ├── config-x86_64  (18K)
+│   │   ├── patches/
+│   │   │   ├── README.md  (3.2K)
+│   │   ├── synthex-kernel-config.md  (8.4K)
+│   │   ├── synthex-kernel.spec  (11K)
+│   ├── packages/
+│   │   ├── copr/
+│   │   │   ├── synthex-repo-setup.sh  (6.0K)
+│   │   ├── synthex-repos/
+│   │   │   ├── repo-architecture.md  (12K)
+│   │   │   ├── synthex.repo  (2.0K)
+│   │   │   ├── synthex.repo.asc  (793)
+│   │   ├── spec-files/
+│   │   │   ├── synthex-ai-hub.spec  (3.6K)
+│   │   │   ├── synthex-ai-platform.spec  (7.3K)
+│   │   │   ├── synthex-branding.spec  (8.4K)
+│   │   │   ├── synthex-desktop-common.spec  (4.5K)
+│   │   │   ├── synthex-gaming-control-center.spec  (4.5K)
+│   │   │   ├── synthex-gaming-platform.spec  (2.9K)
+│   │   │   ├── synthex-gnome-desktop.spec  (6.9K)
+│   │   │   ├── synthex-gpu-drivers.spec  (3.9K)
+│   │   │   ├── synthex-hyprland-desktop.spec  (6.6K)
+│   │   │   ├── synthex-plasma-desktop.spec  (7.0K)
+│   │   │   ├── synthex-security-dashboard.spec  (13K)
+│   ├── project-inventory.json  (29K)
+│   ├── project-tree.txt  (6.4K)
+│   ├── README.md  (6.1K)
+│   ├── roadmap/
+│   │   ├── release-plan.md  (7.0K)
+│   │   ├── roadmap.md  (8.9K)
+│   ├── security/
+│   │   ├── audit/
+│   │   │   ├── red-team-report-template.md  (20K)
+│   │   │   ├── security-checklist.md  (41K)
+│   │   ├── hardening/
+│   │   │   ├── auditd.rules  (14K)
+│   │   │   ├── limits.conf  (8.5K)
+│   │   │   ├── README.md  (16K)
+│   │   │   ├── sysctl.conf  (13K)
+│   │   ├── security-architecture.md  (51K)
+│   │   ├── selinux-policy/
+│   │   │   ├── synthex-policy.te  (28K)
+│   ├── tests/
+│   │   ├── generate-tree.sh  (850)
+│   │   ├── inventory.py  (2.8K)

@@ -1,0 +1,1586 @@
+{
+  "project": "Linux Synthex",
+  "generated": "2026-07-04T21:26:54.647761",
+  "root": "./",
+  "files": [
+    {
+      "path": ".gitignore",
+      "size_bytes": 458,
+      "extension": "",
+      "lines": 0,
+      "sha256": "",
+      "modified": "2026-07-04T20:45:47.810400"
+    },
+    {
+      "path": "LICENSE",
+      "size_bytes": 1076,
+      "extension": "",
+      "lines": 0,
+      "sha256": "",
+      "modified": "2026-07-04T20:45:46.196310"
+    },
+    {
+      "path": "README.md",
+      "size_bytes": 6218,
+      "extension": ".md",
+      "lines": 181,
+      "sha256": "9fe6e2254f62625d5e7016b5b47bb8dcff35ce1278be8798e0335e46422418e0",
+      "modified": "2026-07-04T20:40:00.874016"
+    },
+    {
+      "path": "ai/ai-architecture.md",
+      "size_bytes": 36852,
+      "extension": ".md",
+      "lines": 869,
+      "sha256": "39d441cabf5f4fcb85726bb93b044c6fd63597ce2538890708aa73bf984abc0b",
+      "modified": "2026-07-04T20:27:37.255425"
+    },
+    {
+      "path": "ai/models/model-sources.sh",
+      "size_bytes": 26160,
+      "extension": ".sh",
+      "lines": 650,
+      "sha256": "0ab702f221fb0383e35bdd28708430b0b978d7401125545341ea67c956831756",
+      "modified": "2026-07-04T20:32:07.917956"
+    },
+    {
+      "path": "ai/ollama/modellibrary.json",
+      "size_bytes": 26835,
+      "extension": ".json",
+      "lines": 597,
+      "sha256": "e3d0ff4ae2034ff8f0e4c8e01c7b5393ef54e443a40c64a3018e871996f85414",
+      "modified": "2026-07-04T20:30:37.378052"
+    },
+    {
+      "path": "ai/ollama/ollama-config",
+      "size_bytes": 785,
+      "extension": "",
+      "lines": 0,
+      "sha256": "",
+      "modified": "2026-07-04T20:30:37.071036"
+    },
+    {
+      "path": "ai/ollama/ollama.service",
+      "size_bytes": 1493,
+      "extension": ".service",
+      "lines": 62,
+      "sha256": "a090711921fe313ac79b99daf8cb67e5a70dd314a400047e8218248c33710cde",
+      "modified": "2026-07-04T20:30:37.018033"
+    },
+    {
+      "path": "ai/synthex-ai-hub/ai-hub.service",
+      "size_bytes": 891,
+      "extension": ".service",
+      "lines": 41,
+      "sha256": "dfc261b18f05079fb95e6f0264e67c254290b4a86d5de5d94a258f1c621027f8",
+      "modified": "2026-07-04T20:30:37.308049"
+    },
+    {
+      "path": "ai/synthex-ai-hub/hub-architecture.md",
+      "size_bytes": 47512,
+      "extension": ".md",
+      "lines": 925,
+      "sha256": "9cc45480a36d8b83a75933d33edde1e48c44be9900360cd70a4105106312939d",
+      "modified": "2026-07-04T20:29:12.394486"
+    },
+    {
+      "path": "architecture/overview.md",
+      "size_bytes": 59909,
+      "extension": ".md",
+      "lines": 1105,
+      "sha256": "5a95ed531425ccd8d46b7264f1bd2656143f0725d09d723a9eeab10e8742fc78",
+      "modified": "2026-07-04T20:18:15.071355"
+    },
+    {
+      "path": "branding/boot-splash.md",
+      "size_bytes": 9946,
+      "extension": ".md",
+      "lines": 246,
+      "sha256": "8a86ce953a2790dac06e9715cd297d5fecec0f09b98586dd92c14bd1ac54f668",
+      "modified": "2026-07-04T20:37:51.700844"
+    },
+    {
+      "path": "branding/branding-guide.md",
+      "size_bytes": 12213,
+      "extension": ".md",
+      "lines": 302,
+      "sha256": "994e525fb5ddfece86d838edc6e85d665cb5ee317faead2998cc31aa021749b3",
+      "modified": "2026-07-04T20:33:38.708908"
+    },
+    {
+      "path": "branding/grub/grub-synthex.cfg",
+      "size_bytes": 1263,
+      "extension": ".cfg",
+      "lines": 50,
+      "sha256": "56b2b315a953e9f8501f1d458f3e125bcf99fb615e56c93542f2249a7c9b68d1",
+      "modified": "2026-07-04T20:36:26.738145"
+    },
+    {
+      "path": "branding/grub/synthex-grub-theme.md",
+      "size_bytes": 7755,
+      "extension": ".md",
+      "lines": 227,
+      "sha256": "c96c5c75a5c16016ed6fc85e02e4c08dd0419e585c1fc9084ba9caab7f730628",
+      "modified": "2026-07-04T20:36:17.156616"
+    },
+    {
+      "path": "branding/logo/logo-specs.md",
+      "size_bytes": 8545,
+      "extension": ".md",
+      "lines": 214,
+      "sha256": "61a8263e70cf782cdd7d27a2dbb0232bc6ed17e3f7a9a80ac163db95ac0accb7",
+      "modified": "2026-07-04T20:34:07.535487"
+    },
+    {
+      "path": "branding/logo/synthex-icon.svg",
+      "size_bytes": 2698,
+      "extension": ".svg",
+      "lines": 65,
+      "sha256": "99f6a0faa34371088d6d2f593f4dcf3a82c1c8eaaad8c3239ad085158964a486",
+      "modified": "2026-07-04T20:34:31.316791"
+    },
+    {
+      "path": "branding/logo/synthex-logo.svg",
+      "size_bytes": 3040,
+      "extension": ".svg",
+      "lines": 73,
+      "sha256": "50e89393a377b85c7f6221097142d7cba9152d6040cb3d3f83def671da43f312",
+      "modified": "2026-07-04T20:34:20.259184"
+    },
+    {
+      "path": "branding/theme/synthex-cursor/design.md",
+      "size_bytes": 8901,
+      "extension": ".md",
+      "lines": 254,
+      "sha256": "4b75756fe85a94aef249d50ea84d2919df3c39373ba3ec5ccb1ed06b42a8c7e1",
+      "modified": "2026-07-04T20:37:23.287270"
+    },
+    {
+      "path": "branding/theme/synthex-plasma-theme/README.md",
+      "size_bytes": 3932,
+      "extension": ".md",
+      "lines": 100,
+      "sha256": "4be4c5b44331a4e08d7ed404885a02a37b33ce7be02bc02d82fd696e926a09c0",
+      "modified": "2026-07-04T20:35:51.598207"
+    },
+    {
+      "path": "branding/theme/synthex-plasma-theme/colors",
+      "size_bytes": 3366,
+      "extension": "",
+      "lines": 0,
+      "sha256": "",
+      "modified": "2026-07-04T20:35:36.584379"
+    },
+    {
+      "path": "branding/theme/synthex-plasma-theme/metadata.desktop",
+      "size_bytes": 1516,
+      "extension": ".desktop",
+      "lines": 39,
+      "sha256": "39264a58a8a92243912cd5b1b95c8eea41a180f58e7229f78a2801833c94b292",
+      "modified": "2026-07-04T20:35:22.673613"
+    },
+    {
+      "path": "branding/theme/synthex-sddm-theme/design.md",
+      "size_bytes": 8579,
+      "extension": ".md",
+      "lines": 229,
+      "sha256": "50a3d341e93fcec5a3674bf1017d44c2c867b890316212b705eb6bc9c9928c0f",
+      "modified": "2026-07-04T20:36:51.933536"
+    },
+    {
+      "path": "branding/wallpaper/default-dark-config.txt",
+      "size_bytes": 2732,
+      "extension": ".txt",
+      "lines": 92,
+      "sha256": "7d0f8b4e2bb49a3554b9d0dcc2640502e63c5b6c7e96df63c62d6e711f4e6326",
+      "modified": "2026-07-04T20:35:10.773959"
+    },
+    {
+      "path": "branding/wallpaper/generate-wallpapers.sh",
+      "size_bytes": 4058,
+      "extension": ".sh",
+      "lines": 156,
+      "sha256": "59a8356317eb517f629fcefa19b8dfe1e221803c1dfbce0b06c2a797529032cd",
+      "modified": "2026-07-04T20:34:55.973145"
+    },
+    {
+      "path": "build/kickstart/synthex-gaming-packages.ksinc",
+      "size_bytes": 3631,
+      "extension": ".ksinc",
+      "lines": 0,
+      "sha256": "",
+      "modified": "2026-07-04T20:32:45.202986"
+    },
+    {
+      "path": "build/kickstart/synthex-gnome.ks",
+      "size_bytes": 12059,
+      "extension": ".ks",
+      "lines": 585,
+      "sha256": "ba4d02d5548b6cf393e63b8165ca2165d3cc229f816cc36dec05faf1b76cb7a1",
+      "modified": "2026-07-04T20:31:18.655284"
+    },
+    {
+      "path": "build/kickstart/synthex-hyprland.ks",
+      "size_bytes": 20406,
+      "extension": ".ks",
+      "lines": 970,
+      "sha256": "ba0862dd084f91a1e9ffe38e83ead3202e06f06182274075e2d9604b10dd77de",
+      "modified": "2026-07-04T20:30:37.071036"
+    },
+    {
+      "path": "build/kickstart/synthex-plasma.ks",
+      "size_bytes": 24441,
+      "extension": ".ks",
+      "lines": 1320,
+      "sha256": "1bed8d4da6a994518ad55c6165d119c75887d0e679dccab1b1f518d90cc4f352",
+      "modified": "2026-07-04T20:29:25.055164"
+    },
+    {
+      "path": "build/livecd/Dockerfile",
+      "size_bytes": 8636,
+      "extension": "",
+      "lines": 0,
+      "sha256": "",
+      "modified": "2026-07-04T20:32:28.744090"
+    },
+    {
+      "path": "build/livecd/build-iso.sh",
+      "size_bytes": 15545,
+      "extension": ".sh",
+      "lines": 510,
+      "sha256": "a9e098ca61ab85a5c900db13ae70ea01ea5262a12f0a0a8cedbd48c3cb419b0e",
+      "modified": "2026-07-04T20:32:02.927685"
+    },
+    {
+      "path": "build/scripts/hardware-detect.sh",
+      "size_bytes": 23956,
+      "extension": ".sh",
+      "lines": 764,
+      "sha256": "bd4cc0d2ad2d72ac776086635a04af77e10564a2a90f0fb4aa41b7fb79a6a126",
+      "modified": "2026-07-04T20:39:03.965852"
+    },
+    {
+      "path": "build/scripts/post-install.sh",
+      "size_bytes": 19822,
+      "extension": ".sh",
+      "lines": 616,
+      "sha256": "5eac94dc6057e02199e0d2a198473f05f6c337bb5cd218d25e3ef5e7dca98908",
+      "modified": "2026-07-04T20:35:18.586389"
+    },
+    {
+      "path": "ci/ci-cd-architecture.md",
+      "size_bytes": 4250,
+      "extension": ".md",
+      "lines": 149,
+      "sha256": "712de81ed2cc701fbb8b9def1a7825cdbbdcab1674cf408f609fce25b01f8546",
+      "modified": "2026-07-04T20:41:20.475450"
+    },
+    {
+      "path": "ci/copr/synthex-copr-setup.sh",
+      "size_bytes": 8241,
+      "extension": ".sh",
+      "lines": 265,
+      "sha256": "cae38f147ac5ba7b065d0408aaf3daf3eac659671c86e45e6232c4cf92f835d5",
+      "modified": "2026-07-04T20:44:24.391727"
+    },
+    {
+      "path": "ci/copr/synthex.repo",
+      "size_bytes": 2002,
+      "extension": ".repo",
+      "lines": 0,
+      "sha256": "",
+      "modified": "2026-07-04T20:44:26.392839"
+    },
+    {
+      "path": "ci/github-actions/build-iso.yml",
+      "size_bytes": 7834,
+      "extension": ".yml",
+      "lines": 227,
+      "sha256": "5ceb1d7d3eabc4c2d608b75211387f8e6ab307eb681ac8783f9bb2d08a12c196",
+      "modified": "2026-07-04T20:42:44.102118"
+    },
+    {
+      "path": "ci/github-actions/build-packages.yml",
+      "size_bytes": 11263,
+      "extension": ".yml",
+      "lines": 337,
+      "sha256": "af2df7d3588f761cf48fe929f20d028cc1dbd90449d0551900d7d91460014faa",
+      "modified": "2026-07-04T20:42:45.907219"
+    },
+    {
+      "path": "ci/github-actions/performance-benchmark.yml",
+      "size_bytes": 18261,
+      "extension": ".yml",
+      "lines": 479,
+      "sha256": "890a8744b17469ff57882971d73a071eb1445551d82652670222b43b85b9ce3d",
+      "modified": "2026-07-04T20:42:53.491643"
+    },
+    {
+      "path": "ci/github-actions/release-iso.yml",
+      "size_bytes": 13270,
+      "extension": ".yml",
+      "lines": 380,
+      "sha256": "363f802f69ae4411c3c65a12ac632cd8fd2fc9cabc8aa4db568c1a514dc0ac92",
+      "modified": "2026-07-04T20:42:51.760550"
+    },
+    {
+      "path": "ci/github-actions/security-scan.yml",
+      "size_bytes": 14058,
+      "extension": ".yml",
+      "lines": 381,
+      "sha256": "27479ccc21bfe7bbc18da6d2c01261086e16ed42e000caf4535b08eaa75728a2",
+      "modified": "2026-07-04T20:42:47.977335"
+    },
+    {
+      "path": "ci/github-actions/test-iso.yml",
+      "size_bytes": 10445,
+      "extension": ".yml",
+      "lines": 322,
+      "sha256": "d6ec824f1e61be409d6df0c2d6974fda3dfabb680589ac8134ce5e1365cc348c",
+      "modified": "2026-07-04T20:42:49.860440"
+    },
+    {
+      "path": "ci/iso-builder/builder-config.sh",
+      "size_bytes": 7118,
+      "extension": ".sh",
+      "lines": 217,
+      "sha256": "2d58666249f64235f9724e885f5e8a1e39e293c02da822c75a3b7c50d6ba15ce",
+      "modified": "2026-07-04T20:44:28.177939"
+    },
+    {
+      "path": "ci/iso-builder/test-iso.sh",
+      "size_bytes": 11748,
+      "extension": ".sh",
+      "lines": 379,
+      "sha256": "f7ec8b034a87a7e2ad2c975ce6ed5b1499058baf623ddcb0390352f2870cfdf8",
+      "modified": "2026-07-04T20:44:46.233950"
+    },
+    {
+      "path": "ci/iso-builder/upload-iso.sh",
+      "size_bytes": 11456,
+      "extension": ".sh",
+      "lines": 362,
+      "sha256": "608c3324178b9cfb9684fa3ad0b21cf49732ad953f73c6292901c4d2be87e87d",
+      "modified": "2026-07-04T20:44:29.915036"
+    },
+    {
+      "path": "desktop/common/synthex-cursor/target/cursor.theme",
+      "size_bytes": 6480,
+      "extension": ".theme",
+      "lines": 0,
+      "sha256": "",
+      "modified": "2026-07-04T20:32:10.675106"
+    },
+    {
+      "path": "desktop/gnome/synthex-gnome-overview.md",
+      "size_bytes": 16007,
+      "extension": ".md",
+      "lines": 399,
+      "sha256": "f7b5c1708e26219447295f2c3aa59653e8c4b77119009a866f8078a7bb8e9e87",
+      "modified": "2026-07-04T20:28:19.763679"
+    },
+    {
+      "path": "desktop/gnome/synthex-shell.css",
+      "size_bytes": 18059,
+      "extension": ".css",
+      "lines": 651,
+      "sha256": "7d4fda3b8f6d1b8d0c272825ce502756e079a197829b0646924074693ce379a7",
+      "modified": "2026-07-04T20:31:49.328947"
+    },
+    {
+      "path": "desktop/hyprland/hyprland.conf",
+      "size_bytes": 15476,
+      "extension": ".conf",
+      "lines": 423,
+      "sha256": "cd974f59b6235432d60fa8c4415f908e479565b732166ea1052dbedd96f5d638",
+      "modified": "2026-07-04T20:30:18.572039"
+    },
+    {
+      "path": "desktop/hyprland/hyprpaper.conf",
+      "size_bytes": 2575,
+      "extension": ".conf",
+      "lines": 34,
+      "sha256": "b11791d964e8b116576a59e0d5ce0d1d10f433f829f2d755f831c99c38ea3212",
+      "modified": "2026-07-04T20:30:27.610526"
+    },
+    {
+      "path": "desktop/hyprland/synthex-hyprland-overview.md",
+      "size_bytes": 12126,
+      "extension": ".md",
+      "lines": 347,
+      "sha256": "09eedff6648c0a3c02b86a726dd965eda23b3cd6afc7e7e756e68291cdc7fb3a",
+      "modified": "2026-07-04T20:27:27.599915"
+    },
+    {
+      "path": "desktop/hyprland/waybar-config.jsonc",
+      "size_bytes": 8291,
+      "extension": ".jsonc",
+      "lines": 205,
+      "sha256": "326827c64dc57ac614db8efe4fa4c7bea4fcf71513274a3525ac3dbcce4b8ec0",
+      "modified": "2026-07-04T20:30:49.157688"
+    },
+    {
+      "path": "desktop/hyprland/wofi-config",
+      "size_bytes": 2942,
+      "extension": "",
+      "lines": 0,
+      "sha256": "",
+      "modified": "2026-07-04T20:31:00.328292"
+    },
+    {
+      "path": "desktop/plasma/default-settings.knsrc",
+      "size_bytes": 3079,
+      "extension": ".knsrc",
+      "lines": 193,
+      "sha256": "c887a6afdb52194ea2d895f313b33751b92a6260cc1d660919e524a0a82f4664",
+      "modified": "2026-07-04T20:28:41.564840"
+    },
+    {
+      "path": "desktop/plasma/kwin-synthex.kwinrules",
+      "size_bytes": 6483,
+      "extension": ".kwinrules",
+      "lines": 175,
+      "sha256": "547170d1095e85b93fd7a332c3c1799f40997fc88a25331ae35ae4a11c056709",
+      "modified": "2026-07-04T20:29:29.190386"
+    },
+    {
+      "path": "desktop/plasma/synthex-desktop-config.sh",
+      "size_bytes": 11250,
+      "extension": ".sh",
+      "lines": 244,
+      "sha256": "45d9bf29f1ca9184cb542b34b224d5ee2c2b8f614fa0ed1812fa2e164f7fceb3",
+      "modified": "2026-07-04T20:29:09.587336"
+    },
+    {
+      "path": "desktop/plasma/synthex-plasma-overview.md",
+      "size_bytes": 23272,
+      "extension": ".md",
+      "lines": 589,
+      "sha256": "1d24a4fbfcf32533303a9a599f51e9ad3bf8043ddaade15cb32db1eafb359647",
+      "modified": "2026-07-04T20:26:43.752606"
+    },
+    {
+      "path": "docs/architecture/synthex-architecture.md",
+      "size_bytes": 62086,
+      "extension": ".md",
+      "lines": 1161,
+      "sha256": "f863638076101b4276bd8f292d5149a99ad4432a401a5d3a77ee3339bfa31599",
+      "modified": "2026-07-04T20:56:59.037664"
+    },
+    {
+      "path": "docs/build/build-guide.md",
+      "size_bytes": 28999,
+      "extension": ".md",
+      "lines": 1234,
+      "sha256": "045ca39a7d658349282e040167dffe2c993428365f9af421e611bb17a3a76b14",
+      "modified": "2026-07-04T20:54:07.898863"
+    },
+    {
+      "path": "docs/developer/api-docs.md",
+      "size_bytes": 33703,
+      "extension": ".md",
+      "lines": 1708,
+      "sha256": "5941ebd09eea3fc5b87c2e8cab6b64234fa5f8652e439272a95c802b5004fd1a",
+      "modified": "2026-07-04T20:55:32.482385"
+    },
+    {
+      "path": "docs/developer/building-packages.md",
+      "size_bytes": 27152,
+      "extension": ".md",
+      "lines": 1168,
+      "sha256": "122df2cca8833bab9b8243e15a92d1f5838e5dddddc6d70a9a0b944a1231faab",
+      "modified": "2026-07-04T20:50:26.013804"
+    },
+    {
+      "path": "docs/developer/contributing.md",
+      "size_bytes": 36523,
+      "extension": ".md",
+      "lines": 1219,
+      "sha256": "8327212a4801e1bcbb9c9e38c9d346bc2b73ae4421551457ed679cc8be4405ef",
+      "modified": "2026-07-04T20:49:09.261965"
+    },
+    {
+      "path": "docs/security/security-guide.md",
+      "size_bytes": 46576,
+      "extension": ".md",
+      "lines": 1587,
+      "sha256": "71f93f78c09dc666872acd28a18c5e9b21d8107dd64710e4df116d32cf9a334f",
+      "modified": "2026-07-04T20:52:36.984138"
+    },
+    {
+      "path": "docs/user/getting-started.md",
+      "size_bytes": 51023,
+      "extension": ".md",
+      "lines": 1596,
+      "sha256": "5c0fbb41a2004597b40dd9b591d27d3f4dced3012b89cf672ab637e1a56b3a62",
+      "modified": "2026-07-04T20:47:43.824312"
+    },
+    {
+      "path": "docs/user/installation-guide.md",
+      "size_bytes": 69495,
+      "extension": ".md",
+      "lines": 1708,
+      "sha256": "db544d57e3708f3b934190e5ba756d51e55b61df333eb5caea8ab94193d21dd0",
+      "modified": "2026-07-04T20:45:41.102024"
+    },
+    {
+      "path": "gaming/README.md",
+      "size_bytes": 6307,
+      "extension": ".md",
+      "lines": 174,
+      "sha256": "da3f714417468305a8df8c145ec0739dcffa32f61ddd904d30eac748a3017742",
+      "modified": "2026-07-04T20:32:45.363995"
+    },
+    {
+      "path": "gaming/drivers/amdgpu-config",
+      "size_bytes": 4900,
+      "extension": "",
+      "lines": 0,
+      "sha256": "",
+      "modified": "2026-07-04T20:28:35.970542"
+    },
+    {
+      "path": "gaming/drivers/gpu-driver-manager.sh",
+      "size_bytes": 17815,
+      "extension": ".sh",
+      "lines": 533,
+      "sha256": "2244a42989d9d00f4ccc94ffdec9595bda44494967516b4c88b64fb0cfe4d674",
+      "modified": "2026-07-04T20:28:36.437567"
+    },
+    {
+      "path": "gaming/drivers/intel-config",
+      "size_bytes": 5180,
+      "extension": "",
+      "lines": 0,
+      "sha256": "",
+      "modified": "2026-07-04T20:28:36.026545"
+    },
+    {
+      "path": "gaming/drivers/nvidia-config",
+      "size_bytes": 6720,
+      "extension": "",
+      "lines": 0,
+      "sha256": "",
+      "modified": "2026-07-04T20:28:35.973542"
+    },
+    {
+      "path": "gaming/gaming-architecture.md",
+      "size_bytes": 20795,
+      "extension": ".md",
+      "lines": 620,
+      "sha256": "eaab0f7e0470628db1fcd217ea2984523a05151cae8732982c4f4bbfaafc676b",
+      "modified": "2026-07-04T20:28:36.213555"
+    },
+    {
+      "path": "gaming/gaming-control-center-spec.md",
+      "size_bytes": 31739,
+      "extension": ".md",
+      "lines": 708,
+      "sha256": "6661773088a7c0a5eb4ff541cc83f11feeef8a7878391792d9b01592428c5b78",
+      "modified": "2026-07-04T20:32:45.484001"
+    },
+    {
+      "path": "gaming/proton/proton-ge-build.sh",
+      "size_bytes": 14578,
+      "extension": ".sh",
+      "lines": 485,
+      "sha256": "1c5418911b43350f78c03784acfd8f8aee9aee68a56f9e032e0f86e87b3767af",
+      "modified": "2026-07-04T20:30:19.965114"
+    },
+    {
+      "path": "gaming/steam/steam-optimizations.sh",
+      "size_bytes": 12997,
+      "extension": ".sh",
+      "lines": 377,
+      "sha256": "93f8366a0ed7668641b3af597a879ecb10d60afb92b0cf67647dca495bec3a11",
+      "modified": "2026-07-04T20:30:19.958113"
+    },
+    {
+      "path": "gaming/steam/steam-wrapper.sh",
+      "size_bytes": 11755,
+      "extension": ".sh",
+      "lines": 336,
+      "sha256": "dcce4b29aeace122e5264607b272cf4d3c560a97f60e03230bb9751a782d8633",
+      "modified": "2026-07-04T20:30:19.965114"
+    },
+    {
+      "path": "installer/config/calamares-settings.conf",
+      "size_bytes": 17651,
+      "extension": ".conf",
+      "lines": 661,
+      "sha256": "b4271f14f1fd197144737b62f715c2a1d204866ff0cf93019de4da9a5a10a511",
+      "modified": "2026-07-04T20:33:20.229898"
+    },
+    {
+      "path": "installer/design/installer-design.md",
+      "size_bytes": 18775,
+      "extension": ".md",
+      "lines": 527,
+      "sha256": "9c6120391f44dcf5e99f0117fc9fb76e6f90c6b44d87602808dcc8fec91bf405",
+      "modified": "2026-07-04T20:34:21.968278"
+    },
+    {
+      "path": "kernel/build.sh",
+      "size_bytes": 13612,
+      "extension": ".sh",
+      "lines": 376,
+      "sha256": "9e3079026a691a88cceab8fccfa7c02818731a5a31e6337e7941463a2b10f800",
+      "modified": "2026-07-04T20:17:36.211596"
+    },
+    {
+      "path": "kernel/config-x86_64",
+      "size_bytes": 18010,
+      "extension": "",
+      "lines": 0,
+      "sha256": "",
+      "modified": "2026-07-04T20:16:27.246562"
+    },
+    {
+      "path": "kernel/patches/README.md",
+      "size_bytes": 3265,
+      "extension": ".md",
+      "lines": 55,
+      "sha256": "40889084b65ff2895e7929f79df25d90fa33f9a02af4bddcee9628d88a7f4e6f",
+      "modified": "2026-07-04T20:17:47.171089"
+    },
+    {
+      "path": "kernel/synthex-kernel-config.md",
+      "size_bytes": 8522,
+      "extension": ".md",
+      "lines": 197,
+      "sha256": "87a4e4e69337f276e4c07d864a5d548713a57c5da5a53ba615dbf1ab5c8f9571",
+      "modified": "2026-07-04T20:18:22.831711"
+    },
+    {
+      "path": "kernel/synthex-kernel.spec",
+      "size_bytes": 10913,
+      "extension": ".spec",
+      "lines": 301,
+      "sha256": "553e0f9503b90ff63513f313cc74587cac65a3a1b7ad23bf9ab5bd2dc488ec3d",
+      "modified": "2026-07-04T20:17:04.489186"
+    },
+    {
+      "path": "layouts/balanced.json",
+      "size_bytes": 874,
+      "extension": ".json",
+      "lines": 36,
+      "sha256": "8ef6ce1d923a2d657d1a15605dcf5c35e4669d041fb9b5e58ddd0c1c3a9ba54f",
+      "modified": "2026-07-04T21:22:57.838442"
+    },
+    {
+      "path": "layouts/gaming.json",
+      "size_bytes": 937,
+      "extension": ".json",
+      "lines": 36,
+      "sha256": "1b27793d1fac73b65a0f98b120911b4612949535461dc980ff8842b499344a65",
+      "modified": "2026-07-04T21:22:57.891706"
+    },
+    {
+      "path": "layouts/macos.json",
+      "size_bytes": 1025,
+      "extension": ".json",
+      "lines": 42,
+      "sha256": "04a81f0f9feacce689ed9434ff20d02e683ce1ed146bbf4c3aaa985d01168ff1",
+      "modified": "2026-07-04T21:22:57.833720"
+    },
+    {
+      "path": "layouts/minimal.json",
+      "size_bytes": 886,
+      "extension": ".json",
+      "lines": 37,
+      "sha256": "dbf20c36f727cddc1408d8e96316ed4c3d03b61e5e9af63f25cdc9d24048d8fd",
+      "modified": "2026-07-04T21:22:57.727716"
+    },
+    {
+      "path": "layouts/windows.json",
+      "size_bytes": 1104,
+      "extension": ".json",
+      "lines": 43,
+      "sha256": "bef1fd43eb98d227884b2c0101eb90c5659440b31dac1498b9ca1f47bdc24e7b",
+      "modified": "2026-07-04T21:22:57.831720"
+    },
+    {
+      "path": "modes/balanced.sh",
+      "size_bytes": 1651,
+      "extension": ".sh",
+      "lines": 49,
+      "sha256": "5bf087d6e6da0efe6d4949ea145b197184c9778589ab3b1e48f5473a025e9800",
+      "modified": "2026-07-04T21:23:42.499500"
+    },
+    {
+      "path": "modes/battery.sh",
+      "size_bytes": 1908,
+      "extension": ".sh",
+      "lines": 55,
+      "sha256": "0991cae2897339fd2329acc5ea061a5205c8bc8b058bda259dfb82ce27197b1b",
+      "modified": "2026-07-04T21:23:41.504786"
+    },
+    {
+      "path": "modes/creator.sh",
+      "size_bytes": 1700,
+      "extension": ".sh",
+      "lines": 46,
+      "sha256": "43815cf46b35ad3acd64c86f3a919100c5f942bd151561bfbfe2181c301f0d42",
+      "modified": "2026-07-04T21:23:41.510825"
+    },
+    {
+      "path": "modes/dev.sh",
+      "size_bytes": 1645,
+      "extension": ".sh",
+      "lines": 49,
+      "sha256": "2f24cebec2e4e497e961c9fbdf84b2fca102e37aedf8f37a2b7b410e30009856",
+      "modified": "2026-07-04T21:23:42.471499"
+    },
+    {
+      "path": "modes/gaming.sh",
+      "size_bytes": 1842,
+      "extension": ".sh",
+      "lines": 53,
+      "sha256": "7c15d4a017f35e838846a63a30cb0a9b262e82f54c5778ab34c1ee7d9489e951",
+      "modified": "2026-07-04T21:23:41.495459"
+    },
+    {
+      "path": "packages/copr/synthex-repo-setup.sh",
+      "size_bytes": 6095,
+      "extension": ".sh",
+      "lines": 213,
+      "sha256": "a736488fd1ecbc7d44bf89a020a80a3781a2d4f5dc41fa9ac796287195821179",
+      "modified": "2026-07-04T20:44:33.634244"
+    },
+    {
+      "path": "packages/synthex-repos/repo-architecture.md",
+      "size_bytes": 11349,
+      "extension": ".md",
+      "lines": 334,
+      "sha256": "3ae4859f4650709b218ade7f67aa6f8c226c44bbfe4c81599ce5cd4191dd6c37",
+      "modified": "2026-07-04T20:40:23.805292"
+    },
+    {
+      "path": "packages/synthex-repos/synthex.repo",
+      "size_bytes": 2002,
+      "extension": ".repo",
+      "lines": 0,
+      "sha256": "",
+      "modified": "2026-07-04T20:44:46.199948"
+    },
+    {
+      "path": "packages/synthex-repos/synthex.repo.asc",
+      "size_bytes": 793,
+      "extension": ".asc",
+      "lines": 0,
+      "sha256": "",
+      "modified": "2026-07-04T20:44:46.248951"
+    },
+    {
+      "path": "packages/spec-files/synthex-ai-hub.spec",
+      "size_bytes": 3616,
+      "extension": ".spec",
+      "lines": 118,
+      "sha256": "dabd1209172b495721a63082009504cb7f54134a4a47d44b14bb272cb33e70f5",
+      "modified": "2026-07-04T20:32:07.844953"
+    },
+    {
+      "path": "packages/spec-files/synthex-ai-platform.spec",
+      "size_bytes": 7391,
+      "extension": ".spec",
+      "lines": 210,
+      "sha256": "1f8cacf5a1ba434aa4461dfa6161a57f191f2b6b15efe3a2af501726d59933a7",
+      "modified": "2026-07-04T20:32:07.734753"
+    },
+    {
+      "path": "packages/spec-files/synthex-branding.spec",
+      "size_bytes": 8531,
+      "extension": ".spec",
+      "lines": 280,
+      "sha256": "7126dd38553a03fce07f29ae9ed7a75483961650db19e8d462e077e97d58bb06",
+      "modified": "2026-07-04T20:38:21.441492"
+    },
+    {
+      "path": "packages/spec-files/synthex-desktop-common.spec",
+      "size_bytes": 4518,
+      "extension": ".spec",
+      "lines": 101,
+      "sha256": "eaad45675a4c78467a50893e73aa9a673bd4499ac935f380f75206baf1ab6bc7",
+      "modified": "2026-07-04T20:32:24.689869"
+    },
+    {
+      "path": "packages/spec-files/synthex-gaming-control-center.spec",
+      "size_bytes": 4585,
+      "extension": ".spec",
+      "lines": 161,
+      "sha256": "c77357f590f514b300aea590ccfe53af8430d4a1c2434f35179f668f51a73bc4",
+      "modified": "2026-07-04T20:32:45.338994"
+    },
+    {
+      "path": "packages/spec-files/synthex-gaming-platform.spec",
+      "size_bytes": 2885,
+      "extension": ".spec",
+      "lines": 109,
+      "sha256": "a39b467d494dff9ffca5c9e81e64f9dd9b5c606ede7073fe5795118e9e28f6eb",
+      "modified": "2026-07-04T20:32:45.307992"
+    },
+    {
+      "path": "packages/spec-files/synthex-gnome-desktop.spec",
+      "size_bytes": 6991,
+      "extension": ".spec",
+      "lines": 163,
+      "sha256": "3677563f6a667491e89a5d2debf0a6dda71174b746b2a87123c02d286c32a146",
+      "modified": "2026-07-04T20:33:22.591027"
+    },
+    {
+      "path": "packages/spec-files/synthex-gpu-drivers.spec",
+      "size_bytes": 3905,
+      "extension": ".spec",
+      "lines": 134,
+      "sha256": "154a1211cae8b3ed7d96970e7018e400a9607ab4da8fd410fb5a4211fbcdc9cf",
+      "modified": "2026-07-04T20:32:45.303992"
+    },
+    {
+      "path": "packages/spec-files/synthex-hyprland-desktop.spec",
+      "size_bytes": 6692,
+      "extension": ".spec",
+      "lines": 158,
+      "sha256": "0d119b330ce9c9b8a5ac2c56564481e38cbcebded2905f2761c8114461235874",
+      "modified": "2026-07-04T20:33:03.195968"
+    },
+    {
+      "path": "packages/spec-files/synthex-meta-full.spec",
+      "size_bytes": 7829,
+      "extension": ".spec",
+      "lines": 278,
+      "sha256": "29bb8cc9870c08e18469dd122df65ad0e3c1508b3b44cc0ffe1c633e6bc58068",
+      "modified": "2026-07-04T20:45:40.322980"
+    },
+    {
+      "path": "packages/spec-files/synthex-meta-minimal.spec",
+      "size_bytes": 2484,
+      "extension": ".spec",
+      "lines": 103,
+      "sha256": "032e24c5798eabaa31a688cd11c8918a8dee421ce213db8c3f1137bfabb70e7c",
+      "modified": "2026-07-04T20:45:36.952791"
+    },
+    {
+      "path": "packages/spec-files/synthex-meta-standard.spec",
+      "size_bytes": 4453,
+      "extension": ".spec",
+      "lines": 182,
+      "sha256": "1ef5eb6cac7f23d05eb6d48789cdf123b3fd8a7d9fdc8e32ff293034bbe72c7e",
+      "modified": "2026-07-04T20:45:38.688889"
+    },
+    {
+      "path": "packages/spec-files/synthex-plasma-desktop.spec",
+      "size_bytes": 7068,
+      "extension": ".spec",
+      "lines": 168,
+      "sha256": "0dcbc43ac5129e140015bf4a34f8f4a0c80c2a882c0e30efb792ac009f36a993",
+      "modified": "2026-07-04T20:32:45.104981"
+    },
+    {
+      "path": "packages/spec-files/synthex-release.spec",
+      "size_bytes": 2899,
+      "extension": ".spec",
+      "lines": 93,
+      "sha256": "1f9bfb9a2955405efc6ab0fbcb80e292e9a9e5464b9c943f84bd310aaab38eb9",
+      "modified": "2026-07-04T20:45:34.961680"
+    },
+    {
+      "path": "packages/spec-files/synthex-security-dashboard.spec",
+      "size_bytes": 13226,
+      "extension": ".spec",
+      "lines": 389,
+      "sha256": "cb8b31327691703a7e1c085a7dbff81c614debf30a09456831475b10a7789d88",
+      "modified": "2026-07-04T20:24:38.368092"
+    },
+    {
+      "path": "project-inventory.json",
+      "size_bytes": 41192,
+      "extension": ".json",
+      "lines": 1326,
+      "sha256": "1e8bfb1de9e7114d483292f95e30480b3cb813ea5e03c65e42ca1509c549bd41",
+      "modified": "2026-07-04T21:24:41.078959"
+    },
+    {
+      "path": "project-tree.txt",
+      "size_bytes": 7382,
+      "extension": ".txt",
+      "lines": 164,
+      "sha256": "aa0fd233ffb4d40e36ef9b82cbab08c2d8f3256d4238b3ec3536d5e1f7e69535",
+      "modified": "2026-07-04T20:45:29.075350"
+    },
+    {
+      "path": "roadmap/release-plan.md",
+      "size_bytes": 7099,
+      "extension": ".md",
+      "lines": 284,
+      "sha256": "e1f46738cd8188bb6700f7d6d81f77fabb0036fc330bf68211dbc9b840b4df09",
+      "modified": "2026-07-04T20:40:00.863015"
+    },
+    {
+      "path": "roadmap/roadmap.md",
+      "size_bytes": 9084,
+      "extension": ".md",
+      "lines": 326,
+      "sha256": "f858a8e0c52c914b0e323a6ddbee564c501954cd727c102cf90c547cbc61df35",
+      "modified": "2026-07-04T20:40:00.742009"
+    },
+    {
+      "path": "security/audit/red-team-report-template.md",
+      "size_bytes": 19460,
+      "extension": ".md",
+      "lines": 786,
+      "sha256": "98c2644e306b34e1c31dc35e3f8ef4915749ca43d772eaa22b855ca39ec80b3b",
+      "modified": "2026-07-04T20:24:36.504996"
+    },
+    {
+      "path": "security/audit/security-checklist.md",
+      "size_bytes": 41500,
+      "extension": ".md",
+      "lines": 1377,
+      "sha256": "e893bd2d288e23413b5ad0095b3f6a96433c378b63b95b780b91d98fcb951d55",
+      "modified": "2026-07-04T20:24:34.619899"
+    },
+    {
+      "path": "security/hardening/README.md",
+      "size_bytes": 15735,
+      "extension": ".md",
+      "lines": 516,
+      "sha256": "4aa781e9bfd767c3edf88042a19bce8db996636a1f85cec428f294b70644b1d9",
+      "modified": "2026-07-04T20:24:40.389195"
+    },
+    {
+      "path": "security/hardening/auditd.rules",
+      "size_bytes": 13492,
+      "extension": ".rules",
+      "lines": 367,
+      "sha256": "7d7583dcebd9c30914603cb76e4da2a3df273b79411c59e2a8b1f3465ae1b0df",
+      "modified": "2026-07-04T20:20:32.676825"
+    },
+    {
+      "path": "security/hardening/limits.conf",
+      "size_bytes": 8673,
+      "extension": ".conf",
+      "lines": 229,
+      "sha256": "e5c08cc6dcf4be2e429b9dcd18bb9a690551d80e5b277d349ddb48adc4c5fe1c",
+      "modified": "2026-07-04T20:20:32.727827"
+    },
+    {
+      "path": "security/hardening/sysctl.conf",
+      "size_bytes": 13311,
+      "extension": ".conf",
+      "lines": 385,
+      "sha256": "8c5018d44e1f66cde1ee79e29c717b76ac28e5aeec5baf1665e3f1c666b2903b",
+      "modified": "2026-07-04T20:20:32.486815"
+    },
+    {
+      "path": "security/security-architecture.md",
+      "size_bytes": 51750,
+      "extension": ".md",
+      "lines": 1386,
+      "sha256": "9b46e9fcdb320da0cc440d66a4e6443bd5681e6b83ab34a2bdd1bacafa4663d3",
+      "modified": "2026-07-04T20:20:32.546818"
+    },
+    {
+      "path": "security/selinux-policy/synthex-policy.te",
+      "size_bytes": 28410,
+      "extension": ".te",
+      "lines": 822,
+      "sha256": "1e2377a2b2de16bbf051696ad8231b9abc71196d9de9c5b85c953abd0c33c350",
+      "modified": "2026-07-04T20:20:32.614822"
+    },
+    {
+      "path": "src/synthex-ai-hub/main.py",
+      "size_bytes": 30800,
+      "extension": ".py",
+      "lines": 797,
+      "sha256": "7d13859d08c0a88e9c29c1417ccfc04e39fd41e92107d554347ca737e667ae6b",
+      "modified": "2026-07-04T21:23:24.810946"
+    },
+    {
+      "path": "src/synthex-ai-hub/requirements.txt",
+      "size_bytes": 45,
+      "extension": ".txt",
+      "lines": 2,
+      "sha256": "b6b632f6b0c269f5a6fadbd2c00da9a552a79ee93530845e5697f1b71de6ac99",
+      "modified": "2026-07-04T21:23:24.799784"
+    },
+    {
+      "path": "src/synthex-blueprint/blueprint.py",
+      "size_bytes": 9129,
+      "extension": ".py",
+      "lines": 283,
+      "sha256": "6ff72d17a80e3df79bff61431653be5ca640c00f2e8d35db25addbbf6b4e4bb1",
+      "modified": "2026-07-04T21:25:59.226433"
+    },
+    {
+      "path": "src/synthex-control-center/CMakeLists.txt",
+      "size_bytes": 772,
+      "extension": ".txt",
+      "lines": 34,
+      "sha256": "ac54913f06bac7852b9cdfe33e0fdad1c99c82de3e67024488dff4c5a76d431b",
+      "modified": "2026-07-04T21:24:54.329705"
+    },
+    {
+      "path": "src/synthex-control-center/main.cpp",
+      "size_bytes": 1776,
+      "extension": ".cpp",
+      "lines": 0,
+      "sha256": "",
+      "modified": "2026-07-04T21:23:45.004602"
+    },
+    {
+      "path": "src/synthex-control-center/resources.qrc",
+      "size_bytes": 666,
+      "extension": ".qrc",
+      "lines": 0,
+      "sha256": "",
+      "modified": "2026-07-04T21:25:40.228569"
+    },
+    {
+      "path": "src/synthex-control-center/ui/Main.qml",
+      "size_bytes": 8325,
+      "extension": ".qml",
+      "lines": 0,
+      "sha256": "",
+      "modified": "2026-07-04T21:23:45.003603"
+    },
+    {
+      "path": "src/synthex-control-center/ui/pages/Dashboard.qml",
+      "size_bytes": 11536,
+      "extension": ".qml",
+      "lines": 0,
+      "sha256": "",
+      "modified": "2026-07-04T21:23:44.987211"
+    },
+    {
+      "path": "src/synthex-control-center/ui/pages/Developer.qml",
+      "size_bytes": 13401,
+      "extension": ".qml",
+      "lines": 0,
+      "sha256": "",
+      "modified": "2026-07-04T21:23:45.002602"
+    },
+    {
+      "path": "src/synthex-control-center/ui/pages/Gaming.qml",
+      "size_bytes": 13201,
+      "extension": ".qml",
+      "lines": 0,
+      "sha256": "",
+      "modified": "2026-07-04T21:23:45.007603"
+    },
+    {
+      "path": "src/synthex-control-center/ui/pages/Performance.qml",
+      "size_bytes": 12105,
+      "extension": ".qml",
+      "lines": 0,
+      "sha256": "",
+      "modified": "2026-07-04T21:23:45.047604"
+    },
+    {
+      "path": "src/synthex-control-center/ui/pages/Security.qml",
+      "size_bytes": 12977,
+      "extension": ".qml",
+      "lines": 0,
+      "sha256": "",
+      "modified": "2026-07-04T21:24:54.339533"
+    },
+    {
+      "path": "src/synthex-control-center/ui/pages/System.qml",
+      "size_bytes": 13456,
+      "extension": ".qml",
+      "lines": 0,
+      "sha256": "",
+      "modified": "2026-07-04T21:24:54.332633"
+    },
+    {
+      "path": "src/synthex-control-center/ui/pages/Themes.qml",
+      "size_bytes": 16606,
+      "extension": ".qml",
+      "lines": 0,
+      "sha256": "",
+      "modified": "2026-07-04T21:24:54.340533"
+    },
+    {
+      "path": "src/synthex-control-center/ui/pages/Updates.qml",
+      "size_bytes": 13094,
+      "extension": ".qml",
+      "lines": 0,
+      "sha256": "",
+      "modified": "2026-07-04T21:24:54.331254"
+    },
+    {
+      "path": "src/synthex-desktopd/CMakeLists.txt",
+      "size_bytes": 1801,
+      "extension": ".txt",
+      "lines": 71,
+      "sha256": "64ee6fee89b3d07bdbdb2cdc9845945c1c9ae63850f33aa9a7a410f0a7a1f08f",
+      "modified": "2026-07-04T21:23:45.105607"
+    },
+    {
+      "path": "src/synthex-desktopd/desktopd.cpp",
+      "size_bytes": 18384,
+      "extension": ".cpp",
+      "lines": 0,
+      "sha256": "",
+      "modified": "2026-07-04T21:23:08.544139"
+    },
+    {
+      "path": "src/synthex-desktopd/desktopd.h",
+      "size_bytes": 3999,
+      "extension": ".h",
+      "lines": 0,
+      "sha256": "",
+      "modified": "2026-07-04T21:22:29.557639"
+    },
+    {
+      "path": "src/synthex-desktopd/layout-manager.cpp",
+      "size_bytes": 8790,
+      "extension": ".cpp",
+      "lines": 0,
+      "sha256": "",
+      "modified": "2026-07-04T21:24:06.397487"
+    },
+    {
+      "path": "src/synthex-desktopd/layout-manager.h",
+      "size_bytes": 2366,
+      "extension": ".h",
+      "lines": 0,
+      "sha256": "",
+      "modified": "2026-07-04T21:23:52.482910"
+    },
+    {
+      "path": "src/synthex-desktopd/main.cpp",
+      "size_bytes": 7120,
+      "extension": ".cpp",
+      "lines": 0,
+      "sha256": "",
+      "modified": "2026-07-04T21:23:26.520854"
+    },
+    {
+      "path": "src/synthex-desktopd/org.synthex.Desktop.xml",
+      "size_bytes": 3239,
+      "extension": ".xml",
+      "lines": 0,
+      "sha256": "",
+      "modified": "2026-07-04T21:23:37.058279"
+    },
+    {
+      "path": "src/synthex-gaming-center/ui/Main.qml",
+      "size_bytes": 10005,
+      "extension": ".qml",
+      "lines": 0,
+      "sha256": "",
+      "modified": "2026-07-04T21:26:47.039655"
+    },
+    {
+      "path": "src/synthex-gpu-setupd/Makefile",
+      "size_bytes": 682,
+      "extension": "",
+      "lines": 0,
+      "sha256": "",
+      "modified": "2026-07-04T21:25:42.080653"
+    },
+    {
+      "path": "src/synthex-gpu-setupd/gpu-detect.c",
+      "size_bytes": 15478,
+      "extension": ".c",
+      "lines": 0,
+      "sha256": "",
+      "modified": "2026-07-04T21:25:37.925465"
+    },
+    {
+      "path": "src/synthex-gpu-setupd/install-amd.sh",
+      "size_bytes": 7607,
+      "extension": ".sh",
+      "lines": 230,
+      "sha256": "a24996d8c4349c6f2e789a63a49201b6ab37bd1aa4b457dfdcaad362afb8bcb8",
+      "modified": "2026-07-04T21:26:48.915744"
+    },
+    {
+      "path": "src/synthex-gpu-setupd/install-intel.sh",
+      "size_bytes": 7004,
+      "extension": ".sh",
+      "lines": 206,
+      "sha256": "91e3f2018d9e8d76b39d5207fe9a379b079b7147de9022a0f59616fd571cd61e",
+      "modified": "2026-07-04T21:26:48.909743"
+    },
+    {
+      "path": "src/synthex-gpu-setupd/install-nvidia.sh",
+      "size_bytes": 10918,
+      "extension": ".sh",
+      "lines": 332,
+      "sha256": "c8154654b0336900a15069ef2f534106e2751ade56c4bf921251d1ecd653ce48",
+      "modified": "2026-07-04T21:26:48.908743"
+    },
+    {
+      "path": "src/synthex-gpu-setupd/synthex-gpu-setupd.sh",
+      "size_bytes": 5780,
+      "extension": ".sh",
+      "lines": 196,
+      "sha256": "1ba04e02559d7dabc1cf6b10dd67ebe519268bf05f6680df766c340afe1e5d3a",
+      "modified": "2026-07-04T21:23:42.509830"
+    },
+    {
+      "path": "src/synthex-hwdaemon/Makefile",
+      "size_bytes": 675,
+      "extension": "",
+      "lines": 0,
+      "sha256": "",
+      "modified": "2026-07-04T21:25:01.086828"
+    },
+    {
+      "path": "src/synthex-hwdaemon/hw-profile.h",
+      "size_bytes": 3746,
+      "extension": ".h",
+      "lines": 0,
+      "sha256": "",
+      "modified": "2026-07-04T21:24:18.567989"
+    },
+    {
+      "path": "src/synthex-hwdaemon/hwdaemon.c",
+      "size_bytes": 21635,
+      "extension": ".c",
+      "lines": 0,
+      "sha256": "",
+      "modified": "2026-07-04T21:24:56.764639"
+    },
+    {
+      "path": "src/synthex-layout",
+      "size_bytes": 6403,
+      "extension": "",
+      "lines": 0,
+      "sha256": "",
+      "modified": "2026-07-04T21:22:57.704695"
+    },
+    {
+      "path": "src/synthex-oobe/ui/Main.qml",
+      "size_bytes": 10533,
+      "extension": ".qml",
+      "lines": 0,
+      "sha256": "",
+      "modified": "2026-07-04T21:25:59.242905"
+    },
+    {
+      "path": "src/synthex-oobe/ui/pages/Finish.qml",
+      "size_bytes": 7237,
+      "extension": ".qml",
+      "lines": 0,
+      "sha256": "",
+      "modified": "2026-07-04T21:25:40.251324"
+    },
+    {
+      "path": "src/synthex-oobe/ui/pages/Profile.qml",
+      "size_bytes": 5152,
+      "extension": ".qml",
+      "lines": 0,
+      "sha256": "",
+      "modified": "2026-07-04T21:25:40.252570"
+    },
+    {
+      "path": "src/synthex-oobe/ui/pages/Themes.qml",
+      "size_bytes": 6360,
+      "extension": ".qml",
+      "lines": 0,
+      "sha256": "",
+      "modified": "2026-07-04T21:25:40.272959"
+    },
+    {
+      "path": "src/synthex-oobe/ui/pages/Welcome.qml",
+      "size_bytes": 3751,
+      "extension": ".qml",
+      "lines": 0,
+      "sha256": "",
+      "modified": "2026-07-04T21:25:40.243732"
+    },
+    {
+      "path": "src/synthex-recovery/initramfs-hook.sh",
+      "size_bytes": 3577,
+      "extension": ".sh",
+      "lines": 130,
+      "sha256": "0f4c973e22e512dfcfefdce24b13866b9887c4829ff943f7ee1e13a618d8eb3a",
+      "modified": "2026-07-04T21:24:35.315711"
+    },
+    {
+      "path": "src/synthex-recovery/synthex-recovery.sh",
+      "size_bytes": 11159,
+      "extension": ".sh",
+      "lines": 370,
+      "sha256": "2ce5b5061a85e80d6c5efab870fdb67ee85c3c7e142fb18a7770a89fc7d2f708",
+      "modified": "2026-07-04T21:24:35.277721"
+    },
+    {
+      "path": "src/synthex-security-dashboard/security-check.py",
+      "size_bytes": 6316,
+      "extension": ".py",
+      "lines": 171,
+      "sha256": "f55ccabe79e41e2a5e0f6de74d70beaed19ce69d3ce794d10eccb263e6fe4a2a",
+      "modified": "2026-07-04T21:25:59.285435"
+    },
+    {
+      "path": "src/synthex-software-center/ui/Main.qml",
+      "size_bytes": 10762,
+      "extension": ".qml",
+      "lines": 0,
+      "sha256": "",
+      "modified": "2026-07-04T21:26:47.044655"
+    },
+    {
+      "path": "src/synthex-stored/CMakeLists.txt",
+      "size_bytes": 1558,
+      "extension": ".txt",
+      "lines": 57,
+      "sha256": "112d24acc5d45a943ce594635e31b059bcabd8dd5013e3ef79134d3d6a073c73",
+      "modified": "2026-07-04T21:26:35.735123"
+    },
+    {
+      "path": "src/synthex-stored/main.cpp",
+      "size_bytes": 24933,
+      "extension": ".cpp",
+      "lines": 0,
+      "sha256": "",
+      "modified": "2026-07-04T21:26:31.819940"
+    },
+    {
+      "path": "src/synthex-stored/org.synthex.SoftwareCenter.xml",
+      "size_bytes": 3661,
+      "extension": ".xml",
+      "lines": 0,
+      "sha256": "",
+      "modified": "2026-07-04T21:25:52.812140"
+    },
+    {
+      "path": "src/synthex-stored/synthex-stored",
+      "size_bytes": 9340,
+      "extension": "",
+      "lines": 0,
+      "sha256": "",
+      "modified": "2026-07-04T21:26:47.054336"
+    },
+    {
+      "path": "src/synthex-webapp-engine/webappd.py",
+      "size_bytes": 6513,
+      "extension": ".py",
+      "lines": 235,
+      "sha256": "95efc0f93420b0f04d6997ef41fb463b2372a8ef3c5174f370f2da07dbba9fcf",
+      "modified": "2026-07-04T21:25:59.236433"
+    },
+    {
+      "path": "src/synthex-workspace/modes/balanced.sh",
+      "size_bytes": 3229,
+      "extension": ".sh",
+      "lines": 84,
+      "sha256": "f0bf1aced9905fd95e9677dfc7d17117f6adaf0a96509746a3f7e9bf2786dcf7",
+      "modified": "2026-07-04T21:25:46.187839"
+    },
+    {
+      "path": "src/synthex-workspace/modes/battery.sh",
+      "size_bytes": 3971,
+      "extension": ".sh",
+      "lines": 104,
+      "sha256": "85195a198e4bbe012b600f82c8f48390a233d5aa5eb2ab7670c9baa6832c5c1e",
+      "modified": "2026-07-04T21:25:46.191053"
+    },
+    {
+      "path": "src/synthex-workspace/modes/dev.sh",
+      "size_bytes": 2374,
+      "extension": ".sh",
+      "lines": 62,
+      "sha256": "4d9208c0653baf9f4ef41dc79c1ee0464defdbbffac685b883dd037dd8aa0558",
+      "modified": "2026-07-04T21:25:46.196839"
+    },
+    {
+      "path": "src/synthex-workspace/modes/gaming.sh",
+      "size_bytes": 3651,
+      "extension": ".sh",
+      "lines": 89,
+      "sha256": "dcc2a462ec17b65ba89fe3d7aa89e8aac80d61ba7456bfc2465e0385771f923a",
+      "modified": "2026-07-04T21:25:46.167939"
+    },
+    {
+      "path": "src/synthex-workspace/synthex-workspace",
+      "size_bytes": 2117,
+      "extension": "",
+      "lines": 0,
+      "sha256": "",
+      "modified": "2026-07-04T21:23:41.500459"
+    },
+    {
+      "path": "src/synthex-workspace/synthex-workspace.sh",
+      "size_bytes": 7458,
+      "extension": ".sh",
+      "lines": 246,
+      "sha256": "619c5af24def5fd593809457df65591806c74c0b52f8bc6dba66784750a21999",
+      "modified": "2026-07-04T21:25:46.191053"
+    },
+    {
+      "path": "src/synthex.py",
+      "size_bytes": 11549,
+      "extension": ".py",
+      "lines": 347,
+      "sha256": "7f0a5be4d5f7020fcd953e18df566951961539e40d5f085e0e453f81b2d6dd12",
+      "modified": "2026-07-04T21:22:57.879722"
+    },
+    {
+      "path": "systemd/synthex-ai-hub.service",
+      "size_bytes": 251,
+      "extension": ".service",
+      "lines": 13,
+      "sha256": "2295514e83696c2329c56dd2b3eb903b4abeddc5489a2cc9986827d16db64ce8",
+      "modified": "2026-07-04T21:24:35.439716"
+    },
+    {
+      "path": "systemd/synthex-blueprint.service",
+      "size_bytes": 254,
+      "extension": ".service",
+      "lines": 10,
+      "sha256": "470b620b97e138d6b7a4320122820232d059b0e7195e278831463e796d9e98db",
+      "modified": "2026-07-04T21:24:35.425716"
+    },
+    {
+      "path": "systemd/synthex-blueprint.timer",
+      "size_bytes": 154,
+      "extension": ".timer",
+      "lines": 0,
+      "sha256": "",
+      "modified": "2026-07-04T21:24:35.451879"
+    },
+    {
+      "path": "systemd/synthex-desktopd.service",
+      "size_bytes": 729,
+      "extension": ".service",
+      "lines": 33,
+      "sha256": "1abca644705f8a14657e6566c9bb361336c3be31fe92609972673e59def70243",
+      "modified": "2026-07-04T21:26:41.986417"
+    },
+    {
+      "path": "systemd/synthex-gpu-setupd.service",
+      "size_bytes": 798,
+      "extension": ".service",
+      "lines": 31,
+      "sha256": "c2ba44a3d12f96ea4e3275d08a5d73f5fe74a91f32f3397e2e222252e6734873",
+      "modified": "2026-07-04T21:26:49.647778"
+    },
+    {
+      "path": "systemd/synthex-hwdaemon.service",
+      "size_bytes": 695,
+      "extension": ".service",
+      "lines": 30,
+      "sha256": "92b57d6eab04e7d2e80d2bc6af2f82eb67243ee8f01f250dd203eceead6bd86d",
+      "modified": "2026-07-04T21:26:45.868600"
+    },
+    {
+      "path": "systemd/synthex-recovery.service",
+      "size_bytes": 266,
+      "extension": ".service",
+      "lines": 13,
+      "sha256": "5f8ecd32eb2d17296db9cb31fe67d2852504fa0fdbcc8e224b954aca44fe155f",
+      "modified": "2026-07-04T21:24:35.263709"
+    },
+    {
+      "path": "systemd/synthex-stored.service",
+      "size_bytes": 746,
+      "extension": ".service",
+      "lines": 34,
+      "sha256": "8b26d0c312c04dff17b6f22f3df8b54d2283cc008c9d57c79164c496a73249b0",
+      "modified": "2026-07-04T21:26:53.348953"
+    },
+    {
+      "path": "systemd/synthex-webappd.service",
+      "size_bytes": 295,
+      "extension": ".service",
+      "lines": 14,
+      "sha256": "cee733743b70fe5a44db025db0726922d1146d60032fbbecf641a37d7e01a62e",
+      "modified": "2026-07-04T21:24:35.431716"
+    },
+    {
+      "path": "systemd/synthex-workspace.service",
+      "size_bytes": 336,
+      "extension": ".service",
+      "lines": 14,
+      "sha256": "ffc4b39f3a6a0582ab3d19f5500918fb3babdc02f0c706e672e3ddc72ff03bbd",
+      "modified": "2026-07-04T21:24:35.290710"
+    },
+    {
+      "path": "tests/generate-tree.sh",
+      "size_bytes": 850,
+      "extension": ".sh",
+      "lines": 29,
+      "sha256": "d6a3a8de697299607fdcdb3b557eaa3db278f459470a9ce0ebdbb22102652a8d",
+      "modified": "2026-07-04T20:40:28.353546"
+    },
+    {
+      "path": "tests/inventory.py",
+      "size_bytes": 2830,
+      "extension": ".py",
+      "lines": 83,
+      "sha256": "d5e104a48d1095e6867e17ab0b3ea4a7c09426dc059e96a1d77bc0e99fc6600b",
+      "modified": "2026-07-04T20:40:25.993414"
+    }
+  ],
+  "summary": {
+    "total_files": 189,
+    "total_size_bytes": 2065204,
+    "total_size_mb": 1.97,
+    "total_lines": 50689,
+    "categories": {
+      "root": 5,
+      "ai": 1,
+      "models": 1,
+      "ollama": 3,
+      "synthex-ai-hub": 4,
+      "architecture": 2,
+      "branding": 2,
+      "grub": 2,
+      "logo": 3,
+      "synthex-cursor": 1,
+      "synthex-plasma-theme": 3,
+      "synthex-sddm-theme": 1,
+      "wallpaper": 2,
+      "kickstart": 4,
+      "livecd": 2,
+      "scripts": 2,
+      "ci": 1,
+      "copr": 3,
+      "github-actions": 6,
+      "iso-builder": 3,
+      "target": 1,
+      "gnome": 2,
+      "hyprland": 5,
+      "plasma": 4,
+      "build": 1,
+      "developer": 3,
+      "security": 2,
+      "user": 2,
+      "gaming": 3,
+      "drivers": 4,
+      "proton": 1,
+      "steam": 2,
+      "config": 1,
+      "design": 1,
+      "kernel": 4,
+      "patches": 1,
+      "layouts": 5,
+      "modes": 9,
+      "synthex-repos": 3,
+      "spec-files": 15,
+      "roadmap": 2,
+      "audit": 2,
+      "hardening": 4,
+      "selinux-policy": 1,
+      "synthex-blueprint": 1,
+      "synthex-control-center": 3,
+      "ui": 4,
+      "pages": 12,
+      "synthex-desktopd": 7,
+      "synthex-gpu-setupd": 6,
+      "synthex-hwdaemon": 3,
+      "src": 2,
+      "synthex-recovery": 2,
+      "synthex-security-dashboard": 1,
+      "synthex-stored": 4,
+      "synthex-webapp-engine": 1,
+      "synthex-workspace": 2,
+      "systemd": 10,
+      "tests": 2
+    }
+  }
+}
