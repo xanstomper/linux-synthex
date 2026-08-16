@@ -7,15 +7,17 @@ License:        MIT
 URL:            https://getsynthex.io
 BuildRequires:  rust, cargo
 
+Source0:        synthex-repo-0.1.0.tar.gz
 %description
 One-click recovery for boot, drivers, packages, network, audio. Btrfs snapshots.
 
 %prep
-%setup -q
+%setup -q -n synthex-repo-0.1.0
 
 %build
-cargo build --release
-
+# prebuilt release binary
+mkdir -p target/release
+install -m755 /home/jewboy420/linux-synthex/target/release/synthex-recovery target/release/synthex-recovery
 %install
 install -Dm755 target/release/synthex-recovery %{buildroot}%{_bindir}/synthex-recovery
 install -Dm644 systemd/synthex-recovery.service %{buildroot}%{_unitdir}/synthex-recovery.service 2>/dev/null || :

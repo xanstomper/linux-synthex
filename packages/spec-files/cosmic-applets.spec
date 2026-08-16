@@ -32,6 +32,7 @@ panel and desktop. Includes:
 - User Menu: account switching, lock, logout
 
 %prep
+%setup -q -n synthex-repo-24.04.0
 %autosetup -n cosmic-applets-v%{cosmicapplets_version}
 
 %build

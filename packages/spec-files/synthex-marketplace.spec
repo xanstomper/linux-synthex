@@ -7,10 +7,12 @@ License:        MIT
 URL:            https://getsynthex.io
 Requires:       python3
 
+Source0:        synthex-repo-0.1.0.tar.gz
 %description
 Synthex package marketplace browser.
 
 %prep
+%setup -q -n synthex-repo-0.1.0
 # No source archive — files installed directly from repo
 
 %build

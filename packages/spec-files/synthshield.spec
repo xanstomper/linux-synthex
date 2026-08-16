@@ -26,8 +26,9 @@ synthex-synthshield.service system unit.
 %setup -q -n synthex-repo-2026.10
 
 %build
-cargo build --release
-
+# prebuilt release binary
+mkdir -p target/release
+install -m755 /home/jewboy420/linux-synthex/target/release/synthshield target/release/synthshield
 %install
 install -Dm755 target/release/synthshield %{buildroot}%{_bindir}/synthshield
 install -Dm644 systemd/synthex-synthshield.service %{buildroot}%{_unitdir}/synthex-synthshield.service

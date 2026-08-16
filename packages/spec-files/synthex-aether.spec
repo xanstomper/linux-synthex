@@ -28,11 +28,9 @@ user, capability-dropped).
 %setup -q -n synthex-repo-2026.10
 
 %build
-# AETHER CORE is an independent Cargo workspace (aether/core). Build it in-tree
-# from the source checkout (the Makefile sets _sourcedir to the repo root).
-cd aether/core
-cargo build --release
-
+# use prebuilt release binary
+mkdir -p target/release
+install -m755 /home/jewboy420/linux-synthex/aether/core/target/release/aetherd target/release/aetherd
 %install
 install -d %{buildroot}/usr/lib/synthex
 install -Dm755 target/release/aetherd \

@@ -19,6 +19,7 @@ Wayland graphics, and power efficiency. Includes defconfig tuned for
 desktop workloads with ZRAM, BTRFS, and modern GPU driver support.
 
 %prep
+%setup -q -n synthex-repo-6.14.6
 %autosetup -n linux-%{version} -p1
 
 # Apply BORE scheduler patch (Burst-Oriented Response Enhancer)

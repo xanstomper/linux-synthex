@@ -19,6 +19,7 @@ Requires:       xdg-utils
 
 Suggests:       python3-scikit-learn
 
+Source0:        synthex-repo-2026.10.tar.gz
 %description
 synthex-predictive — Machine-Learning Predictive Application Launcher.
 
@@ -58,6 +59,7 @@ The synthex-predictived daemon operates in three phases:
   ~/.local/share/synthex/predictive.db.  You can wipe it at any time.
 
 %prep
+%setup -q -n synthex-repo-2026.10
 # noarch script package — no tarball
 
 %build

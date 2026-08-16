@@ -72,7 +72,6 @@ layout and Material Rounded aesthetics, including:
 # ─── Prep ────────────────────────────────────────────────────────────────
 %prep
 %setup -q -n synthex-repo-%{version}
-%autosetup -n %{name}-%{version}
 
 # ─── Build ───────────────────────────────────────────────────────────────
 %build
@@ -112,7 +111,7 @@ install -m 0644 desktop/gnome/synthex-gnome.desktop \
     %{buildroot}%{_datadir}/wayland-sessions/
 
 # Skeleton configs
-cp -r desktop/gnome/skel/* \
+cp -r desktop/gnome/skel/. \
     %{buildroot}%{_sysconfdir}/skel/.config/
 
 # ─── Post-install ─────────────────────────────────────────────────────────

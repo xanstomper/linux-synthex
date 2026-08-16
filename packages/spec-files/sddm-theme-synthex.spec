@@ -9,6 +9,7 @@ Requires:       sddm
 Requires:       qt6-qtdeclarative
 Requires:       google-noto-sans-fonts
 
+Source0:        synthex-repo-2026.10.tar.gz
 %description
 SynthOS SDDM login screen theme.
 Features dark navy/midnight blue design with amber gold (#FFB300) accents,
@@ -16,6 +17,7 @@ glassmorphism login card, session selector (Wayland/X11/Plasma/Hyprland/GNOME),
 keyboard layout picker, clock/date display, and power controls.
 
 %prep
+%setup -q -n synthex-repo-2026.10
 # No source archive — files installed directly from repo
 
 %build

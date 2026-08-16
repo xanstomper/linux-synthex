@@ -7,15 +7,17 @@ License:        MIT
 URL:            https://getsynthex.io
 BuildRequires:  rust, cargo
 
+Source0:        synthex-repo-0.1.0.tar.gz
 %description
 Upstream monitoring for 11 sources.
 
 %prep
-%setup -q
+%setup -q -n synthex-repo-0.1.0
 
 %build
-cargo build --release
-
+# prebuilt release binary
+mkdir -p target/release
+install -m755 /home/jewboy420/linux-synthex/target/release/synthex-integration-engine target/release/synthex-integration-engine
 %install
 install -Dm755 target/release/synthex-integration-engine %{buildroot}%{_bindir}/synthex-integration-engine
 install -Dm644 systemd/synthex-integration-engine.service %{buildroot}%{_unitdir}/synthex-integration-engine.service 2>/dev/null || :

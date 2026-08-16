@@ -35,6 +35,7 @@ Written in Rust, it provides:
 - Column view for quick navigation
 
 %prep
+%setup -q -n synthex-repo-24.04.0
 %autosetup -n cosmic-files-v%{cosmicfiles_version}
 
 %build

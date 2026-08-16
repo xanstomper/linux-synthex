@@ -67,7 +67,6 @@ configuration, including:
 # ─── Prep ────────────────────────────────────────────────────────────────
 %prep
 %setup -q -n synthex-repo-%{version}
-%autosetup -n %{name}-%{version}
 
 # ─── Build ───────────────────────────────────────────────────────────────
 %build
@@ -76,6 +75,7 @@ configuration, including:
 # ─── Install ─────────────────────────────────────────────────────────────
 %install
 # Create directory structure
+mkdir -p %{buildroot}%{_bindir}
 mkdir -p %{buildroot}%{_sysconfdir}/hypr
 mkdir -p %{buildroot}%{_sysconfdir}/xdg/waybar
 mkdir -p %{buildroot}%{_sysconfdir}/wofi

@@ -30,6 +30,7 @@ desktop environment. Features include:
 - Exposé view of all windows on a workspace
 
 %prep
+%setup -q -n synthex-repo-24.04.0
 %autosetup -n cosmic-workspaces-v%{cosmicws_version}
 
 %build

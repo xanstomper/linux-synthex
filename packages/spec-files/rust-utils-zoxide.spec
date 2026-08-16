@@ -29,6 +29,7 @@ Features:
 - Cross-platform: Linux, macOS, Windows
 
 %prep
+%setup -q -n synthex-repo-0.9.7
 %autosetup -n zoxide-v%{zoxide_version}
 
 %build

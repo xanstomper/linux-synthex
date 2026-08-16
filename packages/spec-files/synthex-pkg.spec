@@ -7,15 +7,17 @@ License:        MIT
 URL:            https://getsynthex.io
 BuildRequires:  rust, cargo
 
+Source0:        synthex-repo-0.1.0.tar.gz
 %description
 Unified package manager for DNF/Flatpak/AUR.
 
 %prep
-%setup -q
+%setup -q -n synthex-repo-0.1.0
 
 %build
-cargo build --release
-
+# prebuilt release binary
+mkdir -p target/release
+install -m755 /home/jewboy420/linux-synthex/target/release/synthex-pkg target/release/synthex-pkg
 %install
 install -Dm755 target/release/synthex-pkg %{buildroot}%{_bindir}/synthex-pkg
 

@@ -18,8 +18,9 @@ Python prototypes with a single fast static binary).
 %setup -q -n synthex-repo-2026.10
 
 %build
-cargo build --release
-
+# prebuilt release binary
+mkdir -p target/release
+install -m755 /home/jewboy420/linux-synthex/target/release/synthex-perf-tuning-rs target/release/synthex-perf-tuning-rs
 %install
 install -Dm755 target/release/synthex-perf-tuning-rs %{buildroot}%{_bindir}/synthex-perf-tuning-rs
 

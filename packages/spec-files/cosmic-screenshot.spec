@@ -33,6 +33,7 @@ COSMIC desktop environment. Features include:
 - GIF recording mode
 
 %prep
+%setup -q -n synthex-repo-24.04.0
 %autosetup -n cosmic-screenshot-v%{cosmicscreenshot_version}
 
 %build

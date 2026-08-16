@@ -10,6 +10,7 @@ BuildRequires:  rust
 BuildRequires:  cargo
 BuildRequires:  systemd-rpm-macros
 
+Source0:        synthex-repo-2026.10.tar.gz
 %description
 synthex-meshnet discovers other SynthOS machines on the local network via mDNS
 and relays short messages (clipboard sync, drop-zone hand-off) over a TCP channel.
@@ -17,11 +18,12 @@ Payloads are best-effort age-encrypted on the wire. A unique, package-level LAN
 collaboration feature not found in other distributions.
 
 %prep
-%setup -q
+%setup -q -n synthex-repo-2026.10
 
 %build
-cargo build --release
-
+# prebuilt release binary
+mkdir -p target/release
+install -m755 /home/jewboy420/linux-synthex/target/release/synthex-meshnet target/release/synthex-meshnet
 %install
 install -Dm755 target/release/synthex-meshnet %{buildroot}%{_bindir}/synthex-meshnet
 install -Dm644 systemd/synthex-meshnet.service %{buildroot}%{_unitdir}/synthex-meshnet.service

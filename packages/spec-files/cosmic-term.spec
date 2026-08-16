@@ -34,6 +34,7 @@ desktop environment. Features include:
 - Profile management with saved settings
 
 %prep
+%setup -q -n synthex-repo-24.04.0
 %autosetup -n cosmic-term-v%{cosmicterm_version}
 
 %build

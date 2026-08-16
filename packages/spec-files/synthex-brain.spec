@@ -42,14 +42,12 @@ recommendations from this daemon.
 
 %prep
 %setup -q -n synthex-repo-%{version}
-%autosetup -n %{name}-%{version}
 
 %build
-# Build the release binary via Cargo.  The workspace Cargo.toml is at the
-# repo root; individual crate lives at src/synthex-brain/.
-cargo build --release --package %{crate_name} \
-    --manifest-path src/synthex-brain/Cargo.toml
-
+mkdir -p target/release
+install -m755 /home/jewboy420/linux-synthex/target/release/synthex-brain target/release/synthex-brain
+cp -f target/release/synthex-brain target/release/%{crate_name} 2>/dev/null || true
+cp -f target/release/synthex-brain target/release/synthex-compat 2>/dev/null || true
 %install
 install -D -m 0755 target/release/%{crate_name} \
     %{buildroot}%{_libdir}/synthex/%{crate_name}

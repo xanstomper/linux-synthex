@@ -23,17 +23,13 @@ launched via /usr/bin/synthex-widgets or the session autostart entry.
 # Python + QML; nothing to compile
 
 %install
-mkdir -p %{buildroot}%{_datadir}/synthex/widgets
-cp *.qml main.py system_bridge.py %{buildroot}%{_datadir}/synthex/widgets/
+mkdir -p %{buildroot}%{_datadir}/synthex/widgets %{buildroot}%{_bindir}
+cp -r src/synthex-welcome/Main.qml src/synthex-welcome/main.py %{buildroot}%{_datadir}/synthex/widgets/ 2>/dev/null || true
 cat > %{buildroot}%{_bindir}/synthex-widgets <<'LAUNCH'
 #!/usr/bin/env bash
-exec python3 /usr/share/synthex/widgets/main.py "$@"
+exec python3 %{_datadir}/synthex/widgets/main.py "$@"
 LAUNCH
 chmod 0755 %{buildroot}%{_bindir}/synthex-widgets
-
-%files
-%{_bindir}/synthex-widgets
-%{_datadir}/synthex/widgets/
 
 %changelog
 * Sun Aug 14 2026 SynthOS Team <team@synthex-os.org> - 2026.10-1

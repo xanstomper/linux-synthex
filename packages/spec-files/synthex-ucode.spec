@@ -15,12 +15,14 @@ Recommends:     amd-ucode-firmware
 Recommends:     microcode_ctl
 %endif
 
+Source0:        synthex-repo-2026.10.tar.gz
 %description
 SynthOS CPU microcode meta-package. Automatically installs appropriate
 microcode updates for both Intel and AMD processors.
 Early microcode loading is configured via dracut for maximum security.
 
 %prep
+%setup -q -n synthex-repo-2026.10
 # meta-package
 
 %build

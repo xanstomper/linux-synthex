@@ -26,6 +26,7 @@ desktop. Written in Rust with Iced, it provides:
 - Slideshow support
 
 %prep
+%setup -q -n synthex-repo-24.04.0
 %autosetup -n cosmic-bg-v%{cosmicbg_version}
 
 %build

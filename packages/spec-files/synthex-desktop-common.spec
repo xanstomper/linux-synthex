@@ -34,16 +34,11 @@ SynthOS common desktop configuration shared across all desktop editions
 # ─── Prep ────────────────────────────────────────────────────────────────
 %prep
 %setup -q -n synthex-repo-%{version}
-%autosetup -n %{name}-%{version}
 
 # ─── Build ───────────────────────────────────────────────────────────────
 %build
-# Build cursor theme from SVG sources
-pushd common/synthex-cursor
-make %{?_smp_mflags}
-popd
+# cursor theme target/ is pre-generated; nothing to compile
 
-# ─── Install ─────────────────────────────────────────────────────────────
 %install
 # Create directory structure
 mkdir -p %{buildroot}%{_datadir}/synthex/branding
@@ -55,6 +50,7 @@ mkdir -p %{buildroot}%{_datadir}/fonts
 mkdir -p %{buildroot}%{_datadir}/pixmaps
 mkdir -p %{buildroot}%{_sysconfdir}/xdg
 mkdir -p %{buildroot}%{_sysconfdir}/pam.d
+mkdir -p %{buildroot}%{_sysconfdir}/fonts
 
 # Cursor theme
 cp -r desktop/common/synthex-cursor/target/* %{buildroot}%{_datadir}/icons/Synthex-Cursor/

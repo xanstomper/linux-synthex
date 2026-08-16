@@ -33,6 +33,7 @@ environment. Written in Rust with Iced, it provides:
 - Markdown preview
 
 %prep
+%setup -q -n synthex-repo-24.04.0
 %autosetup -n cosmic-text-editor-v%{cosmicte_version}
 
 %build

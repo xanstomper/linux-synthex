@@ -31,6 +31,7 @@ environment. Written entirely in Rust, it provides:
 Runs as a Wayland session with GPU acceleration for smooth animations.
 
 %prep
+%setup -q -n synthex-repo-24.04.0
 %autosetup -n cosmic-epoch-v%{cosmicepoch_version}
 
 %build

@@ -31,6 +31,7 @@ Written in Rust with Iced, cosmic-osd renders overlay notifications with
 smooth animations and minimal resource usage.
 
 %prep
+%setup -q -n synthex-repo-24.04.0
 %autosetup -n cosmic-osd-v%{cosmico_version}
 
 %build

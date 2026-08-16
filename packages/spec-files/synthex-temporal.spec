@@ -35,6 +35,7 @@ Suggests:       plasma-workspace-wallpapers
 # GNOME integration
 Suggests:       gnome-shell
 
+Source0:        synthex-repo-2026.10.tar.gz
 %description
 synthex-temporal — the Time-Aware Desktop daemon.
 
@@ -71,6 +72,7 @@ The daemon:
   • Zero configuration required — works out of the box on first login
 
 %prep
+%setup -q -n synthex-repo-2026.10
 # noarch meta + script package — no tarball
 
 %build

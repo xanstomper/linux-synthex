@@ -7,15 +7,17 @@ License:        MIT
 URL:            https://getsynthex.io
 BuildRequires:  rust, cargo
 
+Source0:        synthex-repo-0.1.0.tar.gz
 %description
 Desktop environment integration service.
 
 %prep
-%setup -q
+%setup -q -n synthex-repo-0.1.0
 
 %build
-cargo build --release
-
+# prebuilt release binary
+mkdir -p target/release
+install -m755 /home/jewboy420/linux-synthex/target/release/synthex-desktopd target/release/synthex-desktopd
 %install
 install -Dm755 target/release/synthex-desktopd %{buildroot}%{_bindir}/synthex-desktopd
 install -Dm644 systemd/synthex-desktopd.service %{buildroot}%{_unitdir}/synthex-desktopd.service 2>/dev/null || :

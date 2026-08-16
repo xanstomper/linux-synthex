@@ -27,6 +27,7 @@ COSMIC desktop. Features:
 - Desktop file integration
 
 %prep
+%setup -q -n synthex-repo-24.04.0
 %autosetup -n cosmic-app-library-v%{cosmical_version}
 
 %build

@@ -30,6 +30,7 @@ Features:
 - Auto-update page cache
 
 %prep
+%setup -q -n synthex-repo-1.7.0
 %autosetup -n tealdeer-v%{tealdeer_version}
 
 %build

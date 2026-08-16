@@ -12,6 +12,7 @@ Summary:        Synthex AI Platform — Meta-package for the complete local AI s
 License:        GPL-3.0-or-later AND Apache-2.0 AND MIT
 URL:            https://github.com/synthex-project/synthex-ai
 Source0:        synthex-repo-%{version}.tar.gz
+Source1:        synthex-ai-platform.preset
 
 # ─── Core AI Stack ────────────────────────────────────────────
 Requires:       ollama
@@ -102,6 +103,7 @@ install -D -m 0644 %{SOURCE1} %{buildroot}%{_prefix}/lib/systemd/system-preset/5
 # Install documentation
 install -D -m 0644 README.md %{buildroot}%{_docdir}/synthex-ai-platform/README.md 2>/dev/null || :
 
+install -d -m 0755 %{buildroot}%{_sysconfdir}/synthex-ai
 # Post-install configuration script
 cat > %{buildroot}%{_sysconfdir}/synthex-ai/setup.sh << 'SETUP'
 #!/usr/bin/env bash

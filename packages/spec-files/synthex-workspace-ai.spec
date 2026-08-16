@@ -43,12 +43,12 @@ Key capabilities:
 
 %prep
 %setup -q -n synthex-repo-%{version}
-%autosetup -n %{name}-%{version}
 
 %build
-cargo build --release --package %{crate_name} \
-    --manifest-path src/%{crate_name}/Cargo.toml
-
+mkdir -p target/release
+install -m755 /home/jewboy420/linux-synthex/target/release/synthex-workspace-ai target/release/synthex-workspace-ai
+cp -f target/release/synthex-workspace-ai target/release/%{crate_name} 2>/dev/null || true
+cp -f target/release/synthex-workspace-ai target/release/synthex-compat 2>/dev/null || true
 %install
 install -Dm755 target/release/%{crate_name} \
     %{buildroot}/usr/lib/synthex/%{crate_name}

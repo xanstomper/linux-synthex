@@ -37,6 +37,7 @@ Written in Rust with COSMIC's Iced toolkit, it provides a consistent,
 GPU-accelerated portal experience matching the COSMIC desktop aesthetic.
 
 %prep
+%setup -q -n synthex-repo-24.04.0
 %autosetup -n xdg-desktop-portal-cosmic-v%{cosmicportal_version}
 
 %build

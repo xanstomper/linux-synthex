@@ -6,6 +6,7 @@ License:        CC-BY-4.0
 URL:            https://synthex-os.org
 BuildArch:      noarch
 
+Source0:        synthex-repo-2026.10.tar.gz
 %description
 SynthOS custom sound theme providing:
   - Login/logout chimes
@@ -15,16 +16,17 @@ SynthOS custom sound theme providing:
 All audio files use the XDG Sound Naming specification.
 
 %prep
-%setup -q
+%setup -q -n synthex-repo-2026.10
 
 %build
 # Nothing to compile — noarch data/script package
 
 %install
 install -d %{buildroot}/usr/share/sounds/synthex/stereo
-for wav in installer/sounds/*.wav installer/sounds/*.oga 2>/dev/null; do
-    [ -f "$wav" ] && install -m 644 "$wav" \
-        %{buildroot}/usr/share/sounds/synthex/stereo/ || true
+for wav in installer/sounds/*.wav installer/sounds/*.oga; do
+    if [ -f "$wav" ]; then
+        install -m 644 "$wav" %{buildroot}/usr/share/sounds/synthex/stereo/ || true
+    fi
 done
 
 # Sound theme index

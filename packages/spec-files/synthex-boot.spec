@@ -23,9 +23,9 @@ generator (grub-generator.sh), the initramfs recovery hook
 
 %install
 install -Dm755 synthex-bootctl.sh %{buildroot}%{_bindir}/synthex-bootctl
-install -Dm755 main.py %{buildroot}%{_libexecdir}/synthex/synthex-boot
-install -Dm755 grub-generator.sh %{buildroot}%{_datadir}/synthex/boot/grub-generator.sh
-install -Dm755 initramfs-recovery.sh %{buildroot}%{_datadir}/synthex/boot/initramfs-recovery.sh
+install -Dm755 src/synthex-boot/main.py %{buildroot}%{_libexecdir}/synthex/synthex-boot
+install -Dm755 src/synthex-boot/grub-generator.sh %{buildroot}%{_datadir}/synthex/boot/grub-generator.sh
+install -Dm755 src/synthex-boot/initramfs-recovery.sh %{buildroot}%{_datadir}/synthex/boot/initramfs-recovery.sh
 
 %files
 %{_bindir}/synthex-bootctl

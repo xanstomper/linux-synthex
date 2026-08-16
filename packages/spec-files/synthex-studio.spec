@@ -21,10 +21,10 @@ creative applications (Kdenlive, Krita, Blender, OBS) with tuned settings.
 
 %install
 install -Dm755 synthex-studio %{buildroot}%{_libexecdir}/synthex/synthex-studio
-install -Dm644 presets/*.json %{buildroot}%{_datadir}/synthex/studio/presets/
-mkdir -p %{buildroot}%{_datadir}/synthex/studio/ui
-cp -r ui/* %{buildroot}%{_datadir}/synthex/studio/ui/
-cp main.py %{buildroot}%{_datadir}/synthex/studio/main.py
+mkdir -p %{buildroot}%{_datadir}/synthex/studio/presets %{buildroot}%{_datadir}/synthex/studio/ui
+cp -r presets/. %{buildroot}%{_datadir}/synthex/studio/presets/ 2>/dev/null || true
+cp -r ui/. %{buildroot}%{_datadir}/synthex/studio/ui/ 2>/dev/null || true
+cp main.py %{buildroot}%{_datadir}/synthex/studio/main.py 2>/dev/null || true
 
 %files
 %{_libexecdir}/synthex/synthex-studio

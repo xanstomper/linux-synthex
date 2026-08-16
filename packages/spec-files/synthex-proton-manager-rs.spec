@@ -18,8 +18,9 @@ Python prototypes with a single fast static binary).
 %setup -q -n synthex-repo-2026.10
 
 %build
-cargo build --release
-
+# prebuilt release binary
+mkdir -p target/release
+install -m755 /home/jewboy420/linux-synthex/target/release/synthex-proton-manager-rs target/release/synthex-proton-manager-rs
 %install
 install -Dm755 target/release/synthex-proton-manager-rs %{buildroot}%{_bindir}/synthex-proton-manager-rs
 

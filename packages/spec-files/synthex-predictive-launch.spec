@@ -20,7 +20,7 @@ next app to cut perceived launch latency. Fully local — no telemetry.
 # Python; nothing to compile
 
 %install
-install -Dm755 predictor.py %{buildroot}%{_libexecdir}/synthex/predictive-launch.py
+install -Dm755 src/synthex-predictive-launch/predictor.py %{buildroot}%{_libexecdir}/synthex/predictive-launch.py
 
 %files
 %{_libexecdir}/synthex/predictive-launch.py

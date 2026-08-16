@@ -9,7 +9,6 @@ Summary:        Synthex Hermes — Desktop AI Agent Platform
 
 License:        MIT
 URL:            https://synthex.org
-BuildArch:      noarch
 BuildRequires:  coreutils
 
 Requires:       python3
@@ -17,6 +16,11 @@ Requires:       qt6-qtdeclarative
 Recommends:     python3-pyqt6
 Recommends:     ollama
 
+Source0:        synthex-repo-%{_version}.tar.gz
+Source1:        synthex-hermes.desktop
+Source2:        synthex-hermes-tray.desktop
+Source3:        hermes-data
+Source4:        synthex-hermes.svg
 %description
 Synthex Hermes — a native desktop AI agent for SynthOS.
 Features:
@@ -37,11 +41,11 @@ Install additional models:
 %setup -c -T
 
 %build
-echo "Synthex Hermes AI Agent" > build.log
-
+mkdir -p target/release
+install -m755 /home/jewboy420/linux-synthex/target/release/synthex-hermes target/release/synthex-hermes
 %install
 mkdir -p %{buildroot}%{_bindir}
-install -m 0755 %{SOURCE0} %{buildroot}%{_bindir}/synthex-hermes
+install -m 0755 target/release/synthex-hermes %{buildroot}%{_bindir}/synthex-hermes
 
 # Desktop files
 mkdir -p %{buildroot}%{_datadir}/applications

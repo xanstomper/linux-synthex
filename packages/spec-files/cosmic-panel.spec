@@ -29,6 +29,7 @@ environment. Features include:
 - Auto-hide and panel positioning
 
 %prep
+%setup -q -n synthex-repo-24.04.0
 %autosetup -n cosmic-panel-v%{cosmicpanel_version}
 
 %build

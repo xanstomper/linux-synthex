@@ -14,6 +14,7 @@ BuildRequires:  coreutils
 
 Requires:       calamares
 
+Source0:        synthex-repo-%{_version}.tar.gz
 %description
 SynthOS Calamares branding package. Provides the installer visual
 identity — branding descriptor with product info and sidebar colors,

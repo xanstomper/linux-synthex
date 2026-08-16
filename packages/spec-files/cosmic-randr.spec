@@ -32,6 +32,7 @@ Includes both a CLI tool (cosmic-randr) and a library for other COSMIC
 components to query and set display configurations.
 
 %prep
+%setup -q -n synthex-repo-24.04.0
 %autosetup -n cosmic-randr-v%{cosmicrandr_version}
 
 %build

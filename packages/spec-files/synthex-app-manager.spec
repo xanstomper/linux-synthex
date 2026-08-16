@@ -1,39 +1,37 @@
 Name:           synthex-app-manager
-Version:        2026.10
-Release:        1%{?dist}
-Summary:        SynthOS App Manager — browse, install, and remove applications
-
-License:        GPL-3.0-or-later
+Version:        1.0.0
+Release:        1
+Summary:        SynthOS app manager (Python)
+License:        MIT
 URL:            https://getsynthex.org
-Source0:        synthex-repo-%{version}.tar.gz
-BuildArch:      noarch
 Requires:       python3
-Requires:       flatpak
-Recommends:     synthex-control-center
+
+Source0:        synthex-repo-%{version}.tar.gz
 
 %description
-Browse and install Flatpak, DNF, and AppImage applications by category.
-Supports batch install of app bundles and removal of installed apps.
-Qt/QML frontend (PySide) talking to the real Flatpak/DNF backends.
+SynthOS application manager (Python GUI + launcher).
 
 %prep
 %setup -q -n synthex-repo-%{version}
+
 %build
-# Nothing to build — Python + QML
+true
 
 %install
-install -Dm755 synthex-app-manager %{buildroot}%{_libexecdir}/synthex/synthex-app-manager
-install -Dm644 synthex-app-manager.desktop %{buildroot}%{_datadir}/applications/synthex-app-manager.desktop
-mkdir -p %{buildroot}%{_datadir}/synthex/app-manager/ui
-cp -r ui/* %{buildroot}%{_datadir}/synthex/app-manager/ui/
-cp -r main.py %{buildroot}%{_datadir}/synthex/app-manager/main.py
+install -d %{buildroot}%{_bindir} %{buildroot}%{_libexecdir}/synthex/app-manager %{buildroot}%{_datadir}/applications
+cat > %{buildroot}%{_bindir}/synthex-app-manager <<'LAUNCH'
+#!/usr/bin/env bash
+exec python3 %{_libexecdir}/synthex/app-manager/main.py "$@"
+LAUNCH
+chmod 0755 %{buildroot}%{_bindir}/synthex-app-manager
+cp -r src/synthex-app-manager/. %{buildroot}%{_libexecdir}/synthex/app-manager/ 2>/dev/null || true
+cp src/synthex-app-manager/synthex-app-manager.desktop %{buildroot}%{_datadir}/applications/ 2>/dev/null || true
 
 %files
-%{_libexecdir}/synthex/synthex-app-manager
+%{_bindir}/synthex-app-manager
+%{_libexecdir}/synthex/app-manager/
 %{_datadir}/applications/synthex-app-manager.desktop
-%{_datadir}/synthex/app-manager/
 
 %changelog
-* Sun Aug 14 2026 SynthOS Team <team@synthex-os.org> - 2026.10-1
-- Centralized spec (was component-local); ships launcher + QML UI
-- Installs/removes via real Flatpak and DNF backends
+* Sun Aug 16 2026 SynthOS Team <build@synthex.org> - 1.0.0-1
+- Rewire as Python app-manager

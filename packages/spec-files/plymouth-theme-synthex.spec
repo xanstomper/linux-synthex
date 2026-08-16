@@ -10,6 +10,7 @@ Requires:       plymouth
 Requires:       plymouth-plugin-script
 Requires(post): plymouth-scripts
 
+Source0:        synthex-repo-2026.10.tar.gz
 %description
 SynthOS animated Plymouth boot splash.
 Shows a spinning amber sun logo on a dark navy background with a progress bar.
@@ -17,6 +18,7 @@ Supports encrypted disk password prompts and status messages.
 Includes dracut configuration for initramfs embedding.
 
 %prep
+%setup -q -n synthex-repo-2026.10
 # No source archive — files installed directly from repo
 
 %build

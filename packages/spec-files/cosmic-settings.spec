@@ -36,6 +36,7 @@ settings interface organized into categories:
 - About: device info, OS version, licenses
 
 %prep
+%setup -q -n synthex-repo-24.04.0
 %autosetup -n cosmic-settings-v%{cosmicsettings_version}
 
 %build

@@ -4,7 +4,7 @@
 # Copyright (c) 2026 Synthex Project
 #
 
-%global __requires_exclude_from ^%{python3_sitelib}/synthex_ai_hub/
+%global __requires_exclude_from ^%{_datadir}/synthex-ai-hub/
 
 %define python3_sitelib %(python3 -c "import sysconfig; print(sysconfig.get_path('purelib'))" 2>/dev/null || echo "/usr/lib/python3.12/site-packages")
 
@@ -67,23 +67,21 @@ Features:
 %prep
 %setup -q -n synthex-repo-%{version}
 %build
-%meson
-%meson_build
+# Python application; nothing to compile
+true
 
 %install
-%meson_install
+install -d %{buildroot}%{_bindir} %{buildroot}%{_userunitdir} %{buildroot}%{_datadir}/synthex-ai-hub
 
-# Install model library
-install -D -m 0644 data/modellibrary.json \
-    %{buildroot}%{_datadir}/synthex-ai-hub/modellibrary.json
-
-# Install model manager script
-install -D -m 0755 scripts/model-sources.sh \
-    %{buildroot}%{_bindir}/synthex-ai-model
-
-# Install systemd user service
-install -D -m 0644 data/synthex-ai-hub.service \
-    %{buildroot}%{_userunitdir}/synthex-ai-hub.service
+# Launcher that runs the Python module
+cat > %{buildroot}%{_bindir}/synthex-ai-hub <<'LAUNCH'
+#!/usr/bin/env bash
+exec python3 %{_datadir}/synthex-ai-hub/main.py "$@"
+LAUNCH
+chmod 0755 %{buildroot}%{_bindir}/synthex-ai-hub
+install -m 0755 scripts/model-sources.sh %{buildroot}%{_bindir}/synthex-ai-model
+install -m 0644 data/modellibrary.json %{buildroot}%{_datadir}/synthex-ai-hub/modellibrary.json
+install -m 0644 data/synthex-ai-hub.service %{buildroot}%{_userunitdir}/synthex-ai-hub.service
 
 # GSettings schema compilation (post-install)
 %post
@@ -98,15 +96,8 @@ install -D -m 0644 data/synthex-ai-hub.service \
 %defattr(-,root,root)
 %{_bindir}/synthex-ai-hub
 %{_bindir}/synthex-ai-model
-%{python3_sitelib}/synthex_ai_hub/
-%{_datadir}/synthex-ai-hub/
-%{_datadir}/applications/org.synthex.AIHub.desktop
-%{_datadir}/icons/hicolor/scalable/apps/synthex-ai-hub.svg
-%{_datadir}/metainfo/org.synthex.AIHub.metainfo.xml
-%{_datadir}/glib-2.0/schemas/org.synthex.AIHub.gschema.xml
-%{_datadir}/dbus-1/services/org.synthex.AIHub.service
+%{_datadir}/synthex-ai-hub/modellibrary.json
 %{_userunitdir}/synthex-ai-hub.service
-%{_mandir}/man1/synthex-ai-hub.1*
 
 %changelog
 * Sat Jul 04 2026 Synthex Project <packaging@synthex-project.org> - 1.0.0-1

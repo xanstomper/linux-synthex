@@ -29,6 +29,7 @@ Recommends:     nm-connection-editor
 Recommends:     blueman
 Recommends:     wdisplays
 
+Source0:        synthex-repo-2.0.0.tar.gz
 %description
 SynthOS System Settings launcher. Detects the active desktop environment
 and launches the correct native settings application:
@@ -46,13 +47,13 @@ Power, Keyboard, Mouse, Themes, Users, Firewall, Updates, Drivers)
 is handled by the upstream desktop settings application.
 
 %prep
-%setup -c -T
+%setup -q -n synthex-repo-%{version}
 
 %build
 # Nothing to build — shell script only
 
 %install
-install -Dm755 %{SOURCE0}/../src/synthex-control-center/synthex-control-center \
+install -Dm755 src/synthex-control-center/synthex-control-center \
     %{buildroot}%{_bindir}/synthex-control-center
 
 install -d %{buildroot}%{_datadir}/applications

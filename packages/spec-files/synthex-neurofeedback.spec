@@ -36,6 +36,7 @@ Requires:       pipewire-utils
 
 Suggests:       python3-brainflow
 
+Source0:        synthex-repo-2026.10.tar.gz
 %description
 synthex-neurofeedback — EEG/BCI Device Integration for Focus-Aware Computing.
 
@@ -77,6 +78,7 @@ The synthex-neurofeedbackd daemon:
      machine; the raw stream is not logged by default.
 
 %prep
+%setup -q -n synthex-repo-2026.10
 # noarch script package — no tarball
 
 %build

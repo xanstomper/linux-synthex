@@ -10,6 +10,7 @@ BuildRequires:  rust
 BuildRequires:  cargo
 BuildRequires:  systemd-rpm-macros
 
+Source0:        synthex-repo-2026.10.tar.gz
 %description
 The SynthOS Dead Man's Switch monitors periodic check-ins from the companion
 C{synthex-checkin} binary. If no check-in arrives within the configured interval +
@@ -18,11 +19,13 @@ webhook alerts to every configured endpoint. A unique, package-level security
 feature for unattended or high-risk machines.
 
 %prep
-%setup -q
+%setup -q -n synthex-repo-2026.10
 
 %build
-cargo build --release
-
+# prebuilt release binary
+mkdir -p target/release
+install -m755 /home/jewboy420/linux-synthex/target/release/synthex-deadman target/release/synthex-deadman
+install -m755 /home/jewboy420/linux-synthex/target/release/synthex-checkin target/release/synthex-checkin
 %install
 install -Dm755 target/release/synthex-deadman  %{buildroot}%{_bindir}/synthex-deadman
 install -Dm755 target/release/synthex-checkin  %{buildroot}%{_bindir}/synthex-checkin

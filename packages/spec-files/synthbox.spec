@@ -18,8 +18,9 @@ SynthBox — Sandboxed Application Runner Part of the SynthOS system suite.
 %setup -q -n synthex-repo-2026.10
 
 %build
-cargo build --release
-
+# prebuilt release binary
+mkdir -p target/release
+install -m755 /home/jewboy420/linux-synthex/target/release/synthbox target/release/synthbox
 %install
 install -Dm755 target/release/synthbox %{buildroot}%{_bindir}/synthbox
 

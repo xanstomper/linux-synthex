@@ -26,8 +26,9 @@ the lockdown action exposed via synthex-synthvault.service.
 %setup -q -n synthex-repo-2026.10
 
 %build
-cargo build --release
-
+# prebuilt release binary
+mkdir -p target/release
+install -m755 /home/jewboy420/linux-synthex/target/release/synthvault target/release/synthvault
 %install
 install -Dm755 target/release/synthvault %{buildroot}%{_bindir}/synthvault
 install -Dm644 systemd/synthex-synthvault.service %{buildroot}%{_unitdir}/synthex-synthvault.service

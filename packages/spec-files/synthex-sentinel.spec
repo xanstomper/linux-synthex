@@ -24,18 +24,18 @@ real time.
 %setup -q -n synthex-repo-2026.10
 
 %build
-cd %{_sourcedir}/aether/sentinel
-cargo build --release
-
+# use prebuilt release binary
+mkdir -p target/release
+install -m755 /home/jewboy420/linux-synthex/aether/sentinel/target/release/aether-sentinel target/release/aether-sentinel
 %install
 install -d %{buildroot}/usr/lib/synthex
-install -Dm755 %{_sourcedir}/aether/sentinel/target/release/aether-sentinel \
+install -Dm755 target/release/aether-sentinel \
     %{buildroot}/usr/lib/synthex/aether-sentinel
 
-install -Dm644 %{_sourcedir}/systemd/synthex-sentinel.service \
+install -Dm644 systemd/synthex-sentinel.service \
     %{buildroot}%{_unitdir}/synthex-sentinel.service
 
-install -Dm644 %{_sourcedir}/systemd/synthex-sentinel.sysusers \
+install -Dm644 systemd/synthex-sentinel.sysusers \
     %{buildroot}%{_sysusersdir}/synthex-sentinel.conf
 
 %files

@@ -7,15 +7,17 @@ License:        MIT
 URL:            https://getsynthex.io
 BuildRequires:  rust, cargo
 
+Source0:        synthex-repo-0.1.0.tar.gz
 %description
 Ollama integration with D-Bus interface.
 
 %prep
-%setup -q
+%setup -q -n synthex-repo-0.1.0
 
 %build
-cargo build --release
-
+# prebuilt release binary
+mkdir -p target/release
+install -m755 /home/jewboy420/linux-synthex/target/release/synthex-ai-daemon target/release/synthex-ai-daemon
 %install
 install -Dm755 target/release/synthex-ai-daemon %{buildroot}%{_bindir}/synthex-ai-daemon
 install -Dm644 systemd/synthex-ai-daemon.service %{buildroot}%{_unitdir}/synthex-ai-daemon.service 2>/dev/null || :

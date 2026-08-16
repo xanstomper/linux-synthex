@@ -61,7 +61,6 @@ Design. Provides the complete Plasma desktop configuration, including:
 # ─── Prep ────────────────────────────────────────────────────────────────
 %prep
 %setup -q -n synthex-repo-%{version}
-%autosetup -n %{name}-%{version}
 
 # ─── Build ───────────────────────────────────────────────────────────────
 %build
@@ -110,11 +109,13 @@ cp -r desktop/plasma/aurorae/Synthex-Nova \
     %{buildroot}%{_datadir}/aurorae/themes/
 
 # Wayland session file
+mkdir -p %{buildroot}%{_datadir}/wayland-sessions
+install -d -m 0755 %{buildroot}%{_datadir}/wayland-sessions
 install -m 0644 desktop/plasma/synthex-plasma-wayland.desktop \
     %{buildroot}%{_datadir}/wayland-sessions/
 
 # Skeleton user config
-cp -r desktop/plasma/skel/* \
+cp -r desktop/plasma/skel/. \
     %{buildroot}%{_sysconfdir}/skel/.config/
 
 # ─── Post-install ─────────────────────────────────────────────────────────

@@ -23,6 +23,7 @@ Requires:       util-linux
 Recommends:     grub-btrfs
 Recommends:     zram-generator
 
+Source0:        synthex-repo-%{safety_version}.tar.gz
 %description
 Synthex safety system: prevents removal of critical packages via a DNF5
 plugin, auto-snapshots before system updates, provides a rescue USB
@@ -30,7 +31,7 @@ creator, boot health checking, controller/RGB/handheld udev rules, and
 CachyOS-style performance sysctl + ZRAM tuning.
 
 %prep
-%setup -c -T
+%setup -q -n synthex-repo-%{safety_version}
 
 %build
 # Nothing to build — scripts and configs only

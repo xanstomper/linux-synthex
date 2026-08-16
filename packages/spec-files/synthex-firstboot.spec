@@ -11,6 +11,7 @@ Requires:       synthex-oobe
 Requires:       synthex-hardware-detect
 Requires(post): systemd
 
+Source0:        synthex-repo-2026.10.tar.gz
 %description
 SynthOS first-boot initialization service.
 Runs once on the very first system boot after installation to:
@@ -21,6 +22,7 @@ Runs once on the very first system boot after installation to:
 - Configure GPU drivers if needed
 
 %prep
+%setup -q -n synthex-repo-2026.10
 # No source archive — files installed directly from repo
 
 %build

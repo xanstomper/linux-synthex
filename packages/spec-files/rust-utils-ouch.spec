@@ -39,6 +39,7 @@ Usage:
   ouch list file.zip       # List contents
 
 %prep
+%setup -q -n synthex-repo-0.5.1
 %autosetup -n ouch-%{ouch_version}
 
 %build

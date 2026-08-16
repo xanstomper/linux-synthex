@@ -32,6 +32,7 @@ Key features:
 - Configurable prompt and themes
 
 %prep
+%setup -q -n synthex-repo-0.103.0
 %autosetup -n nushell-%{nu_version}
 
 %build

@@ -33,6 +33,7 @@ GUI toolkit, it provides a modern, GPU-accelerated compositor with:
 - Touch and gesture support
 
 %prep
+%setup -q -n synthex-repo-24.04.0
 %autosetup -n cosmic-comp-epoch-%{cosmic_version}
 
 %build

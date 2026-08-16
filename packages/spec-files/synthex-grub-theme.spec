@@ -9,6 +9,7 @@ BuildRequires:  librsvg2-tools
 Requires:       grub2-common
 Requires:       grub2-tools
 
+Source0:        synthex-repo-2026.10.tar.gz
 %description
 SynthOS branded GRUB2 bootloader theme.
 Features:
@@ -20,6 +21,7 @@ Features:
 - Hides recovery entries when GRUB_DISABLE_RECOVERY=true
 
 %prep
+%setup -q -n synthex-repo-2026.10
 # Convert logo SVG to PNG for GRUB
 rsvg-convert -w 300 -h 75 %{_sourcedir}/synthex-logo.svg \
     -o %{_builddir}/logo.png 2>/dev/null || true

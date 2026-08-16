@@ -27,6 +27,7 @@ Requires:       grub2
 Requires:       grub2-efi-x64
 Requires:       shim-x64
 
+Source0:        synthex-repo-2026.10.tar.gz
 %description
 Provides the complete Calamares installer configuration for SynthOS, including:
   - Main settings.conf (module sequence and branding reference)
@@ -36,7 +37,7 @@ Provides the complete Calamares installer configuration for SynthOS, including:
   - Desktop profile activation scripts
 
 %prep
-%setup -q
+%setup -q -n synthex-repo-2026.10
 
 %build
 # Nothing to compile — noarch data/script package

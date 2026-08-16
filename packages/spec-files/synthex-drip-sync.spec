@@ -27,8 +27,9 @@ Privacy: only runs when explicitly enabled — see /etc/synthex/privacy.conf
 %setup -q -n synthex-repo-%{version}
 
 %build
-cargo build --release -p synthex-drip-sync
-
+# prebuilt release binary
+mkdir -p target/release
+install -m755 /home/jewboy420/linux-synthex/target/release/synthex-drip-sync target/release/synthex-drip-sync
 %install
 install -Dm755 target/release/synthex-drip-sync %{buildroot}%{_bindir}/synthex-drip-sync
 install -Dm644 systemd/synthex-drip-sync.service %{buildroot}%{_unitdir}/synthex-drip-sync.service

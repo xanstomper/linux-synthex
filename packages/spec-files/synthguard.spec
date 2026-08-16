@@ -28,8 +28,9 @@ monitor and the one-shot integrity check wired via ExecStartPost).
 %setup -q -n synthex-repo-2026.10
 
 %build
-cargo build --release
-
+# prebuilt release binary
+mkdir -p target/release
+install -m755 /home/jewboy420/linux-synthex/target/release/synthguard target/release/synthguard
 %install
 install -Dm755 target/release/synthguard %{buildroot}%{_bindir}/synthguard
 install -Dm644 systemd/synthex-synthguard.service %{buildroot}%{_unitdir}/synthex-synthguard.service

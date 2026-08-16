@@ -30,6 +30,7 @@ specification (XDG Notifications) with:
 - Clipboard notification integration
 
 %prep
+%setup -q -n synthex-repo-24.04.0
 %autosetup -n cosmic-notifications-v%{cosmicnotif_version}
 
 %build

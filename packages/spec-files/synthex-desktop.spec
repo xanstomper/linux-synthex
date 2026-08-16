@@ -112,6 +112,7 @@ Recommends:     synthex-codec-pack
 Recommends:     synthex-driver-manager
 Recommends:     synthex-ai-daemon
 
+Source0:        synthex-repo-2026.10.tar.gz
 %description
 SynthOS complete KDE Plasma desktop metapackage. Installing this package
 pulls in everything needed for a fully functional SynthOS Plasma desktop
@@ -126,6 +127,7 @@ Editions are differentiated by additional profile packages:
   synthex-profile-classic  — Windows-like defaults for new users
 
 %prep
+%setup -q -n synthex-repo-2026.10
 # Meta-package — no source archive
 
 %build

@@ -31,6 +31,7 @@ Features:
 - Cross-platform
 
 %prep
+%setup -q -n synthex-repo-18.4.0
 %autosetup -n atuin-v%{atuin_version}
 
 %build

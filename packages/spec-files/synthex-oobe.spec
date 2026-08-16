@@ -14,6 +14,7 @@ Requires:       qt6-qtbase-gui
 Requires:       python3-pyside6-essentials
 Requires:       systemd
 
+Source0:        synthex-repo-2026.10.tar.gz
 %description
 SynthOS Out-Of-Box Experience (OOBE) setup wizard.
 Runs automatically on first login to guide the user through:
@@ -24,6 +25,7 @@ Runs automatically on first login to guide the user through:
 Writes selections to /var/lib/synthex/ for firstboot.service to apply.
 
 %prep
+%setup -q -n synthex-repo-2026.10
 # No source archive — files installed directly from repo
 
 %build

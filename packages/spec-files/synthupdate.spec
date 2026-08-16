@@ -18,8 +18,9 @@ SynthOS synthupdate Part of the SynthOS system suite.
 %setup -q -n synthex-repo-2026.10
 
 %build
-cargo build --release
-
+# prebuilt release binary
+mkdir -p target/release
+install -m755 /home/jewboy420/linux-synthex/target/release/synthupdate target/release/synthupdate
 %install
 install -Dm755 target/release/synthupdate %{buildroot}%{_bindir}/synthupdate
 
