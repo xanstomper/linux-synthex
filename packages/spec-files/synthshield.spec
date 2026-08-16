@@ -21,6 +21,10 @@ SynthShield scans installed files for integrity drift and manages btrfs
 snapshot-based rollback points. Ships the synthshield CLI and the
 synthex-synthshield.service system unit.
 
+
+%prep
+%setup -q -n synthex-repo-2026.10
+
 %build
 cargo build --release
 

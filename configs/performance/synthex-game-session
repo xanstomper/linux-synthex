@@ -1,0 +1,4 @@
+#!/usr/bin/env bash
+# Launch Steam/games under gamescope for low-latency/Wayland. Safe & optional.
+set -e
+exec gamescope --adaptive-sync --rt -f -- "$@"

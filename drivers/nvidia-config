@@ -1,0 +1,2 @@
+# NVIDIA config stub
+options nvidia NVreg_OpenRmEnableUnsupportedGpus=0

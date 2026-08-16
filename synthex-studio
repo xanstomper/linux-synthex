@@ -1,0 +1,3 @@
+#!/usr/bin/env bash
+# synthex-studio: minimal creator studio launcher stub
+echo "synthex-studio: launch creator tools"

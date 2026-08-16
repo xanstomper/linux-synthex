@@ -13,6 +13,10 @@ BuildRequires:  cargo
 %description
 SynthIdentity — Encrypted Credential Manager Part of the SynthOS system suite.
 
+
+%prep
+%setup -q -n synthex-repo-2026.10
+
 %build
 cargo build --release
 

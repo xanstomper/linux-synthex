@@ -9,6 +9,7 @@ BuildArch:      noarch
 Requires:       (plasma-breeze or breeze-cursor-theme)
 Requires:       hicolor-icon-theme
 
+Source0:        synthex-repo-2026.10.tar.gz
 %description
 Installs the Synthex-Cursor theme: Nova metadata layered over the Breeze
 cursor silhouette (inherits Breeze so every cursor shape is always present),
@@ -17,6 +18,10 @@ and sets it as the system default cursor for new sessions.
 Design: rounded Breeze silhouette, 2px high-contrast outline, SynthOS Nova
 slate-blue accent on active states. Sizes 24 (default) / 32 / 48 inherit
 from Breeze's rendered sizes.
+
+
+%prep
+%setup -q -n synthex-repo-2026.10
 
 %install
 install -d %{buildroot}%{_datadir}/icons/Synthex-Cursor

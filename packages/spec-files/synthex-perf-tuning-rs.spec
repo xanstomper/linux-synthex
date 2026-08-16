@@ -13,6 +13,10 @@ BuildRequires:  cargo
 SynthOS performance tuning CLI — governor, I/O scheduler, sysctl profiles. Part of the SynthOS Rust tools suite (replaces the earlier
 Python prototypes with a single fast static binary).
 
+
+%prep
+%setup -q -n synthex-repo-2026.10
+
 %build
 cargo build --release
 

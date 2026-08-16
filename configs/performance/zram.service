@@ -1,0 +1,13 @@
+[Unit]
+Description=Synthex zram swap (low-pressure RAM compreson)
+DefaultDependencies=no
+After=local-fs.target
+Before=swap.target
+ConditionVirtualization=!container
+
+[Service]
+Type=oneshot
+ExecStart=/usr/lib/synthex/zram-setup
+
+[Install]
+WantedBy=swap.target

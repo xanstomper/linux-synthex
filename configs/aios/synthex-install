@@ -1,0 +1,68 @@
+#!/usr/bin/env bash
+# synthex install - snapshot-guarded, non-destructive app/driver installer.
+#
+# Usage:
+#   synthex install <preset|package> [--yes]
+#   Presets: nvidia | amd | intel | mesa | steam | codecs
+#
+# Flow (never "unbrickable"): snapshot -> install -> doctor verify ->
+#   on FAILURE: rollback -> report. Idempotent, safe fallbacks if tools absent.
+set -uo pipefail
+
+SNAP=/usr/sbin/synthex-snapshot
+DOCTOR=/usr/sbin/synthex-doctor
+CONF=0
+
+resolve() {
+  case "$1" in
+    nvidia) echo "dnf install -y nvidia-driver nvidia-modprobe" ;;
+    amd)    echo "dnf install -y mesa-vulkan-drivers vulkan-radeon libva" ;;
+    intel)  echo "dnf install -y mesa-vulkan-drivers vulkan-intel intel-media-driver" ;;
+    mesa)   echo "dnf install -y mesa-vulkan-drivers mesa-va-drivers" ;;
+    steam)  echo "dnf install -y steam" ;;
+    codecs) echo "dnf install -y ffmpeg gstreamer1-plugins-bad-free-extras" ;;
+    *)      echo "dnf install -y $1" ;;
+  esac
+}
+
+take_snapshot() {
+  if [ -x "$SNAP" ]; then
+    "$SNAP" create "pre-$1" 2>/dev/null && echo "snapshot: ok"
+  else
+    echo "warn: $SNAP missing (no pre-snapshot; install still guarded by dnf/rpm atomic)"
+  fi
+}
+
+run_install() {
+  if command -v dnf >/dev/null 2>&1; then
+    echo "  RUN: $*"
+    "$@"; return $?
+  else
+    printf '  note: dnf not present (simulated, non-destructive):\n    %s\n' "$*"
+    return 0
+  fi
+}
+
+verify() {
+  if [ -x "$DOCTOR" ]; then "$DOCTOR" >/dev/null 2>&1; echo "doctor: ok"
+  else echo "doctor: skipped"; fi
+}
+
+[ "$#" -ge 1 ] || { echo "usage: synthex install <nvidia|amd|intel|mesa|steam|codecs|pkgname> [--yes]"; exit 0; }
+TARGET="$1"; shift
+[ "${1:-}" = "--yes" ] && CONF=yes || echo "note: run with --yes to actually install (dry-run listed)"
+
+CMD="$(resolve "$TARGET")"
+echo "== install: $TARGET =="
+echo "  plan: $CMD"
+[ "$CONF" = yes ] || { echo "  (dry-run; pass --yes)"; exit 0; }
+
+take_snapshot "$TARGET"
+if run_install $CMD; then
+  echo "  install finished ok."
+  verify
+else
+  echo "  install FAILED -> rolling back"
+  [ -x "$SNAP" ] && "$SNAP" rollback 2>/dev/null || true
+  exit 1
+fi

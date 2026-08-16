@@ -1,0 +1,4 @@
+[D-BUS Service]
+Name=org.synthex.SecurityGatherer1
+Exec=/usr/libexec/synthex/security-gatherer
+User=root

@@ -13,6 +13,10 @@ BuildRequires:  cargo
 %description
 SynthBox — Sandboxed Application Runner Part of the SynthOS system suite.
 
+
+%prep
+%setup -q -n synthex-repo-2026.10
+
 %build
 cargo build --release
 

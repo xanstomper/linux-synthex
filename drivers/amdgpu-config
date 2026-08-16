@@ -1,0 +1,2 @@
+# amdgpu config stub
+options amdgpu powerplay=1

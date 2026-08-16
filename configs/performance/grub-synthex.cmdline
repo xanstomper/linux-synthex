@@ -1,0 +1,4 @@
+# Follow to GRUB_CMDLINE_LINUX_DEFAULT (append, nothing removed -> reversible)
+quiet splash loglevel=rate_limit
+transparent_hugepage=never
+# NOTE: mitigations intentionally left ENABLED (no npti/nosmep) -> safe

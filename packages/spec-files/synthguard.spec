@@ -23,6 +23,10 @@ surfaces threat detections. Ships the synthguard CLI plus the
 synthex-synthguard.service system unit (two ExecStart lines: the long-running
 monitor and the one-shot integrity check wired via ExecStartPost).
 
+
+%prep
+%setup -q -n synthex-repo-2026.10
+
 %build
 cargo build --release
 

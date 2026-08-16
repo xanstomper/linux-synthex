@@ -1,0 +1,92 @@
+#!/usr/bin/env bash
+# synthex - local-first OS assistant console.
+#
+# Talks to the on-device AI daemons (AETHER/brain/hermes) that SynthOS ships.
+# Defensive: never crashes if a daemon isn't up; prints a useful fallback.
+#
+# Usage:
+#   synthex status          -> which daemons are reachable
+#   synthex think "..."     -> ask the local model a question (system-grounded)
+#   synthex memory          -> show recent memory-graph entries
+#   synthex ask             -> interactive REPL
+#   synthex verbs           -> list capability-broker verbs
+set -uo pipefail
+
+AETHER_HOST="${SYNTHEX_AETHER_HOST:-127.0.0.1}"
+APORT="${SYNTHEX_AETHER_PORT:-8787}"
+
+BRAIN=""
+for c in synthex-hermes synthex-brain synthex-workspace-ai; do
+  if command -v "$c" >/dev/null 2>&1; then BRAIN="$c"; break; fi
+done
+
+say()  { printf '%s\n' "$*"; }
+
+aether_up() {
+  ( exec 3<>"/dev/tcp/${AETHER_HOST}/${APORT}" ) >/dev/null 2>&1
+}
+
+ask_aether() {
+  local q
+  q="${1//\"/\\\"}"
+  printf '{"op":"ask","q":"%s"}\n' "$q" \
+    | timeout 20 bash -c "exec 3<>/dev/tcp/${AETHER_HOST}/${APORT}" 2>/dev/null \
+    | head -c 2048 || true
+}
+
+no_daemon() {
+  say "synthex: no local AI daemon is running."
+  say "start one with:  systemctl --user start synthex-hermes   # or synthex-brain"
+}
+
+cmd="${1:-ask}"
+[ $# -gt 0 ] && shift
+
+case "$cmd" in
+  ask)
+    if [ "$#" -ge 1 ]; then
+      if [ -n "$BRAIN" ]; then "$BRAIN" recall "$*" && exit 0; fi
+      if aether_up; then ask_aether "$*" && exit 0; fi
+      no_daemon
+    else
+      say "synthex REPL (Ctrl-D to quit)"
+      while read -r -p "synthex> " line; do
+        [ -z "$line" ] && continue
+        if [ -n "$BRAIN" ]; then "$BRAIN" recall "$line" && continue; fi
+        if aether_up; then ask_aether "$line" || say "synthex: no reply"; fi
+      done
+    fi
+    ;;
+  think)
+    [ "$#" -ge 1 ] || { say "usage: synthex think \"<question>\""; exit 1; }
+    if [ -n "$BRAIN" ]; then "$BRAIN" recall "$@" && exit 0; fi
+    if aether_up; then ask_aether "$*" && exit 0; fi
+    no_daemon
+    ;;
+  memory|recall)
+    if [ -n "$BRAIN" ]; then "$BRAIN" status
+    else say "synthex: brain not reachable"; fi
+    ;;
+  verbs|capabilities|status)
+    if [ -n "$BRAIN" ]; then "$BRAIN" status
+    else say "synthex: brain not reachable"; fi
+    ;;
+  doctor)
+    if [ -x /usr/sbin/synthex-doctor ]; then /usr/sbin/synthex-doctor; else say "synthex: doctor not installed"; fi
+    ;;
+  persona)
+    if [ -x /usr/sbin/synthex-persona ]; then /usr/sbin/synthex-persona "$@"; else say "synthex: persona not installed"; fi
+    ;;
+  update)
+    if [ -x /usr/sbin/synthex-update-sync ]; then /usr/sbin/synthex-update-sync "${@:-status}"; else say "synthex: update-sync not installed"; fi
+    ;;
+  install)
+    if [ -x /usr/sbin/synthex-install ]; then /usr/sbin/synthex-install "$@"; else say "synthex: install not installed"; fi
+    ;;
+  help|-h|--help)
+    say "usage: synthex {ask|think|memory|verbs|status|doctor|persona|update|install} [args]"
+    ;;
+  *)
+    say "synthex: unknown command '$cmd' (try: synthex help)"
+    ;;
+esac

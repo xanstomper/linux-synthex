@@ -1,0 +1,36 @@
+#!/usr/bin/env bash
+# synthex-defaults - enable the "differentiators" on first boot, best-effort.
+# Usage: synthex-defaults enable-all
+set -uo pipefail
+
+m="${1:-enable-all}"
+[ "$m" = enable-all ] || { echo "usage: synthex-defaults enable-all"; exit 0; }
+
+UNITS=(
+  synthex-zram.service
+  synthex-predictive.service
+  synthex-predictive-launch.service
+  synthex-brain.service
+  synthex-hermes.service
+  synthex-snapshot.service
+  snapper-timeline.timer
+  btrfs-scrub@-.timer
+  fstrim.timer
+)
+
+have () { systemctl list-unit-files "$1" >/dev/null 2>&1; }
+
+for u in "${UNITS[@]}"; do
+  if have "$u"; then systemctl enable "$u" 2>/dev/null && echo "enabled: $u"; fi
+done
+
+if have synthex-zram.service; then
+  systemctl start synthex-zram.service 2>/dev/null || true
+fi
+
+if command -v snapper >/dev/null 2>&1 && [ -f /etc/snapper/configs/root ]; then
+  snapper -c root create --description "firstboot-default" 2>/dev/null || true
+fi
+
+echo "synthex-defaults: done (best-effort)"
+exit 0

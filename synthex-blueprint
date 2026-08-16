@@ -1,0 +1,3 @@
+#!/usr/bin/env bash
+# synthex-blueprint: minimal config-archive tool stub
+echo "synthex-blueprint: list, export, or apply config blueprints"

@@ -1,0 +1,14 @@
+[Unit]
+Description=SynthOS first-boot defaults (predictive, snapshots, zram)
+After=local-fs.target
+ConditionPathExists=/etc/synthex/live-mode
+Before=multi-user.target
+
+[Service]
+Type=oneshot
+ExecStart=/usr/sbin/synthex-defaults enable-all
+StandardOutput=journal
+StandardError=journal
+
+[Install]
+WantedBy=multi-user.target

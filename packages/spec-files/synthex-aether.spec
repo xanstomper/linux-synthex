@@ -23,6 +23,10 @@ Exposes a newline-JSON-over-TCP API on 127.0.0.1:8787 and an in-process
 DaemonApi trait. Ships hardened (ProtectSystem=strict, dedicated unprivileged
 user, capability-dropped).
 
+
+%prep
+%setup -q -n synthex-repo-2026.10
+
 %build
 # AETHER CORE is an independent Cargo workspace (aether/core). Build it in-tree
 # from the source checkout (the Makefile sets _sourcedir to the repo root).

@@ -267,3 +267,25 @@ make validate
 *SynthOS is an independent project not affiliated with Fedora Project or Red Hat.*
 
 </div>
+
+---
+
+## 📚 Documentation
+
+Full, detailed docs live in **`docs/`** — **start at [docs/ALL-DOCS.md](docs/ALL-DOCS.md)**
+(two-generation index) or, for the operations readers, **[docs/INDEX.md](docs/INDEX.md)**.
+
+Key entry points:
+
+| Want to… | Read |
+|---|---|
+| verify everything | `docs/README.md` (and run `configs/tests/verify.sh`) |
+| build the repo | `docs/BUILD.md`, `docs/PACKAGING.md`, `docs/RUNBOOK.md` |
+| use the assistant console | `docs/AIOS.md` |
+| the Mint/Bazzite-style updater | `docs/UPDATER.md` |
+| safe perf tuning | `docs/PERFORMANCE.md` |
+| security posture | `docs/SECURITY.md` |
+| the daemons | `docs/DAEMONS.md` |
+| assemble the ISO | `docs/ISO.md`, `docs/KICKSTARTS.md` |
+| contribute | `docs/CONTRIBUTING.md`, `docs/ROADMAP.md` |
+| all docs (both generations) | `docs/ALL-DOCS.md` |

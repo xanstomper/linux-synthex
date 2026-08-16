@@ -1,0 +1,65 @@
+#!/usr/bin/env bash
+# synthex persona - pick a profile on first boot that pre-installs the right
+# stack and toggles the right daemons. Reversible (switch anytime).
+# Usage: synthex persona [gamer|creator|developer|privacy|minimal]
+set -uo pipefail
+
+META=(gamer:synthex-meta-gaming creator:synthex-meta-creator developer:synthex-meta-developer
+      minimal:synthex-meta-minimal)
+want="${1:-}"
+
+if [ -z "$want" ]; then
+  echo "Synthex persona — choose (reversible):"
+  echo "  synthex persona gamer"
+  echo "  synthex persona creator"
+  echo "  synthex persona developer"
+  echo "  synthex persona minimal"
+  echo "  synthex persona privacy"
+  exit 0
+fi
+
+roles=""
+case "$want" in
+  gamer)    roles="$roles gamer";;
+  creator)  roles="$roles creator";;
+  developer)roles="$roles creator";;
+  privacy)  roles="$roles privacy";;
+  minimal)  roles="";;
+  *) echo "unknown persona '$want'"; exit 1;;
+esac
+
+# 1) install the corresponding meta package(s) - best-effort
+dnfpkgs=""
+for m in "${META[@]}"; do
+  k="${m%%:*}"; v="${m##*:}"
+  case "$want" in
+    "$k") dnfpkgs="$dnfpkgs $v";;
+    developer) [ "$k" = creator ] && dnfpkgs="$dnfpkgs $v";;
+  esac
+done
+[ -n "${dnfpkgs:-}" ] && { command -v dnf >/dev/null 2>&1 && dnf install -y $dnfpkgs 2>/dev/null || echo "synthex-persona: (dnf now shown) would install:$dnfpkgs"; } || true
+
+# 2) toggle daemons per persona (best-effort, idempotent)
+enable() { systemctl enable "$1" 2>/dev/null || true; }
+disable() { systemctl disable "$1" 2>/dev/null || true; }
+case "$want" in
+  gamer)
+    enable synthex-game-session 2>/dev/null || true
+    enable synthex-predictive 2>/dev/null || true
+    enable synthex-predictive-launch 2>/dev/null || true
+    ;;
+  creator)
+    enable synthex-ai-daemon 2>/dev/null || true
+    enable synthex-webapp-engine 2>/dev/null || true
+    ;;
+  privacy)
+    disable synthex-webapp-engine 2>/dev/null || true
+    echo "privacy: web access trimmed."
+    ;;
+  minimal)
+    disable synthex-predictive synthex-predictive-launch synthex-webapp-engine 2>/dev/null || true
+    ;;
+esac
+
+echo "synthex persona is now: $want"
+exit 0

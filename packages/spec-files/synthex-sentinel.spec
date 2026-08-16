@@ -7,6 +7,7 @@ URL:            https://getsynthex.io
 BuildRequires:  rust, cargo, systemd-rpm-macros
 Requires:       systemd, synthex-aether
 
+Source0:        synthex-repo-2026.10.tar.gz
 %description
 AETHER SENTINEL — the zero-trust autonomous security intelligence layer for
 SynthOS AETHER CORE.
@@ -17,6 +18,10 @@ pipeline: a signature lane, a behavioral lane, and an AI-anomaly lane fuse
 into a single risk score per actor. It runs as a hardened system service
 alongside the AETHER consciousness daemon and grades agent activity in
 real time.
+
+
+%prep
+%setup -q -n synthex-repo-2026.10
 
 %build
 cd %{_sourcedir}/aether/sentinel

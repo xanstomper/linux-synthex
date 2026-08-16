@@ -1,0 +1,15 @@
+#!/usr/bin/env bash
+# Synthex frequency-governor helper: `synthex-gov [max|balanced|auto]`
+set -euo pipefail
+GOV=""
+case "${1:-auto}" in
+  max|performance) GOV=performance ;;
+  bal|balanced|auto) GOV=schedutil ;;
+  *) echo "usage: synthex-gov [max|balanced]"; exit 1 ;;
+esac
+for cpu in /sys/devices/system/cpu/cpu[0-9]*/cpufreq/scaling_governor; do
+  [ -w "$cpu" ] && printf '%s\n' "$GOV" > "$cpu"
+done
+echo "$GOV"
+# leave a marker so a restore-on-boot unit can reapply (optional)
+test -d /run/synthex && echo "$GOV" > /run/synthex/governor || true

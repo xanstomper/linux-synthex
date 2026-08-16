@@ -13,6 +13,10 @@ BuildRequires:  cargo
 SynthOS system report CLI — hardware/software diagnostic dump. Part of the SynthOS Rust tools suite (replaces the earlier
 Python prototypes with a single fast static binary).
 
+
+%prep
+%setup -q -n synthex-repo-2026.10
+
 %build
 cargo build --release
 

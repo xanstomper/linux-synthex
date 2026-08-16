@@ -21,6 +21,10 @@ Requires(postun): systemd
 SynthVault manages SynthOS secure storage: LUKS2 volumes, TPM2 sealing and
 the lockdown action exposed via synthex-synthvault.service.
 
+
+%prep
+%setup -q -n synthex-repo-2026.10
+
 %build
 cargo build --release
 

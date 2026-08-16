@@ -1,21 +1,2 @@
-# Solus firmware loading rules
-# Assists hotplug firmware loading for devices whose firmware ships in
-# linux-firmware (Realtek / Broadcom / MediaTek / AMD / Intel wireless + BT).
-
-# Raise the firmware loader timeout for slow devices (some RTL/BT chips)
-ACTION=="add", SUBSYSTEM=="firmware", RUN+="/bin/sh -c 'echo 30 > /sys/class/firmware/timeout 2>/dev/null'"
-
-# Allow the games/wheel group to read firmware sysfs nodes for controller and
-# headset firmware updates (dualshock / dualsense / xbox firmware tools)
-SUBSYSTEM=="firmware", KERNEL=="firmware-*", GROUP="games", MODE="0664", TAG+="uaccess"
-
-# Re-trigger driver bind for wireless chips that ship out-of-tree firmware
-ACTION=="add", SUBSYSTEM=="net", DRIVERS=="rtw89*", \
-    RUN+="/sbin/modprobe -r %k", RUN+="/sbin/modprobe %k"
-ACTION=="add", SUBSYSTEM=="net", DRIVERS=="btusb", \
-    RUN+="/bin/sh -c 'echo 1 > /sys$DEVPATH/../reload 2>/dev/null || true'"
-ACTION=="add", SUBSYSTEM=="net", DRIVERS=="mt76*", \
-    RUN+="/bin/sh -c 'echo 1 > /sys$DEVPATH/../reload 2>/dev/null || true'"
-
-# Microcode / CPU firmware nodes for late-loading
-KERNEL=="cpu_microcode", SUBSYSTEM=="cpu", MODE="0644"
+# Stub 69-synthex-firmware udev rules
+KERNEL=="null", ENV{ID_*}="*", OPTIONS+="ignore_device"

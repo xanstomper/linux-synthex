@@ -1,0 +1,63 @@
+#!/usr/bin/env bash
+# synthex doctor - one-shot integrity & health report. Never destructive.
+# Usage: synthex doctor [--deep]
+set -uo pipefail
+
+ok()   { echo "  [OK]        $1"; }
+warn() { echo "  [WARN]      $1"; }
+bad()  { echo "  [FAIL]      $1"; }
+
+echo "SynthOS doctor — $(date '+%F %T')"
+
+echo; echo "filesystems:"
+if mount | grep -qE 'on / '; then ok "/ mounted"; else warn "/ mount state unknown"; fi
+fs=$(df -T / 2>/dev/null | awk 'NR==2{print $2}')
+case "$fs" in
+  btrfs|xfs) ok "root fs: $fs" ;;
+  *)         warn "root fs: ${fs:-unknown} (snapshots/rollback limited)" ;;
+esac
+
+echo; echo "snapshots/rollback (sets):"
+if command -v snapper >/dev/null 2>&1; then
+    n=$(snapper -c root list 2>/dev/null | wc -l)
+    [ "${n:-0}" -gt 1 ] && ok "snapper snapshots present: $n" || warn "no snapper snapshots yet"
+else
+    warn "snapper not installed (rollback not available)"
+fi
+
+echo; echo "daemons (AI + system):"
+for u in synthex-system-daemon synthex-brain synthex-hermes synthex-hwdaemon; do
+    if systemctl is-active --quiet "$u.service" 2>/dev/null; then ok "active  $u"
+    elif systemctl is-enabled --quiet "$u.service" 2>/dev/null; then ok "enabled $u (not running)"
+    else warn "not present: $u"
+    fi
+done
+
+echo; echo "GPU/driver layer:"
+if command -v vulkaninfo >/dev/null 2>&1; then
+    v=$(vulkaninfo --summary 2>/dev/null | grep -m1 deviceName || echo "none")
+    ok "vulkan: $v"
+else
+    warn "vulkaninfo missing (vulkan-loader/vulkan-tools not installed)"
+fi
+if compgen -G "/usr/share/vulkan/icd.d/*.json" >/dev/null 2>&1; then ok "vulkan ICD present"
+else warn "no Vulkan ICD found"
+fi
+
+echo; echo "update/reproducibility:"
+[ -d /var/lib/synthex/repo ] && ok "local repo present" || warn "local repo missing"
+if command -v dkms >/dev/null 2>&1; then
+    bad=$(dkms status 2>/dev/null | grep -c 'ERROR' || true)
+    if [ "${bad:-0}" -eq 0 ]; then ok "dkms modules clean"
+    else warn "$bad dkms errors (Third-party drivers)"
+    fi
+fi
+
+echo; echo "disk & zram:"
+df -h / | awk 'NR==2{print "  [OK]  root:" $5 " used, "$4" free"}'
+if /sbin/swapon --show 2>/dev/null | grep -q zram; then ok "zram swap active"
+else warn "zram not active (synthex-zram)"
+fi
+
+echo; echo "result: done"
+exit 0
