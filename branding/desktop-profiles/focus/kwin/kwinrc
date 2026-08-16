@@ -1,4 +1,4 @@
-# Solus Focus — KWin Configuration
+# Synthex Focus — KWin Configuration
 
 [Compositing]
 Backend=xrender

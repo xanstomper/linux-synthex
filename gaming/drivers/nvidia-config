@@ -1,4 +1,4 @@
-# Solus Linux — NVIDIA GPU Driver Configuration
+# Synthex Linux — NVIDIA GPU Driver Configuration
 # /etc/default/nvidia (sourced by gpu-driver-manager)
 
 # ============================================================

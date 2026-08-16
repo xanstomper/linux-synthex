@@ -63,4 +63,4 @@ application/json=kate.desktop
 x-scheme-handler/git=firefox.desktop
 
 # Synthex Apps
-x-scheme-handler/solus=org.synthex.SoftwareCenter.desktop
+x-scheme-handler/synthex=org.synthex.SoftwareCenter.desktop

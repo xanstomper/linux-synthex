@@ -1,4 +1,4 @@
-# Solus Linux — AMD GPU Driver Configuration
+# Synthex Linux — AMD GPU Driver Configuration
 # /etc/default/amdgpu (sourced by gpu-driver-manager)
 
 # ============================================================

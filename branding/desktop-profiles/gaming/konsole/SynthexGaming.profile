@@ -1,10 +1,10 @@
-# Solus Classic — Konsole Profile
+# Synthex Gaming — Konsole Profile
 
 [Appearance]
-ColorScheme=LightBackground
+ColorScheme=DarkBackground
 
 [General]
-Name=SolusClassic
+Name=SynthexGaming
 Parent=FALLBACK/
 
 [Scrolling]

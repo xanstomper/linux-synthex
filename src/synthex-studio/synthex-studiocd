@@ -25,7 +25,7 @@ exec python3 -c "
 import sys, dbus, dbus.service, dbus.mainloop.glib
 from gi.repository import GLib
 
-BUS_NAME = 'org.solus.Studio'
+BUS_NAME = 'org.synthex.Studio'
 OBJECT_PATH = '/org/synthex/Studio'
 
 class StudioDaemon(dbus.service.Object):

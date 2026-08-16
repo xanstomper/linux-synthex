@@ -1,10 +1,10 @@
-# Solus Studio — Konsole Profile
+# Synthex Pro — Konsole Profile
 
 [Appearance]
-ColorScheme=LightBackground
+ColorScheme=DarkBackground
 
 [General]
-Name=SolusStudio
+Name=SynthexPro
 Parent=FALLBACK/
 
 [Scrolling]

@@ -15,7 +15,7 @@ THEMES = {
     "latte":    {"name": "Synthex Latte",    "colors": "synthex-latte",    "wallpaper": "synthex-latte.png",    "accent": "#D65D7A"},
 }
 
-CONFIG_DIR = os.path.expanduser("~/.config/solus")
+CONFIG_DIR = os.path.expanduser("~/.config/synthex")
 STATE_FILE = os.path.join(CONFIG_DIR, "current-theme.json")
 
 def run(cmd):

@@ -1,4 +1,4 @@
-# Git ignore rules for Linux Solus build project
+# Git ignore rules for Linux Synthex build project
 
 # Build artifacts
 build/livecd/out/

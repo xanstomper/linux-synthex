@@ -19,7 +19,7 @@ from layout_manager import LayoutManager
 # D-Bus service simulation
 if '--dbus' in sys.argv:
     print('synthex-desktopd: D-Bus mode (stub)')
-    # In production this registers org.solus.Desktop on D-Bus
+    # In production this registers org.synthex.Desktop on D-Bus
     sys.exit(0)
 
 # CLI mode

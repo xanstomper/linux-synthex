@@ -1,7 +1,7 @@
-# /etc/flatpak/system-flatpakrepo — Solus flatpak system defaults
+# /etc/flatpak/system-flatpakrepo — Synthex flatpak system defaults
 
 [Flatpak Repo]
-Title=Solus Flatpak
+Title=Synthex Flatpak
 Url=https://repo.getsol.us/flatpak/
 Homepage=https://getsol.us
-Description=Solus Linux Flatpak repository
+Description=Synthex Linux Flatpak repository

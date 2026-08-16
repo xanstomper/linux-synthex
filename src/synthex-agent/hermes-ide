@@ -25,8 +25,8 @@ class HermesClient:
     def _connect(self):
         try:
             import dbus; bus = dbus.SessionBus()
-            self.obj = bus.get_object("org.solus.Hermes", "/org/synthex/Hermes")
-            self.iface = dbus.Interface(self.obj, "org.solus.Hermes")
+            self.obj = bus.get_object("org.synthex.Hermes", "/org/synthex/Hermes")
+            self.iface = dbus.Interface(self.obj, "org.synthex.Hermes")
             self.available = True
         except:
             self.available = False
@@ -35,8 +35,8 @@ class HermesClient:
                 time.sleep(2)
                 try:
                     import dbus; bus = dbus.SessionBus()
-                    self.obj = bus.get_object("org.solus.Hermes", "/org/synthex/Hermes")
-                    self.iface = dbus.Interface(self.obj, "org.solus.Hermes")
+                    self.obj = bus.get_object("org.synthex.Hermes", "/org/synthex/Hermes")
+                    self.iface = dbus.Interface(self.obj, "org.synthex.Hermes")
                     self.available = True
                 except: pass
     def chat(self, query):
@@ -63,7 +63,7 @@ class HermesIDE(Gtk.ApplicationWindow):
         self.client = HermesClient()
         self.current_file = None
         self.current_language = None
-        self.project_root = Path.home() / "linux-solus"
+        self.project_root = Path.home() / "linux-synthex"
         
         # Build UI
         self._build_ui()
@@ -539,7 +539,7 @@ class HermesIDE(Gtk.ApplicationWindow):
 
 
 def main():
-    app = Gtk.Application(application_id="org.solus.hermes.ide")
+    app = Gtk.Application(application_id="org.synthex.hermes.ide")
     app.connect("activate", lambda a: HermesIDE(a).show_all())
     signal.signal(signal.SIGINT, signal.SIG_DFL)
     app.run(None)

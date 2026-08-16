@@ -1,10 +1,10 @@
-# Solus Touch — Konsole Profile
+# Synthex Focus — Konsole Profile
 
 [Appearance]
-ColorScheme=LightBackground
+ColorScheme=DarkBackground
 
 [General]
-Name=SolusTouch
+Name=SynthexFocus
 Parent=FALLBACK/
 
 [Scrolling]

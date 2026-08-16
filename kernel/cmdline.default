@@ -1,8 +1,8 @@
-# Linux Solus — Default Kernel Command Line Parameters
+# Linux Synthex — Default Kernel Command Line Parameters
 # Used by GRUB/systemd-boot to boot the system
-# These provide the optimal out-of-box experience for Solus
+# These provide the optimal out-of-box experience for Synthex
 
-# Default boot parameters for Solus Linux
+# Default boot parameters for Synthex Linux
 # Format: KEY=VALUE or single options
 # Used in: GRUB_CMDLINE_LINUX_DEFAULT in /etc/default/grub
 

@@ -1,10 +1,10 @@
-# Solus Focus — Konsole Profile
+# Synthex Lite — Konsole Profile
 
 [Appearance]
 ColorScheme=DarkBackground
 
 [General]
-Name=SolusFocus
+Name=SynthexLite
 Parent=FALLBACK/
 
 [Scrolling]

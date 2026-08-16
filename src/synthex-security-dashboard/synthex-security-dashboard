@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Solus Security Dashboard — entry point."""
+"""Synthex Security Dashboard — entry point."""
 import os, sys
 
 HERE = os.path.dirname(os.path.abspath(__file__))

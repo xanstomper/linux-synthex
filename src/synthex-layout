@@ -17,7 +17,7 @@ import subprocess
 import shutil
 
 LAYOUTS_DIR = "/usr/share/synthex/layouts"
-USER_CONFIG_DIR = os.path.expanduser("~/.config/solus")
+USER_CONFIG_DIR = os.path.expanduser("~/.config/synthex")
 
 
 def get_layout_path(name):

@@ -342,7 +342,7 @@ class SystemAgent(BaseAgent):
         import re
         cmds = re.findall(r'`([^`]+)`', response)
         for cmd in cmds[:3]:
-            if cmd.startswith(("sudo", "dnf", "systemctl", "flatpak", "solus")):
+            if cmd.startswith(("sudo", "dnf", "systemctl", "flatpak", "synthex")):
                 r = self.tools.call("execute_command", command=cmd)
                 response += f"\n\n`$ {cmd}`\n```\n{json.dumps(r)[:500]}\n```"
         return response
@@ -507,7 +507,7 @@ class SynthexAgentDaemon(dbus.service.Object):
         threading.Thread(target=self._bg_index, daemon=True).start()
     
     def _bg_index(self):
-        self.kb.index_folder("~/linux-solus")
+        self.kb.index_folder("~/linux-synthex")
         self.kb.index_folder("~/Documents")
     
     @dbus.service.method(IFACE, in_signature="s", out_signature="s")

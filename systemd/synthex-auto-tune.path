@@ -1,5 +1,5 @@
 [Unit]
-Description=Solus hardware-change trigger for auto-tuning
+Description=Synthex hardware-change trigger for auto-tuning
 
 [Path]
 PathChanged=/sys/class/dmi/id/chassis_type

@@ -1,4 +1,4 @@
-# /etc/sudoers.d/solus — Synthex sudo configuration
+# /etc/sudoers.d/synthex — Synthex sudo configuration
 
 # Allow wheel group to use sudo without password for specific commands
 # (safe operations only — system updates, driver management)

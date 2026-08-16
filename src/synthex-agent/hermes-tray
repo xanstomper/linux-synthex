@@ -23,8 +23,8 @@ class HermesClient:
         try:
             import dbus
             bus = dbus.SessionBus()
-            self.obj = bus.get_object("org.solus.Hermes", "/org/synthex/Hermes")
-            self.iface = dbus.Interface(self.obj, "org.solus.Hermes")
+            self.obj = bus.get_object("org.synthex.Hermes", "/org/synthex/Hermes")
+            self.iface = dbus.Interface(self.obj, "org.synthex.Hermes")
             self.available = True
             s = json.loads(self.iface.GetStatus())
             self.status = s.get("status", "ready")
@@ -38,8 +38,8 @@ class HermesClient:
             try:
                 import dbus
                 bus = dbus.SessionBus()
-                self.obj = bus.get_object("org.solus.Hermes", "/org/synthex/Hermes")
-                self.iface = dbus.Interface(self.obj, "org.solus.Hermes")
+                self.obj = bus.get_object("org.synthex.Hermes", "/org/synthex/Hermes")
+                self.iface = dbus.Interface(self.obj, "org.synthex.Hermes")
                 self.available = True
             except: pass
     def chat(self, query):

@@ -310,7 +310,7 @@ def _save_config(cfg: dict) -> None:
 # ---------------------------------------------------------------------------
 if HAS_TK:
 
-    class SolusAIHub(tk.Tk):
+    class SynthexAIHub(tk.Tk):
         """Main Tkinter application window."""
 
         def __init__(self) -> None:
@@ -794,7 +794,7 @@ def main(argv: Optional[List[str]] = None) -> int:
     if args.no_gui or not HAS_TK:
         return cli_main(args)
 
-    app = SolusAIHub()
+    app = SynthexAIHub()
     app.run()
     return 0
 

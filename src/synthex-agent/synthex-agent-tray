@@ -20,7 +20,7 @@ DATA_DIR.mkdir(parents=True, exist_ok=True)
 
 # Add project source to path
 HERE = Path(os.path.dirname(os.path.abspath(__file__)))
-PROJECT = HERE.parent.parent  # ~/linux-solus
+PROJECT = HERE.parent.parent  # ~/linux-synthex
 sys.path.insert(0, str(PROJECT / "src" / "synthex-agent" / "daemon"))
 
 # Synthex Mint colors
@@ -69,8 +69,8 @@ class AgentClient:
         try:
             import dbus
             bus = dbus.SessionBus()
-            self.obj = bus.get_object("org.solus.Agent", "/org/synthex/Agent")
-            self.iface = dbus.Interface(self.obj, "org.solus.Agent")
+            self.obj = bus.get_object("org.synthex.Agent", "/org/synthex/Agent")
+            self.iface = dbus.Interface(self.obj, "org.synthex.Agent")
             self.available = True
         except:
             self.available = False
@@ -85,8 +85,8 @@ class AgentClient:
             try:
                 import dbus
                 bus = dbus.SessionBus()
-                self.obj = bus.get_object("org.solus.Agent", "/org/synthex/Agent")
-                self.iface = dbus.Interface(self.obj, "org.solus.Agent")
+                self.obj = bus.get_object("org.synthex.Agent", "/org/synthex/Agent")
+                self.iface = dbus.Interface(self.obj, "org.synthex.Agent")
                 self.available = True
             except:
                 pass
@@ -469,11 +469,11 @@ class SynthexAgentTray:
         
         # Quick actions
         actions = [
-            ("🔍  Search", "solus search "),
-            ("💻  Codex IDE", "solus codex"),
-            ("📚  Knowledge Base", "solus kb ~/Documents"),
-            ("🎮  Gaming Mode", "solus gaming enable"),
-            ("🔄  System Update", "solus update"),
+            ("🔍  Search", "synthex search "),
+            ("💻  Codex IDE", "synthex codex"),
+            ("📚  Knowledge Base", "synthex kb ~/Documents"),
+            ("🎮  Gaming Mode", "synthex gaming enable"),
+            ("🔄  System Update", "synthex update"),
         ]
         for label, cmd in actions:
             item = Gtk.MenuItem(label=label)

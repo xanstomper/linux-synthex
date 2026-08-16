@@ -1,10 +1,10 @@
-# Solus Ai — Konsole Profile
+# Synthex Ai — Konsole Profile
 
 [Appearance]
 ColorScheme=DarkBackground
 
 [General]
-Name=SolusAi
+Name=SynthexAi
 Parent=FALLBACK/
 
 [Scrolling]

@@ -15,18 +15,18 @@
 /usr/bin/synthex-firstboot\.sh	--	system_u:object_r:solus_oobe_exec_t:s0
 
 # === Synthex CLI tools ===
-/usr/bin/solus\.py		--	system_u:object_r:solus_control_center_exec_t:s0
+/usr/bin/synthex\.py		--	system_u:object_r:solus_control_center_exec_t:s0
 /usr/bin/synthex-marketplace	--	system_u:object_r:solus_stored_exec_t:s0
 /usr/bin/synthex-blueprint	--	system_u:object_r:solus_stored_exec_t:s0
 /usr/bin/synthex-webapp-engine	--	system_u:object_r:solus_stored_exec_t:s0
 
 # === libexec binaries ===
-/usr/libexec/solus(/.*)?		system_u:object_r:solus_data_t:s0
+/usr/libexec/synthex(/.*)?		system_u:object_r:solus_data_t:s0
 
 # === Data directories ===
-/usr/share/solus(/.*)?			system_u:object_r:solus_data_t:s0
-/var/lib/solus(/.*)?			system_u:object_r:solus_var_lib_t:s0
-/var/run/solus(/.*)?			system_u:object_r:solus_var_run_t:s0
-/var/log/solus(/.*)?			system_u:object_r:solus_log_t:s0
-/var/cache/solus(/.*)?			system_u:object_r:solus_cache_t:s0
-/tmp/solus(/.*)?			system_u:object_r:solus_tmp_t:s0
+/usr/share/synthex(/.*)?			system_u:object_r:solus_data_t:s0
+/var/lib/synthex(/.*)?			system_u:object_r:solus_var_lib_t:s0
+/var/run/synthex(/.*)?			system_u:object_r:solus_var_run_t:s0
+/var/log/synthex(/.*)?			system_u:object_r:solus_log_t:s0
+/var/cache/synthex(/.*)?			system_u:object_r:solus_cache_t:s0
+/tmp/synthex(/.*)?			system_u:object_r:solus_tmp_t:s0

@@ -1,4 +1,4 @@
-# /etc/crypttab — Solus LUKS configuration
+# /etc/crypttab — Synthex LUKS configuration
 # This file lists encrypted block devices that should be unlocked at boot.
 # Format: <name>  <device>  <password>  <options>
 

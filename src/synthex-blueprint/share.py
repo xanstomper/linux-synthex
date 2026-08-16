@@ -65,7 +65,7 @@ def cmd_download(url):
     
     try:
         req = urllib.request.Request(url, headers={
-            "User-Agent": "SolusBlueprint/1.0"
+            "User-Agent": "SynthexBlueprint/1.0"
         })
         with urllib.request.urlopen(req, timeout=30) as response:
             data = response.read()

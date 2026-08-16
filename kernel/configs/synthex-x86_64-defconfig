@@ -1,4 +1,4 @@
-# Solus Linux Kernel Configuration
+# Synthex Linux Kernel Configuration
 # Based on Fedora defconfig with CachyOS-style gaming optimizations
 #
 # Key differences from stock:

@@ -1,11 +1,11 @@
 NAME="Synthex Linux"
 VERSION="2026.10"
-ID=solus
+ID=synthex
 ID_LIKE="fedora"
 VERSION_ID=2026.10
 PRETTY_NAME="Synthex Linux 2026.10 (Illuminate)"
 ANSI_COLOR="0;38;2;155;189;92"
 HOME_URL="https://getsynthex.io"
-SUPPORT_URL="https://discord.gg/solus"
+SUPPORT_URL="https://discord.gg/synthex"
 BUG_REPORT_URL="https://github.com/synthex-linux/synthex/issues"
 LOGO=synthex-logo
