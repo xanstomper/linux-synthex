@@ -1,0 +1,87 @@
+# Source Component Catalog
+
+Real LOC per source dir under `src/` (tracked on GitHub).
+
+| Component | files | LOC |
+|---|---|---|
+| `src/synthex-control-center` | 10 | 11109 |
+| `src/synthex-security` | 12 | 3985 |
+| `src/synthex-brain` | 9 | 3690 |
+| `src/synthex-workspace-ai` | 6 | 2440 |
+| `src/synthex-compat-db` | 2 | 1989 |
+| `src/synthex-agent-sandbox` | 8 | 1792 |
+| `src/synthex-security-dashboard` | 4 | 1594 |
+| `src/synthex-ai-hub` | 6 | 1511 |
+| `src/synthex-installer` | 8 | 1426 |
+| `src/synthex-rust-tools` | 5 | 1376 |
+| `src/synthex-hermes` | 4 | 1368 |
+| `src/synthex-gpu-setupd` | 6 | 1274 |
+| `src/synthex-aegis` | 3 | 1211 |
+| `src/synthex-oobe` | 12 | 1120 |
+| `src/synthex-hwdaemon` | 2 | 1119 |
+| `src/synthex-recovery` | 3 | 1000 |
+| `src/synthex-agent` | 13 | 995 |
+| `src/synthex-recovery-rs` | 1 | 946 |
+| `src/synthex-neural-ipc` | 5 | 937 |
+| `src/synthex-doctor` | 2 | 876 |
+| `src/synthex-boot` | 5 | 871 |
+| `src/synthex-system-daemon` | 2 | 857 |
+| `src/installer-detect` | 1 | 721 |
+| `src/system-daemon` | 1 | 715 |
+| `src/synthex-cli` | 3 | 663 |
+| `src/ai-daemon` | 1 | 654 |
+| `src/synthex-blueprint` | 2 | 646 |
+| `src/integration-engine` | 1 | 621 |
+| `src/synthex-temporal` | 1 | 548 |
+| `src/synthex-workspace` | 5 | 512 |
+| `src/synthguard` | 1 | 497 |
+| `src/synthvault` | 1 | 482 |
+| `src/hwdaemon` | 3 | 403 |
+| `src/synthidentity` | 1 | 403 |
+| `src/synthex-gaming-center` | 1 | 385 |
+| `src/synthex-log-viewer` | 1 | 373 |
+| `src/synthex-snapshots` | 1 | 369 |
+| `src/synthex-cachy-tuning` | 3 | 366 |
+| `src/synthshield` | 1 | 361 |
+| `src/synthex-webapp-engine` | 1 | 343 |
+| `src/synthbox` | 1 | 328 |
+| `src/snapshot-manager` | 1 | 311 |
+| `src/stored` | 2 | 309 |
+| `src/synthex-app-installer` | 1 | 298 |
+| `src/desktopd` | 2 | 295 |
+| `src/synthex-software-center` | 1 | 284 |
+| `src/gpu-setupd` | 1 | 272 |
+| `src/synthex-app-manager` | 1 | 271 |
+| `src/synthex-service-manager-rs` | 1 | 266 |
+| `src/synthex-welcome` | 2 | 239 |
+| `src/synthex-kernel-manager-rs` | 1 | 214 |
+| `src/synthex-predictive` | 1 | 212 |
+| `src/synthex-service-manager` | 1 | 199 |
+| `src/synthex-update-manager` | 1 | 195 |
+| `src/synthex-disk-health` | 1 | 188 |
+| `src/synthex-deadman` | 2 | 186 |
+| `src/synthex-meshnet` | 1 | 185 |
+| `src/synthex-kernel-manager` | 1 | 184 |
+| `src/synthex-nvidia-installer` | 1 | 153 |
+| `src/synthex-codec-installer` | 1 | 147 |
+| `src/synthex-studio` | 1 | 146 |
+| `src/synthex-proton-manager-rs` | 1 | 119 |
+| `src/synthex-stored` | 1 | 111 |
+| `src/synthex-system-report-rs` | 1 | 88 |
+| `src/synthex-locale-setup` | 1 | 86 |
+| `src/synthex-nobara-fixes` | 1 | 85 |
+| `src/synthex-terminal-workspace` | 1 | 82 |
+| `src/synthupdate` | 1 | 82 |
+| `src/synthex-perf-tuning-rs` | 1 | 76 |
+| `src/synthnet` | 1 | 76 |
+| `src/synthex-tray` | 1 | 68 |
+| `src/synthex-codec-installer-rs` | 1 | 66 |
+| `src/synthex-handheld-rs` | 1 | 62 |
+| `src/synthex-desktopd` | 1 | 54 |
+| `src/synthex-wine-manager` | 1 | 47 |
+| `src/libexec` | 1 | 37 |
+| `src/synthex-term` | 1 | 15 |
+| `src/synthex-ujust` | 1 | 13 |
+| `src/synthex-predictive-launch` | 1 | 5 |
+
+> GitHub tracks files, not empty dirs — any empty folder on disk doesn't appear on GitHub (see SCAFFOLDS.md).
