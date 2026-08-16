@@ -58,7 +58,7 @@
   <!-- Subtle highlight on icon -->
   <ellipse cx="24" cy="22" rx="10" ry="6" fill="white" opacity="0.08" transform="rotate(-30,24,22)" />
 
-  <!-- Wordmark "Solus" -->
+  <!-- Wordmark "Synthex" -->
   <g transform="translate(64, 20)">
     <text x="0" y="0" font-family="'Inter','Segoe UI',Arial,sans-serif" font-size="32" font-weight="700" fill="#FFFFFF" letter-spacing="3">
       Solus
