@@ -56,3 +56,5 @@ project-tree.txt
 *.raw
 .claude/
 .venv
+aimbot-venv/
+*.env
